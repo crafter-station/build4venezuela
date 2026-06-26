@@ -10,7 +10,11 @@ import type {
   ProjectFormInput,
   ProjectStatus,
 } from "./schema";
-import { normalizeCountries } from "./schema";
+import {
+  normalizeCountries,
+  sortCommentsByVotes,
+  sortProjectsByVotes,
+} from "./schema";
 
 type ProjectRow = {
   id: string;
@@ -212,16 +216,18 @@ export async function listProjects() {
         throw error;
       }
 
-      return (data ?? []).map((row) =>
-        toProject({
-          ...(row as ProjectRow),
-          votes_count: row.votes_count?.[0]?.count ?? 0,
-        }),
+      return sortProjectsByVotes(
+        (data ?? []).map((row) =>
+          toProject({
+            ...(row as ProjectRow),
+            votes_count: row.votes_count?.[0]?.count ?? 0,
+          }),
+        ),
       );
     },
     async () => {
       const data = await readLocalData();
-      return data.projects
+      const projects = data.projects
         .filter((project) => (project.status ?? "published") === "published")
         .map((project) => ({
           ...project,
@@ -229,12 +235,9 @@ export async function listProjects() {
             (vote) => vote.project_id === project.id,
           ).length,
         }))
-        .sort((a, b) =>
-          (b.published_at ?? b.created_at).localeCompare(
-            a.published_at ?? a.created_at,
-          ),
-        )
         .map(toProject);
+
+      return sortProjectsByVotes(projects);
     },
   );
 }
@@ -588,14 +591,16 @@ export async function listComments(projectId: string, voterId?: string) {
         );
       }
 
-      return rows.map((row) => toComment(row, votedCommentIds.has(row.id)));
+      return sortCommentsByVotes(
+        rows.map((row) => toComment(row, votedCommentIds.has(row.id))),
+      );
     },
     async () => {
       const data = await readLocalData();
       const comments = data.comments ?? [];
       const commentVotes = data.commentVotes ?? [];
 
-      return comments
+      const projectComments = comments
         .filter((comment) => comment.project_id === projectId)
         .map((comment) => ({
           ...comment,
@@ -603,7 +608,6 @@ export async function listComments(projectId: string, voterId?: string) {
             (vote) => vote.comment_id === comment.id,
           ).length,
         }))
-        .sort((a, b) => a.created_at.localeCompare(b.created_at))
         .map((comment) =>
           toComment(
             comment,
@@ -613,6 +617,8 @@ export async function listComments(projectId: string, voterId?: string) {
             ),
           ),
         );
+
+      return sortCommentsByVotes(projectComments);
     },
   );
 }

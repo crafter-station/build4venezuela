@@ -1,6 +1,7 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { projectCommentSchema, validationErrors } from "@/lib/projects/schema";
+import { checkCommentForSpam } from "@/lib/projects/spam";
 import { createComment, listComments } from "@/lib/projects/store";
 
 type Props = {
@@ -29,6 +30,19 @@ export async function POST(request: Request, { params }: Props) {
   if (!parsed.success) {
     return NextResponse.json(
       { errors: validationErrors(parsed.error) },
+      { status: 400 },
+    );
+  }
+
+  const spam = await checkCommentForSpam(parsed.data);
+
+  if (!spam.validationPassed) {
+    return NextResponse.json({ error: spam.reason }, { status: 503 });
+  }
+
+  if (spam.isSpam && spam.confidence >= 0.7) {
+    return NextResponse.json(
+      { errors: { body: `This looks like spam: ${spam.reason}` } },
       { status: 400 },
     );
   }

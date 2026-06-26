@@ -2,7 +2,7 @@ import { gateway } from "@ai-sdk/gateway";
 import { generateObject, zodSchema } from "ai";
 import { z } from "zod";
 import { env } from "@/env";
-import type { ProjectFormInput } from "./schema";
+import type { ProjectCommentInput, ProjectFormInput } from "./schema";
 
 const spamResultSchema = z.object({
   isSpam: z.boolean(),
@@ -51,6 +51,40 @@ export async function checkProjectForSpam(
     return { ...result.object, validationPassed: true };
   } catch (error) {
     console.error("Project spam check failed", error);
+    return {
+      isSpam: false,
+      confidence: 0,
+      reason: "AI spam check failed. Please try again.",
+      validationPassed: false,
+    };
+  }
+}
+
+export async function checkCommentForSpam(
+  input: ProjectCommentInput,
+  spamValidationConfigured = Boolean(env.AI_GATEWAY_API_KEY),
+): Promise<SpamCheckResult> {
+  if (!spamValidationConfigured) {
+    return {
+      isSpam: false,
+      confidence: 0,
+      reason: "AI Gateway is not configured.",
+      validationPassed: false,
+    };
+  }
+
+  try {
+    const result = await generateObject({
+      model: gateway("anthropic/claude-sonnet-4.6"),
+      schema: zodSchema(spamResultSchema),
+      system:
+        "You review comments on hackathon/community project submissions. Flag only clear spam, scams, unrelated ads, malicious links, gibberish, harassment, or abusive content. Do not reject concise legitimate feedback, questions, or criticism.",
+      prompt: JSON.stringify({ body: input.body }, null, 2),
+    });
+
+    return { ...result.object, validationPassed: true };
+  } catch (error) {
+    console.error("Project comment spam check failed", error);
     return {
       isSpam: false,
       confidence: 0,
