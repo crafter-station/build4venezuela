@@ -53,11 +53,17 @@ export function SiteHeader() {
             <div className="flex items-center gap-2">
               <Show when="signed-in">
                 <div className="motion-safe:animate-in motion-safe:fade-in-0 motion-safe:zoom-in-95 motion-safe:slide-in-from-right-1 duration-300">
-                  <UserButton />
+                  <UserButton
+                    appearance={{
+                      elements: {
+                        userButtonAvatarBox: "h-10 w-10",
+                      },
+                    }}
+                  />
                 </div>
               </Show>
               <a
-                className="inline-flex border border-border px-3 py-2 font-mono text-xs font-bold uppercase tracking-[0.16em] text-foreground transition hover:border-foreground hover:bg-foreground hover:text-background focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-4 focus-visible:ring-offset-background sm:px-4"
+                className="inline-flex h-10 items-center justify-center border border-border px-3 font-mono text-xs font-bold uppercase tracking-[0.16em] text-foreground transition hover:border-foreground hover:bg-foreground hover:text-background focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-4 focus-visible:ring-offset-background sm:px-4"
                 href="/projects"
               >
                 Projects
@@ -68,7 +74,7 @@ export function SiteHeader() {
             <Show when="signed-out">
               <SignInButton mode="modal">
                 <button
-                  className="font-mono text-xs font-bold uppercase tracking-[0.16em] text-muted-foreground transition hover:text-foreground"
+                  className="inline-flex h-10 items-center justify-center px-3 font-mono text-xs font-bold uppercase tracking-[0.16em] text-muted-foreground transition hover:text-foreground sm:px-4"
                   type="button"
                 >
                   Enter

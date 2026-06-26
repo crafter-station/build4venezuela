@@ -38,7 +38,7 @@ export function LanguageSelector() {
       <DropdownMenuTrigger
         render={
           <Button
-            className="h-auto border-border bg-foreground py-2 text-background hover:bg-primary hover:text-primary-foreground aria-expanded:bg-primary aria-expanded:text-primary-foreground"
+            className="h-10 border-border bg-foreground px-3 py-0 text-background hover:bg-primary hover:text-primary-foreground aria-expanded:bg-primary aria-expanded:text-primary-foreground sm:px-4"
             variant="outline"
             size="sm"
             aria-label={t("label")}
