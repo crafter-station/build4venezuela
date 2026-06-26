@@ -1,6 +1,6 @@
 "use client";
 
-import { Show, SignInButton, UserButton } from "@clerk/nextjs";
+import { Show, UserButton } from "@clerk/nextjs";
 import Image from "next/image";
 import { LanguageSelector } from "@/components/language-selector";
 import {
@@ -70,18 +70,6 @@ export function SiteHeader() {
               </a>
             </div>
           </nav>
-          <div className="flex items-center gap-2">
-            <Show when="signed-out">
-              <SignInButton mode="modal">
-                <button
-                  className="inline-flex h-10 items-center justify-center px-3 font-mono text-xs font-bold uppercase tracking-[0.16em] text-muted-foreground transition hover:text-foreground sm:px-4"
-                  type="button"
-                >
-                  Enter
-                </button>
-              </SignInButton>
-            </Show>
-          </div>
           <LanguageSelector />
         </div>
       </div>
