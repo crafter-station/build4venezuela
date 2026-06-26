@@ -22,6 +22,11 @@ const nextConfig: NextConfig = {
         permanent: false,
       },
       {
+        source: "/discord",
+        destination: "https://discord.com/invite/NRDWrGnxTU",
+        permanent: false,
+      },
+      {
         source: "/event",
         destination: "https://luma.com/hack0-zrbp",
         permanent: false,
