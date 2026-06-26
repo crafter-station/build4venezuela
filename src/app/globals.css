@@ -1,5 +1,37 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: "Input Mono Narrow";
+  src: url("/BFV/fonts/InputMonoNarrow-Regular-Testing.ttf") format("truetype");
+  font-display: swap;
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Input Mono Narrow";
+  src: url("/BFV/fonts/InputMonoNarrow-Light-Testing.ttf") format("truetype");
+  font-display: swap;
+  font-weight: 300;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Input Mono Narrow";
+  src: url("/BFV/fonts/InputMonoNarrow-Bold-Testing.ttf") format("truetype");
+  font-display: swap;
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Input Mono Narrow";
+  src: url("/BFV/fonts/InputMonoNarrow-Black-Testing.ttf") format("truetype");
+  font-display: swap;
+  font-weight: 900;
+  font-style: normal;
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -8,8 +40,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: "Input Mono Narrow", monospace;
+  --font-mono: "Input Mono Narrow", monospace;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -22,5 +54,53 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  font-family: "Input Mono Narrow", monospace;
+}
+
+::selection {
+  background: #fcd43d;
+  color: #000;
+}
+
+.poster-frame {
+  min-height: 100svh;
+}
+
+.poster-map {
+  min-height: clamp(10rem, 24svh, 16.5rem);
+}
+
+@media (max-width: 767px) {
+  .poster-frame {
+    min-height: auto;
+  }
+
+  .poster-map {
+    min-height: clamp(10rem, 30svh, 15rem);
+  }
+
+  .poster-map::before,
+  .poster-map::after {
+    position: absolute;
+    top: 50%;
+    width: 38vw;
+    height: 8rem;
+    transform: translateY(-50%);
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 0.44rem;
+    line-height: 0.58rem;
+    white-space: pre;
+    overflow: hidden;
+    /* biome-ignore lint/suspicious/noUselessEscapeInString: CSS newline escapes for generated ASCII art. */
+    content: "##***..\A#%%%%##*###++***##*-\A%%%@%%%##**++++++****###*----\A%%##*++==--++#%%%%%%%###+::.\A+==----::::::##%%%%%%%#+....\A...::::.      +###%%%#*+";
+  }
+
+  .poster-map::before {
+    right: 67%;
+    text-align: right;
+  }
+
+  .poster-map::after {
+    left: 67%;
+  }
 }
