@@ -1,7 +1,5 @@
 import Image from "next/image";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { SiteFooter } from "@/components/site-footer";
-import { SiteHeader } from "@/components/site-header";
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -171,8 +169,6 @@ export default async function BrandPage({ params }: Props) {
 
   return (
     <main className="min-h-screen overflow-hidden bg-background text-foreground">
-      <SiteHeader />
-
       <section className="relative isolate px-5 pt-28 pb-16 sm:px-8 sm:pt-32 sm:pb-20 lg:px-10">
         <div className="absolute inset-0 -z-20 bg-background" />
         <div className="bg-grid absolute inset-0 -z-10 opacity-[0.06]" />
@@ -316,8 +312,6 @@ export default async function BrandPage({ params }: Props) {
           </div>
         </div>
       </section>
-
-      <SiteFooter />
     </main>
   );
 }

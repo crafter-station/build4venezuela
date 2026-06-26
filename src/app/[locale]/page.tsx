@@ -2,8 +2,6 @@ import { createHash } from "node:crypto";
 import { headers } from "next/headers";
 import Image from "next/image";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { SiteFooter } from "@/components/site-footer";
-import { SiteHeader } from "@/components/site-header";
 import { RealtimeVisitors } from "./realtime-visitors";
 
 const assetPath = "/BFV/assets/";
@@ -67,7 +65,6 @@ export default async function Home({ params }: Props) {
   return (
     <main className="min-h-screen overflow-hidden bg-background text-foreground">
       <RealtimeVisitors visitorId={visitorId} />
-      <SiteHeader />
 
       <section className="relative isolate flex min-h-screen items-center justify-center px-4 pt-20 pb-4 sm:px-8 lg:px-10">
         <div className="absolute inset-0 -z-20 bg-background" />
@@ -263,8 +260,6 @@ export default async function Home({ params }: Props) {
           </div>
         </div>
       </section>
-
-      <SiteFooter />
     </main>
   );
 }
