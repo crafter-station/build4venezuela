@@ -82,6 +82,34 @@
   min-height: clamp(10rem, 24svh, 16.5rem);
 }
 
+/* ── Breaking News Ticker ────────────────────────────────────────── */
+@keyframes ticker-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.ticker-wrap {
+  mask-image: linear-gradient(
+    90deg,
+    transparent,
+    black 3%,
+    black 97%,
+    transparent
+  );
+}
+
+.ticker-track {
+  animation: ticker-scroll 60s linear infinite;
+}
+
+.ticker-track:hover {
+  animation-play-state: paused;
+}
+
 @media (max-width: 767px) {
   .poster-frame {
     min-height: auto;

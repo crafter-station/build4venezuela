@@ -21,6 +21,7 @@ function skipsIntl(pathname: string) {
     pathname.startsWith("/event") ||
     pathname.startsWith("/projects") ||
     pathname.startsWith("/recursos") ||
+    pathname.startsWith("/news") ||
     pathname.startsWith("/submit") ||
     pathname.startsWith("/p/") ||
     /\.[^/]+$/.test(pathname)

@@ -69,6 +69,12 @@ export function SiteHeader() {
                 Proyectos
               </a>
               <a
+                className="inline-flex h-10 items-center justify-center border border-destructive/50 px-3 font-mono text-xs font-bold uppercase tracking-[0.16em] text-destructive transition hover:border-destructive hover:bg-destructive hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-destructive focus-visible:ring-offset-4 focus-visible:ring-offset-background sm:px-4"
+                href="/news"
+              >
+                News
+              </a>
+              <a
                 className="inline-flex h-10 items-center justify-center border border-border px-3 font-mono text-xs font-bold uppercase tracking-[0.16em] text-foreground transition hover:border-foreground hover:bg-foreground hover:text-background focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-4 focus-visible:ring-offset-background sm:px-4"
                 href="/recursos"
               >
