@@ -1,5 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
+import { runMutation } from "@/lib/api-mutation";
 import {
   checkRateLimit,
   rateLimitKey,
@@ -52,7 +53,15 @@ export async function POST(request: Request, { params }: Props) {
     return rateLimitResponse(rateLimit.retryAfter);
   }
 
-  return NextResponse.json(
-    await toggleSolutionRequestCommentVote(commentId, userId),
+  const result = await runMutation(
+    "request.commentVote",
+    { userId, requestId, commentId },
+    () => toggleSolutionRequestCommentVote(commentId, userId),
   );
+
+  if ("response" in result) {
+    return result.response;
+  }
+
+  return NextResponse.json(result.value);
 }

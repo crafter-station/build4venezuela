@@ -1,5 +1,6 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
+import { runMutation } from "@/lib/api-mutation";
 import {
   checkRateLimit,
   rateLimitKey,
@@ -74,14 +75,22 @@ export async function POST(request: Request, { params }: Props) {
 
   const user = await currentUser();
 
-  return NextResponse.json(
-    await createSolutionRequestComment(
-      requestId,
-      userId,
-      displayName(user),
-      user?.imageUrl ?? "",
-      parsed.data,
-    ),
-    { status: 201 },
+  const result = await runMutation(
+    "request.comment",
+    { userId, requestId },
+    () =>
+      createSolutionRequestComment(
+        requestId,
+        userId,
+        displayName(user),
+        user?.imageUrl ?? "",
+        parsed.data,
+      ),
   );
+
+  if ("response" in result) {
+    return result.response;
+  }
+
+  return NextResponse.json(result.value, { status: 201 });
 }
