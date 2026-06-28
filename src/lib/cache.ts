@@ -1,6 +1,11 @@
 import { Redis } from "@upstash/redis";
 import { env } from "@/env";
 import { logError } from "@/lib/log";
+import { withTimeout } from "@/lib/timeout";
+
+// Redis REST calls should be fast; bound them so a stalled Upstash hop can't
+// hold the render to the same 8s wall as a DB pool stall.
+const REDIS_READ_TIMEOUT_MS = 2_000;
 
 /**
  * Upstash-backed cache for hot server-side reads.
@@ -28,7 +33,11 @@ export async function cachedAggregate<T>(
   compute: () => Promise<T>,
 ): Promise<T> {
   try {
-    const cached = await redis.get<T>(key);
+    const cached = await withTimeout(
+      redis.get<T>(key),
+      REDIS_READ_TIMEOUT_MS,
+      "cache.get",
+    );
     if (cached !== null && cached !== undefined) {
       return cached;
     }
