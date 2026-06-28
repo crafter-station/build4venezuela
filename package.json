@@ -9,6 +9,7 @@
     "lint": "biome check",
     "test": "bun test",
     "format": "biome format --write",
+    "gen:assets": "bun scripts/generate-assets.ts",
     "db:studio": "bun --env-file=.env.local drizzle-kit studio",
     "db:pull": "bun --env-file=.env.local drizzle-kit pull"
   },
