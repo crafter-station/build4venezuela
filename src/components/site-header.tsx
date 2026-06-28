@@ -27,6 +27,7 @@ export function SiteHeader() {
     { href: "/whatsapp", label: t("links.whatsapp") },
     { href: "/discord", label: t("links.discord") },
     { href: "/projects", label: t("links.projects") },
+    { href: "/requests", label: t("links.requests") },
     { href: "/recursos", label: t("links.resources") },
   ];
 
