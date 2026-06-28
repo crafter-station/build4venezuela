@@ -192,8 +192,53 @@
       "empty": "No projects yet. Be the first one to add a build.",
       "syncing": "Syncing live feed...",
       "live": "Live feed enabled",
+      "all": "All",
+      "project": "project",
+      "projects": "projects",
       "vote": "vote",
       "votes": "votes"
+    },
+    "categories": {
+      "personas": {
+        "label": "Find People",
+        "title": "Missing & Found People",
+        "description": "Report, search, and reunite missing people and pets — WhatsApp/Telegram bots, facial recognition, and rescue maps. Join here if you want to help families find each other."
+      },
+      "recursos": {
+        "label": "Aid Coordination",
+        "title": "Aid & Resource Coordination",
+        "description": "Live maps and directories of shelters, collection centers, hospitals, volunteers, and needs by zone. Join here to help route help to where it's needed."
+      },
+      "data": {
+        "label": "Data & APIs",
+        "title": "Data, Dedup & Shared APIs",
+        "description": "The shared data layer — scraping, normalization, deduplication, and open APIs other tools build on. Join here to make every other tool speak the same truth."
+      },
+      "damage": {
+        "label": "Damage Assessment",
+        "title": "Structural Damage Assessment",
+        "description": "Crowdsourced and AI-assisted assessment of building damage, habitability, and structural risk. Join here if you work with engineering, CV, or satellite data."
+      },
+      "donations": {
+        "label": "Donations",
+        "title": "Donations & Funding",
+        "description": "Crowdfunding, donor matching, and transparent aid payments. Join here to move money and supplies to people who need them."
+      },
+      "infra": {
+        "label": "Connectivity & Infra",
+        "title": "Connectivity & Infrastructure",
+        "description": "Offline mesh networking, edge inference, sensing, and alerts that keep tools running when the grid is down. Join here for the hardest, highest-leverage bets."
+      },
+      "info": {
+        "label": "Verified Info",
+        "title": "Verified Info & Anti-misinformation",
+        "description": "Fighting rumors with verified, real-time information. Join here to keep the public informed and the noise down."
+      },
+      "other": {
+        "label": "Other",
+        "title": "Community & Other",
+        "description": "Community, meta, and builds that don't fit a single cluster yet."
+      }
     }
   },
   "SubmitProject": {

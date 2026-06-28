@@ -192,8 +192,53 @@
       "empty": "Todavía no hay proyectos. Sé la primera persona en agregar uno.",
       "syncing": "Sincronizando feed en vivo...",
       "live": "Feed en vivo activo",
+      "all": "Todos",
+      "project": "proyecto",
+      "projects": "proyectos",
       "vote": "voto",
       "votes": "votos"
+    },
+    "categories": {
+      "personas": {
+        "label": "Buscar personas",
+        "title": "Personas desaparecidas y encontradas",
+        "description": "Reporta, busca y reúne a personas y mascotas desaparecidas — bots de WhatsApp/Telegram, reconocimiento facial y mapas de rescate. Únete aquí si quieres ayudar a las familias a encontrarse."
+      },
+      "recursos": {
+        "label": "Coordinación de ayuda",
+        "title": "Ayuda y coordinación de recursos",
+        "description": "Mapas en vivo y directorios de refugios, centros de acopio, hospitales, voluntarios y necesidades por zona. Únete aquí para dirigir la ayuda donde se necesita."
+      },
+      "data": {
+        "label": "Datos y APIs",
+        "title": "Datos, deduplicación y APIs compartidas",
+        "description": "La capa de datos compartida — scraping, normalización, deduplicación y APIs abiertas sobre las que construyen otras herramientas. Únete aquí para que todas las herramientas hablen la misma verdad."
+      },
+      "damage": {
+        "label": "Evaluación de daños",
+        "title": "Evaluación de daños estructurales",
+        "description": "Evaluación colaborativa y asistida por IA de daños en edificios, habitabilidad y riesgo estructural. Únete aquí si trabajas con ingeniería, visión por computadora o datos satelitales."
+      },
+      "donations": {
+        "label": "Donaciones",
+        "title": "Donaciones y financiamiento",
+        "description": "Crowdfunding, emparejamiento de donantes y pagos de ayuda transparentes. Únete aquí para mover dinero y suministros a quienes los necesitan."
+      },
+      "infra": {
+        "label": "Conectividad e infra",
+        "title": "Conectividad e infraestructura",
+        "description": "Redes mesh sin conexión, inferencia en el borde, sensores y alertas que mantienen las herramientas funcionando cuando cae la red. Únete aquí para las apuestas más difíciles y de mayor impacto."
+      },
+      "info": {
+        "label": "Info verificada",
+        "title": "Información verificada y anti-desinformación",
+        "description": "Combatiendo rumores con información verificada en tiempo real. Únete aquí para mantener informado al público y reducir el ruido."
+      },
+      "other": {
+        "label": "Otros",
+        "title": "Comunidad y otros",
+        "description": "Comunidad, meta y proyectos que aún no encajan en un solo cluster."
+      }
     }
   },
   "SubmitProject": {

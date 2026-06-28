@@ -9,6 +9,7 @@ import {
   getCategoryContext,
   getProjectCategoryMap,
 } from "@/lib/projects/category-store";
+import { localizeClusters } from "@/lib/projects/localize-clusters";
 import { getCachedProjects } from "@/lib/projects/store";
 import { withTimeout } from "@/lib/timeout";
 import { ProjectShell } from "../project-shell";
@@ -31,6 +32,10 @@ type Props = {
 export default async function ProjectsPage({ params }: Props) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "Projects" });
+  const tCategories = await getTranslations({
+    locale,
+    namespace: "Projects.categories",
+  });
   const [projects, categoryMap, context] = await timed(
     "projects.page.load",
     {},
@@ -47,7 +52,10 @@ export default async function ProjectsPage({ params }: Props) {
   );
 
   const graduated = graduatedProposalIds(context.proposals, context.counts);
-  const clusters = resolveClusters(context.proposals, context.counts);
+  const clusters = localizeClusters(
+    resolveClusters(context.proposals, context.counts),
+    tCategories,
+  );
   const assignments: Record<string, string> = {};
   for (const project of projects) {
     assignments[project.slug] = resolveProjectCluster(

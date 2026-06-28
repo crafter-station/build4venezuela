@@ -156,7 +156,7 @@ export function RealtimeProjectsGrid({
         <CategoryChip
           active={activeCategory === "all"}
           count={projects.length}
-          label="All"
+          label={t("all")}
           onClick={() => setActiveCategory("all")}
         />
         {visibleClusters.map((cluster) => (
@@ -183,7 +183,7 @@ export function RealtimeProjectsGrid({
 
       <div className="mb-3 flex justify-between gap-4">
         <p className="font-mono text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground">
-          {visible.length} {visible.length === 1 ? "project" : "projects"}
+          {visible.length} {visible.length === 1 ? t("project") : t("projects")}
         </p>
         <p className="font-mono text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground">
           {isFetching ? t("syncing") : t("live")}
@@ -200,7 +200,8 @@ export function RealtimeProjectsGrid({
               onClick={() => setActiveCategory(categoryId)}
               type="button"
             >
-              {clusterById.get(categoryId)?.label ?? "Other"}
+              {clusterById.get(categoryId)?.label ??
+                clusterById.get("other")?.label}
             </button>
             <ProjectVideoEmbed
               detailHref={`/${locale}/p/${project.slug}`}
