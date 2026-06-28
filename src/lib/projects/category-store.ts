@@ -3,6 +3,7 @@ import path from "node:path";
 import { sql } from "drizzle-orm";
 import { db, isDbConfigured } from "@/db";
 import { categoryProposals, projectCategories } from "@/db/schema";
+import { cachedAggregate, invalidateCache } from "@/lib/cache";
 import { logError } from "@/lib/log";
 import type { CategoryProposal, ClassificationDecision } from "./categories";
 
@@ -17,6 +18,13 @@ type CategoryContext = {
   counts: Map<string, number>;
 };
 
+type CachedCategoryContext = {
+  proposals: CategoryProposal[];
+  counts: Record<string, number>;
+};
+
+type CachedCategoryMap = Record<string, ProjectCategoryAssignment>;
+
 type LocalCategoryData = {
   proposals: { id: string; label: string; description: string }[];
   assignments: Record<
@@ -26,6 +34,15 @@ type LocalCategoryData = {
 };
 
 const localStorePath = path.join(process.cwd(), ".data", "categories.json");
+
+// Same discipline as project list caching: keep category reads off the pool on
+// the `/projects` hot path. Writes invalidate explicitly below.
+const CACHE_VERSION = "v1";
+const CACHE_TTL_SECONDS = 60;
+const categoryCacheKeys = {
+  context: `build4venezuela:categories:context:${CACHE_VERSION}`,
+  map: `build4venezuela:categories:map:${CACHE_VERSION}`,
+};
 
 async function readLocalData(): Promise<LocalCategoryData> {
   try {
@@ -54,23 +71,49 @@ function countAssignments(rows: { categoryId: string }[]): Map<string, number> {
   return counts;
 }
 
-/** Proposals + per-cluster assignment counts. Drives both the classifier
- * (so it can reuse pending proposals) and the UI (so proposals can graduate). */
-export async function getCategoryContext(): Promise<CategoryContext> {
+function serializeContext(context: CategoryContext): CachedCategoryContext {
+  return {
+    proposals: context.proposals,
+    counts: Object.fromEntries(context.counts),
+  };
+}
+
+function deserializeContext(cached: CachedCategoryContext): CategoryContext {
+  return {
+    proposals: cached.proposals,
+    counts: new Map(Object.entries(cached.counts)),
+  };
+}
+
+function serializeMap(
+  map: Map<string, ProjectCategoryAssignment>,
+): CachedCategoryMap {
+  return Object.fromEntries(map);
+}
+
+function deserializeMap(cached: CachedCategoryMap) {
+  return new Map(Object.entries(cached));
+}
+
+function invalidateCategoryCaches() {
+  return invalidateCache(categoryCacheKeys.context, categoryCacheKeys.map);
+}
+
+async function loadCategoryContext(): Promise<CategoryContext> {
   if (isDbConfigured()) {
     try {
-      const [proposals, assignments] = await Promise.all([
-        db
-          .select({
-            id: categoryProposals.id,
-            label: categoryProposals.label,
-            description: categoryProposals.description,
-          })
-          .from(categoryProposals),
-        db
-          .select({ categoryId: projectCategories.categoryId })
-          .from(projectCategories),
-      ]);
+      // Serial reads: the pool caps at 3 connections in production and the
+      // projects page already loads projects + the category map in parallel.
+      const proposals = await db
+        .select({
+          id: categoryProposals.id,
+          label: categoryProposals.label,
+          description: categoryProposals.description,
+        })
+        .from(categoryProposals);
+      const assignments = await db
+        .select({ categoryId: projectCategories.categoryId })
+        .from(projectCategories);
 
       return {
         proposals: proposals.map((row) => ({
@@ -100,8 +143,7 @@ export async function getCategoryContext(): Promise<CategoryContext> {
   };
 }
 
-/** project_id -> assignment, for resolving display clusters on the list page. */
-export async function getProjectCategoryMap(): Promise<
+async function loadProjectCategoryMap(): Promise<
   Map<string, ProjectCategoryAssignment>
 > {
   if (isDbConfigured()) {
@@ -132,6 +174,27 @@ export async function getProjectCategoryMap(): Promise<
       { categoryId: value.category_id, status: value.status },
     ]),
   );
+}
+
+/** Proposals + per-cluster assignment counts. Drives both the classifier
+ * (so it can reuse pending proposals) and the UI (so proposals can graduate). */
+export async function getCategoryContext(): Promise<CategoryContext> {
+  const cached = await cachedAggregate(
+    { key: categoryCacheKeys.context, ttlSeconds: CACHE_TTL_SECONDS },
+    async () => serializeContext(await loadCategoryContext()),
+  );
+  return deserializeContext(cached);
+}
+
+/** project_id -> assignment, for resolving display clusters on the list page. */
+export async function getProjectCategoryMap(): Promise<
+  Map<string, ProjectCategoryAssignment>
+> {
+  const cached = await cachedAggregate(
+    { key: categoryCacheKeys.map, ttlSeconds: CACHE_TTL_SECONDS },
+    async () => serializeMap(await loadProjectCategoryMap()),
+  );
+  return deserializeMap(cached);
 }
 
 /** Persist one classification decision (idempotent upserts). */
@@ -169,6 +232,7 @@ export async function assignProjectCategory(
             updatedAt: sql`now()`,
           },
         });
+      await invalidateCategoryCaches();
       return;
     } catch (error) {
       logError("category.assign.fallback", error);
@@ -192,4 +256,5 @@ export async function assignProjectCategory(
     confidence: decision.confidence,
   };
   await writeLocalData(local);
+  await invalidateCategoryCaches();
 }
