@@ -2,6 +2,7 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import type { ChangeEvent, FormEvent } from "react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -59,6 +60,8 @@ export function ProjectForm({
   projectId,
   submitLabel,
 }: ProjectFormProps) {
+  const locale = useLocale();
+  const t = useTranslations("ProjectForm");
   const router = useRouter();
   const queryClient = useQueryClient();
   const [values, setValues] = useState(() =>
@@ -78,7 +81,7 @@ export function ProjectForm({
     },
     onSuccess: (project) => {
       queryClient.invalidateQueries({ queryKey: projectQueryKeys.list() });
-      router.push(`/p/${project.slug}`);
+      router.push(`/${locale}/p/${project.slug}`);
     },
   });
 
@@ -115,13 +118,13 @@ export function ProjectForm({
 
       <label className="grid gap-2" htmlFor="project-slug">
         <span className="font-mono text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground">
-          Project slug
+          {t("slugLabel")}
         </span>
         <Input
           id="project-slug"
           name="slug"
           onChange={handleValueChange("slug")}
-          placeholder="cool-slug"
+          placeholder={t("slugPlaceholder")}
           required
           value={values.slug}
         />
@@ -130,7 +133,7 @@ export function ProjectForm({
 
       <label className="grid gap-2" htmlFor="project-name">
         <span className="font-mono text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground">
-          Project name
+          {t("nameLabel")}
         </span>
         <Input
           id="project-name"
@@ -144,7 +147,7 @@ export function ProjectForm({
 
       <label className="grid gap-2" htmlFor="project-url">
         <span className="font-mono text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground">
-          Project link
+          {t("projectUrlLabel")}
         </span>
         <Input
           id="project-url"
@@ -160,13 +163,13 @@ export function ProjectForm({
 
       <label className="grid gap-2" htmlFor="project-countries">
         <span className="font-mono text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground">
-          Participant countries
+          {t("countriesLabel")}
         </span>
         <Input
           id="project-countries"
           name="countries"
           onChange={handleValueChange("countries")}
-          placeholder="Venezuela, Colombia, United States"
+          placeholder={t("countriesPlaceholder")}
           required
           value={values.countries}
         />
@@ -175,7 +178,7 @@ export function ProjectForm({
 
       <label className="grid gap-2" htmlFor="project-participant-name">
         <span className="font-mono text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground">
-          Team or participant name
+          {t("participantNameLabel")}
         </span>
         <Input
           id="project-participant-name"
@@ -189,13 +192,13 @@ export function ProjectForm({
 
       <label className="grid gap-2" htmlFor="project-video-url">
         <span className="font-mono text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground">
-          Demo video link (optional)
+          {t("videoUrlLabel")}
         </span>
         <Input
           id="project-video-url"
           name="videoUrl"
           onChange={handleValueChange("videoUrl")}
-          placeholder="https://youtu.be/..."
+          placeholder={t("videoUrlPlaceholder")}
           type="url"
           value={values.videoUrl}
         />
@@ -204,13 +207,13 @@ export function ProjectForm({
 
       <label className="grid gap-2" htmlFor="project-contribute-in-url">
         <span className="font-mono text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground">
-          Contribution link (optional)
+          {t("contributeInUrlLabel")}
         </span>
         <Input
           id="project-contribute-in-url"
           name="contributeInUrl"
           onChange={handleValueChange("contributeInUrl")}
-          placeholder="https://github.com/... or https://linkedin.com/..."
+          placeholder={t("contributeInUrlPlaceholder")}
           type="url"
           value={values.contributeInUrl}
         />
@@ -219,16 +222,14 @@ export function ProjectForm({
 
       <label className="grid gap-2" htmlFor="project-description">
         <span className="font-mono text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground">
-          Markdown description
+          {t("descriptionMarkdownLabel")}
         </span>
         <Textarea
           className="min-h-64 text-sm leading-6"
           id="project-description"
           name="descriptionMarkdown"
           onChange={handleValueChange("descriptionMarkdown")}
-          placeholder={
-            "## What did you build?\n\nWho is it for? How does it help? What should people try first?"
-          }
+          placeholder={t("descriptionMarkdownPlaceholder")}
           required
           value={values.descriptionMarkdown}
         />
@@ -246,7 +247,7 @@ export function ProjectForm({
         disabled={projectMutation.isPending}
         type="submit"
       >
-        {projectMutation.isPending ? "Checking..." : submitLabel}
+        {projectMutation.isPending ? t("pending") : submitLabel}
       </Button>
     </form>
   );

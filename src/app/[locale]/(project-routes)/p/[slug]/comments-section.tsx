@@ -2,6 +2,7 @@
 
 import { SignInButton, useUser } from "@clerk/nextjs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { type FormEvent, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -31,6 +32,7 @@ export function CommentsSection({
   initialComments,
   initialSignedIn,
 }: CommentsSectionProps) {
+  const t = useTranslations("Comments");
   const { isSignedIn } = useUser();
   const signedIn = isSignedIn ?? initialSignedIn;
   const queryClient = useQueryClient();
@@ -255,12 +257,12 @@ export function CommentsSection({
     const trimmedBody = body.trim();
 
     if (trimmedBody.length < 3) {
-      setError("Add at least 3 characters.");
+      setError(t("errors.tooShort"));
       return;
     }
 
     if (trimmedBody.length > maxCommentLength) {
-      setError("Keep comments under 1,200 characters.");
+      setError(t("errors.tooLong"));
       return;
     }
 
@@ -281,14 +283,15 @@ export function CommentsSection({
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="font-mono text-sm uppercase tracking-[0.28em] text-accent">
-            Comments
+            {t("eyebrow")}
           </p>
           <h2 className="mt-3 font-mono text-3xl font-black uppercase leading-none tracking-[-0.04em] sm:text-5xl">
-            Build feedback
+            {t("title")}
           </h2>
         </div>
         <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">
-          {comments.length} {comments.length === 1 ? "comment" : "comments"}
+          {comments.length}{" "}
+          {comments.length === 1 ? t("comment") : t("comments")}
         </p>
       </div>
 
@@ -302,7 +305,7 @@ export function CommentsSection({
               maxLength={maxCommentLength}
               name="body"
               onChange={(event) => setBody(event.target.value)}
-              placeholder="Add a useful question, note, or suggestion..."
+              placeholder={t("placeholder")}
               value={body}
             />
             <div className="flex flex-wrap items-center justify-between gap-3">
@@ -314,7 +317,7 @@ export function CommentsSection({
                 disabled={commentMutation.isPending}
                 type="submit"
               >
-                {commentMutation.isPending ? "Posting..." : "Post comment"}
+                {commentMutation.isPending ? t("posting") : t("post")}
               </Button>
             </div>
             {error ? (
@@ -326,14 +329,14 @@ export function CommentsSection({
         ) : (
           <div className="border border-border bg-background p-5">
             <p className="font-mono text-sm uppercase leading-6 tracking-[0.14em] text-muted-foreground">
-              Sign in to leave feedback and vote on comments.
+              {t("signedOutDescription")}
             </p>
             <SignInButton mode="modal">
               <Button
                 className="mt-4 h-11 px-5 text-sm uppercase tracking-[0.18em]"
                 type="button"
               >
-                Sign in to comment
+                {t("signIn")}
               </Button>
             </SignInButton>
           </div>
@@ -361,7 +364,9 @@ export function CommentsSection({
                     type="button"
                     variant={comment.voted ? "default" : "outline"}
                   >
-                    {comment.voted ? "Voted" : "Vote"} ({comment.votesCount})
+                    {comment.voted
+                      ? t("voted", { count: comment.votesCount })
+                      : t("vote", { count: comment.votesCount })}
                   </Button>
                 ) : (
                   <SignInButton mode="modal">
@@ -370,7 +375,7 @@ export function CommentsSection({
                       type="button"
                       variant="outline"
                     >
-                      Vote ({comment.votesCount})
+                      {t("vote", { count: comment.votesCount })}
                     </Button>
                   </SignInButton>
                 )}
@@ -383,8 +388,7 @@ export function CommentsSection({
         ) : (
           <div className="bg-background p-5">
             <p className="font-mono text-sm uppercase leading-6 tracking-[0.14em] text-muted-foreground">
-              No comments yet. Start the thread with a sharp question or useful
-              suggestion.
+              {t("empty")}
             </p>
           </div>
         )}

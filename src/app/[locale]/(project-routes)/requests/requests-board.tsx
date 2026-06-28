@@ -2,6 +2,7 @@
 
 import { SignInButton, useUser } from "@clerk/nextjs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { type FormEvent, useEffect, useState } from "react";
 import { ProjectMarkdown } from "@/components/project-markdown";
 import { Button } from "@/components/ui/button";
@@ -34,6 +35,7 @@ export function RequestsBoard({
   initialRequests,
   initialSignedIn,
 }: RequestsBoardProps) {
+  const t = useTranslations("Requests.board");
   const { isSignedIn } = useUser();
   const signedIn = isSignedIn ?? initialSignedIn;
   const queryClient = useQueryClient();
@@ -269,12 +271,12 @@ export function RequestsBoard({
     const trimmedDescription = descriptionMarkdown.trim();
 
     if (trimmedName.length < 3) {
-      setError("Add a clear request name.");
+      setError(t("errors.nameTooShort"));
       return;
     }
 
     if (trimmedDescription.length > maxDescriptionLength) {
-      setError("Keep the description under 8,000 characters.");
+      setError(t("errors.descriptionTooLong"));
       return;
     }
 
@@ -289,12 +291,12 @@ export function RequestsBoard({
     const body = (commentBodies[requestId] ?? "").trim();
 
     if (body.length < 3) {
-      setError("Add at least 3 characters.");
+      setError(t("errors.commentTooShort"));
       return;
     }
 
     if (body.length > maxCommentLength) {
-      setError("Keep comments under 1,200 characters.");
+      setError(t("errors.commentTooLong"));
       return;
     }
 
@@ -317,14 +319,13 @@ export function RequestsBoard({
     <div className="grid gap-8 lg:grid-cols-[0.75fr_1.25fr]">
       <aside className="border border-border bg-card p-5 lg:sticky lg:top-24 lg:self-start sm:p-6">
         <p className="font-mono text-sm uppercase tracking-[0.28em] text-accent">
-          Leave an idea
+          {t("formEyebrow")}
         </p>
         <h2 className="mt-3 font-mono text-3xl font-black uppercase leading-none tracking-[-0.04em]">
-          Request a solution
+          {t("formTitle")}
         </h2>
         <p className="mt-4 font-mono text-xs uppercase leading-6 tracking-[0.14em] text-muted-foreground">
-          Name the problem. Add context only if it helps builders understand who
-          is affected, what fails today, and what a good outcome looks like.
+          {t("formDescription")}
         </p>
 
         {signedIn ? (
@@ -335,7 +336,7 @@ export function RequestsBoard({
               maxLength={140}
               name="name"
               onChange={(event) => setName(event.target.value)}
-              placeholder="Example: reliable medicine availability map"
+              placeholder={t("namePlaceholder")}
               value={name}
             />
             <Textarea
@@ -344,7 +345,7 @@ export function RequestsBoard({
               maxLength={maxDescriptionLength}
               name="descriptionMarkdown"
               onChange={(event) => setDescriptionMarkdown(event.target.value)}
-              placeholder="Optional markdown: who needs this, what is hard today, links, constraints..."
+              placeholder={t("descriptionPlaceholder")}
               value={descriptionMarkdown}
             />
             <div className="flex flex-wrap items-center justify-between gap-3">
@@ -356,21 +357,21 @@ export function RequestsBoard({
                 disabled={createMutation.isPending}
                 type="submit"
               >
-                {createMutation.isPending ? "Posting..." : "Post request"}
+                {createMutation.isPending ? t("posting") : t("postRequest")}
               </Button>
             </div>
           </form>
         ) : (
           <div className="mt-6 border border-border bg-background p-5">
             <p className="font-mono text-sm uppercase leading-6 tracking-[0.14em] text-muted-foreground">
-              Sign in to leave ideas, vote, and comment.
+              {t("signedOutDescription")}
             </p>
             <SignInButton mode="modal">
               <Button
                 className="mt-4 h-11 px-5 text-sm uppercase tracking-[0.18em]"
                 type="button"
               >
-                Sign in
+                {t("signIn")}
               </Button>
             </SignInButton>
           </div>
@@ -385,10 +386,11 @@ export function RequestsBoard({
       <section>
         <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
           <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
-            {requests.length} {requests.length === 1 ? "request" : "requests"}
+            {requests.length}{" "}
+            {requests.length === 1 ? t("request") : t("requests")}
           </p>
           <p className="font-mono text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground">
-            {isFetching ? "Syncing live board..." : "Live board enabled"}
+            {isFetching ? t("syncing") : t("live")}
           </p>
         </div>
         <div className="grid gap-px bg-border">
@@ -422,8 +424,9 @@ export function RequestsBoard({
                         type="button"
                         variant={request.voted ? "default" : "outline"}
                       >
-                        {request.voted ? "Voted" : "Vote"} ({request.votesCount}
-                        )
+                        {request.voted
+                          ? t("voted", { count: request.votesCount })
+                          : t("vote", { count: request.votesCount })}
                       </Button>
                     ) : (
                       <SignInButton mode="modal">
@@ -432,7 +435,7 @@ export function RequestsBoard({
                           type="button"
                           variant="outline"
                         >
-                          Vote ({request.votesCount})
+                          {t("vote", { count: request.votesCount })}
                         </Button>
                       </SignInButton>
                     )}
@@ -443,7 +446,7 @@ export function RequestsBoard({
                     onClick={() => toggleDescription(request.id)}
                     type="button"
                   >
-                    {expanded ? "Collapse" : "Expand"} details
+                    {expanded ? t("collapse") : t("expand")}
                   </button>
 
                   {expanded ? (
@@ -454,8 +457,7 @@ export function RequestsBoard({
                         />
                       ) : (
                         <p className="font-mono text-sm uppercase leading-6 tracking-[0.14em] text-muted-foreground">
-                          No extra description yet. Use the comments to ask for
-                          missing context.
+                          {t("noDescription")}
                         </p>
                       )}
                     </div>
@@ -464,7 +466,7 @@ export function RequestsBoard({
                   <div className="mt-6 border-t border-border pt-5">
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <p className="font-mono text-xs uppercase tracking-[0.18em] text-accent">
-                        Comments ({request.comments.length})
+                        {t("comments", { count: request.comments.length })}
                       </p>
                     </div>
 
@@ -483,7 +485,7 @@ export function RequestsBoard({
                               [request.id]: event.target.value,
                             }))
                           }
-                          placeholder="Ask a question, confirm the need, or add context..."
+                          placeholder={t("commentPlaceholder")}
                           value={commentBody}
                         />
                         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -495,7 +497,7 @@ export function RequestsBoard({
                             disabled={commentMutation.isPending}
                             type="submit"
                           >
-                            Comment
+                            {t("comment")}
                           </Button>
                         </div>
                       </form>
@@ -529,8 +531,9 @@ export function RequestsBoard({
                                     comment.voted ? "default" : "outline"
                                   }
                                 >
-                                  {comment.voted ? "Voted" : "Vote"} (
-                                  {comment.votesCount})
+                                  {comment.voted
+                                    ? t("voted", { count: comment.votesCount })
+                                    : t("vote", { count: comment.votesCount })}
                                 </Button>
                               ) : null}
                             </div>
@@ -542,7 +545,7 @@ export function RequestsBoard({
                       ) : (
                         <div className="bg-card p-4">
                           <p className="font-mono text-xs uppercase leading-6 tracking-[0.14em] text-muted-foreground">
-                            No comments yet.
+                            {t("noComments")}
                           </p>
                         </div>
                       )}
@@ -554,8 +557,7 @@ export function RequestsBoard({
           ) : (
             <div className="bg-background p-8">
               <p className="font-mono text-lg uppercase leading-8 tracking-[0.14em] text-muted-foreground">
-                No requests yet. Start with one concrete problem builders should
-                solve.
+                {t("empty")}
               </p>
             </div>
           )}

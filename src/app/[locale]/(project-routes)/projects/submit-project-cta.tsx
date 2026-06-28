@@ -1,11 +1,16 @@
 "use client";
 
 import { ClerkLoading, Show, SignInButton } from "@clerk/nextjs";
+import { useLocale, useTranslations } from "next-intl";
 
 const ctaClassName =
   "inline-flex border border-primary bg-primary px-4 py-3 font-mono text-xs font-bold uppercase tracking-[0.18em] text-primary-foreground transition hover:bg-primary/80";
 
 export function SubmitProjectCta() {
+  const locale = useLocale();
+  const t = useTranslations("Projects.submitCta");
+  const submitHref = `/${locale}/submit`;
+
   return (
     <>
       <ClerkLoading>
@@ -15,22 +20,22 @@ export function SubmitProjectCta() {
           disabled
           type="button"
         >
-          <span className="invisible">Submit yours</span>
+          <span className="invisible">{t("label")}</span>
         </button>
       </ClerkLoading>
       <Show when="signed-in">
-        <a className={ctaClassName} href="/submit">
-          Submit yours
+        <a className={ctaClassName} href={submitHref}>
+          {t("label")}
         </a>
       </Show>
       <Show when="signed-out">
         <SignInButton
-          forceRedirectUrl="/submit"
+          forceRedirectUrl={submitHref}
           mode="modal"
-          signUpForceRedirectUrl="/submit"
+          signUpForceRedirectUrl={submitHref}
         >
           <button className={ctaClassName} type="button">
-            Submit yours
+            {t("label")}
           </button>
         </SignInButton>
       </Show>

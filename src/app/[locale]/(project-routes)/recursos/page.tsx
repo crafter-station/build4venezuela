@@ -1,52 +1,57 @@
+import { getTranslations } from "next-intl/server";
 import { ProjectShell } from "../project-shell";
 
 type Resource = {
+  key: "deck" | "projects" | "github" | "discord";
   title: string;
   description: string;
   href: string;
   kind: string;
 };
 
-const resources: Resource[] = [
+const resourceLinks = [
   {
-    title: "Build4Venezuela Deck",
-    description:
-      "Presentacion del proyecto Build4Venezuela en Google Slides.",
+    key: "deck",
     href: "https://docs.google.com/presentation/d/17mFtyMMBRuQ3zvZFtnFBD4Ig3JMfqJNgicabChnBVkU/edit?usp=drivesdk",
-    kind: "Slides",
   },
   {
-    title: "Proyectos",
-    description:
-      "Listado de proyectos en Google Sheets.",
+    key: "projects",
     href: "https://docs.google.com/spreadsheets/d/1izXHF-aZOOu7VvfmbpH8TmVCFbjqwm2eqnpJN2ODrCo/htmlview?gid=608803999&pru=AAABnyqRshg*Od-l2t9POoYbazcuvEwnxw#gid=608803999",
-    kind: "Sheets",
   },
   {
-    title: "🐙 GitHub",
-    description: "Repositorio de Build4Venezuela en GitHub.",
+    key: "github",
     href: "https://github.com/crafter-station/build4venezuela",
-    kind: "Codigo",
   },
   {
-    title: "💬 Discord",
-    description: "Unete a la comunidad en Discord.",
+    key: "discord",
     href: "https://build4venezuela.com/discord",
-    kind: "Comunidad",
   },
-];
+] as const;
 
-export default function RecursosPage() {
+type Props = {
+  params: Promise<{ locale: string }>;
+};
+
+export default async function RecursosPage({ params }: Props) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "Resources" });
+  const resources: Resource[] = resourceLinks.map((resource) => ({
+    ...resource,
+    title: t(`items.${resource.key}.title`),
+    description: t(`items.${resource.key}.description`),
+    kind: t(`items.${resource.key}.kind`),
+  }));
+
   return (
     <ProjectShell>
       <section className="px-5 py-16 sm:px-8 sm:py-20 lg:px-10">
         <div className="mx-auto max-w-6xl">
           <div className="mb-10 border-border border-b pb-8">
             <p className="font-mono text-sm uppercase tracking-[0.28em] text-accent">
-              Recursos
+              {t("eyebrow")}
             </p>
             <h1 className="mt-4 font-mono text-[clamp(3rem,8vw,7rem)] font-black uppercase leading-[0.85] tracking-[-0.07em]">
-              Materiales
+              {t("title")}
             </h1>
           </div>
 
@@ -69,7 +74,7 @@ export default function RecursosPage() {
                   {resource.description}
                 </p>
                 <span className="mt-8 inline-flex items-center font-mono text-xs font-bold uppercase tracking-[0.18em] text-primary transition group-hover:translate-x-1">
-                  Abrir &rarr;
+                  {t("open")} &rarr;
                 </span>
               </a>
             ))}

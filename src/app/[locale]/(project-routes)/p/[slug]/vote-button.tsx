@@ -2,6 +2,7 @@
 
 import { SignInButton, useUser } from "@clerk/nextjs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { createBrowserSupabase } from "@/lib/projects/browser-supabase";
@@ -31,6 +32,7 @@ export function VoteButton({
   initialSignedIn,
   initialVoted,
 }: VoteButtonProps) {
+  const t = useTranslations("Votes");
   const { isSignedIn } = useUser();
   const queryClient = useQueryClient();
   const voteQueryKey = projectQueryKeys.votes(projectId);
@@ -195,7 +197,7 @@ export function VoteButton({
           className="h-12 px-5 text-sm uppercase tracking-[0.18em]"
           type="button"
         >
-          Sign in to vote ({voteState.count})
+          {t("signIn", { count: voteState.count })}
         </Button>
       </SignInButton>
     );
@@ -209,8 +211,8 @@ export function VoteButton({
       type="button"
     >
       {voteState.voted
-        ? `Voted (${voteState.count})`
-        : `Vote (${voteState.count})`}
+        ? t("voted", { count: voteState.count })
+        : t("vote", { count: voteState.count })}
     </Button>
   );
 }

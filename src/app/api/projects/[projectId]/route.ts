@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
+import { routing } from "@/i18n/routing";
 import {
   checkRateLimit,
   rateLimitKey,
@@ -70,7 +71,10 @@ export async function PATCH(request: Request, { params }: Props) {
     spamReason: result.spam.reason,
   });
 
-  revalidatePath("/projects");
-  revalidatePath(`/p/${project.slug}`);
+  for (const locale of routing.locales) {
+    revalidatePath(`/${locale}/projects`);
+    revalidatePath(`/${locale}/p/${project.slug}`);
+  }
+
   return NextResponse.json({ project });
 }

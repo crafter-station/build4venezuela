@@ -183,5 +183,147 @@
         "className": "mx-auto h-auto w-full max-w-[104px] select-none sm:max-w-[130px]"
       }
     ]
+  },
+  "Projects": {
+    "eyebrow": "Project list",
+    "title": "Shipped work",
+    "submitCta": { "label": "Submit yours" },
+    "grid": {
+      "empty": "No projects yet. Be the first one to add a build.",
+      "syncing": "Syncing live feed...",
+      "live": "Live feed enabled",
+      "vote": "vote",
+      "votes": "votes"
+    }
+  },
+  "SubmitProject": {
+    "eyebrow": "Submit",
+    "title": "Add your project",
+    "description": "Every accepted project gets a permanent page at /p/your-slug. You can edit the slug later from this browser.",
+    "submitLabel": "Submit project"
+  },
+  "EditProject": {
+    "eyebrow": "Edit",
+    "title": "Update your project",
+    "description": "Change any field, including the slug. The page URL updates after saving.",
+    "submitLabel": "Save changes"
+  },
+  "ProjectForm": {
+    "slugLabel": "Project slug",
+    "slugPlaceholder": "cool-slug",
+    "nameLabel": "Project name",
+    "projectUrlLabel": "Project link",
+    "countriesLabel": "Participant countries",
+    "countriesPlaceholder": "Venezuela, Colombia, United States",
+    "participantNameLabel": "Team or participant name",
+    "videoUrlLabel": "Demo video link (optional)",
+    "videoUrlPlaceholder": "https://youtu.be/...",
+    "contributeInUrlLabel": "Contribution link (optional)",
+    "contributeInUrlPlaceholder": "https://github.com/... or https://linkedin.com/...",
+    "descriptionMarkdownLabel": "Markdown description",
+    "descriptionMarkdownPlaceholder": "## What did you build?\n\nWho is it for? How does it help? What should people try first?",
+    "pending": "Checking..."
+  },
+  "ProjectDetail": {
+    "metadata": {
+      "notFoundTitle": "Project not found | Build4Venezuela",
+      "description": "A Build4Venezuela project by {name}."
+    },
+    "builtBy": "Built by",
+    "countries": "Countries",
+    "openProject": "Open project",
+    "watchDemo": "Watch demo",
+    "contribute": "Contribute",
+    "edit": "Edit project and slug"
+  },
+  "Votes": {
+    "signIn": "Sign in to vote ({count})",
+    "vote": "Vote ({count})",
+    "voted": "Voted ({count})"
+  },
+  "Comments": {
+    "eyebrow": "Comments",
+    "title": "Build feedback",
+    "comment": "comment",
+    "comments": "comments",
+    "placeholder": "Add a useful question, note, or suggestion...",
+    "posting": "Posting...",
+    "post": "Post comment",
+    "signedOutDescription": "Sign in to leave feedback and vote on comments.",
+    "signIn": "Sign in to comment",
+    "vote": "Vote ({count})",
+    "voted": "Voted ({count})",
+    "empty": "No comments yet. Start the thread with a sharp question or useful suggestion.",
+    "errors": {
+      "tooShort": "Add at least 3 characters.",
+      "tooLong": "Keep comments under 1,200 characters."
+    }
+  },
+  "Requests": {
+    "metadata": {
+      "title": "Requests for solutions | Build4Venezuela",
+      "description": "A live board where people in Venezuela can request useful solutions, vote, and discuss what builders should make next."
+    },
+    "eyebrow": "Requests for solutions",
+    "title": "Tell builders what matters.",
+    "description": "If you are in Venezuela, leave concrete problems that technology, coordination, logistics, or information tools could help solve. The community votes and comments in real time.",
+    "board": {
+      "formEyebrow": "Leave an idea",
+      "formTitle": "Request a solution",
+      "formDescription": "Name the problem. Add context only if it helps builders understand who is affected, what fails today, and what a good outcome looks like.",
+      "namePlaceholder": "Example: reliable medicine availability map",
+      "descriptionPlaceholder": "Optional markdown: who needs this, what is hard today, links, constraints...",
+      "posting": "Posting...",
+      "postRequest": "Post request",
+      "signedOutDescription": "Sign in to leave ideas, vote, and comment.",
+      "signIn": "Sign in",
+      "request": "request",
+      "requests": "requests",
+      "syncing": "Syncing live board...",
+      "live": "Live board enabled",
+      "vote": "Vote ({count})",
+      "voted": "Voted ({count})",
+      "expand": "Expand details",
+      "collapse": "Collapse details",
+      "noDescription": "No extra description yet. Use the comments to ask for missing context.",
+      "comments": "Comments ({count})",
+      "commentPlaceholder": "Ask a question, confirm the need, or add context...",
+      "comment": "Comment",
+      "noComments": "No comments yet.",
+      "empty": "No requests yet. Start with one concrete problem builders should solve.",
+      "errors": {
+        "nameTooShort": "Add a clear request name.",
+        "descriptionTooLong": "Keep the description under 8,000 characters.",
+        "commentTooShort": "Add at least 3 characters.",
+        "commentTooLong": "Keep comments under 1,200 characters."
+      }
+    }
+  },
+  "Resources": {
+    "eyebrow": "Resources",
+    "title": "Materials",
+    "open": "Open",
+    "items": {
+      "deck": {
+        "title": "Build4Venezuela Deck",
+        "description": "Build4Venezuela project presentation in Google Slides.",
+        "kind": "Slides"
+      },
+      "projects": {
+        "title": "Projects",
+        "description": "Project list in Google Sheets.",
+        "kind": "Sheets"
+      },
+      "github": {
+        "title": "GitHub",
+        "description": "Build4Venezuela repository on GitHub.",
+        "kind": "Code"
+      },
+      "discord": {
+        "title": "Discord",
+        "description": "Join the community on Discord.",
+        "kind": "Community"
+      }
+    }
   }
 }

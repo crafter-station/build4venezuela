@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { ProjectVideoEmbed } from "@/components/project-video-embed";
 import { createBrowserSupabase } from "@/lib/projects/browser-supabase";
@@ -18,6 +19,8 @@ type ProjectVotePayload = {
 export function RealtimeProjectsGrid({
   initialProjects,
 }: RealtimeProjectsGridProps) {
+  const locale = useLocale();
+  const t = useTranslations("Projects.grid");
   const queryClient = useQueryClient();
   const { data: projects = [], isFetching } = useQuery({
     initialData: initialProjects,
@@ -92,7 +95,7 @@ export function RealtimeProjectsGrid({
     return (
       <div className="border border-border bg-card p-8">
         <p className="font-mono text-lg uppercase leading-8 tracking-[0.14em] text-muted-foreground">
-          No projects yet. Be the first one to add a build.
+          {t("empty")}
         </p>
       </div>
     );
@@ -102,7 +105,7 @@ export function RealtimeProjectsGrid({
     <div className="relative">
       <div className="mb-3 flex justify-end">
         <p className="font-mono text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground">
-          {isFetching ? "Syncing live feed..." : "Live feed enabled"}
+          {isFetching ? t("syncing") : t("live")}
         </p>
       </div>
       <div className="grid gap-px bg-border md:grid-cols-2 lg:grid-cols-3">
@@ -112,7 +115,7 @@ export function RealtimeProjectsGrid({
             key={project.id}
           >
             <ProjectVideoEmbed
-              detailHref={`/p/${project.slug}`}
+              detailHref={`/${locale}/p/${project.slug}`}
               title={project.name}
               videoUrl={project.videoUrl}
             />
@@ -123,10 +126,10 @@ export function RealtimeProjectsGrid({
               {/* ponytail: singular/plural needed — "1 votes" reads wrong and breaks trust */}
               <p className="font-mono text-xs uppercase tracking-[0.18em] text-primary">
                 {project.votesCount}{" "}
-                {project.votesCount === 1 ? "vote" : "votes"}
+                {project.votesCount === 1 ? t("vote") : t("votes")}
               </p>
             </div>
-            <a className="block" href={`/p/${project.slug}`}>
+            <a className="block" href={`/${locale}/p/${project.slug}`}>
               <h2 className="mt-8 font-mono text-3xl font-black uppercase leading-none tracking-[-0.04em] transition group-hover:text-primary">
                 {project.name}
               </h2>

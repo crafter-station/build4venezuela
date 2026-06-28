@@ -183,5 +183,147 @@
         "className": "mx-auto h-auto w-full max-w-[104px] select-none sm:max-w-[130px]"
       }
     ]
+  },
+  "Projects": {
+    "eyebrow": "Lista de proyectos",
+    "title": "Trabajo publicado",
+    "submitCta": { "label": "Envía el tuyo" },
+    "grid": {
+      "empty": "Todavía no hay proyectos. Sé la primera persona en agregar uno.",
+      "syncing": "Sincronizando feed en vivo...",
+      "live": "Feed en vivo activo",
+      "vote": "voto",
+      "votes": "votos"
+    }
+  },
+  "SubmitProject": {
+    "eyebrow": "Enviar",
+    "title": "Agrega tu proyecto",
+    "description": "Cada proyecto aceptado recibe una página permanente en /p/tu-slug. Puedes editar el slug después desde este navegador.",
+    "submitLabel": "Enviar proyecto"
+  },
+  "EditProject": {
+    "eyebrow": "Editar",
+    "title": "Actualiza tu proyecto",
+    "description": "Cambia cualquier campo, incluido el slug. La URL se actualiza después de guardar.",
+    "submitLabel": "Guardar cambios"
+  },
+  "ProjectForm": {
+    "slugLabel": "Slug del proyecto",
+    "slugPlaceholder": "slug-genial",
+    "nameLabel": "Nombre del proyecto",
+    "projectUrlLabel": "Enlace del proyecto",
+    "countriesLabel": "Países participantes",
+    "countriesPlaceholder": "Venezuela, Colombia, Estados Unidos",
+    "participantNameLabel": "Equipo o participante",
+    "videoUrlLabel": "Video demo (opcional)",
+    "videoUrlPlaceholder": "https://youtu.be/...",
+    "contributeInUrlLabel": "Enlace para contribuir (opcional)",
+    "contributeInUrlPlaceholder": "https://github.com/... o https://linkedin.com/...",
+    "descriptionMarkdownLabel": "Descripción en Markdown",
+    "descriptionMarkdownPlaceholder": "## ¿Qué construiste?\n\n¿Para quién es? ¿Cómo ayuda? ¿Qué debería probar la gente primero?",
+    "pending": "Revisando..."
+  },
+  "ProjectDetail": {
+    "metadata": {
+      "notFoundTitle": "Proyecto no encontrado | Build4Venezuela",
+      "description": "Un proyecto de Build4Venezuela por {name}."
+    },
+    "builtBy": "Construido por",
+    "countries": "Países",
+    "openProject": "Abrir proyecto",
+    "watchDemo": "Ver demo",
+    "contribute": "Contribuir",
+    "edit": "Editar proyecto y slug"
+  },
+  "Votes": {
+    "signIn": "Inicia sesión para votar ({count})",
+    "vote": "Votar ({count})",
+    "voted": "Votado ({count})"
+  },
+  "Comments": {
+    "eyebrow": "Comentarios",
+    "title": "Feedback del proyecto",
+    "comment": "comentario",
+    "comments": "comentarios",
+    "placeholder": "Agrega una pregunta, nota o sugerencia útil...",
+    "posting": "Publicando...",
+    "post": "Publicar comentario",
+    "signedOutDescription": "Inicia sesión para dejar feedback y votar comentarios.",
+    "signIn": "Inicia sesión para comentar",
+    "vote": "Votar ({count})",
+    "voted": "Votado ({count})",
+    "empty": "Todavía no hay comentarios. Abre la conversación con una pregunta clara o sugerencia útil.",
+    "errors": {
+      "tooShort": "Agrega al menos 3 caracteres.",
+      "tooLong": "Mantén los comentarios por debajo de 1.200 caracteres."
+    }
+  },
+  "Requests": {
+    "metadata": {
+      "title": "Solicitudes de soluciones | Build4Venezuela",
+      "description": "Un tablero en vivo donde personas en Venezuela pueden pedir soluciones útiles, votar y debatir qué debería construir la comunidad."
+    },
+    "eyebrow": "Solicitudes de soluciones",
+    "title": "Dile a los builders qué importa.",
+    "description": "Si estás en Venezuela, deja problemas concretos que tecnología, coordinación, logística o herramientas de información podrían ayudar a resolver. La comunidad vota y comenta en tiempo real.",
+    "board": {
+      "formEyebrow": "Deja una idea",
+      "formTitle": "Solicita una solución",
+      "formDescription": "Nombra el problema. Agrega contexto solo si ayuda a entender quién está afectado, qué falla hoy y cómo se ve un buen resultado.",
+      "namePlaceholder": "Ejemplo: mapa confiable de disponibilidad de medicinas",
+      "descriptionPlaceholder": "Markdown opcional: quién necesita esto, qué es difícil hoy, enlaces, restricciones...",
+      "posting": "Publicando...",
+      "postRequest": "Publicar solicitud",
+      "signedOutDescription": "Inicia sesión para dejar ideas, votar y comentar.",
+      "signIn": "Iniciar sesión",
+      "request": "solicitud",
+      "requests": "solicitudes",
+      "syncing": "Sincronizando tablero en vivo...",
+      "live": "Tablero en vivo activo",
+      "vote": "Votar ({count})",
+      "voted": "Votado ({count})",
+      "expand": "Expandir detalles",
+      "collapse": "Contraer detalles",
+      "noDescription": "Aún no hay descripción adicional. Usa los comentarios para pedir contexto faltante.",
+      "comments": "Comentarios ({count})",
+      "commentPlaceholder": "Haz una pregunta, confirma la necesidad o agrega contexto...",
+      "comment": "Comentar",
+      "noComments": "Todavía no hay comentarios.",
+      "empty": "Todavía no hay solicitudes. Empieza con un problema concreto que los builders deberían resolver.",
+      "errors": {
+        "nameTooShort": "Agrega un nombre claro para la solicitud.",
+        "descriptionTooLong": "Mantén la descripción por debajo de 8.000 caracteres.",
+        "commentTooShort": "Agrega al menos 3 caracteres.",
+        "commentTooLong": "Mantén los comentarios por debajo de 1.200 caracteres."
+      }
+    }
+  },
+  "Resources": {
+    "eyebrow": "Recursos",
+    "title": "Materiales",
+    "open": "Abrir",
+    "items": {
+      "deck": {
+        "title": "Deck de Build4Venezuela",
+        "description": "Presentación del proyecto Build4Venezuela en Google Slides.",
+        "kind": "Slides"
+      },
+      "projects": {
+        "title": "Proyectos",
+        "description": "Listado de proyectos en Google Sheets.",
+        "kind": "Sheets"
+      },
+      "github": {
+        "title": "GitHub",
+        "description": "Repositorio de Build4Venezuela en GitHub.",
+        "kind": "Código"
+      },
+      "discord": {
+        "title": "Discord",
+        "description": "Únete a la comunidad en Discord.",
+        "kind": "Comunidad"
+      }
+    }
   }
 }

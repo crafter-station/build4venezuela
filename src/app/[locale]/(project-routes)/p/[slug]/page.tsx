@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { ProjectMarkdown } from "@/components/project-markdown";
 import { ProjectVideoEmbed } from "@/components/project-video-embed";
 import {
@@ -14,25 +15,27 @@ import { CommentsSection } from "./comments-section";
 import { VoteButton } from "./vote-button";
 
 type Props = {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ locale: string; slug: string }>;
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = await params;
+  const { locale, slug } = await params;
+  const t = await getTranslations({ locale, namespace: "ProjectDetail" });
   const project = await getProjectBySlug(slug);
 
   if (!project) {
-    return { title: "Project not found | Build4Venezuela" };
+    return { title: t("metadata.notFoundTitle") };
   }
 
   return {
     title: `${project.name} | Build4Venezuela`,
-    description: `A Build4Venezuela project by ${project.participantName}.`,
+    description: t("metadata.description", { name: project.participantName }),
   };
 }
 
 export default async function ProjectPage({ params }: Props) {
-  const { slug } = await params;
+  const { locale, slug } = await params;
+  const t = await getTranslations({ locale, namespace: "ProjectDetail" });
   const project = await getProjectBySlug(slug);
 
   if (!project) {
@@ -58,7 +61,7 @@ export default async function ProjectPage({ params }: Props) {
             <div className="mt-8 grid gap-px bg-border">
               <div className="bg-background p-4">
                 <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">
-                  Built by
+                  {t("builtBy")}
                 </p>
                 <p className="mt-2 font-mono text-lg uppercase tracking-[0.08em]">
                   {project.participantName}
@@ -66,7 +69,7 @@ export default async function ProjectPage({ params }: Props) {
               </div>
               <div className="bg-background p-4">
                 <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">
-                  Countries
+                  {t("countries")}
                 </p>
                 <p className="mt-2 font-mono text-lg uppercase tracking-[0.08em]">
                   {project.countries.join(" / ")}
@@ -81,7 +84,7 @@ export default async function ProjectPage({ params }: Props) {
                   rel="noreferrer"
                   target="_blank"
                 >
-                  Open project
+                  {t("openProject")}
                 </a>
               ) : null}
               {project.videoUrl ? (
@@ -91,7 +94,7 @@ export default async function ProjectPage({ params }: Props) {
                   rel="noreferrer"
                   target="_blank"
                 >
-                  Watch demo
+                  {t("watchDemo")}
                 </a>
               ) : null}
               {project.contributeInUrl ? (
@@ -101,7 +104,7 @@ export default async function ProjectPage({ params }: Props) {
                   rel="noreferrer"
                   target="_blank"
                 >
-                  Contribute
+                  {t("contribute")}
                 </a>
               ) : null}
               <VoteButton
@@ -114,9 +117,9 @@ export default async function ProjectPage({ params }: Props) {
             {canEdit ? (
               <a
                 className="mt-4 inline-flex font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground underline underline-offset-4 transition hover:text-primary"
-                href={`/p/${project.slug}/edit`}
+                href={`/${locale}/p/${project.slug}/edit`}
               >
-                Edit project and slug
+                {t("edit")}
               </a>
             ) : null}
           </aside>

@@ -1,6 +1,7 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
+import { routing } from "@/i18n/routing";
 import {
   checkRateLimit,
   rateLimitKey,
@@ -71,6 +72,9 @@ export async function POST(request: Request) {
     displayName(user),
   );
 
-  revalidatePath("/requests");
+  for (const locale of routing.locales) {
+    revalidatePath(`/${locale}/requests`);
+  }
+
   return NextResponse.json({ request: solutionRequest }, { status: 201 });
 }

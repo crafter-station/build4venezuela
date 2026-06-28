@@ -22,8 +22,7 @@ export const env = createEnv({
   client: requiredClientEnv,
   emptyStringAsUndefined: true,
   skipValidation:
-    process.env.NODE_ENV !== "production" ||
-    !!process.env.SKIP_ENV_VALIDATION,
+    process.env.NODE_ENV !== "production" || !!process.env.SKIP_ENV_VALIDATION,
   experimental__runtimeEnv: {
     NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:
       process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,

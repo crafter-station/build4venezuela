@@ -6,7 +6,29 @@ import { routing } from "./i18n/routing";
 const intlMiddleware = createMiddleware(routing);
 
 function isProtectedRoute(pathname: string) {
-  return pathname === "/submit" || pathname.startsWith("/submit/");
+  const [, locale, segment] = pathname.split("/");
+  return routing.locales.some(
+    (supportedLocale) => supportedLocale === locale && segment === "submit",
+  );
+}
+
+function legacyLocalizedRedirect(request: Request) {
+  const url = new URL(request.url);
+  const { pathname } = url;
+
+  const legacyPaths = ["/projects", "/submit", "/requests", "/recursos"];
+
+  if (legacyPaths.includes(pathname)) {
+    url.pathname = `/${routing.defaultLocale}${pathname}`;
+    return NextResponse.redirect(url, 308);
+  }
+
+  if (pathname === "/p" || pathname.startsWith("/p/")) {
+    url.pathname = `/${routing.defaultLocale}${pathname}`;
+    return NextResponse.redirect(url, 308);
+  }
+
+  return null;
 }
 
 function skipsIntl(pathname: string) {
@@ -20,17 +42,18 @@ function skipsIntl(pathname: string) {
     pathname.startsWith("/luma") ||
     pathname.startsWith("/discord") ||
     pathname.startsWith("/event") ||
-    pathname.startsWith("/projects") ||
-    pathname.startsWith("/requests") ||
-    pathname.startsWith("/recursos") ||
-    pathname.startsWith("/submit") ||
-    pathname.startsWith("/p/") ||
     /\.[^/]+$/.test(pathname)
   );
 }
 
 export default clerkMiddleware(async (auth, request) => {
   const { pathname } = request.nextUrl;
+
+  const legacyRedirect = legacyLocalizedRedirect(request);
+
+  if (legacyRedirect) {
+    return legacyRedirect;
+  }
 
   if (isProtectedRoute(pathname)) {
     await auth.protect();
