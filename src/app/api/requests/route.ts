@@ -8,6 +8,7 @@ import {
   rateLimitResponse,
   readJsonObject,
 } from "@/lib/projects/api-security";
+import { checkSolutionRequestForSpam } from "@/lib/projects/spam";
 import { solutionRequestSchema, validationErrors } from "@/lib/requests/schema";
 import {
   createSolutionRequest,
@@ -61,6 +62,21 @@ export async function POST(request: Request) {
   if (!parsed.success) {
     return NextResponse.json(
       { errors: validationErrors(parsed.error) },
+      { status: 400 },
+    );
+  }
+
+  const spam = await checkSolutionRequestForSpam(parsed.data);
+
+  if (!spam.validationPassed) {
+    return NextResponse.json({ error: spam.reason }, { status: 503 });
+  }
+
+  if (spam.isSpam && spam.confidence >= 0.7) {
+    return NextResponse.json(
+      {
+        errors: { descriptionMarkdown: `This looks like spam: ${spam.reason}` },
+      },
       { status: 400 },
     );
   }

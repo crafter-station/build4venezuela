@@ -47,3 +47,39 @@ test("comment spam validation fails closed when AI Gateway API key is missing", 
     validationPassed: false,
   });
 });
+
+test("solution request spam validation fails closed when AI Gateway API key is missing", async () => {
+  const { checkSolutionRequestForSpam } = await import("./spam");
+
+  await expect(
+    checkSolutionRequestForSpam(
+      {
+        name: "Emergency supply coordination",
+        descriptionMarkdown:
+          "We need a lightweight tool for matching verified supply requests with local volunteer teams and publishing fulfillment status.",
+      },
+      false,
+    ),
+  ).resolves.toEqual({
+    isSpam: false,
+    confidence: 0,
+    reason: "AI Gateway is not configured.",
+    validationPassed: false,
+  });
+});
+
+test("solution request comment spam validation fails closed when AI Gateway API key is missing", async () => {
+  const { checkSolutionRequestCommentForSpam } = await import("./spam");
+
+  await expect(
+    checkSolutionRequestCommentForSpam(
+      { body: "I can help scope this with local organizers." },
+      false,
+    ),
+  ).resolves.toEqual({
+    isSpam: false,
+    confidence: 0,
+    reason: "AI Gateway is not configured.",
+    validationPassed: false,
+  });
+});

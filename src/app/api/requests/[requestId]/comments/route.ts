@@ -6,7 +6,7 @@ import {
   rateLimitResponse,
   readJsonObject,
 } from "@/lib/projects/api-security";
-import { checkCommentForSpam } from "@/lib/projects/spam";
+import { checkSolutionRequestCommentForSpam } from "@/lib/projects/spam";
 import {
   solutionRequestCommentSchema,
   validationErrors,
@@ -59,7 +59,7 @@ export async function POST(request: Request, { params }: Props) {
     );
   }
 
-  const spam = await checkCommentForSpam(parsed.data);
+  const spam = await checkSolutionRequestCommentForSpam(parsed.data);
 
   if (!spam.validationPassed) {
     return NextResponse.json({ error: spam.reason }, { status: 503 });
