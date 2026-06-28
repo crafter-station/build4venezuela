@@ -52,6 +52,24 @@ async function parseJson<T>(response: Response): Promise<T> {
   return (await response.json()) as T;
 }
 
+// Like parseJson, but returns null instead of throwing when the body is empty
+// or not valid JSON — e.g. a 504/500 with no body. Without this, callers that
+// blindly `response.json()` an empty error body surface the cryptic
+// "Unexpected end of JSON input" instead of a useful message.
+async function safeParseJson<T>(response: Response): Promise<T | null> {
+  try {
+    return (await response.json()) as T;
+  } catch {
+    return null;
+  }
+}
+
+// How long the client waits for a save before giving up. The server can take a
+// few seconds (spam + classify LLM calls, each bounded server-side), so this is
+// generous — but it guarantees the form never sits on "CHECKING..." until
+// Vercel's 300s timeout.
+const SAVE_PROJECT_TIMEOUT_MS = 45_000;
+
 async function responseError(response: Response, fallback: string) {
   try {
     const data = await parseJson<CommentErrorResponse>(response);
@@ -140,22 +158,44 @@ export async function toggleProjectCommentVote(
 }
 
 export async function saveProject({ projectId, values }: ProjectMutationInput) {
-  const response = await fetch(
-    projectId ? `/api/projects/${projectId}` : "/api/projects",
-    {
-      body: JSON.stringify(values),
-      headers: { "Content-Type": "application/json" },
-      method: projectId ? "PATCH" : "POST",
-    },
-  );
+  let response: Response;
 
-  if (!response.ok) {
+  try {
+    response = await fetch(
+      projectId ? `/api/projects/${projectId}` : "/api/projects",
+      {
+        body: JSON.stringify(values),
+        headers: { "Content-Type": "application/json" },
+        method: projectId ? "PATCH" : "POST",
+        signal: AbortSignal.timeout(SAVE_PROJECT_TIMEOUT_MS),
+      },
+    );
+  } catch (error) {
+    const timedOut =
+      error instanceof DOMException && error.name === "TimeoutError";
     throw new ProjectFormError(
-      await parseJson<ProjectFormErrorResponse>(response),
-      "Could not save project.",
+      { values },
+      timedOut
+        ? "The server took too long to respond. Please try again."
+        : "Network error. Check your connection and try again.",
     );
   }
 
-  const data = await parseJson<{ project: Project }>(response);
+  if (!response.ok) {
+    // The error body may be empty (504/500 with no JSON) — fall back to a
+    // readable message instead of throwing "Unexpected end of JSON input".
+    const data = await safeParseJson<ProjectFormErrorResponse>(response);
+    throw new ProjectFormError(data ?? { values }, "Could not save project.");
+  }
+
+  const data = await safeParseJson<{ project: Project }>(response);
+
+  if (!data?.project) {
+    throw new ProjectFormError(
+      { values },
+      "The project may not have been saved. Please refresh and check.",
+    );
+  }
+
   return data.project;
 }
