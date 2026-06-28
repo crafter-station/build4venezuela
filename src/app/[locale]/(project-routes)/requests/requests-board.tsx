@@ -450,107 +450,115 @@ export function RequestsBoard({
                   </button>
 
                   {expanded ? (
-                    <div className="mt-5 border border-border bg-card p-5">
-                      {hasDescription ? (
-                        <ProjectMarkdown
-                          markdown={request.descriptionMarkdown}
-                        />
-                      ) : (
-                        <p className="font-mono text-sm uppercase leading-6 tracking-[0.14em] text-muted-foreground">
-                          {t("noDescription")}
-                        </p>
-                      )}
-                    </div>
-                  ) : null}
-
-                  <div className="mt-6 border-t border-border pt-5">
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                      <p className="font-mono text-xs uppercase tracking-[0.18em] text-accent">
-                        {t("comments", { count: request.comments.length })}
-                      </p>
-                    </div>
-
-                    {signedIn ? (
-                      <form
-                        className="mt-4 grid gap-3"
-                        onSubmit={(event) => submitComment(event, request.id)}
-                      >
-                        <Textarea
-                          className="min-h-24 bg-card font-mono text-sm leading-6"
-                          disabled={commentMutation.isPending}
-                          maxLength={maxCommentLength}
-                          onChange={(event) =>
-                            setCommentBodies((current) => ({
-                              ...current,
-                              [request.id]: event.target.value,
-                            }))
-                          }
-                          placeholder={t("commentPlaceholder")}
-                          value={commentBody}
-                        />
-                        <div className="flex flex-wrap items-center justify-between gap-3">
-                          <p className="font-mono text-xs uppercase tracking-[0.16em] text-muted-foreground">
-                            {commentBody.trim().length}/{maxCommentLength}
+                    <>
+                      <div className="mt-5 border border-border bg-card p-5">
+                        {hasDescription ? (
+                          <ProjectMarkdown
+                            markdown={request.descriptionMarkdown}
+                          />
+                        ) : (
+                          <p className="font-mono text-sm uppercase leading-6 tracking-[0.14em] text-muted-foreground">
+                            {t("noDescription")}
                           </p>
-                          <Button
-                            className="h-10 px-4 text-xs uppercase tracking-[0.16em]"
-                            disabled={commentMutation.isPending}
-                            type="submit"
-                          >
-                            {t("comment")}
-                          </Button>
-                        </div>
-                      </form>
-                    ) : null}
+                        )}
+                      </div>
 
-                    <div className="mt-4 grid gap-px bg-border">
-                      {request.comments.length > 0 ? (
-                        request.comments.map((comment) => (
-                          <div className="bg-card p-4" key={comment.id}>
+                      <div className="mt-6 border-t border-border pt-5">
+                        <div className="flex flex-wrap items-center justify-between gap-3">
+                          <p className="font-mono text-xs uppercase tracking-[0.18em] text-accent">
+                            {t("comments", { count: request.comments.length })}
+                          </p>
+                        </div>
+
+                        {signedIn ? (
+                          <form
+                            className="mt-4 grid gap-3"
+                            onSubmit={(event) =>
+                              submitComment(event, request.id)
+                            }
+                          >
+                            <Textarea
+                              className="min-h-24 bg-card font-mono text-sm leading-6"
+                              disabled={commentMutation.isPending}
+                              maxLength={maxCommentLength}
+                              onChange={(event) =>
+                                setCommentBodies((current) => ({
+                                  ...current,
+                                  [request.id]: event.target.value,
+                                }))
+                              }
+                              placeholder={t("commentPlaceholder")}
+                              value={commentBody}
+                            />
                             <div className="flex flex-wrap items-center justify-between gap-3">
-                              <div>
-                                <p className="font-mono text-xs font-bold uppercase tracking-[0.16em]">
-                                  {comment.authorName}
-                                </p>
-                                <p className="mt-1 font-mono text-[0.65rem] uppercase tracking-[0.16em] text-muted-foreground">
-                                  {comment.createdAt.slice(0, 10)}
+                              <p className="font-mono text-xs uppercase tracking-[0.16em] text-muted-foreground">
+                                {commentBody.trim().length}/{maxCommentLength}
+                              </p>
+                              <Button
+                                className="h-10 px-4 text-xs uppercase tracking-[0.16em]"
+                                disabled={commentMutation.isPending}
+                                type="submit"
+                              >
+                                {t("comment")}
+                              </Button>
+                            </div>
+                          </form>
+                        ) : null}
+
+                        <div className="mt-4 grid gap-px bg-border">
+                          {request.comments.length > 0 ? (
+                            request.comments.map((comment) => (
+                              <div className="bg-card p-4" key={comment.id}>
+                                <div className="flex flex-wrap items-center justify-between gap-3">
+                                  <div>
+                                    <p className="font-mono text-xs font-bold uppercase tracking-[0.16em]">
+                                      {comment.authorName}
+                                    </p>
+                                    <p className="mt-1 font-mono text-[0.65rem] uppercase tracking-[0.16em] text-muted-foreground">
+                                      {comment.createdAt.slice(0, 10)}
+                                    </p>
+                                  </div>
+                                  {signedIn ? (
+                                    <Button
+                                      className="h-9 px-3 text-[0.65rem] uppercase tracking-[0.16em]"
+                                      disabled={commentVoteMutation.isPending}
+                                      onClick={() =>
+                                        commentVoteMutation.mutate({
+                                          requestId: request.id,
+                                          commentId: comment.id,
+                                        })
+                                      }
+                                      type="button"
+                                      variant={
+                                        comment.voted ? "default" : "outline"
+                                      }
+                                    >
+                                      {comment.voted
+                                        ? t("voted", {
+                                            count: comment.votesCount,
+                                          })
+                                        : t("vote", {
+                                            count: comment.votesCount,
+                                          })}
+                                    </Button>
+                                  ) : null}
+                                </div>
+                                <p className="mt-4 whitespace-pre-wrap font-mono text-sm leading-7 text-muted-foreground">
+                                  {comment.body}
                                 </p>
                               </div>
-                              {signedIn ? (
-                                <Button
-                                  className="h-9 px-3 text-[0.65rem] uppercase tracking-[0.16em]"
-                                  disabled={commentVoteMutation.isPending}
-                                  onClick={() =>
-                                    commentVoteMutation.mutate({
-                                      requestId: request.id,
-                                      commentId: comment.id,
-                                    })
-                                  }
-                                  type="button"
-                                  variant={
-                                    comment.voted ? "default" : "outline"
-                                  }
-                                >
-                                  {comment.voted
-                                    ? t("voted", { count: comment.votesCount })
-                                    : t("vote", { count: comment.votesCount })}
-                                </Button>
-                              ) : null}
+                            ))
+                          ) : (
+                            <div className="bg-card p-4">
+                              <p className="font-mono text-xs uppercase leading-6 tracking-[0.14em] text-muted-foreground">
+                                {t("noComments")}
+                              </p>
                             </div>
-                            <p className="mt-4 whitespace-pre-wrap font-mono text-sm leading-7 text-muted-foreground">
-                              {comment.body}
-                            </p>
-                          </div>
-                        ))
-                      ) : (
-                        <div className="bg-card p-4">
-                          <p className="font-mono text-xs uppercase leading-6 tracking-[0.14em] text-muted-foreground">
-                            {t("noComments")}
-                          </p>
+                          )}
                         </div>
-                      )}
-                    </div>
-                  </div>
+                      </div>
+                    </>
+                  ) : null}
                 </article>
               );
             })
