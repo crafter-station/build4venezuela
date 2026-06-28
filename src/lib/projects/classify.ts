@@ -2,6 +2,7 @@ import { gateway } from "@ai-sdk/gateway";
 import { generateObject, zodSchema } from "ai";
 import { z } from "zod";
 import { env } from "@/env";
+import { logError } from "@/lib/log";
 import {
   type CategoryProposal,
   type ClassifierVerdict,
@@ -120,7 +121,7 @@ export async function classifyProject(
 
     return { ...result.object, validationPassed: true };
   } catch (error) {
-    console.error("Project classification failed", error);
+    logError("classify.project", error);
     return { ...FAILED, reasoning: "AI classification failed." };
   }
 }

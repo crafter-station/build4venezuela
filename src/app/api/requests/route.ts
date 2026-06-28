@@ -2,6 +2,7 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { routing } from "@/i18n/routing";
+import { logEvent, timed } from "@/lib/log";
 import {
   checkRateLimit,
   rateLimitKey,
@@ -66,13 +67,23 @@ export async function POST(request: Request) {
     );
   }
 
-  const spam = await checkSolutionRequestForSpam(parsed.data);
+  logEvent("request.submit.start", {
+    userId,
+    nameLen: parsed.data.name.length,
+    descLen: parsed.data.descriptionMarkdown.length,
+  });
+
+  const spam = await timed("request.spam", { userId }, () =>
+    checkSolutionRequestForSpam(parsed.data),
+  );
 
   if (!spam.validationPassed) {
+    logEvent("request.submit.blocked", { userId, reason: "spam-unavailable" });
     return NextResponse.json({ error: spam.reason }, { status: 503 });
   }
 
   if (spam.isSpam && spam.confidence >= 0.7) {
+    logEvent("request.submit.blocked", { userId, reason: "spam" });
     return NextResponse.json(
       {
         errors: { descriptionMarkdown: `This looks like spam: ${spam.reason}` },
@@ -82,16 +93,19 @@ export async function POST(request: Request) {
   }
 
   const user = await currentUser();
-  const solutionRequest = await createSolutionRequest(
-    parsed.data,
-    userId,
-    displayName(user),
-    user?.imageUrl ?? "",
+  const solutionRequest = await timed("request.create", { userId }, () =>
+    createSolutionRequest(
+      parsed.data,
+      userId,
+      displayName(user),
+      user?.imageUrl ?? "",
+    ),
   );
 
   for (const locale of routing.locales) {
     revalidatePath(`/${locale}/requests`);
   }
 
+  logEvent("request.submit.ok", { userId, requestId: solutionRequest.id });
   return NextResponse.json({ request: solutionRequest }, { status: 201 });
 }

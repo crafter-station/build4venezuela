@@ -9,6 +9,7 @@ import {
   projects,
   projectVotes,
 } from "@/db/schema";
+import { logError } from "@/lib/log";
 import type {
   Project,
   ProjectComment,
@@ -247,10 +248,9 @@ async function withLocalFallback<T>(
   try {
     return await operation();
   } catch (error) {
-    console.warn(
-      "Drizzle project store failed; using local fallback",
-      normalizeStoreError(error),
-    );
+    logError("project.store.fallback", error, {
+      detail: normalizeStoreError(error),
+    });
     return fallback();
   }
 }

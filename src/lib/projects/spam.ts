@@ -2,6 +2,7 @@ import { gateway } from "@ai-sdk/gateway";
 import { generateObject, zodSchema } from "ai";
 import { z } from "zod";
 import { env } from "@/env";
+import { logError } from "@/lib/log";
 import type {
   SolutionRequestCommentInput,
   SolutionRequestInput,
@@ -61,7 +62,7 @@ export async function checkProjectForSpam(
 
     return { ...result.object, validationPassed: true };
   } catch (error) {
-    console.error("Project spam check failed", error);
+    logError("spam.project", error);
     return {
       isSpam: false,
       confidence: 0,
@@ -96,7 +97,7 @@ export async function checkCommentForSpam(
 
     return { ...result.object, validationPassed: true };
   } catch (error) {
-    console.error("Project comment spam check failed", error);
+    logError("spam.projectComment", error);
     return {
       isSpam: false,
       confidence: 0,
@@ -138,7 +139,7 @@ export async function checkSolutionRequestForSpam(
 
     return { ...result.object, validationPassed: true };
   } catch (error) {
-    console.error("Solution request spam check failed", error);
+    logError("spam.request", error);
     return {
       isSpam: false,
       confidence: 0,
@@ -173,7 +174,7 @@ export async function checkSolutionRequestCommentForSpam(
 
     return { ...result.object, validationPassed: true };
   } catch (error) {
-    console.error("Solution request comment spam check failed", error);
+    logError("spam.requestComment", error);
     return {
       isSpam: false,
       confidence: 0,

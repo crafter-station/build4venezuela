@@ -2,6 +2,7 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { routing } from "@/i18n/routing";
+import { logEvent, timed } from "@/lib/log";
 import {
   checkRateLimit,
   rateLimitKey,
@@ -87,9 +88,18 @@ export async function POST(request: Request) {
   }
 
   const values = body.value as Record<string, string>;
-  const result = await validateProjectSubmission(values);
+
+  logEvent("project.submit.start", { userId, slug: values.slug });
+
+  // Runs the slug check + spam LLM call; the heaviest, most failure-prone step.
+  const result = await timed(
+    "project.validate",
+    { userId, slug: values.slug },
+    () => validateProjectSubmission(values),
+  );
 
   if (!result.ok) {
+    logEvent("project.submit.blocked", { userId, slug: values.slug });
     return NextResponse.json(
       { values: result.values, errors: result.errors },
       { status: 400 },
@@ -97,20 +107,30 @@ export async function POST(request: Request) {
   }
 
   const user = await currentUser();
-  const project = await createProject({
-    ...result.data,
-    ownerUserId: userId,
-    ownerName: displayName(user),
-    ownerImageUrl: user?.imageUrl ?? "",
-    spamScore: result.spam.confidence,
-    spamReason: result.spam.reason,
-  });
+  const project = await timed(
+    "project.create",
+    { userId, slug: values.slug },
+    () =>
+      createProject({
+        ...result.data,
+        ownerUserId: userId,
+        ownerName: displayName(user),
+        ownerImageUrl: user?.imageUrl ?? "",
+        spamScore: result.spam.confidence,
+        spamReason: result.spam.reason,
+      }),
+  );
 
-  await classifyAndStore(project.id, result.data);
+  // Best-effort: never blocks the response on failure, but we still time it so a
+  // slow classify call is visible in the logs.
+  await timed("project.classify", { userId, projectId: project.id }, () =>
+    classifyAndStore(project.id, result.data),
+  );
 
   for (const locale of routing.locales) {
     revalidatePath(`/${locale}/projects`);
   }
 
+  logEvent("project.submit.ok", { userId, projectId: project.id });
   return NextResponse.json({ project }, { status: 201 });
 }

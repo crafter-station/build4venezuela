@@ -3,6 +3,7 @@ import path from "node:path";
 import { sql } from "drizzle-orm";
 import { db, isDbConfigured } from "@/db";
 import { categoryProposals, projectCategories } from "@/db/schema";
+import { logError } from "@/lib/log";
 import type { CategoryProposal, ClassificationDecision } from "./categories";
 
 export type ProjectCategoryAssignment = {
@@ -80,7 +81,7 @@ export async function getCategoryContext(): Promise<CategoryContext> {
         counts: countAssignments(assignments),
       };
     } catch (error) {
-      console.warn("Category context read failed; using local fallback", error);
+      logError("category.context.fallback", error);
     }
   }
 
@@ -120,7 +121,7 @@ export async function getProjectCategoryMap(): Promise<
         ]),
       );
     } catch (error) {
-      console.warn("Category map read failed; using local fallback", error);
+      logError("category.map.fallback", error);
     }
   }
 
@@ -170,10 +171,7 @@ export async function assignProjectCategory(
         });
       return;
     } catch (error) {
-      console.warn(
-        "Category assignment write failed; using local fallback",
-        error,
-      );
+      logError("category.assign.fallback", error);
     }
   }
 
