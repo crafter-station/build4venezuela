@@ -54,6 +54,10 @@ type ClassifyContext = {
   configured?: boolean;
 };
 
+// Bound the gateway call. Classification is best-effort (the caller swallows
+// failures), so a timeout simply skips it instead of hanging the submit.
+const CLASSIFY_TIMEOUT_MS = 15_000;
+
 const FAILED: ProjectClassification = {
   fitsExisting: false,
   categoryId: null,
@@ -93,6 +97,7 @@ export async function classifyProject(
     const result = await generateObject({
       model: gateway("anthropic/claude-sonnet-4.6"),
       schema: zodSchema(classificationSchema),
+      abortSignal: AbortSignal.timeout(CLASSIFY_TIMEOUT_MS),
       system:
         "You classify civic/humanitarian hackathon projects into thematic clusters. " +
         "Strongly prefer assigning to an existing cluster. Only propose a NEW cluster when the project's core purpose genuinely matches none of them — not merely because it has an extra feature. " +
