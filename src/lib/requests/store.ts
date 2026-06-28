@@ -3,6 +3,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { createClient } from "@supabase/supabase-js";
 import { env } from "@/env";
+import { logError } from "@/lib/log";
 import type {
   SolutionRequest,
   SolutionRequestComment,
@@ -62,6 +63,10 @@ const localStorePath = path.join(
 const requestSelect = "*, votes_count:solution_request_votes(count)";
 const commentSelect = "*, votes_count:solution_request_comment_votes(count)";
 
+// The Supabase JS client's fetch has no default timeout, so a stalled PostgREST
+// request would hang the whole route until Vercel's 300s wall. Bound every call.
+const SUPABASE_TIMEOUT_MS = 8_000;
+
 function getSupabase() {
   const url = env.NEXT_PUBLIC_SUPABASE_URL;
   const key = env.SUPABASE_SERVICE_ROLE_KEY;
@@ -70,7 +75,19 @@ function getSupabase() {
     return null;
   }
 
-  return createClient(url, key, { auth: { persistSession: false } });
+  // Cast: the wrapper satisfies the call signature but not the extra static
+  // members on the global `fetch` type (e.g. `preconnect`), which Supabase
+  // never calls.
+  const timeoutFetch = ((input: RequestInfo | URL, init?: RequestInit) =>
+    fetch(input, {
+      ...init,
+      signal: init?.signal ?? AbortSignal.timeout(SUPABASE_TIMEOUT_MS),
+    })) as typeof fetch;
+
+  return createClient(url, key, {
+    auth: { persistSession: false },
+    global: { fetch: timeoutFetch },
+  });
 }
 
 function toComment(
@@ -143,7 +160,7 @@ async function withLocalFallback<T>(
   try {
     return await operation();
   } catch (error) {
-    console.warn("Supabase request store failed; using local fallback", error);
+    logError("request.store.fallback", error);
     return fallback();
   }
 }
