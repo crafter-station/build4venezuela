@@ -1,0 +1,146 @@
+{
+  "project_slug": "acopiovzla",
+  "name": "AcopioVzla",
+  "repo_url": "https://github.com/nobelaar/acopio-vzla",
+  "live_url": "https://AcopioVzla.vercel.app",
+  "video_url": "",
+  "countries": [
+    "Argentina",
+    "Venezuela"
+  ],
+  "db_description": "Acopio nació como respuesta a un problema concreto: en situaciones de emergencia, la ayuda humanitaria se dispersa porque no existe información centralizada y actualizada sobre qué necesita cada centro de acopio. La comunicación ocurre por WhatsApp, el esfuerzo solidario se concentra en los centros más conocidos mientras otros quedan desabastecidos, y los voluntarios no saben a dónde ir ni qué llevar.\nAcopio resuelve esto con una plataforma web simple: cada centro registra su perfil y publica actualizaciones en tiempo real sobre sus necesidades. La ciudadanía accede a un feed público donde puede ver, filtrar y decidir cómo ayudar de forma concreta e informada.\nEl proyecto es gratuito, sin publicidad y de acceso abierto. Fue construido con React, Vite, Supabase y PostGIS, con foco en ser liviano, rápido de adoptar y fácil de operar incluso desde un celular básico. Entre más centros participan, más útil se vuelve para todos — es infraestructura solidaria que escala con la comunidad.",
+  "lifecycle_status": "ready_to_use",
+  "analysis": {
+    "summary": "Acopio VZLA (also branded \"Saman\") is a React/TypeScript SPA backed by Supabase that maps humanitarian aid collection centers (centros de acopio) in Venezuela post-earthquake. Users can browse centers publicly, see what supplies are needed, follow real-time updates per center, leave comments, and post shelter listings (anuncios de hospedaje). The project was built in roughly 2 days by a single developer, is deployed on Vercel, and shows unusually strong engineering discipline for a hackathon: 10 versioned DB migrations, 98.99% line test coverage via Vitest + MSW, well-organized feature-based folder structure, and proper Supabase RLS on all tables. The main gap is no CI/CD and no server-side rate limiting or logging.",
+    "project_type": "Frontend SPA (React + Vite) with Supabase BaaS",
+    "stack": {
+      "frontend": [
+        "React 18",
+        "TypeScript",
+        "Vite",
+        "Tailwind CSS",
+        "TanStack Query v5",
+        "React Router v6",
+        "lucide-react"
+      ],
+      "backend": [
+        "Supabase Auth",
+        "Supabase Realtime",
+        "Supabase Storage",
+        "PostgreSQL (via Supabase)"
+      ],
+      "database": [
+        "PostgreSQL",
+        "PostGIS (initial migration; coords removed in migration 00002)"
+      ],
+      "infra_deploy": [
+        "Vercel (acopiovzla.vercel.app)",
+        "Supabase (managed)"
+      ],
+      "ai_ml": [],
+      "languages": [
+        "TypeScript",
+        "PLpgSQL",
+        "JavaScript",
+        "CSS",
+        "Shell"
+      ]
+    },
+    "architecture": {
+      "pattern": "Feature-based SPA with BaaS (Supabase). No custom server — all business logic lives in React hooks and Supabase RLS/DB triggers.",
+      "uses_orm": false,
+      "orm_or_db_layer": "Supabase JS client (supabase-js v2) with direct table queries and RPC calls. No ORM. Typed via generated database.generated.ts + hand-written db.ts types.",
+      "api_design": "No custom REST/GraphQL API. The frontend calls Supabase REST endpoints directly. PostgreSQL triggers handle server-side side effects (e.g., notification on comment insert via notificar_comentario() trigger). 10 versioned SQL migrations managed via Supabase CLI.",
+      "separation_of_concerns": "Clean: pages/ own layout, features/ own queries+mutations+realtime hooks (TanStack Query), components/ are presentational. Auth state via useSession() singleton hook.",
+      "modularity": "High. Each feature (centros, posts, notificaciones, anuncios, auth) has isolated queries.ts / mutations.ts / realtime.ts. Test mocks live in src/test/mocks/ and are shared, not duplicated per feature.",
+      "notable_patterns": [
+        "MSW (Mock Service Worker) for all Supabase calls in tests — no live DB in CI",
+        "TanStack Query with staleTime 30s / gcTime 5min for center listings",
+        "Supabase Realtime channel per centro — subscription cleaned up on unmount",
+        "DB-level RLS enforces ownership (coordinador_id = auth.uid()); frontend cannot bypass it",
+        "Client-side image compression via canvas.toBlob before Storage upload",
+        "PostgreSQL trigger (notificar_comentario) creates notifications server-side on comment insert",
+        "Nominatim geocoding with 1 req/s throttle for address-to-coord lookup"
+      ]
+    },
+    "code_organization": {
+      "score": 4,
+      "directory_structure": "src/ split into features/, components/, pages/, lib/, types/, test/. DB schema in supabase/migrations/ with 10 numbered migrations. Docs in docs/ (PRD.md + ARCHITECTURE.md). Very clean for a 2-day hackathon.",
+      "naming_quality": "Consistent Spanish naming aligned with domain (centros_acopio, notificacion, anuncio) and English for code constructs. File names are descriptive and predictable.",
+      "documentation_quality": "Above average: README with full setup guide, troubleshooting, and commands table; separate PRD.md and ARCHITECTURE.md; SQL migrations with inline comments.",
+      "reasoning": "The codebase is unusually well-organized for a hackathon entry. Feature isolation is genuine, not cosmetic. The only minor gap is that some test files reside both inside src/features/ and src/components/ rather than a unified test/ directory."
+    },
+    "production_readiness": {
+      "score": 3,
+      "has_auth": true,
+      "has_error_handling": true,
+      "has_logging": false,
+      "has_env_config": true,
+      "has_deploy_config": false,
+      "secrets_handling": "Only two VITE_* env vars needed (Supabase URL + anon key). .env.example committed with placeholders. No secrets in code.",
+      "security_notes": "RLS enforced on all tables including anuncio, notificacion, post_comentario. Storage policies scope uploads to auth.uid() folder prefix. coordinador_id is always set from auth.uid() server-side — cannot be spoofed by client. No custom backend means no SSRF/injection surface beyond Supabase defaults.",
+      "scalability_notes": "Supabase free tier scales to ~50k monthly active users. Real-time is scoped per-center channel (not a global broadcast). No pagination implemented on the feed — full table scan on posts per center on load. Nominatim geocoding is throttled client-side but could be a bottleneck under load.",
+      "reasoning": "Solid security posture via Supabase RLS and proper ownership checks. No CI/CD pipeline, no server-side logging or error monitoring (no Sentry etc.), and no Dockerfile. The app is deployed on Vercel already, which counts as deploy config, but it is implicit (no vercel.json committed)."
+    },
+    "maturity": {
+      "score": 3,
+      "has_readme": true,
+      "has_tests": true,
+      "has_ci": false,
+      "is_real_or_boilerplate": "Real — contains substantial domain logic: 10 versioned DB migrations, 7700+ LOC, fully typed Supabase queries, MSW test mocks with fixtures, and a live deployed instance at acopiovzla.vercel.app.",
+      "reasoning": "98.99% line coverage with Vitest + React Testing Library + MSW is genuinely impressive for a 2-day hackathon. However there is no CI/CD (no .yml files found), a single contributor, and only 21 commits — it is a solid MVP, not a mature product."
+    },
+    "viability": {
+      "score": 4,
+      "reasoning": "Solves a clear, immediate problem (locating and tracking aid collection centers post-earthquake) with a working deployed instance and a full feature set: center registry, real-time updates, comments, notifications, and shelter listings. The Supabase BaaS backend means near-zero ops overhead. Main deployment risk is Supabase free-tier limits under surge traffic and no incident monitoring."
+    },
+    "key_features": [
+      "Public browsable map/grid of aid collection centers (centros de acopio) — no login required",
+      "Real-time post feed per center via Supabase Realtime (WebSocket, 2 events/sec throttle)",
+      "Supplies-needed tags (necesidades[]) on posts with predefined + custom chip selector",
+      "Shelter listings (anuncios de hospedaje) with capacity, pets, accessibility fields",
+      "DB trigger auto-notifies center coordinator on new comment",
+      "Client-side image compression (canvas JPEG 0.8) before Supabase Storage upload",
+      "Address geocoding via Nominatim (OpenStreetMap) with 1 req/s throttle",
+      "Supabase Auth with email confirmation flow, resend support",
+      "Community feed for posts not tied to a specific center",
+      "Light/dark theme toggle",
+      "Mobile-first responsive layout with desktop sidebar"
+    ],
+    "domain_tags": [
+      "donations-aid",
+      "shelter-mapping",
+      "aid-logistics",
+      "mapping-geo",
+      "alerts-notifications"
+    ],
+    "merge_potential": "High — clean feature boundaries, strong test suite with MSW mocks, and a BaaS backend mean another team could fork or extend individual features (e.g., add mapping-geo visualisation, people-finder module) with low integration risk. The SQL migration system makes schema changes traceable.",
+    "red_flags": [
+      "Coordinates (lat/lng) and PostGIS centros_cercanos RPC were removed in migration 00002 — the proximity-search capability advertised in the README no longer exists; centers are now sorted alphabetically by city only",
+      "No CI/CD pipeline — tests are not run automatically on push; coverage numbers come from a committed coverage-summary.json, not a gated check",
+      "No pagination on post/center feeds — a center with thousands of posts will fetch all of them in a single query",
+      "No server-side rate limiting beyond Nominatim throttle — registration and post creation are only rate-limited by Supabase free-tier defaults",
+      "Single contributor, 21 commits across 2 days — bus factor of 1 with very short history"
+    ]
+  },
+  "signals": {
+    "accessible": true,
+    "stars": 1,
+    "forks": 0,
+    "contributors": 1,
+    "commit_count": 21,
+    "code_loc": 7708,
+    "created_at": "2026-06-27T19:54:26Z",
+    "pushed_at": "2026-06-29T12:43:55Z",
+    "license": null,
+    "languages_bytes": {
+      "TypeScript": 253668,
+      "PLpgSQL": 11590,
+      "HTML": 2007,
+      "JavaScript": 1980,
+      "CSS": 1789,
+      "Shell": 1175
+    },
+    "archived": false
+  }
+}

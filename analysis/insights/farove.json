@@ -1,0 +1,140 @@
+{
+  "project_slug": "farove",
+  "name": "FaroVE — Plataforma de Reunificación Familiar",
+  "repo_url": "https://github.com/luacantu/rescue-track",
+  "live_url": "https://faro-ve.vercel.app/",
+  "video_url": "",
+  "countries": [
+    "Miami",
+    "FL"
+  ],
+  "db_description": "## ¿Qué construí?\n\nFaroVE es un sistema offline-first de registro \ny seguimiento de niños/as rescatados tras el \nsismo en Venezuela, con protección contra \ntráfico infantil.\n\n## ¿Para quién es?\n\n- **Rescatistas y voluntarios** que encuentran \n  niños/as solos en zonas afectadas\n- **Familias** que buscan a sus hijos/as \n  desaparecidos\n- **Coordinadores** en refugios y hospitales \n  que gestionan casos y aprueban traslados\n\n## ¿Cómo ayuda?\n\n- Funciona **100% sin internet** — datos \n  guardados localmente, sincroniza cuando \n  vuelve la conexión\n- Genera un **ID único + ficha imprimible** \n  para brazalete en 60 segundos\n- **Feed público** donde familias y voluntarios \n  publican búsquedas y niños/as encontrados\n- Sistema de **detección de tráfico infantil** \n  — detecta señales de alerta automáticamente\n- Registro de **reclamantes con cédula** antes \n  de cualquier entrega\n- **Aprobación múltiple** de coordinadores \n  para aprobar traslados\n- Todos los datos **cifrados en el dispositivo** \n  — si roban el teléfono, los datos son ilegibles\n- Integración con datos de \n  **venezuelatebusca.com** (en progreso)\n\n## ¿Qué probar primero?\n\n1. Abre **faro-ve.vercel.app**\n2. Toca \"Ver publicaciones\" — feed público, \n   sin login\n3. Toca \"Busco a mi hijo/a\" — ingresa datos \n   y busca\n4. Toca \"Soy rescatista\" — registra un niño/a \n   de prueba con PIN: usa el PIN de rescatista\n\n## Stack técnico\n\n- Next.js 15 + Tailwind + TypeScript\n- PWA offline-first con service worker\n- IndexedDB (Dexie.js) para datos locales\n- Supabase para feed compartido\n- Cifrado AES en dispositivo\n- Vercel deploy\n\n## Construido en una noche para Build4Venezuela 🇻🇪\n\nCada niño/a merece ser encontrado/a.",
+  "lifecycle_status": "ready_to_use",
+  "analysis": {
+    "summary": "FaroVE is an offline-first PWA for child registration and family reunification after the June 2026 Venezuela earthquake. It uses a dual-storage architecture: Dexie/IndexedDB (AES-encrypted, local, offline) for sensitive child records, and Supabase for a public missing-persons feed. The concept is genuinely strong — PIN-gated roles, printable bracelet IDs, trafficking red-flags, coordinator approval workflows, and a preloaded feed of 4,019 real records from venezuelatebusca.com. The UI is polished and Spanish-language. However, there is a critical encryption design flaw: NEXT_PUBLIC_PIN_COORDINATOR (the coordinator auth credential AND the AES encryption key for sensitive child data) is baked into the client-side JavaScript bundle, meaning any user can inspect the page source, obtain the key, and decrypt all child records. Additionally, child records live only in per-device IndexedDB with no cross-device sync, so coordinators on different devices cannot share or see each other's registrations — a severe practical limitation for field deployment.",
+    "project_type": "PWA (Progressive Web App) — Next.js App Router",
+    "stack": {
+      "frontend": [
+        "Next.js 16.2.9",
+        "React 19",
+        "Tailwind v4",
+        "next-pwa",
+        "Dexie (IndexedDB)",
+        "Service Worker"
+      ],
+      "backend": [
+        "Next.js API Routes (minimal)",
+        "Supabase (BaaS)"
+      ],
+      "database": [
+        "Supabase (PostgreSQL) — public feed",
+        "IndexedDB via Dexie — encrypted local child registry"
+      ],
+      "infra_deploy": [
+        "Vercel",
+        "vercel.json config"
+      ],
+      "ai_ml": [],
+      "languages": [
+        "TypeScript",
+        "JavaScript"
+      ]
+    },
+    "architecture": {
+      "pattern": "Offline-first PWA with BaaS for public data and client-side encrypted local storage for sensitive records",
+      "uses_orm": false,
+      "orm_or_db_layer": "Supabase JS client for public Supabase tables; Dexie.js (IndexedDB) for encrypted local child records — no ORM, raw table queries via supabase.from()",
+      "api_design": "Minimal: one Next.js API route (/api/coordinator-request) sends Resend email notifications; all other data access is direct client-to-Supabase or client-to-IndexedDB",
+      "separation_of_concerns": "Good — lib/ cleanly separates auth.ts, db.ts (Dexie schema), encryption.ts, posts.ts (Supabase), supabase.ts, pinStore.ts; pages handle UI+business logic",
+      "modularity": "Moderate — key abstractions extracted to lib/, components/ has shared UI, but page files are large and mix data-fetching with rendering",
+      "notable_patterns": [
+        "PIN-based role authentication (no server sessions — roles stored in sessionStorage)",
+        "AES encryption of child records before writing to IndexedDB using CryptoJS",
+        "Offline-first: registration works without connectivity, sync is implicit via shared device",
+        "Red-flag trafficking-prevention checklist on every child registration",
+        "Printable bracelet-ID ficha with print CSS",
+        "Transfer chain with dual coordinator sign-off (approver + receiver)",
+        "Location-request workflow: families submit encrypted requests, coordinators approve/deny"
+      ]
+    },
+    "code_organization": {
+      "score": 4,
+      "directory_structure": "Canonical Next.js App Router layout: app/ (pages + API routes), components/ (shared UI), lib/ (auth, db, encryption, posts, supabase), scripts/ (SQL migrations + CSV import), public/ (PWA assets)",
+      "naming_quality": "Excellent — files named by purpose (encryption.ts, pinStore.ts, db.ts); variables use Spanish domain terms matching the Venezuelan context (cedula, rescatista, refugio)",
+      "documentation_quality": "README, AGENTS.md, and CLAUDE.md present; SQL schema scripts in scripts/; inline comments explain encryption design decisions; coordinator-request route has a TODO comment",
+      "reasoning": "Codebase is clean and easy to navigate for a hackathon project. Main weakness is that page files (admin/page.tsx is 846 lines) mix data fetching, business logic, and rendering without extraction to custom hooks."
+    },
+    "production_readiness": {
+      "score": 2,
+      "has_auth": true,
+      "has_error_handling": true,
+      "has_logging": false,
+      "has_env_config": true,
+      "has_deploy_config": true,
+      "secrets_handling": "CRITICAL: NEXT_PUBLIC_PIN_COORDINATOR and NEXT_PUBLIC_PIN_RESCUER are baked into the client-side JS bundle at build time. NEXT_PUBLIC_PIN_COORDINATOR also serves as the AES encryption key for sensitive child records — any user who opens DevTools can read it and decrypt all IndexedDB data. Supabase URL is hardcoded in lib/supabase.ts (the anon key is env-driven). RESEND_API_KEY is correctly server-side only.",
+      "security_notes": "The encryption model is broken by design: using a NEXT_PUBLIC_ env var as both auth credential and encryption key means the 'encrypted' child data in IndexedDB offers zero protection against a motivated family-side user. Supabase RLS policies allow unrestricted public inserts and reads (intentional but creates spam/abuse surface). No CSRF protection on the coordinator-request API route.",
+      "scalability_notes": "Child records stored only in per-device IndexedDB — a coordinator on Device A cannot see registrations made by a rescuer on Device B; there is no server-side sync of encrypted records. Supabase public feed scales fine. The 'export to JSON' workaround for cross-device data sharing is manual and operationally risky.",
+      "reasoning": "Live deployment at faro-ve.vercel.app with real data is a strong positive. The Vercel + Supabase stack is production-grade infrastructure. But the encryption flaw, per-device data silo, and absence of any logging or error monitoring make this unsafe for real victims' data at current state."
+    },
+    "maturity": {
+      "score": 3,
+      "has_readme": true,
+      "has_tests": false,
+      "has_ci": false,
+      "is_real_or_boilerplate": "Real — 65 commits in 2 days, 2 contributors, domain-specific encryption logic, 4,019 CSV records imported from venezuelatebusca.com, live deployment, Spanish-language UI designed for Venezuelan field workers",
+      "reasoning": "Built rapidly but with genuine substance: custom ID generation, encryption layer, coordinator workflow, public feed with imported real data, PWA offline capability. No tests or CI pipeline, and the core encryption architecture has a fundamental design error that needs fixing before it can handle real sensitive data."
+    },
+    "viability": {
+      "score": 3,
+      "reasoning": "Addresses a real and urgent gap (child reunification tracking) with a working live deployment and preloaded real data. The offline-first PWA design is appropriate for Venezuela's connectivity constraints. However, the per-device IndexedDB data silo means teams cannot share child records across devices without manual JSON export, and the broken encryption model means sensitive records are not actually protected. Both issues are fixable but require non-trivial rearchitecting (server-side sync + server-side PIN validation)."
+    },
+    "key_features": [
+      "Offline-first child registration with PIN-based AES-encrypted IndexedDB storage",
+      "Unique bracelet ID generation (format: VZ-YYYYMMDD-XXXXX) with printable ficha (print CSS)",
+      "Red-flag trafficking-prevention checklist on every registration (4 specific risk signals)",
+      "Family search mode using cedula identity — no PIN, no account required",
+      "Location request workflow: family submits encrypted request, coordinator approves/denies with audit log",
+      "Transfer chain tracking with dual coordinator sign-off (approver + receiver names)",
+      "Admin panel with tabs: pending location requests, coordinator access requests, alerts, all children",
+      "Public missing-persons feed with 4,019 preloaded records from venezuelatebusca.com",
+      "Coordinator access request flow with Resend email notification + confirmation to applicant",
+      "JSON export of decrypted child registry for backup/transfer",
+      "PWA with service worker — registers and works offline",
+      "Role-based access: rescuer (register only) vs coordinator (register + search + admin)"
+    ],
+    "domain_tags": [
+      "family-reunification",
+      "people-finder",
+      "shelter-mapping",
+      "volunteer-coordination"
+    ],
+    "merge_potential": "Medium-high — the public feed (Supabase-backed, 4,019 records), family search UX, and coordinator approval workflow are immediately deployable. The offline PWA architecture and printable ID concept are valuable. Must fix the encryption key exposure and add cross-device sync before handling real sensitive child data in production.",
+    "red_flags": [
+      "CRITICAL: NEXT_PUBLIC_PIN_COORDINATOR is both the coordinator auth credential and the AES encryption key — it is baked into the client-side bundle, completely defeating the encryption of sensitive child records",
+      "CRITICAL: Per-device IndexedDB storage with no server-side sync means teams on different devices cannot share child registrations — coordinators are siloed to the device they used",
+      "NEXT_PUBLIC_PIN_RESCUER exposed in client bundle allows any user to authenticate as a rescuer and register fake children",
+      "CryptoJS AES with static hardcoded SALT 'faroVE2024' weakens key derivation — key = pin + 'faroVE2024'",
+      "Supabase RLS allows unrestricted public INSERT on posts and usuarios tables — abuse and spam surface",
+      "No tests of any kind (unit, integration, e2e)",
+      "No CI/CD pipeline — no automated quality gates",
+      "Supabase project URL hardcoded in lib/supabase.ts (minor, anon key is env-driven)"
+    ]
+  },
+  "signals": {
+    "accessible": true,
+    "stars": 0,
+    "forks": 0,
+    "contributors": 2,
+    "commit_count": 65,
+    "code_loc": 5750,
+    "created_at": "2026-06-27T17:47:54Z",
+    "pushed_at": "2026-06-29T14:33:39Z",
+    "license": null,
+    "languages_bytes": {
+      "TypeScript": 238128,
+      "JavaScript": 2979,
+      "CSS": 574
+    },
+    "archived": false
+  }
+}

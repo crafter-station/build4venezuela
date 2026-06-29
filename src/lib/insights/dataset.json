@@ -1,0 +1,3528 @@
+{
+  "generatedFrom": "analysis/insights.json",
+  "count": 28,
+  "layout": {
+    "width": 1000,
+    "height": 1000
+  },
+  "nodes": [
+    {
+      "slug": "acopiovzla",
+      "name": "AcopioVzla",
+      "type": "Frontend SPA (React + Vite) with Supabase BaaS",
+      "summary": "Acopio VZLA (also branded \"Saman\") is a React/TypeScript SPA backed by Supabase that maps humanitarian aid collection centers (centros de acopio) in Venezuela post-earthquake. Users can browse centers publicly, see what…",
+      "tier": "promote",
+      "severity": "high",
+      "solvesRealProblem": "yes",
+      "liveDemoStatus": "partial",
+      "onePitch": "Saman muestra en tiempo real qué necesita cada centro de acopio en Venezuela, para que tu ayuda llegue donde más falta hace — sin WhatsApp, sin publicidad, gratis.",
+      "scores": {
+        "maturity": 3,
+        "production": 3,
+        "organization": 4,
+        "viability": 4,
+        "product": 3,
+        "diffusion": 3,
+        "impact": 4
+      },
+      "signals": {
+        "stars": 1,
+        "commits": 21,
+        "loc": 7708,
+        "contributors": 1,
+        "license": null
+      },
+      "stack": {
+        "frontend": [
+          "React 18",
+          "TypeScript",
+          "Vite",
+          "Tailwind CSS",
+          "TanStack Query v5",
+          "React Router v6",
+          "lucide-react"
+        ],
+        "backend": [
+          "Supabase Auth",
+          "Supabase Realtime",
+          "Supabase Storage",
+          "PostgreSQL (via Supabase)"
+        ],
+        "database": [
+          "PostgreSQL",
+          "PostGIS (initial migration; coords removed in migration 00002)"
+        ],
+        "ai_ml": [],
+        "usesOrm": false,
+        "orm": "Supabase JS client (supabase-js v2) with direct table queries and RPC calls. No ORM. Typed via generated database.generated.ts + hand-written db.ts types.",
+        "pattern": "Feature-based SPA with BaaS (Supabase). No custom server — all business logic lives in React hooks and Supabase RLS/DB triggers."
+      },
+      "tags": [
+        "donations-aid",
+        "shelter-mapping",
+        "aid-logistics",
+        "mapping-geo",
+        "alerts-notifications"
+      ],
+      "redFlags": [
+        "Coordinates (lat/lng) and PostGIS centros_cercanos RPC were removed in migration 00002 — the proximity-search capability advertised in the README no longer exists; centers are now sorted alphabetically by city only",
+        "No CI/CD pipeline — tests are not run automatically on push; coverage numbers come from a committed coverage-summary.json, not a gated check",
+        "No pagination on post/center feeds — a center with thousands of posts will fetch all of them in a single query",
+        "No server-side rate limiting beyond Nominatim throttle — registration and post creation are only rate-limited by Supabase free-tier defaults",
+        "Single contributor, 21 commits across 2 days — bus factor of 1 with very short history"
+      ],
+      "mergePotential": "High — clean feature boundaries, strong test suite with MSW mocks, and a BaaS backend mean another team could fork or extend individual features (e.g., add mapping-geo visualisation, people-finder module) with low integration risk. The SQL migration system makes schema changes traceable.",
+      "diffusion": {
+        "ready": true,
+        "assets": [
+          "live-demo",
+          "clear-value-prop"
+        ],
+        "angle": "Lead with the WhatsApp chaos problem: volunteers don't know where to go or what to bring. Saman replaces that chaos with a real-time public dashboard of every collection center's needs — free, no ads, works on basic phones. Highlight the shelter board as a second hook for displaced families.",
+        "gaps": [
+          "No demo video — a 60-second screen recording showing the real-time feed would be the single highest-leverage missing asset",
+          "No screenshots published anywhere (README, social, or hackathon submission)",
+          "Geo-proximity search was removed from the codebase (coordinates stripped in migration 00002) — cannot claim 'find centers near you' without re-adding it",
+          "No confirmed real users or centers registered yet — social proof is zero",
+          "No open-source license committed, which may deter contributors or institutional adopters"
+        ]
+      },
+      "repoUrl": "https://github.com/nobelaar/acopio-vzla",
+      "liveUrl": "https://AcopioVzla.vercel.app",
+      "videoUrl": "",
+      "x": 583,
+      "y": 479
+    },
+    {
+      "slug": "aid-trace",
+      "name": "AidTrace | RastroAyuda",
+      "type": "Offline-first PWA + blockchain audit trail for humanitarian aid supply chain tracking",
+      "summary": "AidTrace / RastroAyuda is a legitimately built, offline-first humanitarian aid tracking PWA that writes immutable proof-of-custody records to a deployed smart contract on Celo Mainnet. The contract is live and verified…",
+      "tier": "promote",
+      "severity": "high",
+      "solvesRealProblem": "yes",
+      "liveDemoStatus": "working",
+      "onePitch": "AidTrace rastrea cada entrega de ayuda humanitaria con QR y blockchain — sin internet, sin wallet, con prueba pública e inmutable en Celoscan.",
+      "scores": {
+        "maturity": 3,
+        "production": 3,
+        "organization": 4,
+        "viability": 4,
+        "product": 4,
+        "diffusion": 4,
+        "impact": 4
+      },
+      "signals": {
+        "stars": 0,
+        "commits": 49,
+        "loc": 3238,
+        "contributors": 1,
+        "license": null
+      },
+      "stack": {
+        "frontend": [
+          "Vanilla JS",
+          "HTML5",
+          "CSS3",
+          "Service Worker",
+          "IndexedDB",
+          "QR code (qrcode.js)",
+          "PWA / manifest.webmanifest"
+        ],
+        "backend": [
+          "Node.js ESM serverless (Vercel)",
+          "Express (listed in package.json)",
+          "Zavu SDK (Telegram/WhatsApp/SMS relay)"
+        ],
+        "database": [
+          "Celo Mainnet smart contract (AidTraceLedger.sol)",
+          "localStorage (client-side state)",
+          "IndexedDB (service worker sync queue)",
+          "Supabase Postgres (optional distributed lock)",
+          "Upstash Redis (optional distributed lock)"
+        ],
+        "ai_ml": [],
+        "usesOrm": false,
+        "orm": "No ORM. Blockchain state is read via viem getLogs() chunked by block range. Client state is raw JSON in localStorage. Service worker uses raw IndexedDB API.",
+        "pattern": "Static PWA with serverless API relay and on-chain event log"
+      },
+      "tags": [
+        "aid-logistics",
+        "donations-aid",
+        "alerts-notifications"
+      ],
+      "redFlags": [
+        "No authentication on /api/zavu relay endpoint — any actor can drain the relayer wallet by POSTing arbitrary events",
+        "CORS wildcard (*) on relay and timeline endpoints",
+        "No rate limiting on serverless relay functions",
+        "Timeline API does full block-range scan on every request — will degrade as contract history grows (no caching or indexed store)",
+        "Single relayer private key — loss or compromise stops all on-chain writes with no failover",
+        "No automated tests of any kind",
+        "No CI/CD configuration",
+        "package.json lists Express but it is not actually used as a server (Vercel handles routing) — confusing dependency"
+      ],
+      "mergePotential": "The blockchain audit trail and offline-first architecture are unique and complementary to shelter-mapping or people-finder tools. The QR label system and Telegram relay could be integrated as a logistics layer in any multi-tool response platform. The contract and relay are already live and functional.",
+      "diffusion": {
+        "ready": true,
+        "assets": [
+          "live-demo",
+          "demo-video",
+          "clear-value-prop",
+          "branding"
+        ],
+        "angle": "Lead with the offline-first + blockchain transparency angle: 'No internet? No problem. AidTrace records every water bottle, medicine box, and food kit delivered to earthquake victims — even offline — and locks the proof on a public blockchain so donors can verify every peso reaches the people.' Pair the Celoscan link as live evidence of transparency, show the QR label flow in screenshots or video clips, and highlight the Telegram bot for field operators who cannot install apps.",
+        "gaps": [
+          "No real users or testimonials yet (0 stars, solo project)",
+          "No screenshots in the repo for social sharing",
+          "Security issue (unauthenticated relay) should be noted as 'hackathon prototype, not yet production-hardened' to set honest expectations",
+          "No license — unclear terms for adoption by NGOs"
+        ]
+      },
+      "repoUrl": "https://github.com/LuisAlejandroCR/AidTrace-RastroAyuda",
+      "liveUrl": "https://aidtrace-rastroayuda.vercel.app/",
+      "videoUrl": "https://youtu.be/adx0cZFm-5g",
+      "x": 675,
+      "y": 546
+    },
+    {
+      "slug": "apoyo-venezuela-org",
+      "name": "Apoyo Venezuela",
+      "type": "Community-sourced donation point and volunteering directory — React SPA backed by Supabase BaaS",
+      "summary": "ApoyoVenezuela.org is a community-sourced, live directory of donation collection points and volunteering opportunities for Venezuelan earthquake victims abroad (diaspora-focused). Built with React 19 + Supabase, it is a…",
+      "tier": "promote",
+      "severity": "high",
+      "solvesRealProblem": "yes",
+      "liveDemoStatus": "working",
+      "onePitch": "ApoyoVenezuela is the community-powered directory of earthquake relief drop-off points and volunteering spots — validated in real time by the people who actually show up.",
+      "scores": {
+        "maturity": 4,
+        "production": 4,
+        "organization": 4,
+        "viability": 4,
+        "product": 4,
+        "diffusion": 4,
+        "impact": 4
+      },
+      "signals": {
+        "stars": 0,
+        "commits": 62,
+        "loc": 3089,
+        "contributors": 4,
+        "license": null
+      },
+      "stack": {
+        "frontend": [
+          "React 19",
+          "TypeScript",
+          "Tailwind CSS v4",
+          "Vite",
+          "TanStack Query v5",
+          "Vercel Analytics"
+        ],
+        "backend": [
+          "Supabase Edge Functions (Deno)"
+        ],
+        "database": [
+          "Supabase (PostgreSQL)",
+          "Row Level Security",
+          "PLpgSQL RPC for rate limiting"
+        ],
+        "ai_ml": [],
+        "usesOrm": false,
+        "orm": "Direct Supabase JS client with typed queries; no ORM. Reads hit Supabase anon API directly; writes go through Deno Edge Functions using the service role key.",
+        "pattern": "BaaS SPA — static frontend + Supabase as backend (DB + Auth + Edge Functions)"
+      },
+      "tags": [
+        "donations-aid",
+        "volunteer-coordination"
+      ],
+      "redFlags": [
+        "Client fetches ALL places + ALL confirmations in two unbounded queries — will degrade at scale with no pagination or server-side filtering",
+        "Rate limiting fingerprint (SHA-256 of IP+UserAgent) is bypassable with VPN rotation or spoofed user agents — moderation is automated but could be gamed",
+        "No admin UI to review reported places before they're auto-hidden — legitimate places could be mass-reported and vanish",
+        "GitHub Actions CI only deploys edge functions, not the frontend — frontend deploy pipeline is not visible in repo (presumably manual or connected via Vercel dashboard)",
+        "No structured logging or error monitoring (e.g., Sentry) — silent failures in edge functions beyond what Supabase logs capture"
+      ],
+      "mergePotential": "Low overlap with other projects. This is a diaspora-facing donation logistics tool, not an in-Venezuela rescue/shelter/medical tool. Could complement shelter-mapping or aid-logistics projects as a supply-side counterpart, but is independently deployable and already live.",
+      "diffusion": {
+        "ready": true,
+        "assets": [
+          "live-demo",
+          "demo-video",
+          "clear-value-prop",
+          "branding"
+        ],
+        "angle": "Post-disaster, information chaos is deadly. ApoyoVenezuela cuts through it: a community-maintained, self-correcting map of exactly where to donate or volunteer for Venezuelan earthquake relief — inside Venezuela and across the diaspora. Real places, validated by real people who were there. No admin, no bureaucracy, no stale lists.",
+        "gaps": [
+          "No screenshots provided for social posts — a quick screen capture of the live directory with real locations would be high-impact",
+          "Zero GitHub stars/forks — project has no social proof signal yet, needs a push to diaspora communities and Venezuelan Twitter/Instagram",
+          "No real-users signal confirmed yet (seeded data exists but community confirmation count unknown)",
+          "No admin moderation dashboard — a gap worth disclosing if going viral, since mass-reporting could hide legitimate places"
+        ]
+      },
+      "repoUrl": "https://github.com/mfranceschit/apoyo-venezuela",
+      "liveUrl": "https://www.apoyovenezuela.org",
+      "videoUrl": "https://youtu.be/jVl5LC6cV7Y",
+      "x": 930,
+      "y": 796
+    },
+    {
+      "slug": "apoyo-venezuela",
+      "name": "Apoyo Venezuela",
+      "type": "Mobile-first PWA — citizen-coordinated earthquake relief mapping, needs reporting, fundraiser listing, AI assistant",
+      "summary": "Apoyo Venezuela is a production-quality Next.js 16 PWA built in direct response to the June 2026 Venezuela earthquake. Citizens can report affected zones with GPS coordinates, log relief needs by category and urgency, l…",
+      "tier": "spotlight",
+      "severity": "critical",
+      "solvesRealProblem": "yes",
+      "liveDemoStatus": "unknown",
+      "onePitch": "Un mapa colaborativo en tiempo real para coordinar rescate, agua, comida y refugio tras el terremoto en Venezuela — sin registros, sin política, solo ayuda.",
+      "scores": {
+        "maturity": 4,
+        "production": 4,
+        "organization": 5,
+        "viability": 4,
+        "product": 4,
+        "diffusion": 4,
+        "impact": 5
+      },
+      "signals": {
+        "stars": 0,
+        "commits": 69,
+        "loc": 25380,
+        "contributors": 1,
+        "license": "MIT"
+      },
+      "stack": {
+        "frontend": [
+          "Next.js 16 (App Router)",
+          "React 19",
+          "Tailwind CSS 4",
+          "Leaflet / react-leaflet",
+          "Vercel AI SDK (@ai-sdk/react)",
+          "Scalar (API docs embed)",
+          "PWA / Service Worker"
+        ],
+        "backend": [
+          "Next.js API Routes (Route Handlers)",
+          "Next.js Server Actions",
+          "OpenAI API (gpt-4o-mini via @ai-sdk/openai)"
+        ],
+        "database": [
+          "Supabase (PostgreSQL)",
+          "Supabase Realtime",
+          "Supabase Storage (fotos)"
+        ],
+        "ai_ml": [
+          "OpenAI gpt-4o-mini",
+          "Vercel AI SDK streaming",
+          "USGS FDSN seismic data feed"
+        ],
+        "usesOrm": false,
+        "orm": "Supabase JS client (direct PostgREST queries, no ORM). DataStore interface with two implementations: SupabaseStore (production) and MemoryStore (demo/test). All writes go through Server Actions with Zod validation. Status mutations use SECURITY DEFINER Postgres functions instead of direct UPDATE to enforce RLS invariants.",
+        "pattern": "BaaS-backed Next.js App Router with clean DataStore abstraction"
+      },
+      "tags": [
+        "mapping-geo",
+        "structural-inspection",
+        "aid-logistics",
+        "seismic-data",
+        "donations-aid",
+        "alerts-notifications",
+        "volunteer-coordination"
+      ],
+      "redFlags": [
+        "listLocationsPage fetches the entire locations table then slices in memory — acknowledged as deferred but will break under real load",
+        "No user authentication or moderation tools: anyone can update any zone status or add needs with no accountability layer",
+        "Single contributor (bus-factor 1) for a project intended for disaster-response scale",
+        "AI assistant rate limiter is in-process memory only — resets on serverless cold start, so the 10 req/15 min limit is per instance, not global",
+        "All RLS policies on locations and needs allow anonymous INSERT and UPDATE — relies entirely on server-side Zod validation and throttle functions for abuse prevention"
+      ],
+      "mergePotential": "High. The zone-clustering pattern (Haversine mirrored between TypeScript and Postgres trigger, advisory locks, fail-open), the DataStore abstraction with demo/production switching, the Zod-validated Server Action pattern with ActionResult<T>, and the AI assistant grounding approach are all patterns worth reusing in a merged or reference implementation.",
+      "diffusion": {
+        "ready": true,
+        "assets": [
+          "live-demo",
+          "clear-value-prop",
+          "branding"
+        ],
+        "angle": "Built overnight after a real M7.5 earthquake — one developer shipped a live, AI-powered disaster coordination map in 4 days while Venezuela was still shaking. Lead with the human urgency: real earthquake, real tool, zero login required, anyone can report a collapsed building or a need for water right now.",
+        "gaps": [
+          "no demo video to embed in social posts",
+          "no screenshots captured for sharing",
+          "no confirmed real-users or testimonials yet",
+          "single contributor creates fragility narrative that may undermine trust at scale"
+        ]
+      },
+      "repoUrl": "https://github.com/javierdejesusda/apoyo-venezuela",
+      "liveUrl": "https://apoyovenezuela.com",
+      "videoUrl": "",
+      "x": 585,
+      "y": 530
+    },
+    {
+      "slug": "ayuda-venezuela-bot",
+      "name": "Ayuda Venezuela",
+      "type": "Telegram AI chatbot + landing page",
+      "summary": "A Spanish-first Telegram bot that acts as an AI agent over the SOS Venezuela 2026 public humanitarian API. Users can query missing/found persons, map reports, damage assessments, and earthquake news via natural language…",
+      "tier": "promote",
+      "severity": "high",
+      "solvesRealProblem": "yes",
+      "liveDemoStatus": "partial",
+      "onePitch": "Ask @DEV_VEZbot in plain Spanish where to find a shelter, safe water, or a missing loved one — free, no app, no signup, powered by live SOS Venezuela data on Telegram.",
+      "scores": {
+        "maturity": 2,
+        "production": 3,
+        "organization": 4,
+        "viability": 3,
+        "product": 3,
+        "diffusion": 3,
+        "impact": 4
+      },
+      "signals": {
+        "stars": 0,
+        "commits": 13,
+        "loc": 12376,
+        "contributors": 3,
+        "license": "MIT"
+      },
+      "stack": {
+        "frontend": [
+          "Next.js 16",
+          "React 19",
+          "Tailwind CSS 4"
+        ],
+        "backend": [
+          "Python 3.11+",
+          "python-telegram-bot 21",
+          "anthropic SDK",
+          "openai SDK (OpenRouter)"
+        ],
+        "database": [],
+        "ai_ml": [
+          "Claude Haiku 4.5 (Anthropic)",
+          "Llama 3.3 70B (OpenRouter free)",
+          "surfcall (custom OpenAPI-to-tool engine)"
+        ],
+        "usesOrm": false,
+        "orm": "None — fully stateless, no database. Rate limiter state is in-memory (dict) and resets on restart.",
+        "pattern": "AI agent loop (manual Anthropic Messages API tool-use loop) + Telegram transport"
+      },
+      "tags": [
+        "people-finder",
+        "alerts-notifications",
+        "aid-logistics",
+        "comms-chat"
+      ],
+      "redFlags": [
+        "Critical dependency on surfcall (git+https://github.com/GeckoVision/surfcall) — unpublished, not on PyPI, single point of failure for the entire bot",
+        "No test files exist despite the code being explicitly architected for offline testability",
+        "No CI pipeline — no automated quality gate",
+        "In-memory rate limiter resets on every restart; under crisis load, restarts lose all state",
+        "Long-polling mode only — not horizontally scalable, one process handles all traffic",
+        "No logging — failed tool calls and agent errors are silently degraded with no observability",
+        ".next build artifacts committed to the repository (should be gitignored)",
+        "No Dockerfile or process manager config — deployment is manual and undocumented beyond README"
+      ],
+      "mergePotential": "Low-medium. The bot is a self-contained Telegram client over a specific external API and has no shared database or auth layer to merge with. It could complement a shelter-mapping or people-finder project by providing a conversational Telegram interface to that project's API, if the target project exposes an OpenAPI spec (which surfcall can consume). The landing page is redundant with a full-stack project.",
+      "diffusion": {
+        "ready": true,
+        "assets": [
+          "live-demo",
+          "clear-value-prop",
+          "branding"
+        ],
+        "angle": "The free Telegram bot that lets earthquake victims in Venezuela ask for help in plain Spanish — find shelters, search for missing people, check water safety — no app, no signup, works on any phone with Telegram.",
+        "gaps": [
+          "No demo video showing the bot in action (a 30-second screen recording of a real conversation would dramatically improve shareability)",
+          "No screenshots of actual bot responses in the landing page or repo",
+          "No evidence of real users yet (0 stars, no testimonials)",
+          "The Telegram bot may not be running 24/7 since it is a single-process long-polling script with no hosting config — if it is down, the CTA leads nowhere"
+        ]
+      },
+      "repoUrl": "https://github.com/GeckoVision/ayuda-venezuela-bot",
+      "liveUrl": "https://ayuda-venezuela-wine.vercel.app/",
+      "videoUrl": "",
+      "x": 421,
+      "y": 532
+    },
+    {
+      "slug": "ayudave",
+      "name": "AyudaVE — Red P2P de Coordinación Humanitaria",
+      "type": "Humanitarian coordination web platform (Node.js + vanilla JS SPA)",
+      "summary": "AyudaVE is a real, actively deployed humanitarian platform (ayudahumanitariavenezuela.com) for Venezuela earthquake response. It is a Node.js server (no framework, native http module) with a hand-rolled router, dual-eng…",
+      "tier": "spotlight",
+      "severity": "critical",
+      "solvesRealProblem": "yes",
+      "liveDemoStatus": "unknown",
+      "onePitch": "AyudaVE organiza toda la coordinación humanitaria post-terremoto en un solo lugar: donantes, centros de acopio, voluntarios y búsqueda de desaparecidos con IA — para que la ayuda llegue donde realmente hace falta.",
+      "scores": {
+        "maturity": 3,
+        "production": 4,
+        "organization": 3,
+        "viability": 4,
+        "product": 4,
+        "diffusion": 4,
+        "impact": 5
+      },
+      "signals": {
+        "stars": 7,
+        "commits": 5,
+        "loc": 7204,
+        "contributors": 2,
+        "license": "Apache-2.0"
+      },
+      "stack": {
+        "frontend": [
+          "Vanilla JS (SPA)",
+          "Leaflet/OpenStreetMap",
+          "HTML/CSS (no framework)"
+        ],
+        "backend": [
+          "Node.js 22 (native http, no framework)",
+          "Hand-rolled REST API router"
+        ],
+        "database": [
+          "SQLite (dev/local)",
+          "PostgreSQL via pg driver (production, Cloud SQL)"
+        ],
+        "ai_ml": [
+          "Google Gemini 2.5 Flash (photo-based person search)"
+        ],
+        "usesOrm": false,
+        "orm": "Raw SQL via thin abstraction layer (store.js) that switches between SQLite (store-sqlite.js) and PostgreSQL (store-pg.js) via DATABASE_URL env var. All queries are parameterized; no ORM used.",
+        "pattern": "Monolith — single-file server with hand-rolled REST router + static file serving"
+      },
+      "tags": [
+        "people-finder",
+        "shelter-mapping",
+        "donations-aid",
+        "family-reunification",
+        "medical-health",
+        "seismic-data",
+        "structural-inspection",
+        "volunteer-coordination",
+        "aid-logistics",
+        "alerts-notifications"
+      ],
+      "redFlags": [
+        "No automated tests of any kind — entire codebase is untested",
+        "No CI/CD pipeline — no .github/actions or equivalent",
+        "In-memory rate limiting (RL Map) and brute-force lockout (loginAttempts Map) will not function correctly when Cloud Run scales beyond one instance, creating a security gap under load",
+        "All 40+ API handlers crammed into a single 1082-line server.js — maintainability risk for new contributors",
+        "SQL queries stored as ad-hoc strings throughout server.js (though all appear parameterized, making injection unlikely but hard to audit at scale)",
+        "Only 5 commits total — difficult to assess iteration history or contribution patterns"
+      ],
+      "mergePotential": "High — already deployed to production at ayudahumanitariavenezuela.com with real Venezuelan earthquake data. Covers the broadest set of humanitarian domains of any single project reviewed. The platform is functional end-to-end and the clean env-var configuration makes it deployable immediately on any cloud provider.",
+      "diffusion": {
+        "ready": true,
+        "assets": [
+          "live-demo",
+          "demo-video",
+          "clear-value-prop",
+          "branding"
+        ],
+        "angle": "Después del terremoto, la ayuda se pierde en grupos de WhatsApp y listas descoordinadas. AyudaVE es la plataforma que organiza todo en un solo lugar: donantes, voluntarios, transportistas y centros de acopio verificados — con inventario en tiempo real, búsqueda de personas desaparecidas con IA, y trazabilidad de cada donación.",
+        "gaps": [
+          "No screenshots in submission materials — social posts need visual assets from the team",
+          "Demo video not analyzed (YouTube link only, no thumbnail/preview confirmed)",
+          "No confirmed real-users metric — platform is live but user adoption data is unknown",
+          "The 403 on WebFetch means automated promotional tools cannot scrape the site for previews; team should ensure Open Graph tags and link previews work correctly"
+        ]
+      },
+      "repoUrl": "https://github.com/gaboclus/ayudave",
+      "liveUrl": "https://www.ayudahumanitariavenezuela.com/",
+      "videoUrl": "https://youtu.be/nFc4Y9NcahA",
+      "x": 552,
+      "y": 502
+    },
+    {
+      "slug": "beacon-rescate",
+      "name": "Beacon Rescate",
+      "type": "Mobile Android app (Python/Kivy compiled to APK)",
+      "summary": "Beacon-rescate is a single-file Python/Kivy Android app (301 LOC) that attempts offline BLE and Wi-Fi proximity scanning to help rescuers detect nearby devices (potential survivors) in disaster zones. The concept — infr…",
+      "tier": "improve-first",
+      "severity": "high",
+      "solvesRealProblem": "partial",
+      "liveDemoStatus": "no-public-demo",
+      "onePitch": "Beacon Rescate: an offline Android radar that scans Bluetooth and Wi-Fi signals to pinpoint trapped survivors' phones — no cell towers or internet required.",
+      "scores": {
+        "maturity": 1,
+        "production": 1,
+        "organization": 2,
+        "viability": 2,
+        "product": 1,
+        "diffusion": 1,
+        "impact": 3
+      },
+      "signals": {
+        "stars": 0,
+        "commits": 4,
+        "loc": 301,
+        "contributors": 1,
+        "license": null
+      },
+      "stack": {
+        "frontend": [
+          "Kivy 2.3.0"
+        ],
+        "backend": [],
+        "database": [
+          "SQLite (local, WAL mode)"
+        ],
+        "ai_ml": [],
+        "usesOrm": false,
+        "orm": "Raw sqlite3 with parameterized queries directly in app and helper class methods",
+        "pattern": "Monolithic single-file application"
+      },
+      "tags": [
+        "people-finder",
+        "alerts-notifications"
+      ],
+      "redFlags": [
+        "WiFi subnet scan uses 'ping -n 1 -w 100' (Windows syntax) — will fail silently on Android/Linux target; correct flags are '-c 1 -W 0.1'",
+        "MonitorWifiHotspot.escanear_dispositivos_conectados() never calls self.callback_funcion — it writes directly to DB, completely bypassing procesar_dispositivo_wifi in the app",
+        "cargar_datos_en_mapa uses 'LIMIT 1' — radar only ever shows one device regardless of how many are detected",
+        "README claims 'Lógica Matemática: C (Vía Cython)' but zero C or Cython files exist anywhere in the repo",
+        "Radar angle is computed as hash(mac) % 360 — no real triangulation, positions are pseudo-random and not spatially meaningful",
+        "subprocess.run with shell=True and a dynamically constructed IP string, though the IP is locally generated so low practical risk",
+        "No tests, no CI, no buildozer.spec — APK cannot be built from this repo as-is"
+      ],
+      "mergePotential": "Low. The app is a standalone Android tool with a unique offline-detection concept, but its bugs, single-file structure, and Kivy framework make integration into a broader web-based relief platform extremely difficult without a full rewrite.",
+      "diffusion": {
+        "ready": false,
+        "assets": [
+          "clear-value-prop"
+        ],
+        "angle": "If fixed: 'Offline BLE/WiFi radar that locates survivors' phones without cell towers or internet — built for earthquake rescue zones in Venezuela.'",
+        "gaps": [
+          "No working APK or installable build",
+          "No demo video showing the radar in action",
+          "No screenshots of the running app",
+          "Critical bugs must be fixed before any promotion",
+          "False claims in README (Cython/C) undermine credibility",
+          "Zero community signals (0 stars, 0 forks, 1 contributor, 4 commits in one day)"
+        ]
+      },
+      "repoUrl": "https://github.com/jmvidal26/Beacon-rescate",
+      "liveUrl": "https://github.com/jmvidal26/Beacon-rescate.git",
+      "videoUrl": "",
+      "x": 439,
+      "y": 960
+    },
+    {
+      "slug": "busca-chat",
+      "name": "BuscaChat",
+      "type": "WhatsApp chatbot + REST API for missing-persons search and registration",
+      "summary": "BuscaChat is a production-deployed FastAPI service that powers a WhatsApp chatbot for finding missing persons after the Venezuela earthquakes. It syncs data from an external registry (sosvenezuela2026.com), stores recor…",
+      "tier": "improve-first",
+      "severity": "critical",
+      "solvesRealProblem": "yes",
+      "liveDemoStatus": "partial",
+      "onePitch": "BuscaChat: encuentra a tus familiares desaparecidos por el terremoto enviando una foto por WhatsApp — sin apps, sin registro, gratis.",
+      "scores": {
+        "maturity": 4,
+        "production": 4,
+        "organization": 4,
+        "viability": 5,
+        "product": 3,
+        "diffusion": 3,
+        "impact": 4
+      },
+      "signals": {
+        "stars": 2,
+        "commits": 34,
+        "loc": 7379,
+        "contributors": 7,
+        "license": null
+      },
+      "stack": {
+        "frontend": [
+          "HTML/CSS/JS landing page"
+        ],
+        "backend": [
+          "FastAPI",
+          "Python 3.12",
+          "APScheduler",
+          "SQLModel",
+          "Alembic"
+        ],
+        "database": [
+          "PostgreSQL 18 with pgvector",
+          "Redis (conversation state)"
+        ],
+        "ai_ml": [
+          "InsightFace (ONNX, face embedding + matching)",
+          "pgvector cosine similarity search"
+        ],
+        "usesOrm": true,
+        "orm": "SQLModel (SQLAlchemy + Pydantic) with Alembic migrations; raw SQLAlchemy dialect-level INSERT … ON CONFLICT DO UPDATE for upserts",
+        "pattern": "Layered monolith: routers → pipeline → services → adapters → DB"
+      },
+      "tags": [
+        "family-reunification",
+        "people-finder",
+        "comms-chat"
+      ],
+      "redFlags": [
+        "Webhook event log read endpoint (/whatsapp-evolution-api-webhook/logs) requires no authentication, exposing phone numbers and message content",
+        "Production .env.sample defaults face_matcher to 'stub' (no real facial recognition in production unless manually enabled with optional dependencies)",
+        "No Dockerfile for the application itself — deployment relies on uv on the host server, making reproducibility harder",
+        "No rate limiting on webhook endpoints — could be abused to exhaust DB or face matcher resources",
+        "InMemoryConversationStateStore is the default and loses all session state on process restart (must configure Redis for production)"
+      ],
+      "mergePotential": "High. The project has a clean REST API for missing-persons data and a well-abstracted messaging pipeline. Its /missing_people endpoint could be consumed by a mapping or shelter-tracking frontend. The face-embedding infrastructure is reusable. No architectural blockers to integration.",
+      "diffusion": {
+        "ready": false,
+        "assets": [
+          "live-demo",
+          "clear-value-prop"
+        ],
+        "angle": "Lead with the WhatsApp-first, zero-install angle: 'Find your missing family member by sending a photo on WhatsApp — no app download, no registration, free.' Pair with a screenshot of the chatbot conversation flow. Once the landing page links to a real WhatsApp number, this story writes itself: facial recognition + WhatsApp + earthquake response = highly shareable.",
+        "gaps": [
+          "WhatsApp/Telegram buttons on landing page are broken placeholder links — the most important fix before any promotion",
+          "No demo video showing the chatbot conversation flow (the strongest possible asset for this type of product)",
+          "No screenshots of the actual WhatsApp chat experience in the repo or landing page",
+          "No public WhatsApp number displayed anywhere on the landing page or README",
+          "No real-user testimonials or reported matches to cite as social proof"
+        ]
+      },
+      "repoUrl": "https://github.com/DiegoMucha/buscachat",
+      "liveUrl": "https://ayudandoavenezuela.netlify.app/#",
+      "videoUrl": "",
+      "x": 326,
+      "y": 505
+    },
+    {
+      "slug": "centraliza-ayuda",
+      "name": "Centraliza Ayuda",
+      "type": "Static resource directory / aggregator",
+      "summary": "Centraliza Ayuda Venezuela is a zero-backend static web directory that indexes 130+ curated earthquake relief resources across categories including people-search, shelter, donations, structural inspection, and mapping.…",
+      "tier": "promote",
+      "severity": "high",
+      "solvesRealProblem": "yes",
+      "liveDemoStatus": "working",
+      "onePitch": "Un solo enlace para acceder a más de 130 recursos verificados de ayuda ante el terremoto en Venezuela — con búsqueda y filtros por categoría, gratis y sin registro.",
+      "scores": {
+        "maturity": 3,
+        "production": 2,
+        "organization": 3,
+        "viability": 3,
+        "product": 3,
+        "diffusion": 3,
+        "impact": 4
+      },
+      "signals": {
+        "stars": 6,
+        "commits": 54,
+        "loc": 2291,
+        "contributors": 3,
+        "license": null
+      },
+      "stack": {
+        "frontend": [
+          "Vanilla JavaScript (ES6+ classes, private fields)",
+          "Plain CSS",
+          "HTML5"
+        ],
+        "backend": [],
+        "database": [],
+        "ai_ml": [],
+        "usesOrm": false,
+        "orm": "None — all data is a static JS array constant (SOURCES) compiled into js/data_source_json.js by a Python merge script",
+        "pattern": "Static single-page site with client-side search and filtering"
+      },
+      "tags": [
+        "aid-logistics",
+        "mapping-geo",
+        "donations-aid",
+        "shelter-mapping",
+        "people-finder"
+      ],
+      "redFlags": [
+        "Backend API integration commented out with localhost:3000 baseUrl left in production main.js — signals incomplete migration planning",
+        "No link validation: dead or stale URLs will accumulate with no automated detection",
+        "Data update pipeline requires PR review — creates bottleneck during peak crisis when resource availability changes hourly",
+        "No tests at any layer; the Python merge script has no unit tests for its normalization/dedup logic",
+        "No CI/CD: deployments are manual pushes to master with no automated checks"
+      ],
+      "mergePotential": "High — this project already lists itself and other Build4Venezuela hackathon submissions in its directory (entry id 100, 103); it functions as a meta-index and could serve as an official hub or landing page for the hackathon's winning projects.",
+      "diffusion": {
+        "ready": true,
+        "assets": [
+          "live-demo",
+          "clear-value-prop"
+        ],
+        "angle": "One link, 130+ verified ways to help — position it as THE starting point for anyone who wants to help or needs help after the Venezuela earthquake. Emphasize that it aggregates every other tool, including other hackathon projects, making it a force multiplier.",
+        "gaps": [
+          "no demo video showing the search and filter UI in action",
+          "no screenshots to embed in social posts",
+          "no logo or visual branding",
+          "no real-user count or usage metrics",
+          "no evidence of outreach to Venezuelan diaspora or media channels"
+        ]
+      },
+      "repoUrl": "https://github.com/kevinesaa/centraliza-ayuda-venezuela",
+      "liveUrl": "https://kevinesaa.github.io/centraliza-ayuda-venezuela/",
+      "videoUrl": "",
+      "x": 484,
+      "y": 541
+    },
+    {
+      "slug": "confia",
+      "name": "Confia",
+      "type": "Web app (Next.js / Vercel serverless) — misinformation verifier + crypto scam detector",
+      "summary": "Confía is a zero-onboarding misinformation verifier and crypto donation scam detector built for the June 2026 Venezuela earthquake. Users paste any forwarded WhatsApp message or crypto wallet address; the engine auto-cl…",
+      "tier": "promote",
+      "severity": "high",
+      "solvesRealProblem": "yes",
+      "liveDemoStatus": "working",
+      "onePitch": "Pega cualquier rumor de WhatsApp o wallet de donación y Confía te dice en segundos si es real, falso o una estafa — sin app, sin login, solo una URL que se comparte.",
+      "scores": {
+        "maturity": 2,
+        "production": 3,
+        "organization": 4,
+        "viability": 3,
+        "product": 3,
+        "diffusion": 3,
+        "impact": 4
+      },
+      "signals": {
+        "stars": 2,
+        "commits": 7,
+        "loc": 3768,
+        "contributors": 1,
+        "license": null
+      },
+      "stack": {
+        "frontend": [
+          "Next.js 16.2.9 App Router",
+          "React 19",
+          "Tailwind CSS v4",
+          "TypeScript"
+        ],
+        "backend": [
+          "Next.js API Routes (serverless)",
+          "Node.js runtime"
+        ],
+        "database": [],
+        "ai_ml": [
+          "Anthropic Claude SDK (@anthropic-ai/sdk)",
+          "Static NLP / regex pattern matching KB"
+        ],
+        "usesOrm": false,
+        "orm": "No database at all. All knowledge (rumors, resources, verified wallets, official channels) is embedded as static TypeScript arrays in lib/knowledge/. On-chain data is fetched live from Solana JSON-RPC at request time.",
+        "pattern": "Serverless Next.js App Router (API routes + React Server/Client components)"
+      },
+      "tags": [
+        "donations-aid",
+        "alerts-notifications",
+        "comms-chat"
+      ],
+      "redFlags": [
+        "In-memory rate limiter is per-Vercel-instance; provides no global abuse protection under real load — easily bypassed by hitting multiple cold-start instances",
+        "Verified-wallets allowlist is self-referential (Confía's own addresses) with only one third-party wallet; no actual Cruz Roja, Protección Civil, or major NGO addresses are verified, undermining the positive-trust feature",
+        "Zero automated tests: the rumor KB pattern regexes, the classifier scoring logic, and the forensics heuristics are all untested — KB updates ship blind",
+        "No CI pipeline; 7 commits, 1 contributor — bus factor of 1",
+        "Rumors KB has only 12 entries — sparse coverage for a live disaster situation where new misinformation emerges hourly",
+        "LLM fallback is disabled by default, so the majority of unrecognized messages receive only a generic SIN CONFIRMAR with no detail"
+      ],
+      "mergePotential": "Low-medium. The scam-detection angle is highly complementary to donation rails being built by other teams, and the core forensics engine (forensics.ts) is reusable as a library. However, integrating it would require: replacing the in-memory rate limiter with Upstash or similar, expanding the verified-wallet list with real NGO-verified addresses, and deciding how the KB gets curated and updated over time. No tests makes integration risky.",
+      "diffusion": {
+        "ready": true,
+        "assets": [
+          "live-demo",
+          "clear-value-prop",
+          "branding"
+        ],
+        "angle": "Zero-install crypto scam and rumor verifier for Venezuela earthquake victims — paste any WhatsApp forward or donation wallet and get a sourced verdict in seconds. The only disaster tool that runs live on-chain forensics to protect donors from scam wallets.",
+        "gaps": [
+          "No demo video showing the verdict flow in action",
+          "Verified-wallet allowlist is self-referential (own addresses + 1 third-party) — not yet backed by Cruz Roja or official NGO partnerships, which weakens the trust story",
+          "Rumor KB has only 12 entries — thin coverage for a fast-moving misinformation environment",
+          "No evidence of real users or NGO adoption yet"
+        ]
+      },
+      "repoUrl": "https://github.com/JuanMarchetto/confia",
+      "liveUrl": "https://confia-rose.vercel.app/",
+      "videoUrl": "",
+      "x": 322,
+      "y": 425
+    },
+    {
+      "slug": "data-team",
+      "name": "VZLA_DEDUP",
+      "type": "Data ingestion pipeline / ETL backend (no frontend)",
+      "summary": "VZLA_DEDUP is a production-grade Python data pipeline that ingests, deduplicates, and sanitizes crisis-response records (missing persons, aid centers, seismic events) from multiple Venezuelan sources into a Supabase bac…",
+      "tier": "merge-candidate",
+      "severity": "critical",
+      "solvesRealProblem": "yes",
+      "liveDemoStatus": "no-public-demo",
+      "onePitch": "VZLA_DEDUP is the earthquake response data backbone — it silently unifies missing-person records scattered across dozens of Venezuelan sources into one clean, privacy-safe, deduplicated feed that any rescue app can plug into.",
+      "scores": {
+        "maturity": 4,
+        "production": 3,
+        "organization": 5,
+        "viability": 3,
+        "product": 3,
+        "diffusion": 2,
+        "impact": 4
+      },
+      "signals": {
+        "stars": 16,
+        "commits": 69,
+        "loc": 10743,
+        "contributors": 15,
+        "license": "MIT"
+      },
+      "stack": {
+        "frontend": [],
+        "backend": [
+          "Python 3.12",
+          "Pydantic v2",
+          "httpx",
+          "BeautifulSoup4",
+          "Playwright",
+          "pdfplumber",
+          "spaCy es_core_news_sm",
+          "Click CLI"
+        ],
+        "database": [
+          "SQLite (local dedup state)",
+          "Supabase (via HTTP staging exporter)"
+        ],
+        "ai_ml": [
+          "spaCy NLP (Spanish NER for location/name extraction)",
+          "Double Metaphone / NYSIIS phonetic hashing"
+        ],
+        "usesOrm": false,
+        "orm": "Raw SQLite via sqlite3 (dedup state only); Supabase accessed via httpx REST calls to /api/aportes and /api/source_watermarks — no ORM",
+        "pattern": "Staged ETL pipeline: Adapter → Parser → PII Tokenization → Enrichment → Confidence Scoring → Minor Protection → Staging Export"
+      },
+      "tags": [
+        "people-finder",
+        "family-reunification",
+        "aid-logistics",
+        "seismic-data"
+      ],
+      "redFlags": [
+        "api/main.py and api/routes/records.py are empty (1-line stub files) — there is no public API serving layer at all",
+        "Only one of five configured sources (encuentralos) has a working parser registered; the other four (USGS, ReliefWeb, GDACS, Copernicus) are disabled with no parsers implemented",
+        "No Dockerfile — the pipeline is tightly coupled to GitHub Actions environment; local reproducibility requires manual setup",
+        "verification/ module is empty — human review workflow for Person dedup candidates (require human sign-off per specs.py) has no implementation",
+        "Stage 2 consolidation (#82 referenced in comments) is not yet implemented — cross-source person dedup remains unresolved",
+        "The consolidate workflow downloads artifacts and calls 'python -m scrapers.cli consolidate' but that command likely delegates to the empty stage 2"
+      ],
+      "mergePotential": "High — this is backend infrastructure that other projects in the hackathon (people-finder UIs, aid dashboards) could consume directly from the Supabase tables it populates. Its dedup and PII sanitization are capabilities no frontend project would want to replicate. Merging/integrating means pointing the staging exporter at a shared Supabase instance and having consumer projects read from the deduplicated records table.",
+      "diffusion": {
+        "ready": false,
+        "assets": [
+          "clear-value-prop"
+        ],
+        "angle": "Position as the missing data-infrastructure layer for the earthquake response ecosystem — pitch directly to other hackathon teams building people-finder UIs or aid logistics dashboards who need clean, deduplicated, PII-safe records without building the ETL themselves.",
+        "gaps": [
+          "No public API endpoint — the serving layer is entirely empty",
+          "No demo video or screenshots showing the pipeline in action",
+          "Only one active data source out of five planned",
+          "No frontend or consumer-facing interface of any kind",
+          "Stage 2 cross-source consolidation is not yet implemented",
+          "No Dockerfile — hard to reproduce or deploy independently"
+        ]
+      },
+      "repoUrl": "https://github.com/mathiasaiva/VZLA_DEDUP",
+      "liveUrl": "https://github.com/DataVenezuela/VZLA_DEDUP",
+      "videoUrl": "",
+      "x": 589,
+      "y": 594
+    },
+    {
+      "slug": "directorio-sismo",
+      "name": "Directorio sismo",
+      "type": "Static HTML link directory / curated aggregator",
+      "summary": "Venezuela Solidaria (Directorio Sismo) is a pure static HTML/CSS/JavaScript website deployed on Netlify that curates and presents a categorized directory of earthquake relief resources for Venezuela. The site links out…",
+      "tier": "promote",
+      "severity": "high",
+      "solvesRealProblem": "yes",
+      "liveDemoStatus": "working",
+      "onePitch": "Un directorio verificado de más de 40 recursos para víctimas del terremoto en Venezuela — personas desaparecidas, albergues, médicos y donaciones en un solo lugar.",
+      "scores": {
+        "maturity": 2,
+        "production": 1,
+        "organization": 2,
+        "viability": 2,
+        "product": 3,
+        "diffusion": 3,
+        "impact": 3
+      },
+      "signals": {
+        "stars": 0,
+        "commits": 30,
+        "loc": 0,
+        "contributors": 1,
+        "license": null
+      },
+      "stack": {
+        "frontend": [
+          "HTML5",
+          "CSS3",
+          "Vanilla JavaScript"
+        ],
+        "backend": [],
+        "database": [],
+        "ai_ml": [],
+        "usesOrm": false,
+        "orm": "None — no database exists; all content is hardcoded in index.html",
+        "pattern": "Static site — no backend, no build system, no framework"
+      },
+      "tags": [
+        "donations-aid",
+        "people-finder",
+        "shelter-mapping",
+        "medical-health",
+        "mental-health",
+        "volunteer-coordination",
+        "structural-inspection"
+      ],
+      "redFlags": [
+        "Admin password 'Venezuela2025!' is hardcoded in client-side JavaScript and visible to anyone in browser devtools — provides zero security",
+        "All content is hardcoded in HTML; adding or removing a resource requires editing source code and redeploying",
+        "The 'admin panel' is purely decorative — it has no ability to actually manage content, showing static hardcoded stats (8 resources, 1 pending) rather than live data",
+        "No database or CMS means the site cannot scale or be maintained by non-developers",
+        "No CI/CD or netlify.toml configuration — deployment is manual",
+        "30 commits are all titled 'Update index.html' with no meaningful commit messages"
+      ],
+      "mergePotential": "Low — this is a standalone curated directory site that links to other projects. It does not expose an API or share data structures that could integrate with other hackathon projects. It could theoretically serve as a landing/hub page that references other winning projects.",
+      "diffusion": {
+        "ready": true,
+        "assets": [
+          "live-demo",
+          "demo-video",
+          "clear-value-prop",
+          "branding"
+        ],
+        "angle": "Post the direct URL alongside a crisis update: 'Un solo lugar para encontrar todo lo que necesitas — personas desaparecidas, albergues, médicos, donaciones. Directorio verificado y actualizado en tiempo real por venezolanos para venezolanos.' Tag it as the go-to hub and encourage other projects to get listed on it.",
+        "gaps": [
+          "No real-users metric or adoption evidence",
+          "No screenshots packaged for social posts — team should export 2-3 screen captures of category views",
+          "Demo video on Vimeo has no public embed thumbnail to preview",
+          "No press/media mention or endorsement from a recognized NGO to add credibility"
+        ]
+      },
+      "repoUrl": "https://github.com/jeannetteafuentesr/venezuela-solidaria",
+      "liveUrl": "https://directorio-sismo.netlify.app/",
+      "videoUrl": "https://vimeo.com/1205079199?share=copy&fl=sv&fe=ci",
+      "x": 512,
+      "y": 603
+    },
+    {
+      "slug": "doomedag",
+      "name": "Doomedag",
+      "type": "Emergency communication and location-sharing PWA with off-grid mesh fallback",
+      "summary": "iFoundYou (branded \"Dommedag\") is a React PWA + Supabase emergency location-sharing and communication platform. It delivers real-time geo-tracking, community alerts (water/food/medical/shelter/lost), group and 1-on-1 ch…",
+      "tier": "improve-first",
+      "severity": "critical",
+      "solvesRealProblem": "partial",
+      "liveDemoStatus": "partial",
+      "onePitch": "A real-time emergency mesh network PWA that keeps earthquake survivors located and connected — even with no internet — via Meshtastic BLE radio fallback.",
+      "scores": {
+        "maturity": 3,
+        "production": 3,
+        "organization": 3,
+        "viability": 2,
+        "product": 2,
+        "diffusion": 2,
+        "impact": 3
+      },
+      "signals": {
+        "stars": 1,
+        "commits": 47,
+        "loc": 14429,
+        "contributors": 1,
+        "license": null
+      },
+      "stack": {
+        "frontend": [
+          "React 19",
+          "Vite 7",
+          "MapLibre GL JS",
+          "PWA (vite-plugin-pwa)",
+          "TypeScript",
+          "CSS (custom)"
+        ],
+        "backend": [
+          "Supabase (Postgres + PostGIS + Realtime + Auth)",
+          "Netlify Functions (serverless)",
+          "Node.js proxy server"
+        ],
+        "database": [
+          "Supabase / PostgreSQL",
+          "PostGIS (geography columns + spatial indexes)",
+          "IndexedDB (offline message cache via idb)"
+        ],
+        "ai_ml": [
+          "OpenAI integration (docs/openai-integration.md, openai-tools.json, mcp/server.js MCP server)"
+        ],
+        "usesOrm": false,
+        "orm": "Supabase JS client (direct REST/Realtime calls); no ORM. Raw SQL in serverless functions via Supabase REST API. PostGIS stored geography columns with spatial indexes and RLS policies.",
+        "pattern": "Frontend SPA + BaaS (Supabase) + Serverless Edge Functions"
+      },
+      "tags": [
+        "people-finder",
+        "comms-chat",
+        "alerts-notifications",
+        "mapping-geo",
+        "family-reunification"
+      ],
+      "redFlags": [
+        "No CI/CD pipeline and only one trivial smoke test for the entire codebase",
+        "App branded 'Dommedag' (Norwegian for Doomsday) with default map center hardcoded to San Francisco — zero Venezuela context",
+        "BridgeManager inserts community_alerts with lat=0, lon=0 for mesh messages lacking location — corrupts geo data",
+        "App.tsx is a 2357-line monolith combining auth, map, alerts, discovery, chat, and settings state",
+        "Root directory contains 8+ AI-generated research markdown files (Loopt app research, mesh communication research) that are not code",
+        "WiFi MAC address spoofing tool (wifi/mac_spoofer.py) raises legal concerns in deployment environments",
+        "No error monitoring or structured logging (no Sentry, no structured log output in serverless functions)"
+      ],
+      "mergePotential": "Medium. The multi-transport fallback architecture (internet → BLE mesh → HTTP mesh), offline outbox, PostGIS geo-alerting, and RLS-secured community alert system are all reusable primitives. The Venezuela adaptation gap (map center, language, branding) is non-trivial but addressable.",
+      "diffusion": {
+        "ready": false,
+        "assets": [
+          "live-demo",
+          "clear-value-prop"
+        ],
+        "angle": "If the demo is fixed and the app is re-centered on Venezuela with Spanish UI, the angle should be: 'The only offline-capable emergency mesh network app that keeps earthquake survivors connected when all internet is down — no cell signal required.' Highlight the Meshtastic BLE fallback as a unique differentiator vs. internet-dependent apps.",
+        "gaps": [
+          "No demo video showing the actual features",
+          "Live demo is nearly blank — does not showcase the product",
+          "No Spanish localization — unusable by most Venezuelan earthquake victims",
+          "Branding ('Dommedag', Norwegian) is confusing and off-topic for a Venezuelan disaster response hackathon",
+          "No screenshots showing the real map, alert, or chat interfaces",
+          "No Venezuela-specific content, map centering, or regional relevance demonstrated",
+          "Single contributor, 1 star, no community proof of real-world use"
+        ]
+      },
+      "repoUrl": "https://github.com/uset82/iFoundYou",
+      "liveUrl": "https://dommedag.netlify.app/",
+      "videoUrl": "",
+      "x": 427,
+      "y": 464
+    },
+    {
+      "slug": "farove",
+      "name": "FaroVE — Plataforma de Reunificación Familiar",
+      "type": "PWA (Progressive Web App) — Next.js App Router",
+      "summary": "FaroVE is an offline-first PWA for child registration and family reunification after the June 2026 Venezuela earthquake. It uses a dual-storage architecture: Dexie/IndexedDB (AES-encrypted, local, offline) for sensitive…",
+      "tier": "improve-first",
+      "severity": "critical",
+      "solvesRealProblem": "yes",
+      "liveDemoStatus": "partial",
+      "onePitch": "FaroVE registra niños rescatados en Venezuela en 60 segundos, genera un ID de brazalete imprimible, detecta señales de tráfico infantil y funciona sin internet — porque cada segundo cuenta.",
+      "scores": {
+        "maturity": 3,
+        "production": 2,
+        "organization": 4,
+        "viability": 3,
+        "product": 3,
+        "diffusion": 3,
+        "impact": 4
+      },
+      "signals": {
+        "stars": 0,
+        "commits": 65,
+        "loc": 5750,
+        "contributors": 2,
+        "license": null
+      },
+      "stack": {
+        "frontend": [
+          "Next.js 16.2.9",
+          "React 19",
+          "Tailwind v4",
+          "next-pwa",
+          "Dexie (IndexedDB)",
+          "Service Worker"
+        ],
+        "backend": [
+          "Next.js API Routes (minimal)",
+          "Supabase (BaaS)"
+        ],
+        "database": [
+          "Supabase (PostgreSQL) — public feed",
+          "IndexedDB via Dexie — encrypted local child registry"
+        ],
+        "ai_ml": [],
+        "usesOrm": false,
+        "orm": "Supabase JS client for public Supabase tables; Dexie.js (IndexedDB) for encrypted local child records — no ORM, raw table queries via supabase.from()",
+        "pattern": "Offline-first PWA with BaaS for public data and client-side encrypted local storage for sensitive records"
+      },
+      "tags": [
+        "family-reunification",
+        "people-finder",
+        "shelter-mapping",
+        "volunteer-coordination"
+      ],
+      "redFlags": [
+        "CRITICAL: NEXT_PUBLIC_PIN_COORDINATOR is both the coordinator auth credential and the AES encryption key — it is baked into the client-side bundle, completely defeating the encryption of sensitive child records",
+        "CRITICAL: Per-device IndexedDB storage with no server-side sync means teams on different devices cannot share child registrations — coordinators are siloed to the device they used",
+        "NEXT_PUBLIC_PIN_RESCUER exposed in client bundle allows any user to authenticate as a rescuer and register fake children",
+        "CryptoJS AES with static hardcoded SALT 'faroVE2024' weakens key derivation — key = pin + 'faroVE2024'",
+        "Supabase RLS allows unrestricted public INSERT on posts and usuarios tables — abuse and spam surface",
+        "No tests of any kind (unit, integration, e2e)",
+        "No CI/CD pipeline — no automated quality gates",
+        "Supabase project URL hardcoded in lib/supabase.ts (minor, anon key is env-driven)"
+      ],
+      "mergePotential": "Medium-high — the public feed (Supabase-backed, 4,019 records), family search UX, and coordinator approval workflow are immediately deployable. The offline PWA architecture and printable ID concept are valuable. Must fix the encryption key exposure and add cross-device sync before handling real sensitive child data in production.",
+      "diffusion": {
+        "ready": false,
+        "assets": [
+          "live-demo",
+          "clear-value-prop",
+          "branding"
+        ],
+        "angle": "Lead with the humanitarian mission and the 4,019 real records preloaded from venezuelatebusca.com. Emphasize the 60-second bracelet ID generation, offline-first design for areas without connectivity, and the trafficking-prevention safeguard. Frame it as a hackathon prototype that demonstrates what a serious child reunification tool should look like — and invite humanitarian orgs and developers to help harden it. Do NOT position it as production-ready for handling real sensitive child data yet.",
+        "gaps": [
+          "No demo video showing the actual UI flow — critical for social sharing",
+          "No screenshots to accompany posts",
+          "Critical security flaw (coordinator PIN = AES key, baked into client bundle) must be disclosed or fixed before any promotion targeting real field use",
+          "Per-device IndexedDB silo means multi-team coordination is impossible without manual JSON export — a key limitation to be transparent about",
+          "No real users confirmed yet — only preloaded data"
+        ]
+      },
+      "repoUrl": "https://github.com/luacantu/rescue-track",
+      "liveUrl": "https://faro-ve.vercel.app/",
+      "videoUrl": "",
+      "x": 453,
+      "y": 596
+    },
+    {
+      "slug": "found-people-telegram-bot",
+      "name": "Personas Encontradas Bot",
+      "type": "Telegram bot + REST API backend for earthquake victim people-finder",
+      "summary": "A fully operational Telegram bot (live at t.me/encontrados_ve_bot) that aggregates found-people records from 5 Venezuelan earthquake data sources, deduplicates them, stores them in PostgreSQL, and exposes search via Tel…",
+      "tier": "promote",
+      "severity": "critical",
+      "solvesRealProblem": "yes",
+      "liveDemoStatus": "no-public-demo",
+      "onePitch": "Encuentra a tus familiares con un solo comando: el bot de Telegram que unifica todos los registros de personas encontradas tras el terremoto en Venezuela.",
+      "scores": {
+        "maturity": 4,
+        "production": 4,
+        "organization": 4,
+        "viability": 5,
+        "product": 4,
+        "diffusion": 3,
+        "impact": 5
+      },
+      "signals": {
+        "stars": 6,
+        "commits": 77,
+        "loc": 5590,
+        "contributors": 2,
+        "license": "MIT"
+      },
+      "stack": {
+        "frontend": [],
+        "backend": [
+          "Node.js 22 (ESM)",
+          "Fastify 5",
+          "TypeScript 5"
+        ],
+        "database": [
+          "PostgreSQL",
+          "Prisma ORM 6"
+        ],
+        "ai_ml": [],
+        "usesOrm": true,
+        "orm": "Prisma ORM for schema/migrations; raw Prisma.$queryRaw with tagged-template parameterized SQL for bulk inserts, updates, and full-text searches",
+        "pattern": "Layered monolith (config → repositories → services → http/telegram)"
+      },
+      "tags": [
+        "people-finder",
+        "family-reunification",
+        "alerts-notifications"
+      ],
+      "redFlags": [
+        "No Dockerfile or deployment manifest — deployment process is undocumented",
+        "In-memory rate limiting and session state (pending actions, search tokens) are lost on process restart and cannot scale horizontally",
+        "guardAdminRequest uses non-timing-safe string comparison for INGEST_SECRET (inconsistent with guardExternalReportRequest which correctly uses timingSafeEqual)",
+        "No startup validation of required environment variables — missing DATABASE_URL or TELEGRAM_BOT_TOKEN would only error on first use",
+        "Ingestion is triggered manually (npm run ingest:found-people) with no built-in scheduler — data freshness depends on external cron job setup"
+      ],
+      "mergePotential": "High. This project is already live and functional, with an external REST API that other projects can consume directly. The ingestion layer (5 sources, deduplication, fuzzy matching) is the most sophisticated people-finder data pipeline in the cohort and could serve as the authoritative backend for a broader family-reunification platform. Requires adding a Dockerfile and Redis-backed rate limiting for multi-instance deployment.",
+      "diffusion": {
+        "ready": true,
+        "assets": [
+          "clear-value-prop"
+        ],
+        "angle": "Lead with the human story: 'One search on Telegram. Five databases. Every found person in Venezuela.' Show the bot commands (/buscar V12345678) and the five integrated sources by name. Invite families to try it and invite other developers to use the REST API to integrate. A 30-second screen recording of a live Telegram search would massively amplify this — the team should record one immediately.",
+        "gaps": [
+          "no demo video or screen recording",
+          "no screenshots of the bot in action",
+          "no web landing page or visual branding to embed in posts",
+          "no real-user testimonials yet"
+        ]
+      },
+      "repoUrl": "https://github.com/edwinvrgs/found-people-ve-bot",
+      "liveUrl": "https://github.com/edwinvrgs/found-people-ve-bot",
+      "videoUrl": "",
+      "x": 462,
+      "y": 401
+    },
+    {
+      "slug": "guacamalla",
+      "name": "GuacaMalla - Mesh sync entre dispositivos",
+      "type": "Android app + TypeScript backend — offline-first BLE mesh SOS network with cloud aggregation layer",
+      "summary": "GuacaMalla Net is a serious, production-oriented disaster-response mesh network system built for offline-first earthquake response. It consists of an Android Kotlin app implementing BLE flood-routing with Ed25519-signed…",
+      "tier": "spotlight",
+      "severity": "critical",
+      "solvesRealProblem": "yes",
+      "liveDemoStatus": "broken",
+      "onePitch": "GuacaMalla turns ordinary Android phones into a self-organizing rescue mesh — no internet, no cell towers, no servers needed — so earthquake survivors can signal SOS and be found even when all infrastructure has collapsed.",
+      "scores": {
+        "maturity": 4,
+        "production": 4,
+        "organization": 4,
+        "viability": 5,
+        "product": 3,
+        "diffusion": 4,
+        "impact": 5
+      },
+      "signals": {
+        "stars": 3,
+        "commits": 96,
+        "loc": 9278,
+        "contributors": 5,
+        "license": "MIT"
+      },
+      "stack": {
+        "frontend": [
+          "Android (Kotlin)",
+          "Jetpack Compose (partial)",
+          "WorkManager"
+        ],
+        "backend": [
+          "Bun",
+          "Fastify",
+          "TypeScript",
+          "ws (WebSocket)"
+        ],
+        "database": [
+          "Supabase (PostgreSQL)",
+          "Room (SQLite on Android)",
+          "In-memory fallback"
+        ],
+        "ai_ml": [],
+        "usesOrm": false,
+        "orm": "Supabase JS client (BaaS) with raw SQL schema; Room DAO on Android for local SQLite persistence",
+        "pattern": "Offline-first BLE mesh (Android) + REST/WebSocket aggregation backend (Bun/Fastify) + Supabase persistence"
+      },
+      "tags": [
+        "alerts-notifications",
+        "mapping-geo",
+        "comms-chat",
+        "aid-logistics",
+        "volunteer-coordination",
+        "people-finder"
+      ],
+      "redFlags": [
+        "WebSocket client registry and LeakyBucket rate limiter are in-memory — no horizontal scaling without Redis or sticky sessions",
+        "Wi-Fi Aware (NanMessenger/NanDataPath) is implemented but not wired into GuacamayaForegroundService — it is dead code today",
+        "No backend route-level integration tests — only mesh frame decode tests and shared-lib unit tests; resolve route logic is untested at the HTTP layer",
+        "google-services.json committed to repo (acceptable for Android app config but worth noting)",
+        "SMS module is a stub (.gitkeep only) — referenced in docs but not implemented",
+        "In-memory store fallback silently loses data on restart if Supabase is misconfigured in production"
+      ],
+      "mergePotential": "High — the backend exposes standard REST+WebSocket APIs that any other hackathon project could consume for real-time SOS locations and official alerts. The shared package (packages/shared) provides TypeScript types for interoperability. The resolve flow API is a natural complement to any people-finder or shelter-mapping project.",
+      "diffusion": {
+        "ready": true,
+        "assets": [
+          "demo-video",
+          "clear-value-prop",
+          "branding"
+        ],
+        "angle": "A phone network that works when ALL networks fail — GuacaMalla turns Android phones into a cryptographically-secure rescue mesh for earthquake survivors, zero internet required. Lead with the technical miracle: 22-byte signed BLE frames hopping block-by-block across a destroyed city, with a quorum rescue-confirmation flow so rescuers know which pings are real.",
+        "gaps": [
+          "live-demo is broken (guacamalla.org shows an unresolved loading state)",
+          "no Play Store or public APK download link for non-developers",
+          "screenshots of the Android app UI not publicly visible",
+          "SMS relay module documented but unimplemented (minor credibility gap if mentioned)",
+          "Wi-Fi Aware transport implemented but not wired in — should not be claimed as live feature"
+        ]
+      },
+      "repoUrl": "https://github.com/vmlcode/guacamaya-net",
+      "liveUrl": "https://guacamalla.org",
+      "videoUrl": "https://www.youtube.com/watch?v=d21xoFurccc",
+      "x": 488,
+      "y": 488
+    },
+    {
+      "slug": "lanna-naty",
+      "name": "Puente Venezuela",
+      "type": "Humanitarian coordination PWA (geo-tagged needs/offers map)",
+      "summary": "Puente Venezuela is a map-based humanitarian coordination PWA that lets earthquake victims and volunteers post geo-tagged needs/offers without registration. Built in a single day (June 28-29, 2026) using Lovable.dev (AI…",
+      "tier": "promote",
+      "severity": "critical",
+      "solvesRealProblem": "yes",
+      "liveDemoStatus": "working",
+      "onePitch": "Puente Venezuela: mapa en tiempo real que conecta a víctimas del terremoto con voluntarios sin necesidad de registro — construido en menos de 24 horas para salvar vidas.",
+      "scores": {
+        "maturity": 2,
+        "production": 2,
+        "organization": 3,
+        "viability": 3,
+        "product": 3,
+        "diffusion": 3,
+        "impact": 4
+      },
+      "signals": {
+        "stars": 0,
+        "commits": 62,
+        "loc": 8100,
+        "contributors": 1,
+        "license": null
+      },
+      "stack": {
+        "frontend": [
+          "React 19",
+          "TanStack Router",
+          "TanStack Start (SSR)",
+          "TanStack Query",
+          "Tailwind v4",
+          "Radix UI / shadcn-ui",
+          "react-leaflet / Leaflet",
+          "Vite",
+          "workbox (PWA)"
+        ],
+        "backend": [
+          "TanStack Start server functions (Node/Nitro)",
+          "Supabase (BaaS)"
+        ],
+        "database": [
+          "PostgreSQL via Supabase",
+          "Supabase Realtime",
+          "Supabase Storage (report-attachments bucket)"
+        ],
+        "ai_ml": [],
+        "usesOrm": false,
+        "orm": "Raw SQL migrations via Supabase CLI; Supabase JS client (supabase-js v2) used directly as the data-access layer — no ORM",
+        "pattern": "Full-stack SPA/SSR hybrid (TanStack Start) + Supabase BaaS"
+      },
+      "tags": [
+        "mapping-geo",
+        "aid-logistics",
+        "volunteer-coordination",
+        "alerts-notifications",
+        "shelter-mapping"
+      ],
+      "redFlags": [
+        ".env with real Supabase credentials committed to the repository",
+        "Fully open anonymous UPDATE on all reports (anyone can resolve/reassign any report)",
+        "No rate limiting on report creation or file uploads — trivially spammable",
+        "No tests of any kind (unit, integration, or e2e)",
+        "No CI/CD pipeline or deployment configuration",
+        "listReports fetches all rows with no pagination — will degrade at scale",
+        "Built entirely with Lovable.dev AI generation in under 24 hours — limited human review of edge cases",
+        "No content moderation or report flagging mechanism"
+      ],
+      "mergePotential": "Medium. The map+report core is solid and unique enough to stand alone, but the fully open anonymous write model and absence of any spam protection would need resolution before deploying alongside other systems. The bilingual support and WhatsApp integration are directly reusable.",
+      "diffusion": {
+        "ready": true,
+        "assets": [
+          "live-demo",
+          "clear-value-prop",
+          "branding"
+        ],
+        "angle": "Mapa en tiempo real que conecta víctimas del terremoto en Venezuela con voluntarios al instante — sin registro, funciona en cualquier celular. Built in under 24 hours at Build4Venezuela.",
+        "gaps": [
+          "no demo video showing the map and report flow in action",
+          "zero real user data — live counters all show 0, undermining credibility",
+          "no screenshots of the map with actual pins",
+          "no testimonials or pilot usage",
+          "critical security gaps (open anonymous writes, no rate limiting) that could be weaponized if the platform goes viral"
+        ]
+      },
+      "repoUrl": "https://github.com/lannahbett/puentevenezuela",
+      "liveUrl": "https://puentevenezuela.lovable.app/",
+      "videoUrl": "",
+      "x": 546,
+      "y": 438
+    },
+    {
+      "slug": "localizadosvzlabot",
+      "name": "LocalizadosVzlaBot — Localizador de Personas, Refugios y Donativos Terremoto Venezuela (2026)",
+      "type": "WhatsApp chatbot / humanitarian API aggregator",
+      "summary": "A lean, stateless WhatsApp chatbot built with Node.js + Fzap API that aggregates person-finder, shelter, donation-center, and emergency data from multiple Venezuelan earthquake relief APIs (localizadosvenezuela.com, sos…",
+      "tier": "spotlight",
+      "severity": "critical",
+      "solvesRealProblem": "yes",
+      "liveDemoStatus": "working",
+      "onePitch": "Envía un nombre o cédula por WhatsApp y encuentra a tu familiar desaparecido — LocalizadosVzlaBot busca en tiempo real en todos los hospitales, refugios y redes comunitarias del terremoto de Venezuela 2026.",
+      "scores": {
+        "maturity": 2,
+        "production": 3,
+        "organization": 4,
+        "viability": 4,
+        "product": 4,
+        "diffusion": 4,
+        "impact": 5
+      },
+      "signals": {
+        "stars": 3,
+        "commits": 8,
+        "loc": 1122,
+        "contributors": 1,
+        "license": null
+      },
+      "stack": {
+        "frontend": [],
+        "backend": [
+          "Node.js 20",
+          "Express 4",
+          "Axios",
+          "Fzap API (WhatsApp bridge)"
+        ],
+        "database": [
+          "PostgreSQL 15 (used only by Fzap API, not the bot itself)",
+          "In-memory Map cache (TTL)"
+        ],
+        "ai_ml": [],
+        "usesOrm": false,
+        "orm": "No local database. The bot itself is entirely stateless — it only uses an in-memory TTL Map for response caching. PostgreSQL is used exclusively by the Fzap WhatsApp bridge container.",
+        "pattern": "Stateless microservice / API aggregator bot"
+      },
+      "tags": [
+        "people-finder",
+        "family-reunification",
+        "shelter-mapping",
+        "donations-aid",
+        "alerts-notifications",
+        "comms-chat"
+      ],
+      "redFlags": [
+        "ResponseGrid API call uses a hardcoded placeholder UUID (11111111-1111-4111-8111-111111111111) — this endpoint almost certainly returns no real emergency data in production",
+        "FZAP_WEBHOOK_SECRET is hardcoded as 'webhook_secret_secure_sismo' in docker-compose-prod.yml — operators may not realize they must change it",
+        "PostgreSQL password hardcoded as 'fzap123' in both compose files",
+        "In-memory cache and task queue are per-process — multiple instances would be incoherent",
+        "Full runtime dependency on 4 external APIs not operated by this team (localizadosvenezuela.com, sosvenezuela2026.com, acopiove.org, responsegrid.app)",
+        "Zero automated tests",
+        "No CI/CD pipeline"
+      ],
+      "mergePotential": "Medium-high. The bot is a thin aggregator over external APIs with no local data store, so merging its person-finder or shelter-search logic into another platform would require exposing those same external API calls through a different interface. The clean service/router separation makes extraction feasible.",
+      "diffusion": {
+        "ready": true,
+        "assets": [
+          "live-demo",
+          "demo-video",
+          "clear-value-prop"
+        ],
+        "angle": "Lead with the WhatsApp phone number as a call to action. Emphasize zero friction — no app, no account, just send a message with a name or cédula. Pair with the YouTube Shorts demo showing a real search. Target diaspora networks on Twitter/X, Instagram, and Telegram who are desperately trying to locate family members inside Venezuela.",
+        "gaps": [
+          "No screenshots available for static social posts",
+          "No branding assets (logo, colors)",
+          "No confirmed real users or testimonials yet",
+          "ResponseGrid (urgent needs feature) may silently fail due to placeholder UUID"
+        ]
+      },
+      "repoUrl": "https://github.com/Paraguanads/Venezuelan-Tracker-WhatsApp-bot",
+      "liveUrl": "https://wa.me/584225252437",
+      "videoUrl": "https://youtube.com/shorts/hB-zcKp5Cak?feature=share",
+      "x": 442,
+      "y": 501
+    },
+    {
+      "slug": "proto-bloom-sismo",
+      "name": "Bloom-Sismo",
+      "type": "Static PWA / JAMstack — single HTML file with embedded Bloom Filter, Supabase REST for report ingestion, and a Node.js build pipeline",
+      "summary": "Bloom-Sismo is a single-file PWA (~90-150 KB) that embeds a pre-compiled Bloom Filter of earthquake victims reported as located/safe, enabling zero-latency offline lookup by Venezuelan ID number (cédula). The filter is…",
+      "tier": "improve-first",
+      "severity": "critical",
+      "solvesRealProblem": "partial",
+      "liveDemoStatus": "no-public-demo",
+      "onePitch": "A 150 KB offline PWA that lets anyone search if their loved one has been reported safe after an earthquake — shareable via WhatsApp with zero internet required.",
+      "scores": {
+        "maturity": 2,
+        "production": 2,
+        "organization": 4,
+        "viability": 3,
+        "product": 2,
+        "diffusion": 2,
+        "impact": 4
+      },
+      "signals": {
+        "stars": 0,
+        "commits": 11,
+        "loc": 871,
+        "contributors": 2,
+        "license": null
+      },
+      "stack": {
+        "frontend": [
+          "Vanilla JS",
+          "HTML5",
+          "CSS3 (single-file PWA)",
+          "Service Worker",
+          "IndexedDB",
+          "Background Sync API"
+        ],
+        "backend": [
+          "None (fully static)"
+        ],
+        "database": [
+          "Supabase (PostgreSQL via REST)"
+        ],
+        "ai_ml": [],
+        "usesOrm": false,
+        "orm": "Direct Supabase REST API calls via native fetch — no SDK, no ORM. IndexedDB accessed directly via idbOp helper.",
+        "pattern": "Static PWA / JAMstack with build-time filter compilation"
+      },
+      "tags": [
+        "people-finder",
+        "family-reunification"
+      ],
+      "redFlags": [
+        "No real missing-persons data: filter contains only 20 demo records — zero operational value until NGO data is ingested",
+        "ONG API endpoint is a placeholder string ('https://API-DE-LA-ONG.org/v1/localizados') — integration not started",
+        "CI filter-compilation step is commented out in deploy.yml — deployed app will never auto-update the filter on push",
+        "Supabase anon key committed to Git history (sb_publishable_... — publishable by design, but still a credential in public repo)",
+        "datos/ folder is gitignored with only placeholder files — operational data workflow requires manual steps outside version control",
+        "No automated tests — verify.js is a manual CLI tool requiring human interpretation, not a test runner"
+      ],
+      "mergePotential": "Medium — the Bloom Filter PWA shell is a genuinely novel offline lookup layer that could complement heavier platforms as a lightweight satellite app. The build pipeline is clean and extensible. However, the missing data integration (NGO API) is the entire unsolved problem, and the CI build step being commented out means any merge would require re-enabling automated filter updates.",
+      "diffusion": {
+        "ready": false,
+        "assets": [
+          "clear-value-prop"
+        ],
+        "angle": "If the team can secure even a partial CSV feed from one NGO and deploy a live URL, this becomes a genuinely promotable story: 'the app that fits in a WhatsApp message and tells you if your family is safe.' Hold promotion until then — the technical innovation is real, the product is not yet operational.",
+        "gaps": [
+          "no-live-demo",
+          "no-demo-video",
+          "no-screenshots",
+          "no-real-data-zero-operational-value",
+          "no-ngo-partnership-formalized",
+          "no-branding-assets"
+        ]
+      },
+      "repoUrl": "https://github.com/DevAndrew64/Bloom-Sismo",
+      "liveUrl": "https://github.com/DevAndrew64/Bloom-Sismo",
+      "videoUrl": "",
+      "x": 40,
+      "y": 281
+    },
+    {
+      "slug": "psicoayudave",
+      "name": "Psico Ayuda Venezuela",
+      "type": "Full-stack SSR web app (TanStack Start) deployed to Cloudflare Workers edge runtime",
+      "summary": "psico-support (psicoayudaven.com) is a real, working psychological support directory platform built with TanStack Start (React SSR) deployed on Cloudflare Workers with D1 SQLite via Drizzle ORM. It provides a searchable…",
+      "tier": "promote",
+      "severity": "high",
+      "solvesRealProblem": "yes",
+      "liveDemoStatus": "working",
+      "onePitch": "Psico Ayuda Venezuela conecta a víctimas del terremoto con psicólogos venezolanos verificados — gratis, confidencial y accesible por WhatsApp en segundos.",
+      "scores": {
+        "maturity": 3,
+        "production": 3,
+        "organization": 4,
+        "viability": 4,
+        "product": 4,
+        "diffusion": 3,
+        "impact": 4
+      },
+      "signals": {
+        "stars": 0,
+        "commits": 24,
+        "loc": 5248,
+        "contributors": 1,
+        "license": "MIT"
+      },
+      "stack": {
+        "frontend": [
+          "React 19",
+          "TanStack Router / TanStack Start (SSR)",
+          "Tailwind CSS v4",
+          "Radix UI",
+          "TanStack Query",
+          "TanStack Form",
+          "Lucide React",
+          "PWA (vite-plugin-pwa)"
+        ],
+        "backend": [
+          "TanStack Start server functions (createServerFn)",
+          "better-auth (email+password)",
+          "Drizzle ORM"
+        ],
+        "database": [
+          "Cloudflare D1 (SQLite)",
+          "better-sqlite3 (local dev)"
+        ],
+        "ai_ml": [],
+        "usesOrm": true,
+        "orm": "Drizzle ORM over Cloudflare D1 (SQLite). DB connection is lazily initialised from the Cloudflare env binding set per-request via setCloudflareEnv(); a module-level cached singleton prevents repeated initialisation. Local dev uses better-sqlite3.",
+        "pattern": "SSR full-stack with co-located server functions (no separate API server)"
+      },
+      "tags": [
+        "mental-health"
+      ],
+      "redFlags": [
+        "No tests despite vitest being configured — zero confidence in regression safety",
+        "No CI/CD pipeline — deployments are manual `npm run build && wrangler deploy`",
+        "WhatsApp numbers are publicly accessible in the directory with no authentication wall — creates a scraping/spam vector targeting professionals",
+        "No rate limiting on any server function — professional registration, random-pick, and listing are all unthrottled",
+        "Sentry configured with sendDefaultPii:true — logs IP addresses of users who may be earthquake victims seeking mental health help (privacy risk)",
+        "Email verification is not enforced — professionals can register and occupy the admin queue with unverified emails",
+        "Single contributor with 24 commits over 2 days — bus factor of 1",
+        "i18n messages exist only in de.json and en.json, but the app UI is entirely in Spanish — the i18n infrastructure appears unused"
+      ],
+      "mergePotential": "Low — this is a standalone, domain-specific mental health professional directory. It does not expose data APIs or webhooks that other projects could consume. Could theoretically link into a broader aid portal but would require significant integration work.",
+      "diffusion": {
+        "ready": true,
+        "assets": [
+          "live-demo",
+          "clear-value-prop",
+          "branding"
+        ],
+        "angle": "Free, verified psychologist network connecting earthquake-affected Venezuelans directly via WhatsApp — no app download, no cost, no barriers. Built in 48 hours by a Venezuelan developer.",
+        "gaps": [
+          "No demo video showing the user flow",
+          "Only 4 professionals in the directory — hard to claim 'network' scale in promotional copy",
+          "No screenshots prepared for social media",
+          "No testimonials or real-user social proof",
+          "Professional supply-side growth mechanism is entirely manual (outreach not automated)"
+        ]
+      },
+      "repoUrl": "https://github.com/enBonnet/psico-support",
+      "liveUrl": "https://psicoayudaven.com/",
+      "videoUrl": "",
+      "x": 478,
+      "y": 40
+    },
+    {
+      "slug": "rastro",
+      "name": "Rastro",
+      "type": "Web application — emergency response platform (Next.js full-stack)",
+      "summary": "Rastro is a post-earthquake emergency response platform built with Next.js 14 App Router, TypeScript, Supabase, and Leaflet. It covers three core workflows: a public collaborative map showing geo-tagged rescue/supply/ro…",
+      "tier": "improve-first",
+      "severity": "critical",
+      "solvesRealProblem": "yes",
+      "liveDemoStatus": "partial",
+      "onePitch": "Rastro lets earthquake survivors report rescue needs on a live map and helps families find loved ones in shelters by name or ID — no account required, every report verified before it goes public.",
+      "scores": {
+        "maturity": 2,
+        "production": 3,
+        "organization": 4,
+        "viability": 3,
+        "product": 3,
+        "diffusion": 3,
+        "impact": 4
+      },
+      "signals": {
+        "stars": 0,
+        "commits": 5,
+        "loc": 2719,
+        "contributors": 1,
+        "license": null
+      },
+      "stack": {
+        "frontend": [
+          "Next.js 14 App Router",
+          "React 18",
+          "Tailwind CSS",
+          "Leaflet",
+          "react-leaflet",
+          "lucide-react",
+          "react-hook-form",
+          "fuse.js"
+        ],
+        "backend": [
+          "Next.js Route Handlers (API routes)",
+          "Supabase (PostgreSQL + RLS + service role)",
+          "Vercel Cron Jobs"
+        ],
+        "database": [
+          "Supabase (PostgreSQL)",
+          "Row Level Security policies",
+          "PLpgSQL triggers and functions"
+        ],
+        "ai_ml": [],
+        "usesOrm": false,
+        "orm": "Direct Supabase JS client (@supabase/supabase-js v2) — two clients: anon key for public reads, service-role key for writes/admin ops; no ORM",
+        "pattern": "Next.js App Router full-stack — server Route Handlers as API layer, client components for interactivity"
+      },
+      "tags": [
+        "people-finder",
+        "shelter-mapping",
+        "mapping-geo",
+        "alerts-notifications",
+        "aid-logistics"
+      ],
+      "redFlags": [
+        "Two PostgreSQL RPC functions referenced in code (buscar_personas, incrementar_personas_count) are absent from supabase/schema.sql — will produce runtime errors on the fallback search path and after every person registration",
+        "No rate limiting on any public POST endpoint — /api/reportes and /api/personas are open to flood attacks",
+        "Moderation auth is a single shared secret stored in a cookie — no per-moderator identity, no audit trail of who approved what, secret rotation requires redeploying all moderator sessions",
+        "Cron route authorization check is guarded by NODE_ENV === 'production' check — in development the route is completely open to unauthenticated calls",
+        "No test coverage at all (unit, integration, or e2e)",
+        "No CI pipeline — no automated build verification on push",
+        "Photo attachment is a free-text URL field with no upload/storage integration — users must host images externally, which is unreliable in a disaster scenario",
+        "personas SELECT RLS policy is USING (TRUE) — all person records including health status and family phone numbers are publicly readable by anyone with the anon key"
+      ],
+      "mergePotential": "Medium-high. The three modules are cleanly separated and could be integrated into a larger platform as independent features. The Supabase schema, Zod types, and API contracts are well-defined. Would need rate limiting and proper multi-user auth before merging into a shared moderation workflow.",
+      "diffusion": {
+        "ready": false,
+        "assets": [
+          "live-demo",
+          "clear-value-prop"
+        ],
+        "angle": "Lead with the family reunification angle — 'Find your loved ones in shelters by name or cedula, no app download required.' Show all three tabs in a short screen recording with a few seeded demo entries so the map and people search look alive. Emphasize the moderation pipeline as the trust differentiator vs. unverified social media.",
+        "gaps": [
+          "No demo video — the empty-database live demo does not convey the product's power",
+          "No seed/demo data in the live deployment — map shows zero reports, people search returns nothing",
+          "No screenshots in the repo or README showing a working state",
+          "No branding beyond the name Rastro",
+          "Privacy red flag (all person records publicly readable via anon key) must be fixed before any public promotion to avoid exposing victim data",
+          "No real users or testimonials yet"
+        ]
+      },
+      "repoUrl": "https://github.com/danieibazgc/rastro",
+      "liveUrl": "https://rastro-six.vercel.app",
+      "videoUrl": "",
+      "x": 487,
+      "y": 451
+    },
+    {
+      "slug": "reencuentros-terremotos-venezuela",
+      "name": "Reencuentros Terremotos Venezuela",
+      "type": "Full-stack web application — REST API backend + React SPA frontend",
+      "summary": "ReencuentroTerremotoVenezuela is a full-stack missing-persons aggregation platform built for the Venezuela earthquake response. The backend is a TypeScript/Express API with MongoDB, Redis-backed BullMQ queues, MinIO med…",
+      "tier": "improve-first",
+      "severity": "critical",
+      "solvesRealProblem": "yes",
+      "liveDemoStatus": "partial",
+      "onePitch": "Reencuentros Venezuela: an AI-powered platform that unifies missing-persons reports from across Venezuela's fragmented humanitarian network so earthquake survivors and their families can find each other — fast.",
+      "scores": {
+        "maturity": 3,
+        "production": 3,
+        "organization": 4,
+        "viability": 4,
+        "product": 3,
+        "diffusion": 2,
+        "impact": 4
+      },
+      "signals": {
+        "stars": 3,
+        "commits": 135,
+        "loc": 9362,
+        "contributors": 1,
+        "license": null
+      },
+      "stack": {
+        "frontend": [
+          "React 19",
+          "TypeScript",
+          "Vite",
+          "Leaflet / react-leaflet",
+          "PWA (vite-plugin-pwa)",
+          "Axios",
+          "react-router-dom v7"
+        ],
+        "backend": [
+          "Node.js",
+          "Express 5",
+          "TypeScript",
+          "BullMQ",
+          "Mongoose",
+          "MinIO",
+          "ioredis",
+          "jsonwebtoken",
+          "Zod",
+          "Helmet",
+          "express-rate-limit",
+          "Puppeteer",
+          "Cheerio",
+          "rss-parser"
+        ],
+        "database": [
+          "MongoDB (Mongoose ORM)",
+          "Redis (BullMQ queues + caching)",
+          "MinIO (S3-compatible media)"
+        ],
+        "ai_ml": [
+          "Anthropic Claude claude-3-sonnet-20240229",
+          "OpenAI",
+          "Google Gemini",
+          "Pinecone (vector search)",
+          "MongoDB Atlas Vector Search (optional)",
+          "Cosine similarity fallback"
+        ],
+        "usesOrm": true,
+        "orm": "Mongoose v9 with typed schemas, geo indexes (2dsphere), compound indexes, and upsert-heavy write patterns. Raw bulkWrite used in sync jobs for performance.",
+        "pattern": "Layered monolith (routes → services → models) with async worker separation"
+      },
+      "tags": [
+        "people-finder",
+        "family-reunification",
+        "mapping-geo",
+        "seismic-data",
+        "alerts-notifications",
+        "aid-logistics"
+      ],
+      "redFlags": [
+        "JWT_SECRET has hardcoded fallback 'super-secret-key-reencuentro-2024' in auth.middleware.ts — if the env var is not set in production, any attacker can forge admin tokens",
+        "Google auth route has a code path that skips token verification when GOOGLE_CLIENT_ID is 'dummy-client-id', which could reach production if env var is omitted",
+        "CORS is fully open (app.use(cors()) with no origin whitelist) — any site can make credentialed requests",
+        "reencuentro.job.ts generates 250 fake persons as a fallback when external API is unreachable, which would pollute the production database with synthetic data",
+        "reconciliation.service.ts findSimilarPersons loads all persons by state into memory for fuzzy scan — will fail under production data volume",
+        "mock MinIO credentials (minioadmin/minioadmin) shipped in .env.example and docker-compose defaults — likely to remain in production deployments",
+        "No CI/CD pipeline — no automated test gate before deployments"
+      ],
+      "mergePotential": "High. The platform's open partner API (/api/partners, webhooks route), adapter pattern for external sources, and documented integration guide make it a natural hub for aggregating data from other hackathon projects. The UnifiedPerson schema is flexible enough to absorb records from shelter-mapping or medical-health platforms via the webhook or partner endpoints.",
+      "diffusion": {
+        "ready": false,
+        "assets": [
+          "clear-value-prop"
+        ],
+        "angle": "The first AI-powered missing-persons reunification hub for Venezuela earthquake survivors — aggregates data from FUNVISIS, Cruz Roja, and local media in real time, deduplicates fragmented reports with multi-model AI, and puts every case on an interactive map so families can search from anywhere in the world.",
+        "gaps": [
+          "Public live URL to the actual app (Vercel deployment exists but is not linked)",
+          "Demo video showing the search flow and map in action",
+          "Screenshots of the feed, map, and admin audit dashboard",
+          "Branding assets (logo, social card)",
+          "No second contributor or institutional partner visible yet — single-contributor signal limits credibility for donors"
+        ]
+      },
+      "repoUrl": "https://github.com/iacastillo90/ReencuentroTerremotoVenezuela",
+      "liveUrl": "https://docs.google.com/document/d/1yMHR8gaIBqEYeovXp8bD5t1unz7eXPqF/edit",
+      "videoUrl": "",
+      "x": 525,
+      "y": 476
+    },
+    {
+      "slug": "reestructuramos",
+      "name": "Reestructuramos - Inspeccion Estructural Post Sismo",
+      "type": "PWA (Progressive Web App) — offline-first mobile-web inspection tool",
+      "summary": "Reestructuramos is a fully-realized offline-first PWA for post-earthquake structural building safety inspection (ATC-20 / COVENIN 1756 — green/yellow/red placard triage). Built explicitly for the M7.2+M7.5 Venezuela ear…",
+      "tier": "spotlight",
+      "severity": "critical",
+      "solvesRealProblem": "yes",
+      "liveDemoStatus": "partial",
+      "onePitch": "Reestructuramos puts ATC-20 earthquake inspection power in every volunteer's pocket — green, yellow, or red placard triage with GPS-tagged evidence, AI crack analysis, and a collaborative damage map that works even when the cell network is down.",
+      "scores": {
+        "maturity": 2,
+        "production": 3,
+        "organization": 4,
+        "viability": 4,
+        "product": 4,
+        "diffusion": 4,
+        "impact": 5
+      },
+      "signals": {
+        "stars": 0,
+        "commits": 6,
+        "loc": 8512,
+        "contributors": 1,
+        "license": "MIT"
+      },
+      "stack": {
+        "frontend": [
+          "Next.js 16 (App Router)",
+          "React 19",
+          "TypeScript",
+          "Tailwind CSS v4",
+          "Leaflet / react-leaflet",
+          "jsPDF",
+          "html5-qrcode",
+          "qrcode"
+        ],
+        "backend": [
+          "Next.js API Routes (single route: /api/analizar-grieta)",
+          "Supabase (Postgres + PostGIS + Storage + Auth)"
+        ],
+        "database": [
+          "Supabase Postgres with PostGIS",
+          "Dexie (IndexedDB) as local-first store"
+        ],
+        "ai_ml": [
+          "Gemini 2.5 Flash Vision API (crack/damage classification, server-side)"
+        ],
+        "usesOrm": false,
+        "orm": "Supabase JS client (direct table/storage calls) for remote; Dexie (IndexedDB) as the authoritative local store with its own query API",
+        "pattern": "Local-first / offline-first with BaaS sync"
+      },
+      "tags": [
+        "structural-inspection",
+        "mapping-geo",
+        "volunteer-coordination",
+        "alerts-notifications"
+      ],
+      "redFlags": [
+        "Zero automated tests — placard algorithm makes life-safety access decisions but is entirely untested",
+        "No CI/CD pipeline — no build verification or linting gate before deploy",
+        "Only 6 commits, 1 contributor — bus-factor of 1 with no review history",
+        "AI analysis endpoint (/api/analizar-grieta) has no rate limiting, no input size cap on imageBase64, and no authentication — could be abused or cause unexpected Gemini costs",
+        "Storage bucket photos are publicly accessible by URL — acceptable for emergency scenarios but PIDs/location data in filenames are exposed",
+        "pullMapData silently swallows all errors with an empty catch — failures are invisible to operators"
+      ],
+      "mergePotential": "Moderate-to-high. The collaborative damage map (geo-tagged placard data) could feed a city-wide shelter or aid-logistics layer. The inspector role/credential system could integrate with a volunteer-coordination platform. The Supabase schema exposes inspections with lat/lng and placard status — queryable by any coordinating tool with coordinator-level access.",
+      "diffusion": {
+        "ready": true,
+        "assets": [
+          "live-demo",
+          "demo-video",
+          "clear-value-prop",
+          "branding"
+        ],
+        "angle": "When the earthquake hit Venezuela, the cell network went down — and that is exactly when Reestructuramos shines. It is the first PWA that lets volunteer inspectors triage thousands of buildings with ATC-20 green/yellow/red placards, GPS-tagged photos, and a collaborative damage map, all 100% offline. Built in hours for the real M7.2+M7.5 disaster of June 24, 2026.",
+        "gaps": [
+          "No real-user testimonials or adoption metrics yet (launched same day as hackathon deadline)",
+          "No device screenshots showing the actual inspection wizard in action",
+          "Demo video is a YouTube Short — a longer walkthrough showing offline mode, PDF export, and the damage map would strengthen the promotion case",
+          "No endorsement or co-sign from FUNVISIS, Protección Civil, or Colegio de Ingenieros yet"
+        ]
+      },
+      "repoUrl": "https://github.com/comandoconstrucciones/reestructuramos-pwa",
+      "liveUrl": "https://app.reestructuramos.com",
+      "videoUrl": "https://youtube.com/shorts/FO0MElqIggs",
+      "x": 599,
+      "y": 428
+    },
+    {
+      "slug": "resqlink",
+      "name": "ResQLink",
+      "type": "Full-stack web application (Next.js) for humanitarian emergency coordination and incident management",
+      "summary": "ResQLink AI is a real-time humanitarian emergency response platform built with Next.js 16 / React 19, Supabase (PostgreSQL + PostGIS), and OpenAI GPT-4o-mini, deployed on Netlify. It is a genuine working MVP — not boile…",
+      "tier": "promote",
+      "severity": "critical",
+      "solvesRealProblem": "yes",
+      "liveDemoStatus": "partial",
+      "onePitch": "ResQLink AI conecta a víctimas del terremoto con voluntarios y recursos en tiempo real — con IA que prioriza emergencias automáticamente, directo desde el navegador.",
+      "scores": {
+        "maturity": 2,
+        "production": 3,
+        "organization": 4,
+        "viability": 3,
+        "product": 3,
+        "diffusion": 3,
+        "impact": 4
+      },
+      "signals": {
+        "stars": 0,
+        "commits": 15,
+        "loc": 7451,
+        "contributors": 1,
+        "license": null
+      },
+      "stack": {
+        "frontend": [
+          "Next.js 16",
+          "React 19",
+          "TailwindCSS v4",
+          "shadcn/ui",
+          "Framer Motion",
+          "React-Leaflet",
+          "Zustand",
+          "Serwist (PWA)"
+        ],
+        "backend": [
+          "Next.js API Routes",
+          "Netlify Functions (scheduled)"
+        ],
+        "database": [
+          "Supabase (PostgreSQL + PostGIS)"
+        ],
+        "ai_ml": [
+          "OpenAI GPT-4o-mini (priority classification, duplicate detection, summarization, resource recommendation)"
+        ],
+        "usesOrm": false,
+        "orm": "Supabase JS client (@supabase/supabase-js, @supabase/ssr) with typed query builder — no traditional ORM; raw PostGIS POINT() strings passed for geo inserts",
+        "pattern": "Clean Architecture (domain / infrastructure / presentation layers)"
+      },
+      "tags": [
+        "seismic-data",
+        "mapping-geo",
+        "alerts-notifications",
+        "aid-logistics",
+        "shelter-mapping",
+        "volunteer-coordination",
+        "medical-health",
+        "people-finder"
+      ],
+      "redFlags": [
+        "Server-side sync functions (Netlify function and /api/social-feed/sync) use the public anon Supabase key for INSERT/UPDATE — should use service role key for server-side write operations",
+        "CRON_SECRET auth check on sync route is entirely skipped when the env var is absent — any public request can trigger the sync and burn OpenAI quota",
+        "No tests of any kind (unit, integration, or e2e)",
+        "No CI/CD pipeline",
+        "No input validation library — API routes accept user input with minimal checks, relying solely on DB CHECK constraints",
+        "AI endpoints (/api/ai/classify, /api/ai/recommend, /api/ai/duplicates) have no rate limiting — potential for quota exhaustion",
+        "RSS XML parser is hand-rolled regex — fragile against feed format variations",
+        "Dashboard triggers 5 full Supabase queries on every Realtime event instead of incremental state updates — will cause N+1-style load spikes under concurrent users",
+        "Single contributor, 3-day-old repo — bus factor of 1, no code review history"
+      ],
+      "mergePotential": "High — clean architecture, TypeScript throughout, well-separated domain model, and Supabase backend make it straightforward to integrate features (particularly the USGS auto-ingestion, AI triage endpoints, and real-time map) into a larger platform. The domain entity types and Supabase schema are reusable with minimal adaptation.",
+      "diffusion": {
+        "ready": true,
+        "assets": [
+          "live-demo",
+          "demo-video",
+          "clear-value-prop",
+          "branding"
+        ],
+        "angle": "The only Build4Venezuela project with live USGS seismic data auto-ingestion + AI triage: ResQLink AI connects earthquake survivors with volunteers and resources in real time, from any browser, no app install needed.",
+        "gaps": [
+          "No screenshots of the working map or dashboard shared publicly",
+          "Zero real users or testimonials yet",
+          "No social proof (0 stars, 0 forks)",
+          "Single contributor limits credibility signal",
+          "No license makes adoption uncertain"
+        ]
+      },
+      "repoUrl": "https://github.com/otobonh/resqlink-ai",
+      "liveUrl": "https://resqlink-ai.netlify.app/",
+      "videoUrl": "https://www.youtube.com/watch?v=6kjdjAPa208",
+      "x": 516,
+      "y": 520
+    },
+    {
+      "slug": "terrave",
+      "name": "TerraVE",
+      "type": "Full-stack web app (Next.js 14 App Router) — citizen mapping + AI structural damage assessment platform",
+      "summary": "TerraVE is a Next.js 14 App Router web platform that combines citizen-sourced infrastructure memory with AI-powered structural damage classification. Citizens can report infrastructure locations (schools, clinics, pharm…",
+      "tier": "improve-first",
+      "severity": "high",
+      "solvesRealProblem": "yes",
+      "liveDemoStatus": "partial",
+      "onePitch": "TerraVE maps what Venezuela lost and what survived — citizens document pre-earthquake infrastructure, AI classifies post-quake structural damage from photos, all overlaid with satellite SAR data on an interactive map.",
+      "scores": {
+        "maturity": 2,
+        "production": 2,
+        "organization": 4,
+        "viability": 3,
+        "product": 2,
+        "diffusion": 2,
+        "impact": 4
+      },
+      "signals": {
+        "stars": 0,
+        "commits": 92,
+        "loc": 3532,
+        "contributors": 1,
+        "license": "MIT"
+      },
+      "stack": {
+        "frontend": [
+          "Next.js 14",
+          "React 18",
+          "TypeScript",
+          "Tailwind CSS",
+          "Leaflet",
+          "react-leaflet"
+        ],
+        "backend": [
+          "Next.js API Routes (serverless)"
+        ],
+        "database": [
+          "Supabase (PostgreSQL + PostGIS)",
+          "Supabase Storage"
+        ],
+        "ai_ml": [
+          "Hugging Face Inference API",
+          "google/vit-base-patch16-224 (generic ViT, not damage-specific)"
+        ],
+        "usesOrm": false,
+        "orm": "Supabase JS client (BaaS — no ORM; direct table queries via supabase-js v2)",
+        "pattern": "Next.js App Router fullstack monolith with serverless API routes"
+      },
+      "tags": [
+        "structural-inspection",
+        "mapping-geo",
+        "seismic-data",
+        "aid-logistics"
+      ],
+      "redFlags": [
+        "PATCH /api/lugares/[id] accepts arbitrary JSON body and passes it directly to supabase.update() — no field allowlist, allows overwriting any column",
+        "AI model (google/vit-base-patch16-224) is a generic ImageNet classifier not trained on structural damage — damage classifications will be unreliable in real use",
+        "Recursive retry on HF 503 in classifyDamage() has no depth limit — can cause stack overflow under sustained load",
+        "Three Supabase views (stats_dashboard, poblacion_expuesta, coincidencias_satelital) queried in dashboard are absent from supabase-schema.sql — dashboard may be partially non-functional",
+        "No rate limiting on /api/classify — any user can trigger costly HF API calls repeatedly",
+        "No authentication — completely open public writes with no spam or misinformation protection",
+        "No lockfile (package-lock.json/yarn.lock) committed — builds are not reproducible",
+        "No file size or MIME-type validation on base64 image uploads — potential for abuse"
+      ],
+      "mergePotential": "Medium — the citizen-reporting and map infrastructure is solid and deployable quickly. The structural damage AI is the weakest link and needs a domain-specific model swap before results can be trusted. The PATCH endpoint security hole must be fixed before any public launch. Dashboard views need to be committed to the schema or verified as existing in production.",
+      "diffusion": {
+        "ready": false,
+        "assets": [
+          "live-demo",
+          "clear-value-prop"
+        ],
+        "angle": "Lead with the two-question framing — 'What existed here? / What remained standing?' — it is the strongest, most emotionally resonant communication hook and maps directly to humanitarian needs assessment. If the team can fix the routing and seed even a handful of demo data points, a map screenshot showing the traffic-light semaphore overlay would be a compelling visual asset for social posts.",
+        "gaps": [
+          "Inner app routes (map, reporting, evaluation) return 404 — core product is not publicly accessible",
+          "All dashboard statistics show placeholder dashes — no real or demo data visible",
+          "No demo video showing the end-to-end flow",
+          "No screenshots of the working map with semaphore markers",
+          "AI damage classifier uses a generic ImageNet model (google/vit-base-patch16-224), not a structural-damage-specific model — real-world accuracy will be poor",
+          "Zero real users or field validation",
+          "Dashboard depends on three Supabase views absent from committed schema — may be broken in production"
+        ]
+      },
+      "repoUrl": "https://github.com/rainvare/terraVE",
+      "liveUrl": "https://terra-ve.vercel.app/",
+      "videoUrl": "",
+      "x": 633,
+      "y": 508
+    },
+    {
+      "slug": "venemed",
+      "name": "Venemed",
+      "type": "Next.js full-stack web application (App Router + Server Actions)",
+      "summary": "VeneMed is a time-windowed medical supply matching platform connecting Venezuelan health centers with donors. Centers register via phone OTP, pass an admin moderation queue, and the public donor feed shows their active…",
+      "tier": "promote",
+      "severity": "critical",
+      "solvesRealProblem": "yes",
+      "liveDemoStatus": "partial",
+      "onePitch": "VeneMed shows donors in real time what Venezuelan hospitals and shelters need — with countdown windows so aid arrives before it's too late.",
+      "scores": {
+        "maturity": 3,
+        "production": 4,
+        "organization": 5,
+        "viability": 4,
+        "product": 3,
+        "diffusion": 3,
+        "impact": 4
+      },
+      "signals": {
+        "stars": 1,
+        "commits": 16,
+        "loc": 8628,
+        "contributors": 1,
+        "license": null
+      },
+      "stack": {
+        "frontend": [
+          "Next.js 16.2.9 (App Router)",
+          "React 19",
+          "Tailwind CSS v4"
+        ],
+        "backend": [
+          "Next.js Server Actions",
+          "Next.js API Routes (cron endpoint)"
+        ],
+        "database": [
+          "PostgreSQL (Supabase-hosted)",
+          "Drizzle ORM",
+          "postgres-js driver"
+        ],
+        "ai_ml": [],
+        "usesOrm": true,
+        "orm": "Drizzle ORM over postgres-js; Supabase used exclusively for Auth (phone OTP); RLS is explicitly bypassed — all data access goes through Drizzle with server-side authz (requireAdmin / requireCenter)",
+        "pattern": "Next.js App Router with route groups: (public) donor feed, (center) health center back-office, (admin) moderation queue"
+      },
+      "tags": [
+        "medical-health",
+        "donations-aid",
+        "aid-logistics"
+      ],
+      "redFlags": [
+        "Center request creation (posting new supply needs/surplus) is NOT implemented — the 'Crear solicitud' CTA links to /centro/solicitudes/nueva which explicitly 404s; health centers cannot self-serve post requests",
+        "README is default Next.js boilerplate — no project description, setup instructions, or deployment guide",
+        "No Supabase Row Level Security — all data access bypasses RLS via Drizzle + service role key; a service role key leak would expose all data",
+        "No application-layer rate limiting on registration or login endpoints beyond Supabase's built-in OTP limits",
+        "Cron reliability depends on GitHub Actions schedule (external to Vercel) — if the repo is forked or Actions are disabled, expiry stops working",
+        "Single contributor, 16 commits, created June 28 2026 — extremely new, no battle testing"
+      ],
+      "mergePotential": "High — the architecture is clean and well-documented, the live deployment works, and the code quality is production-grade. The main blocker for real deployment is the missing center request-creation UI (slice 2), which is a bounded scope of work given the existing infrastructure. No significant refactoring would be needed to extend it.",
+      "diffusion": {
+        "ready": true,
+        "assets": [
+          "live-demo",
+          "clear-value-prop"
+        ],
+        "angle": "Lead with the donor experience: show the live feed with real time-windowed requests, explain that anyone can see what a hospital needs right now — no sign-up required. Emphasize the surplus alert mechanic (prevents waste) and the WhatsApp/Instagram share flow, which is how aid coordination actually spreads in Venezuela. Frame it as 'the missing link between good intentions and actual impact'. Hold a full spotlight until center request creation (slice 2) is shipped — that closes the loop and makes the platform self-sustaining.",
+        "gaps": [
+          "no demo video",
+          "no screenshots or visual assets",
+          "no branding kit",
+          "center request-creation (core supply-side flow) returns 404 — platform cannot operate without seeded data",
+          "no real users documented",
+          "README is default Next.js boilerplate"
+        ]
+      },
+      "repoUrl": "https://github.com/raulandreroman/venemed",
+      "liveUrl": "https://venemed.vercel.app/",
+      "videoUrl": "",
+      "x": 696,
+      "y": 436
+    },
+    {
+      "slug": "venezuela-juntos",
+      "name": "Venezuela Juntos (Missing Persons Facial Recognition)",
+      "type": "Family reunification web app with embedded facial recognition",
+      "summary": "Venezuela Juntos is a FastAPI server-rendered web application for disaster-relief family reunification. Families upload photos of missing persons; rescuers upload photos of people they found with contact info. The app c…",
+      "tier": "improve-first",
+      "severity": "high",
+      "solvesRealProblem": "yes",
+      "liveDemoStatus": "no-public-demo",
+      "onePitch": "Venezuela Juntos uses ArcFace AI to automatically match photos of missing persons with photos uploaded by rescuers — reuniting families separated by disaster in seconds.",
+      "scores": {
+        "maturity": 2,
+        "production": 2,
+        "organization": 4,
+        "viability": 3,
+        "product": 2,
+        "diffusion": 2,
+        "impact": 4
+      },
+      "signals": {
+        "stars": 0,
+        "commits": 8,
+        "loc": 985,
+        "contributors": 1,
+        "license": null
+      },
+      "stack": {
+        "frontend": [
+          "Jinja2 templates",
+          "Tailwind CSS (CDN)",
+          "HTML"
+        ],
+        "backend": [
+          "FastAPI",
+          "uvicorn"
+        ],
+        "database": [
+          "SQLite",
+          "SQLAlchemy 2.x ORM"
+        ],
+        "ai_ml": [
+          "InsightFace buffalo_l (ArcFace)",
+          "ONNX Runtime (CPU-only)",
+          "OpenCV headless",
+          "NumPy vectorized cosine similarity"
+        ],
+        "usesOrm": true,
+        "orm": "SQLAlchemy 2.x declarative ORM over SQLite; 3 tables: MissingPerson, FoundPerson, Match; embeddings stored as raw float32 BLOBs",
+        "pattern": "Monolithic server-rendered MVC with async ThreadPoolExecutor for CPU-bound ML"
+      },
+      "tags": [
+        "family-reunification",
+        "people-finder"
+      ],
+      "redFlags": [
+        "No authentication on any endpoint — fake missing/found person reports can be submitted by anyone",
+        "No file content-type validation, only extension check — malformed files could trigger downstream errors",
+        "O(N) linear scan loads all embeddings into RAM on every upload — degrades with dataset growth and has no vector index",
+        "SQLite single-writer cannot handle concurrent uploads; will serialize or error under real-world load",
+        "0.40 cosine similarity threshold (ArcFace default) may be too permissive and produce false-positive matches that mislead grieving families",
+        "No CSRF protection on form submissions",
+        "No rate limiting on upload endpoints — trivially abused",
+        "No deduplication: uploading the same photo twice creates a self-match record",
+        "No notification mechanism (email/SMS) when a match is found — families must actively poll the /matches page",
+        "ThreadPoolExecutor(max_workers=2) hard-caps concurrent face recognition to 2 requests system-wide"
+      ],
+      "mergePotential": "Low — self-contained monolith with no shared API, SDK, or component boundaries; the facerec.py toolkit could be extracted as a library for other projects doing face matching",
+      "diffusion": {
+        "ready": false,
+        "assets": [
+          "demo-video",
+          "clear-value-prop"
+        ],
+        "angle": "Lead with the humanitarian mission — AI-powered missing persons reunification for Venezuelan disaster victims — and show the demo video as proof-of-concept. Frame it as 'a team from Germany built this in 48 hours for earthquake victims in Venezuela.' Avoid implying it is production-ready.",
+        "gaps": [
+          "No public live demo for journalists or donors to try",
+          "No authentication — anyone can flood the system with fake missing-person reports, which is a serious trust/safety issue for a grieving-families use case",
+          "False-positive match risk at 0.40 ArcFace threshold could mislead families, a harmful outcome that undermines credibility",
+          "No real users or NGO validation yet",
+          "Single contributor, 8 commits, zero tests — very early prototype stage",
+          "SQLite and 2-worker ML cap will not survive any real traffic spike after publicity"
+        ]
+      },
+      "repoUrl": "https://github.com/OnBeIt/Venezuela_Juntos_v2",
+      "liveUrl": "https://github.com/OnBeIt/Venezuela_Juntos_v2",
+      "videoUrl": "https://youtu.be/k4PaAmArSfU",
+      "x": 960,
+      "y": 240
+    },
+    {
+      "slug": "venezuela-response-hub",
+      "name": "Venezuela Response Hub",
+      "type": "Static information hub / curated disaster-response directory (SSR SPA)",
+      "summary": "VZLA Response Hub is a bilingual (ES/EN) static-content SSR web app built with TanStack Start that acts as a curated directory hub for Venezuela earthquake response tools. It aggregates ~20 external platforms (people-fi…",
+      "tier": "promote",
+      "severity": "critical",
+      "solvesRealProblem": "yes",
+      "liveDemoStatus": "working",
+      "onePitch": "One URL for the Venezuela earthquake: find missing people, donate to verified orgs, and access 22+ vetted humanitarian tools — in Spanish or English, live now at vzlaresponsehub.org.",
+      "scores": {
+        "maturity": 2,
+        "production": 3,
+        "organization": 3,
+        "viability": 3,
+        "product": 3,
+        "diffusion": 3,
+        "impact": 3
+      },
+      "signals": {
+        "stars": 0,
+        "commits": 306,
+        "loc": 6915,
+        "contributors": 2,
+        "license": null
+      },
+      "stack": {
+        "frontend": [
+          "React 19",
+          "TanStack Start",
+          "TanStack Router",
+          "TailwindCSS v4",
+          "Radix UI / shadcn-ui",
+          "Vite 8"
+        ],
+        "backend": [
+          "TanStack Start SSR server handler (Nitro/h3)",
+          "Bun runtime"
+        ],
+        "database": [],
+        "ai_ml": [
+          "Lovable.dev (AI-assisted code generation)"
+        ],
+        "usesOrm": false,
+        "orm": "None — all content is hardcoded inline in TypeScript source files (i18n dictionary, static arrays)",
+        "pattern": "Single-route SSR SPA (TanStack Start) with no backend logic or data layer"
+      },
+      "tags": [
+        "donations-aid",
+        "people-finder",
+        "shelter-mapping",
+        "aid-logistics",
+        "mapping-geo",
+        "structural-inspection",
+        "family-reunification"
+      ],
+      "redFlags": [
+        "All crisis statistics (1430+ dead, 68900+ missing, '3,247 helpers') are hardcoded strings — the 'live' animated indicator is purely decorative with no data source",
+        "Social proof testimonials (Dr. Rivas, María from Miami, Andrea from Madrid, Vargas fire team) appear AI-generated and unverifiable",
+        "Donation bank account numbers are hardcoded — if any account changes, victims could send money to a wrong or closed account with no mechanism for correction short of a code deploy",
+        "Built entirely with Lovable.dev AI code generation — 306 commits in 2 days is an AI iteration pattern, not human authorship",
+        "No CI/CD, no tests, no automated quality gates of any kind",
+        "No mechanism to add new tools, update tool status, or flag offline tools without a code change and deploy"
+      ],
+      "mergePotential": "Medium. The curation quality and bilingual content are strong assets. The site is already live. However, it is architecturally a pure front-end directory with no data model, so it cannot be merged into a backend-driven platform without a significant rewrite of the content layer. The UI components and i18n pattern could be reused. The curated tool data and donation channel details are immediately portable.",
+      "diffusion": {
+        "ready": true,
+        "assets": [
+          "live-demo",
+          "demo-video",
+          "clear-value-prop"
+        ],
+        "angle": "Built in hours, not days: one bilingual URL that maps 22+ vetted humanitarian tools to what earthquake victims and diaspora actually need — find family, locate shelter, or donate to a verified org right now.",
+        "gaps": [
+          "No screenshots attached to submission for social sharing",
+          "Misleading 'live' indicators and hardcoded statistics could backfire if fact-checked by journalists",
+          "AI-generated testimonials undermine credibility if surfaced publicly",
+          "No real-users signal — zero stars, no community traction yet",
+          "Branding is functional but not distinctive enough for viral social posts"
+        ]
+      },
+      "repoUrl": "https://github.com/LauZulu/vzla-response-hub",
+      "liveUrl": "https://vzlaresponsehub.org",
+      "videoUrl": "https://youtu.be/SljWt38myP8",
+      "x": 534,
+      "y": 550
+    }
+  ],
+  "edges": [
+    {
+      "source": "acopiovzla",
+      "target": "aid-trace",
+      "weight": 3,
+      "shared": [
+        "aid-logistics",
+        "donations-aid",
+        "alerts-notifications"
+      ]
+    },
+    {
+      "source": "acopiovzla",
+      "target": "apoyo-venezuela",
+      "weight": 4,
+      "shared": [
+        "mapping-geo",
+        "aid-logistics",
+        "donations-aid",
+        "alerts-notifications"
+      ]
+    },
+    {
+      "source": "acopiovzla",
+      "target": "ayudave",
+      "weight": 4,
+      "shared": [
+        "shelter-mapping",
+        "donations-aid",
+        "aid-logistics",
+        "alerts-notifications"
+      ]
+    },
+    {
+      "source": "acopiovzla",
+      "target": "centraliza-ayuda",
+      "weight": 4,
+      "shared": [
+        "aid-logistics",
+        "mapping-geo",
+        "donations-aid",
+        "shelter-mapping"
+      ]
+    },
+    {
+      "source": "acopiovzla",
+      "target": "guacamalla",
+      "weight": 3,
+      "shared": [
+        "alerts-notifications",
+        "mapping-geo",
+        "aid-logistics"
+      ]
+    },
+    {
+      "source": "acopiovzla",
+      "target": "lanna-naty",
+      "weight": 4,
+      "shared": [
+        "mapping-geo",
+        "aid-logistics",
+        "alerts-notifications",
+        "shelter-mapping"
+      ]
+    },
+    {
+      "source": "acopiovzla",
+      "target": "localizadosvzlabot",
+      "weight": 3,
+      "shared": [
+        "shelter-mapping",
+        "donations-aid",
+        "alerts-notifications"
+      ]
+    },
+    {
+      "source": "acopiovzla",
+      "target": "rastro",
+      "weight": 4,
+      "shared": [
+        "shelter-mapping",
+        "mapping-geo",
+        "alerts-notifications",
+        "aid-logistics"
+      ]
+    },
+    {
+      "source": "acopiovzla",
+      "target": "reencuentros-terremotos-venezuela",
+      "weight": 3,
+      "shared": [
+        "mapping-geo",
+        "alerts-notifications",
+        "aid-logistics"
+      ]
+    },
+    {
+      "source": "acopiovzla",
+      "target": "resqlink",
+      "weight": 4,
+      "shared": [
+        "mapping-geo",
+        "alerts-notifications",
+        "aid-logistics",
+        "shelter-mapping"
+      ]
+    },
+    {
+      "source": "acopiovzla",
+      "target": "venezuela-response-hub",
+      "weight": 4,
+      "shared": [
+        "donations-aid",
+        "shelter-mapping",
+        "aid-logistics",
+        "mapping-geo"
+      ]
+    },
+    {
+      "source": "aid-trace",
+      "target": "apoyo-venezuela",
+      "weight": 3,
+      "shared": [
+        "aid-logistics",
+        "donations-aid",
+        "alerts-notifications"
+      ]
+    },
+    {
+      "source": "aid-trace",
+      "target": "ayudave",
+      "weight": 3,
+      "shared": [
+        "donations-aid",
+        "aid-logistics",
+        "alerts-notifications"
+      ]
+    },
+    {
+      "source": "apoyo-venezuela",
+      "target": "ayudave",
+      "weight": 6,
+      "shared": [
+        "donations-aid",
+        "seismic-data",
+        "structural-inspection",
+        "volunteer-coordination",
+        "aid-logistics",
+        "alerts-notifications"
+      ]
+    },
+    {
+      "source": "apoyo-venezuela",
+      "target": "centraliza-ayuda",
+      "weight": 3,
+      "shared": [
+        "aid-logistics",
+        "mapping-geo",
+        "donations-aid"
+      ]
+    },
+    {
+      "source": "apoyo-venezuela",
+      "target": "directorio-sismo",
+      "weight": 3,
+      "shared": [
+        "donations-aid",
+        "volunteer-coordination",
+        "structural-inspection"
+      ]
+    },
+    {
+      "source": "apoyo-venezuela",
+      "target": "guacamalla",
+      "weight": 4,
+      "shared": [
+        "alerts-notifications",
+        "mapping-geo",
+        "aid-logistics",
+        "volunteer-coordination"
+      ]
+    },
+    {
+      "source": "apoyo-venezuela",
+      "target": "lanna-naty",
+      "weight": 4,
+      "shared": [
+        "mapping-geo",
+        "aid-logistics",
+        "volunteer-coordination",
+        "alerts-notifications"
+      ]
+    },
+    {
+      "source": "apoyo-venezuela",
+      "target": "rastro",
+      "weight": 3,
+      "shared": [
+        "mapping-geo",
+        "alerts-notifications",
+        "aid-logistics"
+      ]
+    },
+    {
+      "source": "apoyo-venezuela",
+      "target": "reencuentros-terremotos-venezuela",
+      "weight": 4,
+      "shared": [
+        "mapping-geo",
+        "seismic-data",
+        "alerts-notifications",
+        "aid-logistics"
+      ]
+    },
+    {
+      "source": "apoyo-venezuela",
+      "target": "reestructuramos",
+      "weight": 4,
+      "shared": [
+        "structural-inspection",
+        "mapping-geo",
+        "volunteer-coordination",
+        "alerts-notifications"
+      ]
+    },
+    {
+      "source": "apoyo-venezuela",
+      "target": "resqlink",
+      "weight": 5,
+      "shared": [
+        "seismic-data",
+        "mapping-geo",
+        "alerts-notifications",
+        "aid-logistics",
+        "volunteer-coordination"
+      ]
+    },
+    {
+      "source": "apoyo-venezuela",
+      "target": "terrave",
+      "weight": 4,
+      "shared": [
+        "structural-inspection",
+        "mapping-geo",
+        "seismic-data",
+        "aid-logistics"
+      ]
+    },
+    {
+      "source": "apoyo-venezuela",
+      "target": "venezuela-response-hub",
+      "weight": 4,
+      "shared": [
+        "donations-aid",
+        "aid-logistics",
+        "mapping-geo",
+        "structural-inspection"
+      ]
+    },
+    {
+      "source": "ayuda-venezuela-bot",
+      "target": "ayudave",
+      "weight": 3,
+      "shared": [
+        "people-finder",
+        "aid-logistics",
+        "alerts-notifications"
+      ]
+    },
+    {
+      "source": "ayuda-venezuela-bot",
+      "target": "doomedag",
+      "weight": 3,
+      "shared": [
+        "people-finder",
+        "comms-chat",
+        "alerts-notifications"
+      ]
+    },
+    {
+      "source": "ayuda-venezuela-bot",
+      "target": "guacamalla",
+      "weight": 4,
+      "shared": [
+        "alerts-notifications",
+        "comms-chat",
+        "aid-logistics",
+        "people-finder"
+      ]
+    },
+    {
+      "source": "ayuda-venezuela-bot",
+      "target": "localizadosvzlabot",
+      "weight": 3,
+      "shared": [
+        "people-finder",
+        "alerts-notifications",
+        "comms-chat"
+      ]
+    },
+    {
+      "source": "ayuda-venezuela-bot",
+      "target": "rastro",
+      "weight": 3,
+      "shared": [
+        "people-finder",
+        "alerts-notifications",
+        "aid-logistics"
+      ]
+    },
+    {
+      "source": "ayuda-venezuela-bot",
+      "target": "reencuentros-terremotos-venezuela",
+      "weight": 3,
+      "shared": [
+        "people-finder",
+        "alerts-notifications",
+        "aid-logistics"
+      ]
+    },
+    {
+      "source": "ayuda-venezuela-bot",
+      "target": "resqlink",
+      "weight": 3,
+      "shared": [
+        "alerts-notifications",
+        "aid-logistics",
+        "people-finder"
+      ]
+    },
+    {
+      "source": "ayudave",
+      "target": "centraliza-ayuda",
+      "weight": 4,
+      "shared": [
+        "aid-logistics",
+        "donations-aid",
+        "shelter-mapping",
+        "people-finder"
+      ]
+    },
+    {
+      "source": "ayudave",
+      "target": "data-team",
+      "weight": 4,
+      "shared": [
+        "people-finder",
+        "family-reunification",
+        "aid-logistics",
+        "seismic-data"
+      ]
+    },
+    {
+      "source": "ayudave",
+      "target": "directorio-sismo",
+      "weight": 6,
+      "shared": [
+        "donations-aid",
+        "people-finder",
+        "shelter-mapping",
+        "medical-health",
+        "volunteer-coordination",
+        "structural-inspection"
+      ]
+    },
+    {
+      "source": "ayudave",
+      "target": "doomedag",
+      "weight": 3,
+      "shared": [
+        "people-finder",
+        "alerts-notifications",
+        "family-reunification"
+      ]
+    },
+    {
+      "source": "ayudave",
+      "target": "farove",
+      "weight": 4,
+      "shared": [
+        "family-reunification",
+        "people-finder",
+        "shelter-mapping",
+        "volunteer-coordination"
+      ]
+    },
+    {
+      "source": "ayudave",
+      "target": "found-people-telegram-bot",
+      "weight": 3,
+      "shared": [
+        "people-finder",
+        "family-reunification",
+        "alerts-notifications"
+      ]
+    },
+    {
+      "source": "ayudave",
+      "target": "guacamalla",
+      "weight": 4,
+      "shared": [
+        "alerts-notifications",
+        "aid-logistics",
+        "volunteer-coordination",
+        "people-finder"
+      ]
+    },
+    {
+      "source": "ayudave",
+      "target": "lanna-naty",
+      "weight": 4,
+      "shared": [
+        "aid-logistics",
+        "volunteer-coordination",
+        "alerts-notifications",
+        "shelter-mapping"
+      ]
+    },
+    {
+      "source": "ayudave",
+      "target": "localizadosvzlabot",
+      "weight": 5,
+      "shared": [
+        "people-finder",
+        "family-reunification",
+        "shelter-mapping",
+        "donations-aid",
+        "alerts-notifications"
+      ]
+    },
+    {
+      "source": "ayudave",
+      "target": "rastro",
+      "weight": 4,
+      "shared": [
+        "people-finder",
+        "shelter-mapping",
+        "alerts-notifications",
+        "aid-logistics"
+      ]
+    },
+    {
+      "source": "ayudave",
+      "target": "reencuentros-terremotos-venezuela",
+      "weight": 5,
+      "shared": [
+        "people-finder",
+        "family-reunification",
+        "seismic-data",
+        "alerts-notifications",
+        "aid-logistics"
+      ]
+    },
+    {
+      "source": "ayudave",
+      "target": "reestructuramos",
+      "weight": 3,
+      "shared": [
+        "structural-inspection",
+        "volunteer-coordination",
+        "alerts-notifications"
+      ]
+    },
+    {
+      "source": "ayudave",
+      "target": "resqlink",
+      "weight": 7,
+      "shared": [
+        "seismic-data",
+        "alerts-notifications",
+        "aid-logistics",
+        "shelter-mapping",
+        "volunteer-coordination",
+        "medical-health",
+        "people-finder"
+      ]
+    },
+    {
+      "source": "ayudave",
+      "target": "terrave",
+      "weight": 3,
+      "shared": [
+        "structural-inspection",
+        "seismic-data",
+        "aid-logistics"
+      ]
+    },
+    {
+      "source": "ayudave",
+      "target": "venemed",
+      "weight": 3,
+      "shared": [
+        "medical-health",
+        "donations-aid",
+        "aid-logistics"
+      ]
+    },
+    {
+      "source": "ayudave",
+      "target": "venezuela-response-hub",
+      "weight": 6,
+      "shared": [
+        "donations-aid",
+        "people-finder",
+        "shelter-mapping",
+        "aid-logistics",
+        "structural-inspection",
+        "family-reunification"
+      ]
+    },
+    {
+      "source": "busca-chat",
+      "target": "doomedag",
+      "weight": 3,
+      "shared": [
+        "people-finder",
+        "comms-chat",
+        "family-reunification"
+      ]
+    },
+    {
+      "source": "busca-chat",
+      "target": "localizadosvzlabot",
+      "weight": 3,
+      "shared": [
+        "people-finder",
+        "family-reunification",
+        "comms-chat"
+      ]
+    },
+    {
+      "source": "centraliza-ayuda",
+      "target": "directorio-sismo",
+      "weight": 3,
+      "shared": [
+        "donations-aid",
+        "people-finder",
+        "shelter-mapping"
+      ]
+    },
+    {
+      "source": "centraliza-ayuda",
+      "target": "guacamalla",
+      "weight": 3,
+      "shared": [
+        "mapping-geo",
+        "aid-logistics",
+        "people-finder"
+      ]
+    },
+    {
+      "source": "centraliza-ayuda",
+      "target": "lanna-naty",
+      "weight": 3,
+      "shared": [
+        "mapping-geo",
+        "aid-logistics",
+        "shelter-mapping"
+      ]
+    },
+    {
+      "source": "centraliza-ayuda",
+      "target": "localizadosvzlabot",
+      "weight": 3,
+      "shared": [
+        "people-finder",
+        "shelter-mapping",
+        "donations-aid"
+      ]
+    },
+    {
+      "source": "centraliza-ayuda",
+      "target": "rastro",
+      "weight": 4,
+      "shared": [
+        "people-finder",
+        "shelter-mapping",
+        "mapping-geo",
+        "aid-logistics"
+      ]
+    },
+    {
+      "source": "centraliza-ayuda",
+      "target": "reencuentros-terremotos-venezuela",
+      "weight": 3,
+      "shared": [
+        "people-finder",
+        "mapping-geo",
+        "aid-logistics"
+      ]
+    },
+    {
+      "source": "centraliza-ayuda",
+      "target": "resqlink",
+      "weight": 4,
+      "shared": [
+        "mapping-geo",
+        "aid-logistics",
+        "shelter-mapping",
+        "people-finder"
+      ]
+    },
+    {
+      "source": "centraliza-ayuda",
+      "target": "venezuela-response-hub",
+      "weight": 5,
+      "shared": [
+        "donations-aid",
+        "people-finder",
+        "shelter-mapping",
+        "aid-logistics",
+        "mapping-geo"
+      ]
+    },
+    {
+      "source": "confia",
+      "target": "localizadosvzlabot",
+      "weight": 3,
+      "shared": [
+        "donations-aid",
+        "alerts-notifications",
+        "comms-chat"
+      ]
+    },
+    {
+      "source": "data-team",
+      "target": "reencuentros-terremotos-venezuela",
+      "weight": 4,
+      "shared": [
+        "people-finder",
+        "family-reunification",
+        "seismic-data",
+        "aid-logistics"
+      ]
+    },
+    {
+      "source": "data-team",
+      "target": "resqlink",
+      "weight": 3,
+      "shared": [
+        "seismic-data",
+        "aid-logistics",
+        "people-finder"
+      ]
+    },
+    {
+      "source": "data-team",
+      "target": "venezuela-response-hub",
+      "weight": 3,
+      "shared": [
+        "people-finder",
+        "aid-logistics",
+        "family-reunification"
+      ]
+    },
+    {
+      "source": "directorio-sismo",
+      "target": "farove",
+      "weight": 3,
+      "shared": [
+        "people-finder",
+        "shelter-mapping",
+        "volunteer-coordination"
+      ]
+    },
+    {
+      "source": "directorio-sismo",
+      "target": "localizadosvzlabot",
+      "weight": 3,
+      "shared": [
+        "people-finder",
+        "shelter-mapping",
+        "donations-aid"
+      ]
+    },
+    {
+      "source": "directorio-sismo",
+      "target": "resqlink",
+      "weight": 4,
+      "shared": [
+        "shelter-mapping",
+        "volunteer-coordination",
+        "medical-health",
+        "people-finder"
+      ]
+    },
+    {
+      "source": "directorio-sismo",
+      "target": "venezuela-response-hub",
+      "weight": 4,
+      "shared": [
+        "donations-aid",
+        "people-finder",
+        "shelter-mapping",
+        "structural-inspection"
+      ]
+    },
+    {
+      "source": "doomedag",
+      "target": "found-people-telegram-bot",
+      "weight": 3,
+      "shared": [
+        "people-finder",
+        "family-reunification",
+        "alerts-notifications"
+      ]
+    },
+    {
+      "source": "doomedag",
+      "target": "guacamalla",
+      "weight": 4,
+      "shared": [
+        "alerts-notifications",
+        "mapping-geo",
+        "comms-chat",
+        "people-finder"
+      ]
+    },
+    {
+      "source": "doomedag",
+      "target": "localizadosvzlabot",
+      "weight": 4,
+      "shared": [
+        "people-finder",
+        "family-reunification",
+        "alerts-notifications",
+        "comms-chat"
+      ]
+    },
+    {
+      "source": "doomedag",
+      "target": "rastro",
+      "weight": 3,
+      "shared": [
+        "people-finder",
+        "mapping-geo",
+        "alerts-notifications"
+      ]
+    },
+    {
+      "source": "doomedag",
+      "target": "reencuentros-terremotos-venezuela",
+      "weight": 4,
+      "shared": [
+        "people-finder",
+        "family-reunification",
+        "mapping-geo",
+        "alerts-notifications"
+      ]
+    },
+    {
+      "source": "doomedag",
+      "target": "resqlink",
+      "weight": 3,
+      "shared": [
+        "mapping-geo",
+        "alerts-notifications",
+        "people-finder"
+      ]
+    },
+    {
+      "source": "doomedag",
+      "target": "venezuela-response-hub",
+      "weight": 3,
+      "shared": [
+        "people-finder",
+        "mapping-geo",
+        "family-reunification"
+      ]
+    },
+    {
+      "source": "farove",
+      "target": "localizadosvzlabot",
+      "weight": 3,
+      "shared": [
+        "people-finder",
+        "family-reunification",
+        "shelter-mapping"
+      ]
+    },
+    {
+      "source": "farove",
+      "target": "resqlink",
+      "weight": 3,
+      "shared": [
+        "shelter-mapping",
+        "volunteer-coordination",
+        "people-finder"
+      ]
+    },
+    {
+      "source": "farove",
+      "target": "venezuela-response-hub",
+      "weight": 3,
+      "shared": [
+        "people-finder",
+        "shelter-mapping",
+        "family-reunification"
+      ]
+    },
+    {
+      "source": "found-people-telegram-bot",
+      "target": "localizadosvzlabot",
+      "weight": 3,
+      "shared": [
+        "people-finder",
+        "family-reunification",
+        "alerts-notifications"
+      ]
+    },
+    {
+      "source": "found-people-telegram-bot",
+      "target": "reencuentros-terremotos-venezuela",
+      "weight": 3,
+      "shared": [
+        "people-finder",
+        "family-reunification",
+        "alerts-notifications"
+      ]
+    },
+    {
+      "source": "guacamalla",
+      "target": "lanna-naty",
+      "weight": 4,
+      "shared": [
+        "mapping-geo",
+        "aid-logistics",
+        "volunteer-coordination",
+        "alerts-notifications"
+      ]
+    },
+    {
+      "source": "guacamalla",
+      "target": "localizadosvzlabot",
+      "weight": 3,
+      "shared": [
+        "people-finder",
+        "alerts-notifications",
+        "comms-chat"
+      ]
+    },
+    {
+      "source": "guacamalla",
+      "target": "rastro",
+      "weight": 4,
+      "shared": [
+        "people-finder",
+        "mapping-geo",
+        "alerts-notifications",
+        "aid-logistics"
+      ]
+    },
+    {
+      "source": "guacamalla",
+      "target": "reencuentros-terremotos-venezuela",
+      "weight": 4,
+      "shared": [
+        "people-finder",
+        "mapping-geo",
+        "alerts-notifications",
+        "aid-logistics"
+      ]
+    },
+    {
+      "source": "guacamalla",
+      "target": "reestructuramos",
+      "weight": 3,
+      "shared": [
+        "mapping-geo",
+        "volunteer-coordination",
+        "alerts-notifications"
+      ]
+    },
+    {
+      "source": "guacamalla",
+      "target": "resqlink",
+      "weight": 5,
+      "shared": [
+        "mapping-geo",
+        "alerts-notifications",
+        "aid-logistics",
+        "volunteer-coordination",
+        "people-finder"
+      ]
+    },
+    {
+      "source": "guacamalla",
+      "target": "venezuela-response-hub",
+      "weight": 3,
+      "shared": [
+        "people-finder",
+        "aid-logistics",
+        "mapping-geo"
+      ]
+    },
+    {
+      "source": "lanna-naty",
+      "target": "rastro",
+      "weight": 4,
+      "shared": [
+        "shelter-mapping",
+        "mapping-geo",
+        "alerts-notifications",
+        "aid-logistics"
+      ]
+    },
+    {
+      "source": "lanna-naty",
+      "target": "reencuentros-terremotos-venezuela",
+      "weight": 3,
+      "shared": [
+        "mapping-geo",
+        "alerts-notifications",
+        "aid-logistics"
+      ]
+    },
+    {
+      "source": "lanna-naty",
+      "target": "reestructuramos",
+      "weight": 3,
+      "shared": [
+        "mapping-geo",
+        "volunteer-coordination",
+        "alerts-notifications"
+      ]
+    },
+    {
+      "source": "lanna-naty",
+      "target": "resqlink",
+      "weight": 5,
+      "shared": [
+        "mapping-geo",
+        "alerts-notifications",
+        "aid-logistics",
+        "shelter-mapping",
+        "volunteer-coordination"
+      ]
+    },
+    {
+      "source": "lanna-naty",
+      "target": "venezuela-response-hub",
+      "weight": 3,
+      "shared": [
+        "shelter-mapping",
+        "aid-logistics",
+        "mapping-geo"
+      ]
+    },
+    {
+      "source": "localizadosvzlabot",
+      "target": "rastro",
+      "weight": 3,
+      "shared": [
+        "people-finder",
+        "shelter-mapping",
+        "alerts-notifications"
+      ]
+    },
+    {
+      "source": "localizadosvzlabot",
+      "target": "reencuentros-terremotos-venezuela",
+      "weight": 3,
+      "shared": [
+        "people-finder",
+        "family-reunification",
+        "alerts-notifications"
+      ]
+    },
+    {
+      "source": "localizadosvzlabot",
+      "target": "resqlink",
+      "weight": 3,
+      "shared": [
+        "alerts-notifications",
+        "shelter-mapping",
+        "people-finder"
+      ]
+    },
+    {
+      "source": "localizadosvzlabot",
+      "target": "venezuela-response-hub",
+      "weight": 4,
+      "shared": [
+        "donations-aid",
+        "people-finder",
+        "shelter-mapping",
+        "family-reunification"
+      ]
+    },
+    {
+      "source": "rastro",
+      "target": "reencuentros-terremotos-venezuela",
+      "weight": 4,
+      "shared": [
+        "people-finder",
+        "mapping-geo",
+        "alerts-notifications",
+        "aid-logistics"
+      ]
+    },
+    {
+      "source": "rastro",
+      "target": "resqlink",
+      "weight": 5,
+      "shared": [
+        "mapping-geo",
+        "alerts-notifications",
+        "aid-logistics",
+        "shelter-mapping",
+        "people-finder"
+      ]
+    },
+    {
+      "source": "rastro",
+      "target": "venezuela-response-hub",
+      "weight": 4,
+      "shared": [
+        "people-finder",
+        "shelter-mapping",
+        "aid-logistics",
+        "mapping-geo"
+      ]
+    },
+    {
+      "source": "reencuentros-terremotos-venezuela",
+      "target": "resqlink",
+      "weight": 5,
+      "shared": [
+        "seismic-data",
+        "mapping-geo",
+        "alerts-notifications",
+        "aid-logistics",
+        "people-finder"
+      ]
+    },
+    {
+      "source": "reencuentros-terremotos-venezuela",
+      "target": "terrave",
+      "weight": 3,
+      "shared": [
+        "mapping-geo",
+        "seismic-data",
+        "aid-logistics"
+      ]
+    },
+    {
+      "source": "reencuentros-terremotos-venezuela",
+      "target": "venezuela-response-hub",
+      "weight": 4,
+      "shared": [
+        "people-finder",
+        "aid-logistics",
+        "mapping-geo",
+        "family-reunification"
+      ]
+    },
+    {
+      "source": "reestructuramos",
+      "target": "resqlink",
+      "weight": 3,
+      "shared": [
+        "mapping-geo",
+        "alerts-notifications",
+        "volunteer-coordination"
+      ]
+    },
+    {
+      "source": "resqlink",
+      "target": "terrave",
+      "weight": 3,
+      "shared": [
+        "mapping-geo",
+        "seismic-data",
+        "aid-logistics"
+      ]
+    },
+    {
+      "source": "resqlink",
+      "target": "venezuela-response-hub",
+      "weight": 4,
+      "shared": [
+        "people-finder",
+        "shelter-mapping",
+        "aid-logistics",
+        "mapping-geo"
+      ]
+    },
+    {
+      "source": "terrave",
+      "target": "venezuela-response-hub",
+      "weight": 3,
+      "shared": [
+        "aid-logistics",
+        "mapping-geo",
+        "structural-inspection"
+      ]
+    }
+  ]
+}

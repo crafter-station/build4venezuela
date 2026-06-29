@@ -1,0 +1,131 @@
+{
+  "project_slug": "apoyo-venezuela-org",
+  "name": "Apoyo Venezuela",
+  "repo_url": "https://github.com/mfranceschit/apoyo-venezuela",
+  "live_url": "https://www.apoyovenezuela.org",
+  "video_url": "https://youtu.be/jVl5LC6cV7Y",
+  "countries": [
+    "España",
+    "Chile"
+  ],
+  "db_description": "## ¿Qué construiste?\n\n**ApoyoVenezuela** es un directorio comunitario de centros de acopio y puntos de voluntariado, validado por gente real que ya donó o ayudó en cada lugar. Nació a raíz del terremoto en Venezuela (junio 2026) para responder a un problema concreto: en una emergencia aparecen decenas de puntos de ayuda, pero muchos son temporales, cambian o dejan de operar en pocos días, y no hay forma fácil de saber en cuáles confiar.\n\nEn lugar de una lista estática que envejece, es un **proyecto vivo que se sostiene entre todos**. La comunidad lo mantiene al día con tres acciones:\n\n- **Agregar** un lugar que conozcas, para que otros lo encuentren.\n- **Confirmar** que estuviste ahí (donaste o fuiste voluntario). Cada confirmación le da confianza a quien viene después.\n- **Dar de baja** un lugar cuando ya cerró, tiene datos erróneos o muestra actividad sospechosa. Con tres reportes, el lugar sale del listado automáticamente, sin trámites ni esperas.\n\n## ¿Para quién es?\n\nPara cualquiera que quiera ayudar y no sepa por dónde empezar: personas dentro y fuera de Venezuela que buscan un punto confiable donde donar o ser voluntarias, y quienes conocen lugares de ayuda y quieren ponerlos en el mapa.\n\n## ¿Cómo ayuda?\n\nConvierte información dispersa y difícil de verificar en un listado en el que se puede confiar, cuidado por la propia comunidad. Nadie depende de un administrador central: la gente que pisa los lugares es la que valida, corrige y depura el directorio en tiempo real.\n\n## ¿Qué debería probar la gente primero?\n\n1. Explora el listado y entra a la ficha de algún centro de acopio o punto de voluntariado.\n2. Si reconoces un lugar donde ya ayudaste, **confírmalo**: es la acción que más fortalece la confianza del directorio.\n3. ¿Sabes de un lugar que falta? **Agrégalo** en segundos.\n4. Compártelo con quien esté buscando cómo ayudar 👉 [apoyovenezuela.org](https://www.apoyovenezuela.org)",
+  "lifecycle_status": "ready_to_use",
+  "analysis": {
+    "summary": "ApoyoVenezuela.org is a community-sourced, live directory of donation collection points and volunteering opportunities for Venezuelan earthquake victims abroad (diaspora-focused). Built with React 19 + Supabase, it is already deployed at apoyovenezuela.org and contains 17+ seeded real locations across Spain, Chile, Argentina, Uruguay, and Mexico. The architecture is tight and deliberate: reads go direct from the anon client to Supabase (RLS-protected), while all writes are funneled through Deno Edge Functions that enforce input validation, rate limiting via IP+UserAgent fingerprinting, and use the service role key server-side. A crowd-sourced moderation system auto-hides places with 3+ reports. The codebase is clean, well-tested (vitest), trilingual (ES/EN/PT), and has CI for function deployment.",
+    "project_type": "Community-sourced donation point and volunteering directory — React SPA backed by Supabase BaaS",
+    "stack": {
+      "frontend": [
+        "React 19",
+        "TypeScript",
+        "Tailwind CSS v4",
+        "Vite",
+        "TanStack Query v5",
+        "Vercel Analytics"
+      ],
+      "backend": [
+        "Supabase Edge Functions (Deno)"
+      ],
+      "database": [
+        "Supabase (PostgreSQL)",
+        "Row Level Security",
+        "PLpgSQL RPC for rate limiting"
+      ],
+      "infra_deploy": [
+        "Supabase (hosted)",
+        "GitHub Actions (edge function deploy)"
+      ],
+      "ai_ml": [],
+      "languages": [
+        "TypeScript",
+        "PLpgSQL"
+      ]
+    },
+    "architecture": {
+      "pattern": "BaaS SPA — static frontend + Supabase as backend (DB + Auth + Edge Functions)",
+      "uses_orm": false,
+      "orm_or_db_layer": "Direct Supabase JS client with typed queries; no ORM. Reads hit Supabase anon API directly; writes go through Deno Edge Functions using the service role key.",
+      "api_design": "Three Supabase Edge Functions (add-place, add-confirmation, report-place) handle all mutations. Reads are client-side queries to Supabase tables/views with RLS.",
+      "separation_of_concerns": "Clear: src/components for UI, src/hooks for data fetching/mutations, src/lib for pure logic (validation, rate limits, hours), src/i18n for translations, supabase/functions for server-side write handlers, db/migrations for schema.",
+      "modularity": "High — shared validation and rate-limit logic is extracted into supabase/functions/_shared/ and reused across all three edge functions. Frontend hooks wrap all mutations behind a clean interface.",
+      "notable_patterns": [
+        "Anonymous write pattern: all mutations go through edge functions to keep service role key server-side",
+        "Crowd-sourced moderation: active_places view hides places with >=3 claims automatically (SQL)",
+        "Rate limiting via SHA-256(IP|UserAgent) fingerprint stored in Postgres, enforced via RPC",
+        "Graceful degradation: on Supabase failure, UI falls back to hardcoded SEED_PLACES so the app stays usable",
+        "Trilingual i18n (ES/EN/PT) with custom hook, no external library"
+      ]
+    },
+    "code_organization": {
+      "score": 4,
+      "directory_structure": "src/ cleanly split into components/, hooks/, lib/, i18n/, types/, data/. supabase/functions/ has one directory per function plus _shared/. db/migrations/ holds hand-written SQL. No dead files or obvious cruft.",
+      "naming_quality": "Excellent. Files, functions, and types are self-explanatory (usePlaces, addPlaceViaFunction, enforceRateLimit, normalizeAddPlacePayload). The _shared/ naming convention mirrors Supabase conventions.",
+      "documentation_quality": "README covers local dev, env vars, local Supabase, and local edge-function serving with curl examples. Inline docs are sparse but code is readable enough. Docs/superpowers/plans contain lightweight design specs for recent features.",
+      "reasoning": "Well above hackathon average. The only gap keeping it from 5 is the absence of JSDoc on public functions and no architectural diagram, but the code structure is self-documenting."
+    },
+    "production_readiness": {
+      "score": 4,
+      "has_auth": false,
+      "has_error_handling": true,
+      "has_logging": false,
+      "has_env_config": true,
+      "has_deploy_config": true,
+      "secrets_handling": "Service role key lives only in Supabase edge function environment (Deno.env). Frontend receives only the anon key via VITE_ env vars. README explicitly warns against exposing service role key via Vite.",
+      "security_notes": "Rate limiting with dual keys (global + per-place) for all write operations. Input validation and type-narrowing in every edge function before DB access. RLS enabled on all tables. Place moderation auto-removes suspicious entries. Fingerprinting uses SHA-256(IP+UserAgent) — can be bypassed but is a reasonable mitigation for anonymous submissions.",
+      "scalability_notes": "Client fetches ALL places and ALL confirmations in two unbounded queries on every load — will degrade visibly past a few thousand rows. No pagination or server-side filtering. Supabase free tier has row limits. For a viral spike this is a real concern.",
+      "reasoning": "The site is already live and serving real users. All write paths are secured server-side. The main production gap is no server-side logging/observability beyond Vercel Analytics, and the unbounded client-side data fetch won't scale past a few thousand places."
+    },
+    "maturity": {
+      "score": 4,
+      "has_readme": true,
+      "has_tests": true,
+      "has_ci": true,
+      "is_real_or_boilerplate": "Real, deployed, actively maintained project. 62 commits in 3 days from 4 contributors, real seed data for 17 physical locations, an actual live domain (apoyovenezuela.org), and evidence of iterative feature additions (hours, timezone, place_claims migration history).",
+      "reasoning": "This is not scaffolding — it has real location data, a live URL, active schema migrations, vitest unit tests covering validation and mutation logic, and a CI pipeline for edge function deployment. Remarkable output for 3 days."
+    },
+    "viability": {
+      "score": 4,
+      "reasoning": "The project is already live and helping real people. Its narrow, well-executed scope (find where to donate/volunteer near you) is exactly what's needed in the first days after a disaster. The diaspora-first approach is smart given Venezuela's large international community. The main risk is scalability if it goes viral and the unbounded fetch pattern hits limits, but that is a tractable engineering problem."
+    },
+    "key_features": [
+      "Community-sourced directory of physical donation drop-off points and volunteering locations across the Venezuelan diaspora",
+      "Crowd-sourced moderation: places auto-hidden after 3 reports (SQL view, no admin needed)",
+      "Community confirmation system: users log recent visits/donations to validate a place is still active",
+      "Open-hours tracking with timezone-aware 'open now' filter",
+      "Graceful degradation to hardcoded seed data when Supabase is unavailable",
+      "Full trilingual UI (Spanish, English, Portuguese)",
+      "Rate-limited anonymous writes via Supabase Edge Functions (no user accounts required)",
+      "Country-level filtering with searchable combobox",
+      "Vercel Analytics integration"
+    ],
+    "domain_tags": [
+      "donations-aid",
+      "volunteer-coordination"
+    ],
+    "merge_potential": "Low overlap with other projects. This is a diaspora-facing donation logistics tool, not an in-Venezuela rescue/shelter/medical tool. Could complement shelter-mapping or aid-logistics projects as a supply-side counterpart, but is independently deployable and already live.",
+    "red_flags": [
+      "Client fetches ALL places + ALL confirmations in two unbounded queries — will degrade at scale with no pagination or server-side filtering",
+      "Rate limiting fingerprint (SHA-256 of IP+UserAgent) is bypassable with VPN rotation or spoofed user agents — moderation is automated but could be gamed",
+      "No admin UI to review reported places before they're auto-hidden — legitimate places could be mass-reported and vanish",
+      "GitHub Actions CI only deploys edge functions, not the frontend — frontend deploy pipeline is not visible in repo (presumably manual or connected via Vercel dashboard)",
+      "No structured logging or error monitoring (e.g., Sentry) — silent failures in edge functions beyond what Supabase logs capture"
+    ]
+  },
+  "signals": {
+    "accessible": true,
+    "stars": 0,
+    "forks": 0,
+    "contributors": 4,
+    "commit_count": 62,
+    "code_loc": 3089,
+    "created_at": "2026-06-26T10:19:56Z",
+    "pushed_at": "2026-06-28T13:20:53Z",
+    "license": null,
+    "languages_bytes": {
+      "TypeScript": 104598,
+      "PLpgSQL": 2152,
+      "HTML": 1645,
+      "CSS": 748
+    },
+    "archived": false
+  }
+}

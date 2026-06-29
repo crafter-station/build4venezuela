@@ -1,0 +1,138 @@
+{
+  "project_slug": "psicoayudave",
+  "name": "Psico Ayuda Venezuela",
+  "repo_url": "https://github.com/enBonnet/psico-support",
+  "live_url": "https://psicoayudaven.com/",
+  "video_url": "",
+  "countries": [
+    "Venezuela",
+    "and venezuelans around the world"
+  ],
+  "db_description": "# Red de Apoyo Psicológico Venezuela\n\nPlataforma de apoyo psicológico para respuesta a emergencias en Venezuela. Conecta a personas que necesitan contención emocional con psicólogos verificados, y permite a los profesionales registrarse, subir sus credenciales y gestionar su disponibilidad.\n\n**Producción:** [psicoayudaven.com](https://psicoayudaven.com)\n\n## Características\n\n- **Ruta de paciente** (`/ayuda`): acceso rápido a ayuda presencial o a distancia.\n- **Directorio de profesionales** (`/ayuda/profesionales`): psicólogos verificados con estado en línea y contacto directo por WhatsApp. Los disponibles aparecen primero. Grilla de 2 columnas en escritorio.\n- **Perfil profesional** (`/ayuda/profesionales/$id`): página pública por profesional con SEO (Open Graph, Twitter Cards, JSON-LD) y botón **Compartir** (Web Share API → portapapeles).\n- **Registro de profesionales** (`/profesional/registro`): formulario en dos pasos. La credencial es un único número de colegiación agnóstico de país (+ colegio certificador opcional). Soporta psicólogos dentro y fuera de Venezuela.\n- **Panel del profesional** (`/profesional/panel`): activar/desactivar disponibilidad (\"En línea\" / \"No conectado\").\n- **Panel de administración** (`/admin`): revisar y verificar o rechazar registros. Acceso basado en base de datos (columna `user.role`).\n- **Centro de cuenta** (`/cuenta`): hub según rol (login, panel, admin, cerrar sesión).\n- **SEO** en todas las páginas públicas (títulos, descripciones, Open Graph, canonical vía `src/lib/seo.ts`).\n- **Autenticación** con Better Auth (email + contraseña).\n- UI _mobile-first_ con estética _liquid glass_ sobre la paleta Medicall. Navegación: barra inferior en móvil, barra superior en escritorio.",
+  "lifecycle_status": "ready_to_use",
+  "analysis": {
+    "summary": "psico-support (psicoayudaven.com) is a real, working psychological support directory platform built with TanStack Start (React SSR) deployed on Cloudflare Workers with D1 SQLite via Drizzle ORM. It provides a searchable, paginated directory of verified psychologists who can be contacted directly via WhatsApp, with a professional self-registration flow, admin approval workflow, and availability toggling. The codebase shows genuine, intentional design decisions documented throughout — this is not boilerplate. The domain psicoayudaven.com appears in the wrangler config, indicating real deployment intent. Created 2 days before the hackathon deadline with 24 commits and active schema iteration (7 migration files).",
+    "project_type": "Full-stack SSR web app (TanStack Start) deployed to Cloudflare Workers edge runtime",
+    "stack": {
+      "frontend": [
+        "React 19",
+        "TanStack Router / TanStack Start (SSR)",
+        "Tailwind CSS v4",
+        "Radix UI",
+        "TanStack Query",
+        "TanStack Form",
+        "Lucide React",
+        "PWA (vite-plugin-pwa)"
+      ],
+      "backend": [
+        "TanStack Start server functions (createServerFn)",
+        "better-auth (email+password)",
+        "Drizzle ORM"
+      ],
+      "database": [
+        "Cloudflare D1 (SQLite)",
+        "better-sqlite3 (local dev)"
+      ],
+      "infra_deploy": [
+        "Cloudflare Workers",
+        "Cloudflare D1",
+        "Wrangler CLI",
+        "Vite 8 + @cloudflare/vite-plugin"
+      ],
+      "ai_ml": [],
+      "languages": [
+        "TypeScript",
+        "CSS"
+      ]
+    },
+    "architecture": {
+      "pattern": "SSR full-stack with co-located server functions (no separate API server)",
+      "uses_orm": true,
+      "orm_or_db_layer": "Drizzle ORM over Cloudflare D1 (SQLite). DB connection is lazily initialised from the Cloudflare env binding set per-request via setCloudflareEnv(); a module-level cached singleton prevents repeated initialisation. Local dev uses better-sqlite3.",
+      "api_design": "TanStack Start createServerFn RPCs — typed, co-located with route modules, validated with Zod. No REST/GraphQL surface. All auth-gated operations re-verify the session on every call via better-auth + DB role lookup.",
+      "separation_of_concerns": "src/server/ holds all server-side logic (professionals.ts, locations.ts); src/db/ holds schema + connection; src/routes/ holds page components and their loaders/beforeLoad guards; src/lib/ holds cross-cutting utilities (auth, notifications, seo, env).",
+      "modularity": "Good — shared WHERE builder (buildProfessionalWhere), shared insert builder (buildProValues), and shared Zod schemas prevent drift between list, random-pick, and registration paths.",
+      "notable_patterns": [
+        "Admin role stored as DB column (not env list), looked up per-request — role changes take effect without redeploy",
+        "Paginated professional listing with shared WHERE clause reused by 'contact random' feature to guarantee consistent filter semantics",
+        "WhatsApp is the sole contact mechanism — no in-app messaging, no email blast",
+        "SSR loader pre-fetches first page then suspense query with refetchInterval:20s keeps availability status live",
+        "Population demographics stored as JSON text array with LIKE filter — acceptable for small table, noted in comments",
+        "Seven migration files showing active schema iteration (collapsed Venezuelan credential fields from 4 columns to 1 country-agnostic field)"
+      ]
+    },
+    "code_organization": {
+      "score": 4,
+      "directory_structure": "Clear: src/server/ (business logic), src/db/ (ORM), src/routes/ (file-based routing with TanStack), src/lib/ (utilities), src/components/ (UI). Drizzle migrations in drizzle/. Public assets in public/.",
+      "naming_quality": "Excellent — Spanish route paths (/ayuda, /profesional) match the target audience; English identifiers in code; Zod schemas named *Schema; server fns named after their action.",
+      "documentation_quality": "Unusually high for a hackathon — extensive 'ponytail:' inline comments on every non-obvious design decision explaining the why, not just the what. AGENTS.md and docs/ui-style.md present.",
+      "reasoning": "Code quality significantly exceeds typical hackathon submissions. Intentional tradeoffs are explicitly documented (e.g., ORDER BY RANDOM() acceptable while <1k rows, LIKE filter can't use index). Consistent TypeScript throughout with Zod validation on all server function inputs."
+    },
+    "production_readiness": {
+      "score": 3,
+      "has_auth": true,
+      "has_error_handling": true,
+      "has_logging": true,
+      "has_env_config": true,
+      "has_deploy_config": true,
+      "secrets_handling": "BETTER_AUTH_SECRET in .env.example (not hardcoded). D1 binding and database_id committed to wrangler.jsonc (D1 IDs are not secrets, but the database_name and ID are public). Sentry DSN is optional via VITE_SENTRY_DSN.",
+      "security_notes": "Admin operations re-check DB role on every server fn call — no stale JWT privilege escalation. Public listing only returns verified professionals. WhatsApp numbers are publicly visible in the directory listing with no auth wall — any scraper can harvest them. No rate limiting on any endpoint. Email verification is not enforced before professional registration (account creation immediately creates a 'pending' row that admins must approve — this is intentional but means anyone can occupy the pending queue).",
+      "scalability_notes": "Cloudflare Workers + D1 is edge-distributed and auto-scales. D1 is eventually consistent on replicas but reads on Workers are handled by the primary unless using read replicas. LIKE '%...%' filters and ORDER BY RANDOM() are fine at hackathon scale (<1k rows) but would need indexing strategy if the directory grows to tens of thousands.",
+      "reasoning": "Strong fundamentals — auth, role-based access, Sentry integration, Zod validation, friendly error messages that never leak raw SQL. Missing: no CI pipeline, no tests, no rate limiting, and sendDefaultPii:true in Sentry logs user IPs (potential privacy concern for vulnerable earthquake victims)."
+    },
+    "maturity": {
+      "score": 3,
+      "has_readme": true,
+      "has_tests": false,
+      "has_ci": false,
+      "is_real_or_boilerplate": "Real — seven DB migrations show active schema evolution over the project's two-day life (collapsed Venezuelan credential fields, added country/estado/ciudad, added role column). The wrangler.jsonc contains an actual D1 database_id and custom domain (psicoayudaven.com). Server functions have production-quality error handling and user-facing Spanish messages.",
+      "reasoning": "Clearly a real working MVP, not scaffolding. However, 24 commits, 1 contributor, no tests, and no CI pipeline are significant gaps for a system handling vulnerable users' contact information. The vitest dependency is declared but no test files exist."
+    },
+    "viability": {
+      "score": 4,
+      "reasoning": "Strong viability: the core user flow (find a verified psychologist by location/modality, tap to open WhatsApp) is fully implemented and deployable to Cloudflare today. The admin moderation workflow is complete. The WhatsApp-as-contact-layer is pragmatic for Venezuela's connectivity constraints. The main gap is building the professional supply side — the platform is useless without a critical mass of registered, admin-approved psychologists, and there is no outreach or seeding mechanism in the codebase."
+    },
+    "key_features": [
+      "Searchable, paginated directory of verified psychologists filterable by modality (in-person/remote), Venezuelan state, city, and population demographic",
+      "Professional self-registration with two-step form (account creation + credential details)",
+      "Admin approval panel: review pending professionals, approve/reject, promote users to admin role",
+      "'Contact random professional' button — picks from the same filtered pool as the current list view and opens WhatsApp",
+      "Professional availability toggle (self-reported 'En línea' status)",
+      "Per-professional public profile pages with SSR SEO head tags",
+      "PWA support (service worker, manifest, maskable icons)",
+      "Sentry error monitoring (optional, via VITE_SENTRY_DSN)",
+      "Role-based access: admin role stored in DB, checked per-request without redeploy"
+    ],
+    "domain_tags": [
+      "mental-health"
+    ],
+    "merge_potential": "Low — this is a standalone, domain-specific mental health professional directory. It does not expose data APIs or webhooks that other projects could consume. Could theoretically link into a broader aid portal but would require significant integration work.",
+    "red_flags": [
+      "No tests despite vitest being configured — zero confidence in regression safety",
+      "No CI/CD pipeline — deployments are manual `npm run build && wrangler deploy`",
+      "WhatsApp numbers are publicly accessible in the directory with no authentication wall — creates a scraping/spam vector targeting professionals",
+      "No rate limiting on any server function — professional registration, random-pick, and listing are all unthrottled",
+      "Sentry configured with sendDefaultPii:true — logs IP addresses of users who may be earthquake victims seeking mental health help (privacy risk)",
+      "Email verification is not enforced — professionals can register and occupy the admin queue with unverified emails",
+      "Single contributor with 24 commits over 2 days — bus factor of 1",
+      "i18n messages exist only in de.json and en.json, but the app UI is entirely in Spanish — the i18n infrastructure appears unused"
+    ]
+  },
+  "signals": {
+    "accessible": true,
+    "stars": 0,
+    "forks": 0,
+    "contributors": 1,
+    "commit_count": 24,
+    "code_loc": 5248,
+    "created_at": "2026-06-27T21:35:12Z",
+    "pushed_at": "2026-06-28T17:41:45Z",
+    "license": "MIT",
+    "languages_bytes": {
+      "TypeScript": 178630,
+      "CSS": 25360,
+      "JavaScript": 3296
+    },
+    "archived": false
+  }
+}

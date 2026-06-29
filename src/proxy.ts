@@ -16,7 +16,13 @@ function legacyLocalizedRedirect(request: Request) {
   const url = new URL(request.url);
   const { pathname } = url;
 
-  const legacyPaths = ["/projects", "/submit", "/requests", "/recursos"];
+  const legacyPaths = [
+    "/projects",
+    "/submit",
+    "/requests",
+    "/recursos",
+    "/insights",
+  ];
 
   if (legacyPaths.includes(pathname)) {
     url.pathname = `/${routing.defaultLocale}${pathname}`;

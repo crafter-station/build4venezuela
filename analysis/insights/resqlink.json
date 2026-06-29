@@ -1,0 +1,146 @@
+{
+  "project_slug": "resqlink",
+  "name": "ResQLink",
+  "repo_url": "https://github.com/otobonh/resqlink-ai",
+  "live_url": "https://resqlink-ai.netlify.app/",
+  "video_url": "https://www.youtube.com/watch?v=6kjdjAPa208",
+  "countries": [
+    "Colombia",
+    "Venezuela"
+  ],
+  "db_description": "ResQLink AI es una plataforma gratuita de respuesta humanitaria diseñada para situaciones de emergencia sísmica. Permite conectar en tiempo real a personas que necesitan ayuda con voluntarios, organizaciones y recursos disponibles.\n\nLa plataforma utiliza inteligencia artificial para priorizar incidentes, detectar reportes duplicados y recomendar recursos automáticamente. Todo funciona desde el navegador, sin necesidad de instalar nada.\n\n### ¿Qué puedes hacer con ResQLink AI?\n\n- Reportar emergencias con ubicación GPS automática\n- Ofrecer recursos como alimentos, agua, medicinas o transporte\n- Visualizar un mapa en tiempo real con todos los incidentes y recursos\n- Coordinar voluntarios y asignar tareas desde el centro de operaciones\n- Consultar estadísticas actualizadas en el dashboard\n\n> **Consejo:** ResQLink AI funciona como PWA (Progressive Web App). Puedes instalarla en tu celular desde el navegador para usarla como una app nativa, incluso sin conexión a internet.",
+  "lifecycle_status": "ready_to_use",
+  "analysis": {
+    "summary": "ResQLink AI is a real-time humanitarian emergency response platform built with Next.js 16 / React 19, Supabase (PostgreSQL + PostGIS), and OpenAI GPT-4o-mini, deployed on Netlify. It is a genuine working MVP — not boilerplate — with verified Venezuela earthquake 2026 incident and resource data pre-seeded, USGS seismic data auto-ingestion, Google News RSS aggregation, AI-powered triage, real-time map (Leaflet/OpenStreetMap with PostGIS), Supabase Realtime subscriptions, and role-based auth. The codebase follows clean architecture (domain/infrastructure/presentation layers). No tests, no CI, and some server-side write operations incorrectly use the anon Supabase key rather than a service role key.",
+    "project_type": "Full-stack web application (Next.js) for humanitarian emergency coordination and incident management",
+    "stack": {
+      "frontend": [
+        "Next.js 16",
+        "React 19",
+        "TailwindCSS v4",
+        "shadcn/ui",
+        "Framer Motion",
+        "React-Leaflet",
+        "Zustand",
+        "Serwist (PWA)"
+      ],
+      "backend": [
+        "Next.js API Routes",
+        "Netlify Functions (scheduled)"
+      ],
+      "database": [
+        "Supabase (PostgreSQL + PostGIS)"
+      ],
+      "infra_deploy": [
+        "Netlify",
+        "@netlify/plugin-nextjs",
+        "Netlify Scheduled Functions"
+      ],
+      "ai_ml": [
+        "OpenAI GPT-4o-mini (priority classification, duplicate detection, summarization, resource recommendation)"
+      ],
+      "languages": [
+        "TypeScript",
+        "CSS",
+        "JavaScript"
+      ]
+    },
+    "architecture": {
+      "pattern": "Clean Architecture (domain / infrastructure / presentation layers)",
+      "uses_orm": false,
+      "orm_or_db_layer": "Supabase JS client (@supabase/supabase-js, @supabase/ssr) with typed query builder — no traditional ORM; raw PostGIS POINT() strings passed for geo inserts",
+      "api_design": "Next.js App Router API routes (POST /api/ai/classify, /api/ai/recommend, /api/ai/duplicates, GET /api/social-feed/sync) plus Netlify scheduled function for hourly USGS + RSS sync",
+      "separation_of_concerns": "Clear: src/domain (entities, enums), src/infrastructure (supabase queries, AI, storage), src/presentation (React components, hooks), src/shared (config, types, utils)",
+      "modularity": "Good — each feature area has dedicated query file and component directory; AI functions isolated in infrastructure/ai/openai/index.ts",
+      "notable_patterns": [
+        "Supabase Realtime subscriptions via useRealtime hook with ref-stable callbacks",
+        "Dynamic import for Leaflet map (SSR-safe)",
+        "Middleware-level session refresh + auth-gated routes",
+        "Hourly Netlify scheduled function pulls USGS earthquakes and auto-inserts incidents",
+        "Seed migration with verified source-cited Venezuela 2026 earthquake data",
+        "RSS feed parsed with hand-rolled XML regex (no parser library)"
+      ]
+    },
+    "code_organization": {
+      "score": 4,
+      "directory_structure": "Exemplary for a hackathon: src/{app,domain,infrastructure,presentation,shared,components,lib} with clear intent. Migration files numbered and separated. Netlify functions in /netlify/functions.",
+      "naming_quality": "Consistent and descriptive — files, functions, and types follow clear conventions (kebab-case files, PascalCase components, camelCase functions).",
+      "documentation_quality": "README exists; AGENTS.md and CLAUDE.md present for AI context; PDF docs are generated artifacts (Python scripts in /docs) and add presentation value but are not code documentation.",
+      "reasoning": "The architecture is unusually clean for a 3-day hackathon project. TypeScript types are thorough throughout. The only weaknesses are the lack of JSDoc on non-obvious functions and the hand-rolled RSS XML parser which is fragile."
+    },
+    "production_readiness": {
+      "score": 3,
+      "has_auth": true,
+      "has_error_handling": true,
+      "has_logging": true,
+      "has_env_config": true,
+      "has_deploy_config": true,
+      "secrets_handling": "Env vars via process.env with a typed env.ts wrapper; OPENAI_API_KEY and Supabase credentials expected as environment variables. No secrets committed. CRON_SECRET check on sync route but is skipped entirely if the env var is absent — a real gap.",
+      "security_notes": "Netlify hourly sync function and the /api/social-feed/sync route use the public anon key for INSERT/UPDATE operations on incidents — these should use a service role key on the server. The sync route exposes a GET endpoint anyone can hit without auth if CRON_SECRET is not set. RLS policies are in place on Supabase which mitigates some risk.",
+      "scalability_notes": "Supabase + Netlify edge can scale horizontally. No rate limiting on AI API endpoints — a single user could exhaust the OpenAI quota. Dashboard does 5 parallel Supabase queries on every realtime event (full reload) rather than incremental updates, which will degrade under load.",
+      "reasoning": "Functional and deployable today with API keys and a Supabase project. Core auth, RLS, and deploy config are solid. The anon key misuse in server functions and missing rate limiting on AI routes are the main gaps before real production use."
+    },
+    "maturity": {
+      "score": 2,
+      "has_readme": true,
+      "has_tests": false,
+      "has_ci": false,
+      "is_real_or_boilerplate": "Real — genuine domain logic, verified seed data with source citations, real external API integrations (USGS, Google News RSS), working AI functions, and a complete Supabase schema with PostGIS and RLS. Clearly AI-assisted but substantively implemented.",
+      "reasoning": "Created June 26 2026, 15 commits, single contributor — 3 days old. No tests of any kind and no CI pipeline. The PDF documents (QA Report, Manual, Hackathon Deck) are generated by Python scripts and present a polished facade, but the absence of automated tests means quality assurance is entirely manual."
+    },
+    "viability": {
+      "score": 3,
+      "reasoning": "Could be deployed to help real users today with just Supabase + OpenAI credentials and a Netlify deploy. The USGS integration and pre-seeded verified data from the actual Venezuela 2026 earthquake make it immediately relevant. Blockers for real production: anon key misuse in server sync, no rate limiting on AI endpoints, no tests, and the RSS parser is fragile regex that will break on unexpected feed formats."
+    },
+    "key_features": [
+      "Real-time incident map (React-Leaflet + OpenStreetMap) with PostGIS-backed geo queries filtered by type and priority",
+      "AI-powered emergency triage: GPT-4o-mini classifies incident priority, detects duplicates, recommends resources",
+      "USGS earthquake API integration — hourly Netlify function auto-ingests seismic events as incidents",
+      "Google News RSS aggregation for Venezuela earthquake search queries with deduplication",
+      "Supabase Realtime subscriptions for live UI updates across incidents, resources, hospitals, shelters",
+      "Role-based access control (admin/organization/volunteer/citizen) enforced at middleware and Supabase RLS level",
+      "Pre-seeded database with verified Venezuela earthquake 2026 data (920+ deaths, 50k+ missing, international aid resources)",
+      "PWA support via Serwist service worker and web manifest",
+      "Resource inventory with international aid organizations mapped by location"
+    ],
+    "domain_tags": [
+      "seismic-data",
+      "mapping-geo",
+      "alerts-notifications",
+      "aid-logistics",
+      "shelter-mapping",
+      "volunteer-coordination",
+      "medical-health",
+      "people-finder"
+    ],
+    "merge_potential": "High — clean architecture, TypeScript throughout, well-separated domain model, and Supabase backend make it straightforward to integrate features (particularly the USGS auto-ingestion, AI triage endpoints, and real-time map) into a larger platform. The domain entity types and Supabase schema are reusable with minimal adaptation.",
+    "red_flags": [
+      "Server-side sync functions (Netlify function and /api/social-feed/sync) use the public anon Supabase key for INSERT/UPDATE — should use service role key for server-side write operations",
+      "CRON_SECRET auth check on sync route is entirely skipped when the env var is absent — any public request can trigger the sync and burn OpenAI quota",
+      "No tests of any kind (unit, integration, or e2e)",
+      "No CI/CD pipeline",
+      "No input validation library — API routes accept user input with minimal checks, relying solely on DB CHECK constraints",
+      "AI endpoints (/api/ai/classify, /api/ai/recommend, /api/ai/duplicates) have no rate limiting — potential for quota exhaustion",
+      "RSS XML parser is hand-rolled regex — fragile against feed format variations",
+      "Dashboard triggers 5 full Supabase queries on every Realtime event instead of incremental state updates — will cause N+1-style load spikes under concurrent users",
+      "Single contributor, 3-day-old repo — bus factor of 1, no code review history"
+    ]
+  },
+  "signals": {
+    "accessible": true,
+    "stars": 0,
+    "forks": 0,
+    "contributors": 1,
+    "commit_count": 15,
+    "code_loc": 7451,
+    "created_at": "2026-06-26T19:18:08Z",
+    "pushed_at": "2026-06-28T17:00:08Z",
+    "license": null,
+    "languages_bytes": {
+      "TypeScript": 202133,
+      "CSS": 4794,
+      "JavaScript": 559
+    },
+    "archived": false
+  }
+}

@@ -1,0 +1,128 @@
+{
+  "project_slug": "proto-bloom-sismo",
+  "name": "Bloom-Sismo",
+  "repo_url": "https://github.com/DevAndrew64/Bloom-Sismo",
+  "live_url": "https://github.com/DevAndrew64/Bloom-Sismo",
+  "video_url": "",
+  "countries": [
+    "Colombia"
+  ],
+  "db_description": "La idea consiste en crear una Progressive Web App (PWA) de una sola página HTML que pesa menos de 150 KB en total y que contiene un Filtro de Bloom de todas las personas reportadas como Localizadas o A salvo en las distintas plataformas unificadas.",
+  "lifecycle_status": "ready_to_use",
+  "analysis": {
+    "summary": "Bloom-Sismo is a single-file PWA (~90-150 KB) that embeds a pre-compiled Bloom Filter of earthquake victims reported as located/safe, enabling zero-latency offline lookup by Venezuelan ID number (cédula). The filter is built from CSV/JSON sources via a Node.js build pipeline and injected as base64 into index.html, so the entire app — search, offline report queue, and QR sharing — works without any network connection. A Supabase REST endpoint receives missing-person reports (with IndexedDB offline queue + Background Sync). The project has a working deployed demo, but currently contains only 20 demo records with no real NGO data connected.",
+    "project_type": "Static PWA / JAMstack — single HTML file with embedded Bloom Filter, Supabase REST for report ingestion, and a Node.js build pipeline",
+    "stack": {
+      "frontend": [
+        "Vanilla JS",
+        "HTML5",
+        "CSS3 (single-file PWA)",
+        "Service Worker",
+        "IndexedDB",
+        "Background Sync API"
+      ],
+      "backend": [
+        "None (fully static)"
+      ],
+      "database": [
+        "Supabase (PostgreSQL via REST)"
+      ],
+      "infra_deploy": [
+        "Vercel",
+        "GitHub Pages",
+        "GitHub Actions CI"
+      ],
+      "ai_ml": [],
+      "languages": [
+        "JavaScript",
+        "HTML"
+      ]
+    },
+    "architecture": {
+      "pattern": "Static PWA / JAMstack with build-time filter compilation",
+      "uses_orm": false,
+      "orm_or_db_layer": "Direct Supabase REST API calls via native fetch — no SDK, no ORM. IndexedDB accessed directly via idbOp helper.",
+      "api_design": "No server API. Client POSTs missing-person reports to Supabase REST /rest/v1/reports with anon key. Filter data is embedded in HTML as base64 constants at build time.",
+      "separation_of_concerns": "Clean split between build-time (build-filter.js, fetch-ong-api.js compile data and inject into HTML) and runtime (index.html + sw.js). The intentional monolithic single-file output enables WhatsApp distribution.",
+      "modularity": "Intentionally low modularity in the output artifact (single HTML file by design). Build pipeline is modular: separate scripts for fetching ONG data, compiling filter, and verifying.",
+      "notable_patterns": [
+        "Bloom Filter with FNV-1a double-hash (k=10, m≈89KB, p=0.001)",
+        "Stale-While-Revalidate Service Worker strategy",
+        "Fire-and-forget Supabase POST with AbortController 8s timeout",
+        "IndexedDB offline queue drained via Background Sync API",
+        "Base64 filter injection via regex replacement into HTML marker comment",
+        "Lazy QR code script loading from CDN"
+      ]
+    },
+    "code_organization": {
+      "score": 4,
+      "directory_structure": "Flat root with index.html, sw.js, build-filter.js, fetch-ong-api.js, verify.js, sample-data.json, vercel.json, datos/ folder, and .github/workflows/. Clean and logical given the project's single-file output goal.",
+      "naming_quality": "Consistent Spanish naming throughout (cedula, fuente, localizados, buscar, reportar). Constants and functions are descriptive. Build scripts use box-drawing comment headers for section navigation.",
+      "documentation_quality": "README is comprehensive: explains the math, data format, ONG integration flow, Supabase SQL schema, privacy model, and deployment steps. Inline comments in all scripts are thorough. Marks TODO/PENDING sections clearly.",
+      "reasoning": "Well-organized for a deliberately minimal codebase. The single-file constraint is a design choice justified by the WhatsApp distribution requirement, not laziness. The build scripts are polished enough to be handed to a non-technical NGO volunteer."
+    },
+    "production_readiness": {
+      "score": 2,
+      "has_auth": false,
+      "has_error_handling": true,
+      "has_logging": false,
+      "has_env_config": false,
+      "has_deploy_config": true,
+      "secrets_handling": "Supabase anon key (sb_publishable_...) hardcoded in index.html and committed to Git. The key prefix indicates it is intentionally a public publishable key, and the Supabase RLS schema in the README restricts reads to authenticated users. However, it is still an exposed credential in version history.",
+      "security_notes": "vercel.json sets strong security headers (X-Frame-Options: DENY, X-XSS-Protection, Referrer-Policy, Permissions-Policy, COOP, COEP). RLS on Supabase restricts report reads to authenticated users. The Bloom Filter is one-way — cédulas cannot be reconstructed from it. UUID v4 idempotency prevents duplicate reports.",
+      "scalability_notes": "The core lookup is purely client-side with zero server load — scales to unlimited concurrent users. Supabase handles report ingestion horizontally with ON CONFLICT DO NOTHING. Service Worker ensures the CDN-cached HTML serves all traffic without origin hits.",
+      "reasoning": "App is deployed and the technical architecture is sound for scale, but it has zero real data (20 demo records only), the ONG API integration is a placeholder, and the CI filter-rebuild step is commented out. It cannot fulfill its purpose until real NGO data is wired in."
+    },
+    "maturity": {
+      "score": 2,
+      "has_readme": true,
+      "has_tests": false,
+      "has_ci": true,
+      "is_real_or_boilerplate": "Real, purpose-built project with genuine algorithmic logic (Bloom Filter, FNV-1a hash, IndexedDB offline queue, Background Sync). Not boilerplate. However, it contains only demo data and the critical NGO data pipeline is unconnected.",
+      "reasoning": "Created June 27, 2026 — only 1-2 days old with 11 commits and 2 contributors. verify.js is a useful manual CLI tool but not an automated test suite. The CI deploy.yml exists but has the filter-compilation step commented out, meaning deployed HTML always reflects the last manually compiled filter."
+    },
+    "viability": {
+      "score": 3,
+      "reasoning": "The core algorithm and PWA architecture are technically correct and well-suited to the low-bandwidth, high-volume Venezuela earthquake use case. The blocker is entirely data: no real NGO partnership is formalized, the ONG_CONFIG.endpoint is a placeholder URL, and the datos/ folder contains only test CSV/JSON files. If a real data feed can be established with any of the named NGOs (Venezuela Te Busca, Cruz Roja Venezuela), the app could be operational within hours given the existing build pipeline."
+    },
+    "key_features": [
+      "Offline Bloom Filter lookup: zero-latency, zero-network cédula search embedded as base64 in HTML",
+      "Service Worker with Stale-While-Revalidate strategy — works fully in airplane mode",
+      "IndexedDB offline queue for missing-person report submission with Background Sync drain",
+      "Node.js build pipeline: reads CSV/JSON from datos/ → compiles Bloom Filter → injects into index.html",
+      "Supabase REST integration with 8s AbortController timeout and UUID v4 idempotency",
+      "QR code sharing (lazy CDN load) for distributing updated filter between phones without data",
+      "WhatsApp-distributable: entire app is a single HTML file under 150 KB",
+      "Security headers configured in vercel.json (X-Frame-Options, COOP, COEP, Permissions-Policy)"
+    ],
+    "domain_tags": [
+      "people-finder",
+      "family-reunification"
+    ],
+    "merge_potential": "Medium — the Bloom Filter PWA shell is a genuinely novel offline lookup layer that could complement heavier platforms as a lightweight satellite app. The build pipeline is clean and extensible. However, the missing data integration (NGO API) is the entire unsolved problem, and the CI build step being commented out means any merge would require re-enabling automated filter updates.",
+    "red_flags": [
+      "No real missing-persons data: filter contains only 20 demo records — zero operational value until NGO data is ingested",
+      "ONG API endpoint is a placeholder string ('https://API-DE-LA-ONG.org/v1/localizados') — integration not started",
+      "CI filter-compilation step is commented out in deploy.yml — deployed app will never auto-update the filter on push",
+      "Supabase anon key committed to Git history (sb_publishable_... — publishable by design, but still a credential in public repo)",
+      "datos/ folder is gitignored with only placeholder files — operational data workflow requires manual steps outside version control",
+      "No automated tests — verify.js is a manual CLI tool requiring human interpretation, not a test runner"
+    ]
+  },
+  "signals": {
+    "accessible": true,
+    "stars": 0,
+    "forks": 0,
+    "contributors": 2,
+    "commit_count": 11,
+    "code_loc": 871,
+    "created_at": "2026-06-27T21:07:11Z",
+    "pushed_at": "2026-06-28T17:50:38Z",
+    "license": null,
+    "languages_bytes": {
+      "HTML": 166491,
+      "JavaScript": 37358
+    },
+    "archived": false
+  }
+}

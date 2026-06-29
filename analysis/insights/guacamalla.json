@@ -1,0 +1,143 @@
+{
+  "project_slug": "guacamalla",
+  "name": "GuacaMalla - Mesh sync entre dispositivos",
+  "repo_url": "https://github.com/vmlcode/guacamaya-net",
+  "live_url": "https://guacamalla.org",
+  "video_url": "https://www.youtube.com/watch?v=d21xoFurccc",
+  "countries": [
+    "Venezuela - España - Mexico - Colombia"
+  ],
+  "db_description": "GuacaMalla es una red de comunicación de emergencia descentralizada y Offline-First, diseñada para situaciones de catástrofe (terremotos, cortes masivos, colapso de infraestructura) donde internet y las torres celulares dejan de funcionar.\n\n## ¿Cuál es la meta?\n\nNuestra meta es salvar vidas asegurando que ninguna persona herida o aislada se quede incomunicada en momentos críticos.\n\n## ¿Cómo funciona?\n\nLa app convierte teléfonos Android en balizas de radio independientes que emiten frames de 119 bytes firmados con Ed25519 vía Bluetooth (BLE 5). Los mensajes SOS y coordenadas GPS saltan de dispositivo en dispositivo formando una malla descentralizada sin necesidad de servidores ni internet. Cuando un teléfono alcanza una zona con señal actúa como \"mula de datos\" y sube los frames acumulados al backend opcional, que los re-verifica criptográficamente antes de persistirlos.\n\nEl enlace es intencionalmente abierto — un SOS es público, cualquiera en alcance debe recibirlo y retransmitirlo. La confianza vive en el payload: cada frame va firmado con Ed25519 y cualquier manipulación rompe la firma, de modo que el siguiente salto lo descarta silenciosamente.\n\n**El backend es opcional.** La malla funciona 100% offline y sin infraestructura.\n\n## Equipo\n\n- Rodrigo Rivas — Product + UI/UX + Frontend · [LinkedIn](https://www.linkedin.com/in/rodrigorivasco)\n- Victor Maldonado — Fullstack + Mobile Native · [LinkedIn](https://www.linkedin.com/in/vmlcode/)\n- David Gonzalez — Backend + Mobile Native + QA · [LinkedIn](https://www.linkedin.com/in/david-gonzalez-dev2012/)\n- Jaime Stalislav — Backend + Mobile Native + QA\n- Carlos Ramirez — PM + Plataforma · [LinkedIn](https://www.linkedin.com/in/carlosjramirez/)\n- Cristopher Avila — Frontend · [LinkedIn](https://www.linkedin.com/in/cristopher-adrián-ávila-lópez-937994402)\n\n## Arquitectura\n\n| Plano | Radio | Payload | Estándar |\n|---|---|---|---|\n| Control / SOS | BLE GAP Broadcaster/Observer | 22 B payload + 32 B pubkey + 64 B firma | BLE 5 Extended Advertising |\n| Datos (ligero) | Wi-Fi Aware (NAN) | ≤ 255 B | NAN Service Discovery |\n| Datos (pesado) | Wi-Fi Aware (NAN) | > 255 B | NAN Data Path (NDP), efímero |\n\nEl frame de 22 bytes incluye lat/lon (int32 E7), timestamp Unix y tipo de mensaje. La autenticidad se verifica con Ed25519 en cada salto — el nodo receptor nunca confía en el remitente.",
+  "lifecycle_status": "in_development",
+  "analysis": {
+    "summary": "GuacaMalla Net is a serious, production-oriented disaster-response mesh network system built for offline-first earthquake response. It consists of an Android Kotlin app implementing BLE flood-routing with Ed25519-signed 22-byte payloads, and a Bun/Fastify TypeScript backend that aggregates messages, provides WebSocket real-time push, and handles a cryptographically-verified M-of-N rescue confirmation (\"resolve\") flow. The system is designed to operate entirely without internet infrastructure — phones form a BLE mesh, store-and-forward SOS frames, and batch-upload to the backend when connectivity returns. The code is genuinely sophisticated: custom leaky-bucket rate limiting keyed on device IDs, timing-safe API key comparison, geo-radius validation for witness claims, TTL-bounded flood routing, BouncyCastle Ed25519 signing on Android, in-memory Supabase fallback for dev, and a full Supabase schema with RLS. This is not boilerplate — it is an original, domain-specific implementation with real algorithmic depth.",
+    "project_type": "Android app + TypeScript backend — offline-first BLE mesh SOS network with cloud aggregation layer",
+    "stack": {
+      "frontend": [
+        "Android (Kotlin)",
+        "Jetpack Compose (partial)",
+        "WorkManager"
+      ],
+      "backend": [
+        "Bun",
+        "Fastify",
+        "TypeScript",
+        "ws (WebSocket)"
+      ],
+      "database": [
+        "Supabase (PostgreSQL)",
+        "Room (SQLite on Android)",
+        "In-memory fallback"
+      ],
+      "infra_deploy": [
+        "Docker",
+        "Railway",
+        "GitHub Actions",
+        "Firebase App Distribution"
+      ],
+      "ai_ml": [],
+      "languages": [
+        "Kotlin",
+        "TypeScript",
+        "Python (scripts)",
+        "Shell"
+      ]
+    },
+    "architecture": {
+      "pattern": "Offline-first BLE mesh (Android) + REST/WebSocket aggregation backend (Bun/Fastify) + Supabase persistence",
+      "uses_orm": false,
+      "orm_or_db_layer": "Supabase JS client (BaaS) with raw SQL schema; Room DAO on Android for local SQLite persistence",
+      "api_design": "REST endpoints for ingest (POST /ingest), locations (GET/POST), channels, resolve flow (POST /resolve, POST /resolve/evidence), plus WebSocket /ws with channel subscription model",
+      "separation_of_concerns": "Backend is cleanly split into db/, mesh/, crypto/, security/, channels/, locations/, resolve/, ws/, dashboard/ modules; Android splits into ble/, mesh/, crypto/, ingest/, backend/, aware/, service/, ui/, proto/ packages",
+      "modularity": "Monorepo with packages/shared (TypeScript types + crypto shared between backend and potential web dashboard), backend/, android/; workspace dependencies via Bun workspaces",
+      "notable_patterns": [
+        "Ed25519 cryptographic signing on every BLE frame and official record",
+        "Store-and-forward mesh routing: phones relay other nodes' SOS frames from local SQLite after originator goes offline",
+        "Data-mule upload pattern: WorkManager batches local SQLite frames and uploads when connectivity returns",
+        "M-of-N witness quorum (configurable) for rescue confirmation with cooldown sweep",
+        "Custom leaky-bucket rate limiter keyed on Ed25519 device ID, not IP",
+        "Dual transport: BLE advertising + Wi-Fi Aware (NaN) — NanMessenger is implemented but not yet wired into the foreground service",
+        "In-memory fallback for all repos when Supabase is unconfigured, enabling `bun run dev` with zero setup"
+      ]
+    },
+    "code_organization": {
+      "score": 4,
+      "directory_structure": "Very clean: backend/src/{mesh,crypto,security,channels,locations,resolve,ws,dashboard,db}/, android split into granular packages, packages/shared for cross-platform types. CLAUDE.md and DESIGN.md at root and in each major subdirectory.",
+      "naming_quality": "Excellent: names like FloodRouter, DedupeCache, LeakyBucket, IngestUploadWorker, OfficialRecordVerifier, verifyWitnessSignature, haversineKm are precise and self-documenting",
+      "documentation_quality": "High: extensive inline comments explaining security rationale, docs/ folder with protocol-flows.md, payload-binary-layout.md, crypto.md, architecture docs in Spanish and English, Postman collection, backend_final.md",
+      "reasoning": "96 commits from 5 contributors with deliberate architecture documentation at every level. The CLAUDE.md and .cursor/rules files indicate active AI-assisted development but the underlying design decisions are clearly human-driven and domain-expert."
+    },
+    "production_readiness": {
+      "score": 4,
+      "has_auth": true,
+      "has_error_handling": true,
+      "has_logging": true,
+      "has_env_config": true,
+      "has_deploy_config": true,
+      "secrets_handling": "API keys via environment variables; server refuses to boot without GUACAMAYA_ADMIN_KEY in production (throws at startup); Supabase service-role key never shipped to clients; timing-safe key comparison via timingSafeEqual",
+      "security_notes": "Ed25519 signatures verified server-side on every ingested frame; geo-radius check on resolve witnesses; per-device-ID leaky bucket (not IP-based); helmet + CORS configured; RLS enabled on all Supabase tables with no anon policies; WebSocket token via sec-websocket-protocol header or query param",
+      "scalability_notes": "WebSocket client set and rate-limiter LeakyBucket are in-memory — no horizontal scaling without sticky sessions or externalizing state to Redis. Single Bun process. Suitable for hackathon/early deployment scale but would need clustering work for city-scale load.",
+      "reasoning": "Backend has graceful SIGTERM/SIGINT shutdown, health endpoint, Railway restart policy, Dockerfile, structured Fastify logging, and comprehensive rate limiting. Primary gap is in-memory WS/rate-limit state preventing horizontal scale-out."
+    },
+    "maturity": {
+      "score": 4,
+      "has_readme": true,
+      "has_tests": true,
+      "has_ci": true,
+      "is_real_or_boilerplate": "Real implementation with genuine algorithmic depth — custom BLE flood router, binary payload protocol, cryptographic verification cascade, M-of-N quorum logic with cooldown sweep. Not boilerplate.",
+      "reasoning": "96 commits, 5 contributors, 17 test files spanning Kotlin unit tests (SignerTest, AgePolicyTest, NodeCatalogTest, PayloadTest, IngestFrameTest, etc.) and TypeScript tests (frame decode, shared types, resolve logic). CI builds and distributes Android APK via Firebase. The only gap is no backend route-level integration tests."
+    },
+    "viability": {
+      "score": 5,
+      "reasoning": "This project uniquely solves the hardest constraint of earthquake response in Venezuela: the near-total collapse of cellular and internet infrastructure. The BLE mesh + store-and-forward design means phones that have never connected to the internet can still relay SOS signals across a city block-by-block, and data-mule upload ensures eventual backend aggregation when any phone regains connectivity. The Ed25519 security model prevents spoofed rescue confirmations. No other reviewed project in this hackathon context addresses infrastructure collapse at the physical layer. The Android app is real, the backend is deployable today on Railway, and the resolve/confirmation flow is a concrete differentiator for rescue coordination."
+    },
+    "key_features": [
+      "BLE flood-routing mesh: Ed25519-signed 22-byte frames, hop-TTL bounded, CRC16 validated",
+      "Store-and-forward: offline phones relay SOS frames from local Room DB for up to 72h (help frames) or 5min (presence)",
+      "Data-mule upload: WorkManager batch-uploads local SQLite to backend when connectivity returns",
+      "M-of-N witness quorum for rescue confirmation with geo-radius verification and cooldown sweep",
+      "Wi-Fi Aware (NaN) secondary transport implemented (NanMessenger, NanDataPath)",
+      "Official downlink: backend signs alert records with Ed25519 and pushes via WebSocket to subscribed devices",
+      "Anti-troll cascade: envelope shape → target existence → recency → rate limit → originator exclusion → geo-radius → signature → upload-token",
+      "Supabase persistence with in-memory dev fallback; full schema with RLS on all tables",
+      "Railway-ready Docker deployment with health endpoint and restart policy",
+      "Firebase App Distribution CI for Android APK builds on every push to main"
+    ],
+    "domain_tags": [
+      "alerts-notifications",
+      "mapping-geo",
+      "comms-chat",
+      "aid-logistics",
+      "volunteer-coordination",
+      "people-finder"
+    ],
+    "merge_potential": "High — the backend exposes standard REST+WebSocket APIs that any other hackathon project could consume for real-time SOS locations and official alerts. The shared package (packages/shared) provides TypeScript types for interoperability. The resolve flow API is a natural complement to any people-finder or shelter-mapping project.",
+    "red_flags": [
+      "WebSocket client registry and LeakyBucket rate limiter are in-memory — no horizontal scaling without Redis or sticky sessions",
+      "Wi-Fi Aware (NanMessenger/NanDataPath) is implemented but not wired into GuacamayaForegroundService — it is dead code today",
+      "No backend route-level integration tests — only mesh frame decode tests and shared-lib unit tests; resolve route logic is untested at the HTTP layer",
+      "google-services.json committed to repo (acceptable for Android app config but worth noting)",
+      "SMS module is a stub (.gitkeep only) — referenced in docs but not implemented",
+      "In-memory store fallback silently loses data on restart if Supabase is misconfigured in production"
+    ]
+  },
+  "signals": {
+    "accessible": true,
+    "stars": 3,
+    "forks": 0,
+    "contributors": 5,
+    "commit_count": 96,
+    "code_loc": 9278,
+    "created_at": "2026-06-27T02:28:49Z",
+    "pushed_at": "2026-06-29T13:54:44Z",
+    "license": "MIT",
+    "languages_bytes": {
+      "Kotlin": 242144,
+      "TypeScript": 100660,
+      "Shell": 23453,
+      "Python": 7132,
+      "Dockerfile": 1490
+    },
+    "archived": false
+  }
+}

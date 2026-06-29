@@ -1,0 +1,148 @@
+{
+  "project_slug": "apoyo-venezuela",
+  "name": "Apoyo Venezuela",
+  "repo_url": "https://github.com/javierdejesusda/apoyo-venezuela",
+  "live_url": "https://apoyovenezuela.com",
+  "video_url": "",
+  "countries": [
+    "Venezuela"
+  ],
+  "db_description": "## What did you build?\n\nApoyo Venezuela is a mobile-first, anonymous crowd-coordination web app built\nafter the June 24, 2026 earthquake in Venezuela (a doublet of roughly M7.1 and\nM7.5). It lets anyone report affected zones on an interactive map, post the\nspecific needs of each location, mark structural status, and look up verified\nemergency phone numbers, with live updates across all users.\n\nCore features:\n\n- **Interactive map of affected zones** with a structural-status traffic light\n  (collapsed, damaged, stable, unconfirmed), always shown as color plus icon\n  plus text label for accessibility.\n- **Zone reporting** with address autocomplete, reverse geocoding, geolocation,\n  or by dragging a pin, including safe photo uploads.\n- **Needs per zone** (rescue, water, food, medicine, shelter, and more) with a\n  needed → on the way → covered lifecycle.\n- **Verified emergency phone directory** by state, with tap-to-call and the\n  source of each number.\n- **Aid guide**: what to donate and what to avoid, shelters, collection centers,\n  and aid organizations.\n- **Live updates** on the map and lists via Supabase Realtime, a PWA with light\n  and dark mode.\n\nWho is it for? Anyone affected by or responding to the earthquake: families\nreporting damage and needs, volunteers and rescuers locating where help is\nrequired, and donors finding verified collection points. No account or login\nis needed, and reports are anonymous by design.\n\nHow does it help? It turns scattered social-media pleas into a single, live,\nmap-based view of where help is needed and what is already covered, so aid is\nnot duplicated and no zone is forgotten.\n\nWhat should people try first? Open the map, tap an affected zone to see its\nneeds and structural status, then file a report or update a need from your own\nlocation to see it appear live for everyone.\n\nBuilt with Next.js 16, React 19, strict TypeScript, Tailwind CSS v4, Leaflet +\nOpenStreetMap, and Supabase (Postgres + Realtime). A citizen initiative with no\npolitical affiliation; information is community-contributed.",
+  "lifecycle_status": "ready_to_use",
+  "analysis": {
+    "summary": "Apoyo Venezuela is a production-quality Next.js 16 PWA built in direct response to the June 2026 Venezuela earthquake. Citizens can report affected zones with GPS coordinates, log relief needs by category and urgency, list fundraisers, and query an AI assistant (GPT-4o-mini) grounded on live Supabase data. The codebase contains real, non-trivial logic throughout: geographic zone clustering via Haversine trigonometry mirrored between TypeScript and Postgres triggers, per-IP rate limiting with SHA-256-hashed keys stored in a SECURITY DEFINER-protected table, Supabase Realtime for live map updates, USGS seismic data integration with Next data-cache bucketing, a PWA service worker, and roughly 100 Vitest tests backed by a CI pipeline. This is not scaffolding or boilerplate — it is a functioning emergency coordination tool.",
+    "project_type": "Mobile-first PWA — citizen-coordinated earthquake relief mapping, needs reporting, fundraiser listing, AI assistant",
+    "stack": {
+      "frontend": [
+        "Next.js 16 (App Router)",
+        "React 19",
+        "Tailwind CSS 4",
+        "Leaflet / react-leaflet",
+        "Vercel AI SDK (@ai-sdk/react)",
+        "Scalar (API docs embed)",
+        "PWA / Service Worker"
+      ],
+      "backend": [
+        "Next.js API Routes (Route Handlers)",
+        "Next.js Server Actions",
+        "OpenAI API (gpt-4o-mini via @ai-sdk/openai)"
+      ],
+      "database": [
+        "Supabase (PostgreSQL)",
+        "Supabase Realtime",
+        "Supabase Storage (fotos)"
+      ],
+      "infra_deploy": [
+        "Vercel (implied by env var docs and next.config.ts patterns)",
+        "GitHub Actions CI"
+      ],
+      "ai_ml": [
+        "OpenAI gpt-4o-mini",
+        "Vercel AI SDK streaming",
+        "USGS FDSN seismic data feed"
+      ],
+      "languages": [
+        "TypeScript",
+        "PLpgSQL",
+        "JavaScript"
+      ]
+    },
+    "architecture": {
+      "pattern": "BaaS-backed Next.js App Router with clean DataStore abstraction",
+      "uses_orm": false,
+      "orm_or_db_layer": "Supabase JS client (direct PostgREST queries, no ORM). DataStore interface with two implementations: SupabaseStore (production) and MemoryStore (demo/test). All writes go through Server Actions with Zod validation. Status mutations use SECURITY DEFINER Postgres functions instead of direct UPDATE to enforce RLS invariants.",
+      "api_design": "REST API v1 under /api/v1/ (zonas, pedidos, campanas, estadisticas) with OpenAPI spec auto-generated and served via Scalar. Internal /api/zonas and /api/asistente for UI consumption. CORS-open read endpoints with pagination.",
+      "separation_of_concerns": "Clear layers: app/ (pages + route handlers + server actions), components/ (UI), lib/data/ (store abstraction, selectors, schemas, types), lib/ai/ (rate-limit, system prompt, tools, validation), lib/sismos/ (USGS loader, parser, formatter), lib/api/ (HTTP helpers, OpenAPI, public DTOs).",
+      "modularity": "High. Each concern lives in its own file; the DataStore interface decouples business logic from the Supabase client. Zone clustering logic is mirrored symmetrically between lib/data/clustering.ts and the SQL trigger function.",
+      "notable_patterns": [
+        "Fail-open everywhere: throttle errors, clustering errors, and USGS fetch failures all degrade gracefully rather than blocking the critical reporting path",
+        "IP rate limiting: SHA-256(THROTTLE_SALT + ip) stored in Postgres via SECURITY DEFINER function; raw IPs never persisted",
+        "Zone clustering: Haversine + pg_trgm similarity in Postgres trigger with advisory lock to prevent duplicate cluster creation under concurrent inserts",
+        "DataStore interface with MemoryStore for demo/test and SupabaseStore for production; getStore() selects at runtime based on env vars",
+        "Migration retry loop: createLocation strips unrecognized columns on 42703 error so reports succeed on un-migrated DBs",
+        "Supabase Realtime intentionally NOT subscribed for cluster/throttle tables to prevent broadcasting internal keys to clients"
+      ]
+    },
+    "code_organization": {
+      "score": 5,
+      "directory_structure": "app/ (Next.js pages and route handlers), components/ (40+ UI components), lib/ (ai/, api/, data/, geocoding/, geolocation/, map/, sismos/, plus hooks), tests/ (~100 test files mirroring src structure), supabase/migrations/ (12 versioned SQL files), scripts/. Naming matches purpose precisely throughout.",
+      "naming_quality": "Excellent. Files, functions, types, and SQL objects all follow consistent conventions; snake_case for DB rows, camelCase for domain model, kebab-case for files.",
+      "documentation_quality": "High. Every non-trivial file opens with a JSDoc block explaining intent, security invariants, and failure modes. SQL migrations include deploy notes, security rationale, and cron suggestions. .env.example documents every var with inline comments.",
+      "reasoning": "The organization quality is exceptional for a hackathon project with 69 commits over 3-4 days. The DataStore abstraction, consistent error-result types, and domain-layer separation indicate deliberate engineering, not speed-coding."
+    },
+    "production_readiness": {
+      "score": 4,
+      "has_auth": false,
+      "has_error_handling": true,
+      "has_logging": true,
+      "has_env_config": true,
+      "has_deploy_config": false,
+      "secrets_handling": "Server-only env vars for OPENAI_API_KEY and MAPBOX_TOKEN (no NEXT_PUBLIC_ prefix). Anon Supabase key is correctly public. THROTTLE_SALT is server-only. .env.example documents all vars clearly. No secrets committed.",
+      "security_notes": "RLS enabled on all tables. Anonymous status mutations go through SECURITY DEFINER Postgres functions (anon cannot directly UPDATE). Throttle and cluster tables are fully REVOKE'd from all roles. IP rate limiting via SHA-256 hash — no raw IPs stored. AI assistant has in-memory per-IP rate limiter (10 req/15 min). Input validated with Zod on every action and API route.",
+      "scalability_notes": "Primary scalability gap: listLocationsPage fetches ALL rows then slices in memory — acknowledged in code comments as a known deferred optimization. Under high load this will be the first bottleneck. Zone clustering uses advisory locks which serialize concurrent inserts in the same grid cell. Supabase Realtime is stateful; very high concurrent subscriber counts may require Supabase plan upgrade.",
+      "reasoning": "Missing user authentication is intentional (open emergency tool) but creates moderation risk. The full-table-scan pagination is the main scalability concern. No Dockerfile or platform-specific deploy config; the README points to Vercel which handles this. Console.error logging is minimal but server-side errors are captured before the client sees them."
+    },
+    "maturity": {
+      "score": 4,
+      "has_readme": true,
+      "has_tests": true,
+      "has_ci": true,
+      "is_real_or_boilerplate": "real",
+      "reasoning": "Approximately 100 Vitest test files covering components, server actions, API routes, AI tooling, rate limiting, geocoding, seismic data parsing, zone clustering, and more. GitHub Actions CI runs lint, typecheck, tests, and build on every push and PR. Project has CHANGELOG, CONTRIBUTING, CODE_OF_CONDUCT, SECURITY, dependabot.yml, PR template, and three issue templates. 69 commits in 4 days from a single contributor is impressive but also a bus-factor risk."
+    },
+    "viability": {
+      "score": 4,
+      "reasoning": "The app has a live domain (apoyovenezuela.com), a working demo mode requiring zero infrastructure, and a clear Supabase + Vercel deployment path documented in the README. All core features (zone reporting, needs tracking, fundraiser listing, AI assistant, seismic ticker, realtime updates) are implemented and tested. Immediate blockers before scaling: the full-table-scan pagination, absence of moderation/admin tools, and single-contributor ownership."
+    },
+    "key_features": [
+      "Interactive Leaflet map of affected zones with GPS geolocation and address autocomplete (Mapbox)",
+      "Zone clustering: duplicate co-located reports are automatically merged via Haversine + pg_trgm in a Postgres trigger",
+      "Relief needs logging per zone with category, urgency, quantity, and status tracking",
+      "Fundraiser directory with duplicate-URL detection",
+      "AI assistant (GPT-4o-mini) grounded on live zone data via buscarZonas tool call",
+      "Real-time map/list updates via Supabase Realtime subscription",
+      "Seismic ticker pulling USGS FDSN feed (5-minute ISR cache)",
+      "Per-IP report rate limiting with SHA-256-hashed keys in a SECURITY DEFINER Postgres function",
+      "Public REST API v1 with OpenAPI spec and Scalar interactive docs",
+      "PWA with service worker and offline-first route caching policy",
+      "Demo mode (in-memory store with seed data) requiring zero infrastructure",
+      "Emergency phone numbers directory (static, curated)"
+    ],
+    "domain_tags": [
+      "mapping-geo",
+      "structural-inspection",
+      "aid-logistics",
+      "seismic-data",
+      "donations-aid",
+      "alerts-notifications",
+      "volunteer-coordination"
+    ],
+    "merge_potential": "High. The zone-clustering pattern (Haversine mirrored between TypeScript and Postgres trigger, advisory locks, fail-open), the DataStore abstraction with demo/production switching, the Zod-validated Server Action pattern with ActionResult<T>, and the AI assistant grounding approach are all patterns worth reusing in a merged or reference implementation.",
+    "red_flags": [
+      "listLocationsPage fetches the entire locations table then slices in memory — acknowledged as deferred but will break under real load",
+      "No user authentication or moderation tools: anyone can update any zone status or add needs with no accountability layer",
+      "Single contributor (bus-factor 1) for a project intended for disaster-response scale",
+      "AI assistant rate limiter is in-process memory only — resets on serverless cold start, so the 10 req/15 min limit is per instance, not global",
+      "All RLS policies on locations and needs allow anonymous INSERT and UPDATE — relies entirely on server-side Zod validation and throttle functions for abuse prevention"
+    ]
+  },
+  "signals": {
+    "accessible": true,
+    "stars": 0,
+    "forks": 0,
+    "contributors": 1,
+    "commit_count": 69,
+    "code_loc": 25380,
+    "created_at": "2026-06-25T05:35:10Z",
+    "pushed_at": "2026-06-28T17:41:33Z",
+    "license": "MIT",
+    "languages_bytes": {
+      "TypeScript": 913881,
+      "JavaScript": 72659,
+      "PLpgSQL": 18233,
+      "CSS": 8952,
+      "HTML": 1710
+    },
+    "archived": false
+  }
+}

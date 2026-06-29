@@ -1,0 +1,144 @@
+{
+  "project_slug": "lanna-naty",
+  "name": "Puente Venezuela",
+  "repo_url": "https://github.com/lannahbett/puentevenezuela",
+  "live_url": "https://puentevenezuela.lovable.app/",
+  "video_url": "",
+  "countries": [
+    "Brazil"
+  ],
+  "db_description": "Puente Venezuela\nA web-based humanitarian coordination platform built for the Build4Venezuela hackathon, following the June 24, 2026, earthquakes in Venezuela.\n\nWhat it does\nConnects those in need of help with those who can offer help in real time:\n\nInteractive map with pins showing needs and offers of help\nQuick reports — anyone can report a need or offer help without having to create an account\nFilters by category — water, food, shelter, medicine, rescue, volunteers, transportation\nReal-time status—pending, in progress, or resolved\nResponsive design—works on mobile and desktop.",
+  "lifecycle_status": "ready_to_use",
+  "analysis": {
+    "summary": "Puente Venezuela is a map-based humanitarian coordination PWA that lets earthquake victims and volunteers post geo-tagged needs/offers without registration. Built in a single day (June 28-29, 2026) using Lovable.dev (AI-assisted), it has a real Supabase backend with 8 SQL migrations, Supabase Realtime subscriptions, photo upload with client-side image compression, bilingual (ES/EN) UI, a nearby-match algorithm (Haversine), WhatsApp sharing, and a volunteer assignment flow. The feature set is genuinely useful for a disaster scenario. However there are no tests, no CI/CD, no deploy config, the .env file with real credentials is committed, and the entire reports table is open to anonymous writes with no rate limiting — creating serious spam/vandalism risk for a real deployment.",
+    "project_type": "Humanitarian coordination PWA (geo-tagged needs/offers map)",
+    "stack": {
+      "frontend": [
+        "React 19",
+        "TanStack Router",
+        "TanStack Start (SSR)",
+        "TanStack Query",
+        "Tailwind v4",
+        "Radix UI / shadcn-ui",
+        "react-leaflet / Leaflet",
+        "Vite",
+        "workbox (PWA)"
+      ],
+      "backend": [
+        "TanStack Start server functions (Node/Nitro)",
+        "Supabase (BaaS)"
+      ],
+      "database": [
+        "PostgreSQL via Supabase",
+        "Supabase Realtime",
+        "Supabase Storage (report-attachments bucket)"
+      ],
+      "infra_deploy": [
+        "None configured — no Dockerfile, no GitHub Actions, no Vercel/Railway config"
+      ],
+      "ai_ml": [],
+      "languages": [
+        "TypeScript",
+        "PLpgSQL",
+        "CSS"
+      ]
+    },
+    "architecture": {
+      "pattern": "Full-stack SPA/SSR hybrid (TanStack Start) + Supabase BaaS",
+      "uses_orm": false,
+      "orm_or_db_layer": "Raw SQL migrations via Supabase CLI; Supabase JS client (supabase-js v2) used directly as the data-access layer — no ORM",
+      "api_design": "TanStack Start createServerFn for server-side mutations (listReports, createReport, updateStatus, assignReport); client-side Supabase JS for storage and realtime subscriptions",
+      "separation_of_concerns": "Routes own page logic; reusable components in src/components; server functions isolated in src/lib/*.functions.ts; i18n, upload, distance, PWA in separate lib modules",
+      "modularity": "Good for a hackathon: components, lib utilities, and routes are cleanly separated; the UI component library (40+ shadcn-ui primitives) is boilerplate but not in the way",
+      "notable_patterns": [
+        "Zod input validation on every server function",
+        "Supabase Realtime subscriptions invalidate TanStack Query cache on table changes",
+        "Client-side Haversine distance for nearby-match suggestions",
+        "Canvas-based image compression before upload (max 1600px, 0.82 JPEG quality)",
+        "Bilingual dictionary-based i18n (ES/EN) stored in React context",
+        "PWA service worker via Workbox with strict guards for preview environments",
+        "WhatsApp deep-link share from report detail panel"
+      ]
+    },
+    "code_organization": {
+      "score": 3,
+      "directory_structure": "Clear: src/routes (pages), src/components (UI), src/lib (utilities and server functions), src/integrations/supabase (client + types), supabase/migrations. No deeply nested confusion.",
+      "naming_quality": "Good: file names match their purpose (reports.functions.ts, attachments.functions.ts, distance.ts, upload.ts). Component names are descriptive.",
+      "documentation_quality": "README exists but is minimal. AGENTS.md present (intent layer). Inline comments are sparse but the code is readable. No JSDoc.",
+      "reasoning": "The codebase is clean and well-structured for a Lovable.dev-generated project built in under 24 hours. The separation of server functions from UI components is commendable, but there is zero test coverage and no inline documentation beyond occasional comments."
+    },
+    "production_readiness": {
+      "score": 2,
+      "has_auth": false,
+      "has_error_handling": true,
+      "has_logging": false,
+      "has_env_config": true,
+      "has_deploy_config": false,
+      "secrets_handling": "CRITICAL: .env file with real Supabase project ID, anon key, and URL is committed to the repository. The anon key is designed to be public, but committing .env is still bad practice and the service_role key could end up there too.",
+      "security_notes": "Anonymous UPDATE on the entire reports table is explicitly granted (USING(true) WITH CHECK(true)) to handle disaster-scenario no-login usage — meaning anyone can mark any report resolved or assign themselves to it. Anonymous INSERT on report_attachments is also fully open with no rate limiting or file-type enforcement beyond the client-side check. No CSRF mitigation beyond TanStack Start's built-in protections.",
+      "scalability_notes": "Supabase scales horizontally; the stateless server functions are fine. However, no pagination on listReports (fetches all rows on every load), no search index on reports, and no rate limiting — a coordinated spam attack could flood the map and render it unusable.",
+      "reasoning": "The app has a real working backend and proper Supabase RLS, but the deliberate choice to allow fully anonymous writes with no rate limiting is a significant production risk. There is no deploy config, no CI, and credentials are committed. It is functional for a demo but needs hardening before real disaster deployment."
+    },
+    "maturity": {
+      "score": 2,
+      "has_readme": true,
+      "has_tests": false,
+      "has_ci": false,
+      "is_real_or_boilerplate": "Real logic — not empty scaffolding. The reports CRUD, photo upload with compression, real-time subscriptions, Haversine matching, bilingual i18n, and volunteer assignment flow are all genuinely implemented and connected to a live Supabase instance.",
+      "reasoning": "Created in a single day via Lovable.dev with 62 commits. Core features work end-to-end but there are zero tests, no CI/CD pipeline, and no deployment configuration. The 8 SQL migrations show iterative feature development but the overall artifact is a functional hackathon prototype, not a mature product."
+    },
+    "viability": {
+      "score": 3,
+      "reasoning": "The concept is directly relevant (needs/offers coordination on a live map after earthquakes) and the implementation covers the most critical flows: reporting without signup, map visualization, volunteer assignment, nearby matching, and emergency contact numbers. The blocking risks for real deployment are: fully open anonymous writes (spam), no rate limiting, no moderation, and no deploy infra. These are fixable in days, not weeks, making it viable with effort."
+    },
+    "key_features": [
+      "Anonymous geo-tagged need/offer reports (no login required)",
+      "Interactive Leaflet map with urgency-sized, color-coded markers (red=need, green=offer)",
+      "Supabase Realtime live updates — map refreshes when any report changes",
+      "Nearby-match algorithm: shows opposite-type reports in the same category within an adjustable radius (Haversine)",
+      "Volunteer self-assignment with name and contact (marks report in_progress)",
+      "Photo upload with client-side canvas compression (max 5 photos, 5MB each, 1600px max)",
+      "Bilingual UI (Spanish/English) with localStorage persistence",
+      "Advanced filters: type, category, status, time period, min urgency, photos-only",
+      "WhatsApp deep-link sharing of individual reports",
+      "Emergency contacts page (Venezuela 911, Bomberos 171, Protección Civil, Cruz Roja, FUNVISIS)",
+      "PWA with service worker (Workbox) for installability and offline indicator"
+    ],
+    "domain_tags": [
+      "mapping-geo",
+      "aid-logistics",
+      "volunteer-coordination",
+      "alerts-notifications",
+      "shelter-mapping"
+    ],
+    "merge_potential": "Medium. The map+report core is solid and unique enough to stand alone, but the fully open anonymous write model and absence of any spam protection would need resolution before deploying alongside other systems. The bilingual support and WhatsApp integration are directly reusable.",
+    "red_flags": [
+      ".env with real Supabase credentials committed to the repository",
+      "Fully open anonymous UPDATE on all reports (anyone can resolve/reassign any report)",
+      "No rate limiting on report creation or file uploads — trivially spammable",
+      "No tests of any kind (unit, integration, or e2e)",
+      "No CI/CD pipeline or deployment configuration",
+      "listReports fetches all rows with no pagination — will degrade at scale",
+      "Built entirely with Lovable.dev AI generation in under 24 hours — limited human review of edge cases",
+      "No content moderation or report flagging mechanism"
+    ]
+  },
+  "signals": {
+    "accessible": true,
+    "stars": 0,
+    "forks": 0,
+    "contributors": 1,
+    "commit_count": 62,
+    "code_loc": 8100,
+    "created_at": "2026-06-29T00:35:06Z",
+    "pushed_at": "2026-06-29T00:35:10Z",
+    "license": null,
+    "languages_bytes": {
+      "TypeScript": 281375,
+      "CSS": 5693,
+      "PLpgSQL": 4045,
+      "JavaScript": 1250
+    },
+    "archived": false
+  }
+}

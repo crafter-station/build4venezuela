@@ -49,3 +49,6 @@ next-env.d.ts
 
 # repomix
 repomix-output.xml
+
+# Insights pipeline scratch (clones, signals, workflow args/results)
+analysis/.work/

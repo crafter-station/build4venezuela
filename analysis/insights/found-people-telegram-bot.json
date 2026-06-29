@@ -1,0 +1,122 @@
+{
+  "project_slug": "found-people-telegram-bot",
+  "name": "Personas Encontradas Bot",
+  "repo_url": "https://github.com/edwinvrgs/found-people-ve-bot",
+  "live_url": "https://github.com/edwinvrgs/found-people-ve-bot",
+  "video_url": "",
+  "countries": [
+    "Venezuela",
+    "Colombia"
+  ],
+  "db_description": "## What did you build?\n\n**Personas Encontradas VE** is a Telegram bot and public API that helps people search public reports of individuals found or located after the earthquakes in Venezuela.\n\nIn emergencies, information is often scattered across spreadsheets, websites, community projects, and social posts. This project brings those public records into one searchable place, while keeping each result linked to its original source for verification.\n\nPeople can use the Telegram bot to search by name or Venezuelan ID number, browse recent records, check current sources, and submit found-person reports for review. Developers and organizations can also integrate through a stable public API.\n\n## Who is it for?\n\nThis is for families looking for loved ones, community volunteers organizing emergency information, local initiatives publishing found-person data, and developers building humanitarian tools.\n\n## How does it help?\n\n- Makes scattered public information searchable from Telegram.\n- Keeps records source-linked so people can verify them.\n- Supports citizen and partner reports.\n- Provides a public API for other tools and organizations.\n- Handles sensitive data carefully by avoiding unnecessary exposure of names, document IDs, raw messages, tokens, or private payloads in logs and analytics.\n\n## What should people try first?\n\nStart with the Telegram bot:\n\nhttps://t.me/encontrados_ve_bot\n\nTry:\n\n- `/ayuda` to see how it works.\n- `/buscar Nombre Apellido` to search by name.\n- `/buscar V12345678` to search by Venezuelan ID.\n- `/lista` to browse records.\n- `/fuentes` to see current data sources.\n\nThe project is open source here:\n\nhttps://github.com/edwinvrgs/found-people-ve-bot",
+  "lifecycle_status": "ready_to_use",
+  "analysis": {
+    "summary": "A fully operational Telegram bot (live at t.me/encontrados_ve_bot) that aggregates found-people records from 5 Venezuelan earthquake data sources, deduplicates them, stores them in PostgreSQL, and exposes search via Telegram commands and a REST API. Built in TypeScript with Fastify, Prisma ORM, Pino logging, PostHog analytics, and a comprehensive test suite. Committed 77 times in 3 days with 2 contributors — this is genuinely working software serving real users, not boilerplate.",
+    "project_type": "Telegram bot + REST API backend for earthquake victim people-finder",
+    "stack": {
+      "frontend": [],
+      "backend": [
+        "Node.js 22 (ESM)",
+        "Fastify 5",
+        "TypeScript 5"
+      ],
+      "database": [
+        "PostgreSQL",
+        "Prisma ORM 6"
+      ],
+      "infra_deploy": [
+        "GitHub Actions CI"
+      ],
+      "ai_ml": [],
+      "languages": [
+        "TypeScript"
+      ]
+    },
+    "architecture": {
+      "pattern": "Layered monolith (config → repositories → services → http/telegram)",
+      "uses_orm": true,
+      "orm_or_db_layer": "Prisma ORM for schema/migrations; raw Prisma.$queryRaw with tagged-template parameterized SQL for bulk inserts, updates, and full-text searches",
+      "api_design": "Fastify REST API with two tiers: public paginated endpoints and authenticated admin/external-report endpoints; Telegram webhook endpoint",
+      "separation_of_concerns": "Well-separated: config/env, repositories (DB access), services (business logic), http (routes/security/schemas), telegram (bot commands), ingestion (source adapters + dedupe)",
+      "modularity": "Distinct modules per concern; ingestion layer is pluggable via source adapter pattern with 5 real source integrations",
+      "notable_patterns": [
+        "Multi-source ingestion pipeline with per-page signature deduplication to detect stale pagination",
+        "IngestMatchCache for in-memory lookup during bulk upsert (source_hash, document_id, source_url)",
+        "Levenshtein-based fuzzy name similarity for duplicate audit and merge planning",
+        "In-process sliding-window rate limiter with periodic bucket sweep",
+        "Timing-safe token comparison (node:crypto timingSafeEqual) for external API auth",
+        "PostHog analytics with hashed user identifiers and secret-salted PII protection",
+        "Pino structured logging with redact paths for all secrets and auth headers"
+      ]
+    },
+    "code_organization": {
+      "score": 4,
+      "directory_structure": "src/{config,http,ingestion/dedupe,repositories,services,telegram} — each layer in its own directory, test files co-located with source files",
+      "naming_quality": "Excellent: descriptive names, consistent camelCase/kebab-case conventions, no abbreviations",
+      "documentation_quality": "README, CONTRIBUTING, SECURITY, architecture docs, PR template, issue templates, and inline comments where non-obvious logic appears",
+      "reasoning": "The codebase is unusually well organized for a 3-day hackathon project: clear layering, comprehensive test coverage per module, no god files. Minor deduction: env.ts has no Zod validation for required vars (missing vars fail silently at runtime rather than startup)."
+    },
+    "production_readiness": {
+      "score": 4,
+      "has_auth": true,
+      "has_error_handling": true,
+      "has_logging": true,
+      "has_env_config": true,
+      "has_deploy_config": false,
+      "secrets_handling": "Secrets managed via environment variables; Pino redacts all secret paths in logs; timing-safe comparison for external API token; Telegram webhook secret validated on every update",
+      "security_notes": "guardAdminRequest uses a non-timing-safe string comparison for INGEST_SECRET (unlike guardExternalReportRequest which uses timingSafeEqual). Admin endpoint is lower risk but inconsistent. HTML escaping and attribute escaping implemented for Telegram output. Rate limiting on all surfaces.",
+      "scalability_notes": "Rate limiting is in-memory (Map-based buckets) — won't work across multiple process instances. Search tokens and pending Telegram chat actions are also in-memory and lost on restart. Single-process deployment assumed. DB queries use parameterized raw SQL preventing SQL injection.",
+      "reasoning": "Strong production signals: structured logging with secret redaction, graceful SIGTERM/SIGINT shutdown, per-surface rate limiting, Zod validation on all inputs, idempotency key support on external reports, CI pipeline with typecheck+test+build+security audit. Missing Dockerfile/deployment manifest is the main gap."
+    },
+    "maturity": {
+      "score": 4,
+      "has_readme": true,
+      "has_tests": true,
+      "has_ci": true,
+      "is_real_or_boilerplate": "Real, deployed software — live Telegram bot confirmed by homepage link (t.me/encontrados_ve_bot), 77 commits over 3 days, tests exercising actual ingestion parsing logic, migrations showing schema evolution",
+      "reasoning": "77 commits, 2 contributors, 4 Prisma migrations tracking real schema changes, CI with 4 jobs (validate, test, build, security audit), comprehensive test suite covering ingestion parsers, deduplication, search, repository, and rate limiting. No Dockerfile is the main maturity gap."
+    },
+    "viability": {
+      "score": 5,
+      "reasoning": "This is already deployed and in active use during the earthquake emergency. The data ingestion pipeline pulls from 5 real Venezuelan earthquake databases. The Telegram bot provides search and browse functionality to people looking for survivors. External API lets other services integrate. The code quality is among the highest in the cohort — this is a serious production system built rapidly under pressure."
+    },
+    "key_features": [
+      "Multi-source ingestion from 5 Venezuelan earthquake people-finder APIs (desaparecidos-terremoto, encuentralos, desaparecidosvenezuela, venezuelatebusca, sosvenezuela2026)",
+      "Automated deduplication with Levenshtein fuzzy name matching, document-ID merging, and audit trail in FoundPeopleMergeAudit table",
+      "Telegram bot with /buscar, /lista, /fuentes, /sugerencia commands and inline keyboard pagination",
+      "Public REST API (/api/v1/found-people) with name/documentId/free-text search and pagination",
+      "External report submission endpoint with idempotency key support (allows other services to report found people)",
+      "Admin Telegram commands (/admin_stats, /admin_delete) gated by chat ID",
+      "Per-surface rate limiting (public API, Telegram chat, external reports, admin)",
+      "PostHog analytics with hashed/salted user identifiers for privacy-safe usage tracking"
+    ],
+    "domain_tags": [
+      "people-finder",
+      "family-reunification",
+      "alerts-notifications"
+    ],
+    "merge_potential": "High. This project is already live and functional, with an external REST API that other projects can consume directly. The ingestion layer (5 sources, deduplication, fuzzy matching) is the most sophisticated people-finder data pipeline in the cohort and could serve as the authoritative backend for a broader family-reunification platform. Requires adding a Dockerfile and Redis-backed rate limiting for multi-instance deployment.",
+    "red_flags": [
+      "No Dockerfile or deployment manifest — deployment process is undocumented",
+      "In-memory rate limiting and session state (pending actions, search tokens) are lost on process restart and cannot scale horizontally",
+      "guardAdminRequest uses non-timing-safe string comparison for INGEST_SECRET (inconsistent with guardExternalReportRequest which correctly uses timingSafeEqual)",
+      "No startup validation of required environment variables — missing DATABASE_URL or TELEGRAM_BOT_TOKEN would only error on first use",
+      "Ingestion is triggered manually (npm run ingest:found-people) with no built-in scheduler — data freshness depends on external cron job setup"
+    ]
+  },
+  "signals": {
+    "accessible": true,
+    "stars": 6,
+    "forks": 1,
+    "contributors": 2,
+    "commit_count": 77,
+    "code_loc": 5590,
+    "created_at": "2026-06-25T18:58:42Z",
+    "pushed_at": "2026-06-28T22:39:29Z",
+    "license": "MIT",
+    "languages_bytes": {
+      "TypeScript": 209311
+    },
+    "archived": false
+  }
+}
