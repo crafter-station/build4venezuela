@@ -470,6 +470,51 @@ export async function updateProject(
   return project;
 }
 
+export async function deleteProject(projectId: string) {
+  const project = await getProjectById(projectId);
+
+  if (!project) {
+    throw new Error("Project not found.");
+  }
+
+  await withLocalFallback(
+    async () => {
+      await db.delete(projects).where(eq(projects.id, projectId));
+    },
+    async () => {
+      const data = await readLocalData();
+      const projectExists = data.projects.some(
+        (projectRow) => projectRow.id === projectId,
+      );
+
+      if (!projectExists) {
+        throw new Error("Project not found.");
+      }
+
+      const deletedCommentIds = new Set(
+        (data.comments ?? [])
+          .filter((comment) => comment.project_id === projectId)
+          .map((comment) => comment.id),
+      );
+
+      data.projects = data.projects.filter(
+        (projectRow) => projectRow.id !== projectId,
+      );
+      data.votes = data.votes.filter((vote) => vote.project_id !== projectId);
+      data.comments = (data.comments ?? []).filter(
+        (comment) => comment.project_id !== projectId,
+      );
+      data.commentVotes = (data.commentVotes ?? []).filter(
+        (vote) => !deletedCommentIds.has(vote.comment_id),
+      );
+      await writeLocalData(data);
+    },
+  );
+
+  await invalidateProjectCaches(project.slug);
+  return project;
+}
+
 export async function canEditProject(
   projectId: string,
   userId: string | null | undefined,

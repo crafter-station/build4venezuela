@@ -8,7 +8,11 @@ import {
   rateLimitResponse,
   readJsonObject,
 } from "@/lib/projects/api-security";
-import { canEditProject, updateProject } from "@/lib/projects/store";
+import {
+  canEditProject,
+  deleteProject,
+  updateProject,
+} from "@/lib/projects/store";
 import { validateProjectSubmission } from "@/lib/projects/submissions";
 
 type Props = {
@@ -77,4 +81,42 @@ export async function PATCH(request: Request, { params }: Props) {
   }
 
   return NextResponse.json({ project });
+}
+
+export async function DELETE(_request: Request, { params }: Props) {
+  const { projectId } = await params;
+  const { userId } = await auth();
+
+  if (!userId) {
+    return NextResponse.json(
+      { error: "Sign in to delete this project." },
+      { status: 401 },
+    );
+  }
+
+  const rateLimit = await checkRateLimit({
+    key: rateLimitKey(_request, "project:delete", userId),
+    limit: 20,
+    windowMs: 60 * 60 * 1000,
+  });
+
+  if (!rateLimit.ok) {
+    return rateLimitResponse(rateLimit.retryAfter);
+  }
+
+  if (!(await canEditProject(projectId, userId))) {
+    return NextResponse.json(
+      { error: "You can only delete projects submitted from your account." },
+      { status: 403 },
+    );
+  }
+
+  const project = await deleteProject(projectId);
+
+  for (const locale of routing.locales) {
+    revalidatePath(`/${locale}/projects`);
+    revalidatePath(`/${locale}/p/${project.slug}`);
+  }
+
+  return NextResponse.json({ ok: true });
 }
