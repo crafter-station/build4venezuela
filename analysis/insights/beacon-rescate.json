@@ -10,18 +10,19 @@
   "db_description": "## ¿Qué construiste?\n\"Rescatista\": Un sistema de triangulación en tiempo real diseñado para entornos de desastre. Utiliza escaneo de protocolos de red (ARP/Wi-Fi) y métricas de latencia para localizar dispositivos móviles sin necesidad de infraestructura de red previa.\n\n## ¿Para quién es? ¿Cómo ayuda?\nDiseñado para equipos de búsqueda y rescate en zonas sin cobertura. Permite localizar víctimas basándose en la señal activa de sus dispositivos (smartphones), proporcionando una ubicación visual en un radar en tiempo real.\n\n## ¿Qué debería probar la gente primero?\n1. Iniciar el escaneo en el entorno de pruebas.\n2. Observar cómo el sistema filtra el \"ruido\" y unifica la señal del objetivo en el radar.\n3. Verificar la persistencia de datos en la base de datos local (SQLite).",
   "lifecycle_status": "ready_to_use",
   "analysis": {
-    "summary": "Beacon-rescate is a single-file Python/Kivy Android app (301 LOC) that attempts offline BLE and Wi-Fi proximity scanning to help rescuers detect nearby devices (potential survivors) in disaster zones. The concept — infrastructure-free detection using Bluetooth and local WiFi — is genuinely relevant to earthquake rescue. However the implementation contains critical bugs, uses a Windows-only ping command on an Android target, never invokes the WiFi callback (bypassing the app's own processing pipeline), and has no real triangulation despite claiming it. The README claims Cython/C math acceleration but no such code exists in the repository.",
-    "project_type": "Mobile Android app (Python/Kivy compiled to APK)",
+    "summary": "Beacon Rescate is a single-file (~301 LOC) Python/Kivy Android mobile app intended to help rescue workers locate trapped victims in earthquake zones using offline BLE and Wi-Fi proximity scanning. The entire application lives in main.py with a local SQLite DB. The concept is valid and the code shows genuine technical understanding of BLE RSSI distance estimation, but there are critical bugs (Wi-Fi ping uses Windows-only flags that fail on Android/Linux), the radar only ever displays the single most-recent device (SQL LIMIT 1 instead of all), and the README claims Cython/C math integration that does not exist in the actual code. No tests, no CI, no deployment config, and only 4 commits in a single day of activity.",
+    "project_type": "Android mobile app (Python/Kivy, offline-first)",
     "stack": {
       "frontend": [
-        "Kivy 2.3.0"
+        "Kivy 2.3.0",
+        "Android APK via Buildozer"
       ],
       "backend": [],
       "database": [
-        "SQLite (local, WAL mode)"
+        "SQLite (WAL mode, local on-device)"
       ],
       "infra_deploy": [
-        "Buildozer (APK packaging)"
+        "Buildozer"
       ],
       "ai_ml": [],
       "languages": [
@@ -29,72 +30,72 @@
       ]
     },
     "architecture": {
-      "pattern": "Monolithic single-file application",
+      "pattern": "Single-file monolith",
       "uses_orm": false,
-      "orm_or_db_layer": "Raw sqlite3 with parameterized queries directly in app and helper class methods",
-      "api_design": "None — fully offline local app with no network API",
-      "separation_of_concerns": "Minimal: BLE scanner, WiFi monitor, radar widget, and SQLite logic are split into classes but all in one file with tight coupling and cross-class DB access",
-      "modularity": "Very low — single main.py file, no modules, no packages",
+      "orm_or_db_layer": "Raw sqlite3 calls with parameterized queries; WAL journal mode enabled; no ORM",
+      "api_design": "No API — fully offline, all data local on device",
+      "separation_of_concerns": "Minimal: BLE scanner, Wi-Fi hotspot monitor, SQLite layer, Kivy radar widget, and app class all co-exist in one 301-line file",
+      "modularity": "No modularity — a single main.py contains all logic",
       "notable_patterns": [
-        "BLE scanning via Android JNI (jnius/autoclass) for native Bluetooth LE",
-        "RSSI-to-distance estimation using log-distance path loss model",
-        "Kivy Clock for periodic UI refresh",
-        "WAL-mode SQLite for concurrent thread writes",
-        "Hash-based angle assignment for radar display (pseudo-random, not real triangulation)"
+        "RSSI-to-distance estimation with rolling average smoothing",
+        "Android BLE native integration via pyjnius/jnius autoclass",
+        "Wi-Fi subnet sweep via subprocess ping",
+        "Kivy Clock for periodic radar refresh",
+        "SQLite INSERT OR REPLACE to avoid duplicate ghost points"
       ]
     },
     "code_organization": {
       "score": 2,
-      "directory_structure": "Flat root: main.py, requirements.txt, README.md, gitignore. No subdirectories, no separation of concerns at file level.",
-      "naming_quality": "Spanish-language identifiers throughout (consistent within the project but non-standard for open-source collaboration); method and class names are descriptive.",
-      "documentation_quality": "README covers install steps and architecture claims but the claimed Cython/C component does not exist in the repo. Inline comments are helpful but scattered.",
-      "reasoning": "The project is a single-file monolith with no module structure. Code is readable but tightly coupled, and the repository structure offers no room to grow without a major refactor."
+      "directory_structure": "Flat root: main.py, requirements.txt, README.md, and a .pyZone.Identifier artifact from Windows — no subdirectories whatsoever",
+      "naming_quality": "Spanish variable/method names are consistent and descriptive; class names are clear",
+      "documentation_quality": "README documents architecture and setup steps but overstates capabilities (claims Cython C integration not present in code)",
+      "reasoning": "Entire application is a single file with no modular separation. The flat structure is acceptable for a very small prototype but the claimed Cython layer is absent. Code comments are adequate inline."
     },
     "production_readiness": {
       "score": 1,
       "has_auth": false,
-      "has_error_handling": false,
+      "has_error_handling": true,
       "has_logging": false,
       "has_env_config": false,
       "has_deploy_config": false,
-      "secrets_handling": "No secrets used — fully offline app.",
-      "security_notes": "No security concerns for secrets, but the WiFi scanner does a blind subnet sweep (192.168.x.1-254) using subprocess shell=True with unvalidated input, which is a code-quality risk.",
-      "scalability_notes": "Fully offline single-device app — scalability is not applicable, but the LIMIT 1 query in cargar_datos_en_mapa means only one device is ever shown on the radar at a time, which is a functional regression.",
-      "reasoning": "Error handling consists entirely of bare print() statements with no recovery logic. No logging framework, no env/config layer, no deployment manifests (Dockerfile, CI, buildozer.spec). The app has critical bugs that prevent its core WiFi flow from working."
+      "secrets_handling": "No secrets needed — fully offline app",
+      "security_notes": "No network exposure; all data is local. The Wi-Fi subnet sweep is unauthenticated by design but appropriate for disaster context.",
+      "scalability_notes": "SQLite on-device is the ceiling; only one device shown on radar at a time due to LIMIT 1 bug. Not designed to scale beyond a single rescuer's phone.",
+      "reasoning": "Critical bugs: Wi-Fi ping uses Windows-only flags (ping -n 1) that will silently fail on Android/Linux. The radar SQL query uses LIMIT 1 so only one victim point is ever shown — the core feature is broken. procesar_dispositivo_wifi callback is defined but never actually wired to MonitorWifiHotspot's internal guardar_en_bd_unificada call."
     },
     "maturity": {
       "score": 1,
       "has_readme": true,
       "has_tests": false,
       "has_ci": false,
-      "is_real_or_boilerplate": "Real custom logic (BLE RSSI math, WiFi subnet sweep, Kivy radar widget) but with significant bugs that prevent correct operation.",
-      "reasoning": "4 commits over a single day, 1 contributor, no tests, no CI. The WiFi monitor never calls its callback (data flows through a duplicate DB path instead), the ping command uses Windows syntax on an Android target, and the radar only ever shows the single most recent device due to a SQL LIMIT 1 bug."
+      "is_real_or_boilerplate": "Real novel code, not boilerplate — the BLE scanning, RSSI math, and Kivy radar widget show genuine authorship and domain thinking, but it is clearly an unfinished prototype with functional bugs",
+      "reasoning": "4 commits all on the same day (June 28, 2026), no tests, no CI, and at least two bugs that prevent core functionality from working on the target platform (Android)."
     },
     "viability": {
       "score": 2,
-      "reasoning": "The core concept — offline BLE/WiFi proximity detection for search and rescue without internet infrastructure — is highly relevant and technically sound in principle. However the current implementation has multiple show-stopping bugs: the WiFi callback is wired but never invoked, the ping command is Windows-only and will fail on Android/Linux, and the radar display is broken (LIMIT 1). The README also falsely claims Cython/C acceleration that does not exist. These are fixable issues but require substantial rework before the app could be tested on a real device."
+      "reasoning": "The concept of offline BLE/Wi-Fi proximity scanning for rescue workers is genuinely useful and technically sound. However the implementation has showstopper bugs (Windows ping flags on Android, radar only shows 1 device), the claimed Cython performance layer does not exist, and there is no path from this code to a deployable APK without significant fixes."
     },
     "key_features": [
-      "Offline BLE Low Energy device scanning using Android native APIs via jnius",
-      "WiFi hotspot subnet sweep using ping to detect connected devices",
-      "RSSI-to-distance estimation with smoothing filter (5-sample rolling average)",
-      "Kivy-based radar widget displaying detected devices at estimated distances",
-      "Local SQLite database (WAL mode) as unified data store for BLE and WiFi detections",
-      "Toggle between BLE and WiFi scanning modes at runtime"
+      "Offline-first: no internet or cellular required",
+      "BLE RSSI-based distance estimation with rolling-average smoothing",
+      "Wi-Fi hotspot subnet sweep for non-BLE devices",
+      "Local SQLite persistence with WAL mode",
+      "Kivy radar visualization showing device proximity",
+      "Android native BLE via pyjnius jnius bridge",
+      "Mode toggle between BLE and Wi-Fi scanning"
     ],
     "domain_tags": [
       "people-finder",
       "alerts-notifications"
     ],
-    "merge_potential": "Low. The app is a standalone Android tool with a unique offline-detection concept, but its bugs, single-file structure, and Kivy framework make integration into a broader web-based relief platform extremely difficult without a full rewrite.",
+    "merge_potential": "Low. The offline BLE proximity-scanning concept for rescue is distinctive and could complement web/server-based projects, but the code has functional bugs and would need significant rework before integration or deployment.",
     "red_flags": [
-      "WiFi subnet scan uses 'ping -n 1 -w 100' (Windows syntax) — will fail silently on Android/Linux target; correct flags are '-c 1 -W 0.1'",
-      "MonitorWifiHotspot.escanear_dispositivos_conectados() never calls self.callback_funcion — it writes directly to DB, completely bypassing procesar_dispositivo_wifi in the app",
-      "cargar_datos_en_mapa uses 'LIMIT 1' — radar only ever shows one device regardless of how many are detected",
-      "README claims 'Lógica Matemática: C (Vía Cython)' but zero C or Cython files exist anywhere in the repo",
-      "Radar angle is computed as hash(mac) % 360 — no real triangulation, positions are pseudo-random and not spatially meaningful",
-      "subprocess.run with shell=True and a dynamically constructed IP string, though the IP is locally generated so low practical risk",
-      "No tests, no CI, no buildozer.spec — APK cannot be built from this repo as-is"
+      "Wi-Fi ping subprocess uses Windows-only flags (`ping -n 1 -w 100`) — silently fails on Android/Linux, breaking Wi-Fi mode entirely",
+      "Radar SQL query uses `LIMIT 1` so only the single most-recent device is ever displayed — the multi-victim visualization is non-functional",
+      "README claims Cython/C math integration (`calcular_distancia_rssi` in C) but all math is pure Python",
+      "procesar_dispositivo_wifi is defined in the App class but MonitorWifiHotspot calls its own guardar_en_bd_unificada directly, bypassing the app-level callback — a dead code path",
+      "No tests, no CI, no Buildozer spec file (.spec) — cannot actually build an APK from this repo as-is",
+      "Windows Zone.Identifier artifact (main.pyZone.Identifier) committed to repo — indicates development on Windows, raising doubts about Android testing"
     ]
   },
   "signals": {
@@ -111,5 +112,32 @@
       "Python": 12613
     },
     "archived": false
+  },
+  "evaluation": {
+    "solves_real_problem": "partial",
+    "real_problem_reasoning": "The concept is genuinely valuable: locating trapped earthquake victims using passive BLE/Wi-Fi signal scanning with zero network infrastructure is a real operational gap for Venezuelan rescue teams. However, the implementation cannot deliver on this promise today. The Wi-Fi scanning mode uses Windows-only ping flags that silently fail on Android, the radar only ever displays one device due to a SQL LIMIT 1 bug, there is no Buildozer .spec file so no APK can be produced from the repo, and the Cython performance layer described in the README does not exist in the code. The problem is real and critical; the solution is not yet functional.",
+    "problem_severity": "critical",
+    "impact_potential": 3,
+    "product_quality": 1,
+    "live_demo_status": "no-public-demo",
+    "live_demo_notes": "Repo-only Android app. No prebuilt APK is provided and the Buildozer .spec file required to compile one is missing, so the project cannot be built from source as submitted. No demo video exists. The live_url in the submission points to the Git clone URL, not a deployable artifact.",
+    "diffusion": {
+      "score": 1,
+      "ready_to_promote": false,
+      "available_assets": [
+        "clear-value-prop"
+      ],
+      "recommended_angle": "Offline BLE/Wi-Fi proximity scanning lets a single rescuer's phone detect trapped victims' devices with zero network infrastructure — the right idea for post-earthquake Venezuela.",
+      "gaps": [
+        "demo-video",
+        "live-demo",
+        "screenshots",
+        "working-APK",
+        "branding",
+        "real-users"
+      ]
+    },
+    "overall_recommendation": "improve-first",
+    "one_line_pitch": "Beacon Rescate detecta el teléfono de víctimas atrapadas usando BLE y Wi-Fi sin internet — pero necesita corregir bugs críticos antes de ser útil en campo."
   }
 }

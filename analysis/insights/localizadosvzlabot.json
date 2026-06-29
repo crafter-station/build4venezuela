@@ -10,54 +10,54 @@
   "db_description": "# Bot de WhatsApp de Ayuda Sismo — Venezuela 2026\n\nUn chatbot de WhatsApp ligero, seguro y optimizado para producción, diseñado para coordinar la asistencia humanitaria y la localización de personas tras el terremoto de Venezuela de 2026. \n\nEl bot consume directamente las APIs públicas de **Localizados Venezuela**, **SOS Venezuela** y **AcopioVE** en tiempo real, ofreciendo información consolidada de forma instantánea sin requerir bases de datos locales ni almacenamiento de estado sensible en el chat.\n\n---\n## Características Clave\n\n*   **Búsqueda Dual y Fusión Inteligente (Smart Fusion)**:\n    *   Al buscar una persona por nombre o cédula, el bot consulta de forma paralela (mediante `Promise.allSettled` tolerante a fallos) la API oficial de **Localizados Venezuela** y la API comunitaria de **SOS Venezuela**.\n    *   **Algoritmo de De-duplicación**: Unifica las respuestas duplicadas utilizando coincidencia exacta sobre el nombre normalizado (removiendo mayúsculas, acentos y espacios innecesarios).\n    *   **Priorización de Estatus**: Otorga prioridad absoluta al estado de **Localizado (Confirmado)** si una persona figura en un centro médico o albergue oficial, enriqueciendo la ficha con reportes comunitarios de búsqueda previa de la red SOS, observaciones clínicas y enlaces de consulta de ambas plataformas.\n*   **Integración de APIs en Tiempo Real**:\n    *   **Localizados Venezuela**: Consulta de personas localizadas en centros de salud y refugios autorizados.\n    *   **SOS Venezuela**: Registro comunitario de personas desaparecidas o reportadas a salvo por familiares.\n    *   **AcopioVE (Refugios y Centros de Donación)**: Ubica albergues activos y puntos de donación por ciudad, mostrando dirección, estado de ocupación (abierto/lleno) y necesidades inmediatas.\n    *   **ResponseGrid (Necesidades de Ayuda)**: Consulta en tiempo real las solicitudes activas de insumos, recursos y voluntariado validadas por coordinadores de emergencia.\n    *   **Directorio de Emergencias**: Acceso directo al listado oficial de números de primera respuesta del país.\n*   **Búsqueda Inteligente y Sin Falsos Positivos**:\n    *   **Por Cédula de Identidad**: Sanitiza la entrada y realiza búsquedas de dígitos exactos sobre la API.\n    *   **Por Nombre (Filtrado Estricto de Telegram)**: Solicita un lote amplio de registros y los filtra localmente en memoria. Exige la coincidencia de **todas** las palabras clave ingresadas (insensible a acentos/mayúsculas), eliminando coincidencias parciales molestas (por ejemplo, buscar \"Carlos Perez\" no retornará otros \"Carlos\" que no sean \"Perez\").\n    *   **Sanitización de Comandos**: Ignora preposiciones gramaticales al inicio de los comandos (`refugio en Caracas` o `acopio de Valencia` buscan directamente por la ciudad `\"Caracas\"` o `\"Valencia\"`).\n*   **Caché en Memoria Local**:\n    *   Implementa un sistema interno de caché por TTL (`Map` nativo de alto rendimiento) para almacenar temporalmente los resultados de las APIs externas:\n        *   Directorio de Emergencias: 5 minutos.\n        *   Búsquedas de Refugios: 2 minutos.\n        *   Centros de Acopio: 2 minutos.\n        *   Necesidades de Ayuda (ResponseGrid): 2 minutos.\n        *   Búsquedas de Personas (Búsqueda Dual): 1 minuto.\n    *   Esto acelera los tiempos de respuesta del bot y mitiga completamente el riesgo de bloqueos por **Rate Limiting** (120 req/min de la API externa) al reutilizar datos de consultas frecuentes de diferentes usuarios.\n\n*   **Aprovisionamiento Idempotente y Seguro**:\n    *   Al iniciar, comprueba si la sesión del bot ya está configurada en la API de FZap.\n    *   Realiza un `GET /webhook` para verificar si la dirección de callback ya existe antes de registrarla, **evitando la duplicación de webhooks** que causa respuestas duplicadas o triplicadas en los chats.\n*   **Seguridad contra Condiciones de Carrera**:\n    *   Procesa los mensajes entrantes de cada chat secuencialmente mediante una cola de tareas asíncronas (`taskQueue`) por JID (ID de usuario de WhatsApp), evitando colisiones cuando un usuario envía ráfagas rápidas de mensajes.\n*   **Imagen Docker Altamente Optimizada**:\n    *   Dockerfile basado en imágenes ligeras Alpine.\n    *   Eliminadas dependencias de compiladores C++ nativos (`make`, `g++`, `python3`) tras remover librerías pesadas como SQLite local.\n    *   El contenedor corre bajo un usuario sin privilegios (`fzap`) para garantizar la seguridad del servidor host.\n\n---\n\n## Configuración de Variables de Entorno\n\nCrea un archivo `.env` en la raíz del proyecto (toma como base `.env.example`). A continuación se detallan los parámetros necesarios:\n\n| Variable | Descripción | Ejemplo / Valor Recomendado |\n| :--- | :--- | :--- |\n| **`PORT`** | Puerto local en el que se ejecuta el servidor del bot. | `3000` |\n| **`FZAP_API_URL`** | URL base de la API de FZap. | `http://fzap_api:8080` o `http://163.176.47.42:8081` |\n| **`FZAP_API_KEY`** | Token de autorización de administrador de FZap. | `tu_fzap_api_key` |\n| **`FZAP_INSTANCE`** | Nombre de la instancia de WhatsApp asignada al bot. | `bot_instance` |\n| **`FZAP_WEBHOOK_URL`** | URL pública o interna del webhook de callback del bot. | `http://whatsapp-bot-sismo.local:3000/webhook/messages` |\n| **`FZAP_WEBHOOK_SECRET`** | Clave secreta para firmar/validar la autenticidad del webhook (HMAC SHA-256). | `tu_secreto_de_webhook` |\n| **`SITE_URL`** | URL del portal web oficial de búsqueda de personas localizadas. | `https://localizadosvenezuela.com` |\n\n---\n\n## Instalación y Despliegue\n\n### Paso 1: Configurar el Entorno\n1. Copia la plantilla de variables:\n   ```bash\n   cp .env.example .env\n   ```\n2. Completa los valores en el archivo `.env` de acuerdo a tu servidor.\n\n### Paso 2: Compilar e Iniciar los Contenedores\nInicia el entorno usando Docker Compose:\n```bash\ndocker compose -f docker-compose-prod.yml up -d --build\n```\n> [!IMPORTANT]\n> Si estás redesplegando cambios de código del bot en un servidor que ya tiene la sesión de WhatsApp vinculada en el contenedor `fzap_api`, **no apagues ni reinicies el cluster completo**. Recompila únicamente el contenedor del bot para preservar la conexión de WhatsApp activa:\n> ```bash\n> docker compose -f docker-compose-prod.yml up -d --build whatsapp_bot_sismo\n> ```\n\n### Paso 3: Emparejar WhatsApp\n1. Accede a tu panel de FZap Manager (`http://TU_IP:8081`).\n2. Selecciona la instancia del bot (`FZAP_INSTANCE`).\n3. Escanea el código QR de emparejamiento desde la aplicación móvil de WhatsApp (Dispositivos vinculados -> Vincular un dispositivo).\n\n---\n\n## Comandos del Bot (Uso en WhatsApp)\n\nEl bot procesa dinámicamente los siguientes mensajes enviados por los usuarios:\n\n*   **Menú de Bienvenida y Ayuda**: Al enviar `hola`, `ayuda`, `help`, `/ayuda`, `/help` o `#`, se muestra el instructivo del bot.\n*   **Búsqueda de Personas**: Envía el nombre completo de la persona o su Cédula de Identidad (mínimo 4 números) para buscar registros confirmados en hospitales y refugios de forma unificada en ambas redes de búsqueda (Localizados VE + SOS Venezuela).\n*   **Búsqueda de Refugios**: Envía la palabra `refugio` sola para ver todos los albergues, o incluye la ciudad (ej: `refugio en Caracas` o `refugio La Guaira`) para ver los específicos de una localidad.\n*   **Centros de Donación/Acopio**: Envía la palabra `acopio` o `donar` seguida de la ciudad (ej: `acopio en Valencia`) para ubicar centros de recolección de víveres.\n*   **Números de Emergencia**: Envía la palabra `emergencia` o `telefono` para obtener el directorio telefónico de ayuda.",
   "lifecycle_status": "ready_to_use",
   "analysis": {
-    "summary": "A lean, stateless WhatsApp chatbot built with Node.js + Fzap API that aggregates person-finder, shelter, donation-center, and emergency data from multiple Venezuelan earthquake relief APIs (localizadosvenezuela.com, sosvenezuela2026.com, acopiove.org, responsegrid.app). The bot is apparently live (homepage: wa.me/584225252437). Code quality is high for a 2-day-old hackathon project: proper security hardening, per-JID task queue for race condition prevention, minor-data protection, timing-safe auth, and a well-structured Docker setup. Key weaknesses: zero tests, no CI, default credentials baked into compose files, and one suspicious hardcoded test UUID in the ResponseGrid API call.",
-    "project_type": "WhatsApp chatbot / humanitarian API aggregator",
+    "summary": "A WhatsApp chatbot (Node.js + Express + Fzap WhatsApp gateway) built to help locate missing persons and coordinate aid after the 2026 Venezuela earthquake. The bot is stateless and aggregates live data from four external APIs in parallel: localizadosvenezuela.com (confirmed localized persons), sosvenezuela2026.com (community missing/found reports), acopiove.org (shelters and donation centers), and responsegrid.app (urgent resource needs). It appears to be actively deployed at wa.me/584225252437. The code is clean, security-conscious, and implements genuine multi-source deduplication logic with privacy protections for minors — this is not boilerplate.",
+    "project_type": "WhatsApp chatbot / humanitarian coordination bot",
     "stack": {
       "frontend": [],
       "backend": [
-        "Node.js 20",
-        "Express 4",
-        "Axios",
-        "Fzap API (WhatsApp bridge)"
+        "Node.js",
+        "Express",
+        "Fzap API (WhatsApp gateway)",
+        "express-rate-limit",
+        "helmet",
+        "morgan",
+        "axios"
       ],
       "database": [
-        "PostgreSQL 15 (used only by Fzap API, not the bot itself)",
-        "In-memory Map cache (TTL)"
+        "PostgreSQL (Fzap-only, not used by the bot itself)"
       ],
       "infra_deploy": [
         "Docker",
-        "docker-compose (dev + prod)",
-        "Alpine-based image",
-        "non-root user"
+        "Docker Compose",
+        "Alpine Linux"
       ],
       "ai_ml": [],
       "languages": [
-        "JavaScript (Node.js)"
+        "JavaScript"
       ]
     },
     "architecture": {
-      "pattern": "Stateless microservice / API aggregator bot",
+      "pattern": "Webhook-driven event microservice — Fzap pushes MESSAGES_UPSERT events to /webhook/messages; the bot dispatches to a router that calls external REST APIs and replies via Fzap",
       "uses_orm": false,
-      "orm_or_db_layer": "No local database. The bot itself is entirely stateless — it only uses an in-memory TTL Map for response caching. PostgreSQL is used exclusively by the Fzap WhatsApp bridge container.",
-      "api_design": "Receives inbound messages via POST /webhook/messages from Fzap API (webhook pattern); calls 4 external REST APIs (localizadosvenezuela.com, sosvenezuela2026.com, acopiove.org, responsegrid.app) using axios with Promise.allSettled for fault tolerance.",
-      "separation_of_concerns": "Clean: src/webhook/auth.js (auth middleware), src/webhook/parser.js (payload normalization), src/webhook/handler.js (dispatcher), src/sismoRouter.js (business logic), src/services/fzap.js (send), src/services/fzapProvision.js (startup provisioning), src/utils/cache.js, src/utils/taskQueue.js.",
-      "modularity": "Good for a small project. sismoRouter.js is 530 LOC and handles all intents in a single file — could be split per domain but is still readable.",
+      "orm_or_db_layer": "No local database. The bot is fully stateless; all data comes from external APIs at query time. An in-memory Map-based TTL cache is used for rate-limit mitigation and response speed.",
+      "api_design": "Single inbound POST /webhook/messages; outbound calls to localizadosvenezuela.com, sosvenezuela2026.com, acopiove.org, and responsegrid.app via axios. Fzap send-message called via POST /chat/send/text.",
+      "separation_of_concerns": "Good: src/webhook/ (auth, parser, handler), src/services/ (fzap client, fzap provisioning), src/utils/ (cache, per-JID task queue), src/sismoRouter.js (business logic), src/config.js, src/index.js",
+      "modularity": "High for its size. Each concern is isolated in its own module. Config is centralized via dotenv. Entry point wires everything together cleanly.",
       "notable_patterns": [
-        "Per-JID sequential task queue to prevent race conditions on burst messages",
-        "Promise.allSettled dual-API fan-out with client-side deduplication and merge by normalized name",
-        "TTL in-memory Map cache to reduce upstream API pressure",
-        "Idempotent startup provisioning (check before create/register webhook)",
-        "Minor-data protection: location and notes hidden for persons under 18",
-        "Timing-safe (crypto.timingSafeEqual) webhook secret comparison",
-        "patch.js: runtime binary patch on Fzap API to handle @lid JID resolution"
+        "Per-JID async task queue (queues.js) prevents race conditions when users send message bursts",
+        "Promise.allSettled for parallel multi-source API calls with graceful degradation if one source fails",
+        "Timing-safe HMAC comparison (crypto.timingSafeEqual) for webhook secret validation",
+        "Idempotent auto-provisioning of Fzap instance and webhook on bot startup",
+        "Privacy protections for minors: masked cédula, location suppressed for persons under 18",
+        "patch.js applies a runtime string-replace patch to Fzap's compiled binary to fix @lid JID resolution bug"
       ]
     },
     "code_organization": {
       "score": 4,
-      "directory_structure": "src/ split into webhook/, services/, utils/ with clear single-responsibility files. Root holds Dockerfile, two compose files, and .env.example.",
-      "naming_quality": "Consistent, descriptive names throughout (routeMessage, parseMessage, enqueue, provisionFzap). Spanish comments match the project's Spanish-language domain.",
-      "documentation_quality": "Well-documented README with command table, env var table, and deployment steps. JSDoc on key functions. Inline comments explain non-obvious decisions (e.g., @lid JID fallback, taskQueue GC).",
-      "reasoning": "The codebase is small (~1100 LOC) but consistently well-organized and documented, with a clear rationale for each module. The one gripe is that sismoRouter.js lumps all 5 intents into one 530-line file."
+      "directory_structure": "Clean src/ layout with webhook/, services/, utils/ subdirectories. Root contains Dockerfile, both docker-compose files, .env.example, and patch.js.",
+      "naming_quality": "Consistent camelCase functions, descriptive module names, JSDoc types in parser.js. Comment markers like 'M-7' (privacy tag) are slightly cryptic but otherwise naming is clear.",
+      "documentation_quality": "README is detailed and accurate, covering architecture decisions, env vars, deployment steps, and bot commands. Source files have module-level JSDoc comments explaining security model and design decisions.",
+      "reasoning": "For a 2-day hackathon project the code structure is notably clean and intentional. Security decisions are explicitly documented inline. The only deduction is no tests and the patch.js monkey-patch is an undocumented footgun."
     },
     "production_readiness": {
       "score": 3,
@@ -66,34 +66,34 @@
       "has_logging": true,
       "has_env_config": true,
       "has_deploy_config": true,
-      "secrets_handling": "FZAP_WEBHOOK_SECRET is correctly loaded from env in code, but docker-compose-prod.yml hardcodes it as 'webhook_secret_secure_sismo' and Postgres password is hardcoded as 'fzap123' in both compose files — operators must override these manually.",
-      "security_notes": "Positives: Helmet headers, 120 req/min rate limiter, timing-safe HMAC comparison, health endpoint locked to localhost, non-root Docker user, JSON body limit 5 MB, minor-data location masking. Negatives: default credentials in compose files; fzap.js logs err.response?.status on send failure (low risk); the auth.js IP subnet fallback is acknowledged as insecure but present.",
-      "scalability_notes": "Stateless bot scales horizontally, but the in-memory cache and taskQueue are per-process — multiple replicas would lose cache coherence and each would maintain separate JID queues. Acceptable for single-instance deployment; would need Redis for multi-replica.",
-      "reasoning": "Good security hygiene for a hackathon — more hardening than most submissions. Docker setup is solid. The hardcoded compose secrets and zero test coverage are the main gaps preventing a 4."
+      "secrets_handling": ".env.example is present and checked in without secrets. However, both docker-compose files contain hardcoded credentials: POSTGRES_PASSWORD=fzap123, ADMIN_TOKEN=secret_key, FZAP_WEBHOOK_SECRET=webhook_secret_secure_sismo. These should use ${VAR} substitution from the .env file.",
+      "security_notes": "Positives: Helmet HTTP headers, rate limiter (120 req/min), health endpoint localhost-only, timing-safe webhook secret comparison, non-root Docker user (fzap), error handlers do not leak user data or message content in logs. Negatives: hardcoded credentials in compose files, patch.js modifies a third-party compiled binary which will silently break on Fzap image updates.",
+      "scalability_notes": "Intentionally single-instance design. In-memory cache and per-JID task queue are process-local; horizontal scaling is not possible without replacing these with Redis. Acceptable for a crisis chatbot with one WhatsApp number.",
+      "reasoning": "The application code itself has solid security hygiene for a hackathon — timing-safe auth, rate limiting, helmet, graceful error handling, privacy protections for minors. Production readiness is held back by hardcoded credentials in compose files, no tests, no CI, and the fragile patch.js approach to fixing a third-party bug."
     },
     "maturity": {
       "score": 2,
       "has_readme": true,
       "has_tests": false,
       "has_ci": false,
-      "is_real_or_boilerplate": "Real, functioning bot with genuine integration logic, privacy features, and an active deployment. Not boilerplate.",
-      "reasoning": "8 commits, 1 contributor, project is 2 days old. Code quality exceeds typical hackathon submissions and the bot appears live, but the complete absence of tests and CI, combined with the brand-new status, caps the maturity score."
+      "is_real_or_boilerplate": "Real — the bot implements genuine multi-source person-search with deduplication, per-JID queueing, privacy rules for minors, idempotent provisioning, and is reportedly deployed at a live WhatsApp number (wa.me/584225252437).",
+      "reasoning": "Created June 27, 2026 with only 8 commits over 2 days and a single contributor. No tests and no CI pipeline exist. Despite being very new, the feature logic is substantive and the project appears live. Score reflects the very short track record."
     },
     "viability": {
-      "score": 4,
-      "reasoning": "The bot is apparently deployed and running (real WhatsApp number in homepage). It solves a concrete, immediate need (family reunification + shelter/aid logistics via WhatsApp — the most accessible channel in Venezuela). Stateless design keeps operational complexity low. The main viability risk is full dependency on 4 external APIs that are not under the team's control, and one ResponseGrid call uses a UUID that appears to be a test/placeholder ID (11111111-1111-4111-8111-111111111111), which may return no real data."
+      "score": 3,
+      "reasoning": "The bot addresses a direct, concrete need (WhatsApp-based person search is the right channel for Venezuela's population). The multi-source aggregation and deduplication logic is genuine and carefully implemented. Main risks: full dependency on four external APIs that may be unstable or unavailable; the responsegrid.app integration uses a clearly placeholder UUID (11111111-1111-4111-8111-111111111111) suggesting it may not work in production; and no local data persistence means the bot has zero state if APIs go down."
     },
     "key_features": [
-      "Dual-source person search: queries localizadosvenezuela.com and sosvenezuela2026.com in parallel, deduplicates and merges results by normalized name",
-      "Shelter finder: queries acopiove.org by city, showing occupancy status and immediate needs",
-      "Donation center finder: same AcopioVE endpoint filtered by tipo=acopio",
-      "Urgent needs/supplies: queries responsegrid.app public emergencies endpoint with local city filtering",
-      "Emergency phone directory: fetches from acopiove.org/v1/telefonos with 5-minute cache",
-      "Minor data protection: location and notes suppressed for persons under 18",
-      "Cédula masking: only shows first 2 and last 3 digits",
-      "Per-JID sequential task queue preventing race conditions on burst messages",
-      "Idempotent Fzap provisioning on startup",
-      "In-memory TTL cache (1–5 min) to reduce upstream API load"
+      "Parallel dual-source person search (localizadosvenezuela.com + sosvenezuela2026.com) with name-normalization deduplication",
+      "Privacy protections for minors: masked cédula, suppressed location/notes for persons under 18",
+      "Active shelter lookup by city via acopiove.org API",
+      "Donation center search by city via acopiove.org API",
+      "Urgent resource needs listing via responsegrid.app API",
+      "Emergency phone directory with 5-minute TTL cache",
+      "Per-JID sequential async task queue to prevent race conditions from message bursts",
+      "Timing-safe webhook secret validation with fallback Docker subnet allowlist",
+      "Idempotent Fzap instance and webhook auto-provisioning on startup",
+      "Non-root Docker container with alpine base image"
     ],
     "domain_tags": [
       "people-finder",
@@ -103,15 +103,14 @@
       "alerts-notifications",
       "comms-chat"
     ],
-    "merge_potential": "Medium-high. The bot is a thin aggregator over external APIs with no local data store, so merging its person-finder or shelter-search logic into another platform would require exposing those same external API calls through a different interface. The clean service/router separation makes extraction feasible.",
+    "merge_potential": "Medium. The bot is live, well-structured, and implements real logic that fills a genuine gap (WhatsApp as the access channel). Before merging/deploying: replace hardcoded credentials in docker-compose files with env-variable references, verify the responsegrid.app UUID is a real endpoint, and document the patch.js dependency on a specific Fzap binary version.",
     "red_flags": [
-      "ResponseGrid API call uses a hardcoded placeholder UUID (11111111-1111-4111-8111-111111111111) — this endpoint almost certainly returns no real emergency data in production",
-      "FZAP_WEBHOOK_SECRET is hardcoded as 'webhook_secret_secure_sismo' in docker-compose-prod.yml — operators may not realize they must change it",
-      "PostgreSQL password hardcoded as 'fzap123' in both compose files",
-      "In-memory cache and task queue are per-process — multiple instances would be incoherent",
-      "Full runtime dependency on 4 external APIs not operated by this team (localizadosvenezuela.com, sosvenezuela2026.com, acopiove.org, responsegrid.app)",
-      "Zero automated tests",
-      "No CI/CD pipeline"
+      "Both docker-compose.yml and docker-compose-prod.yml have hardcoded credentials (POSTGRES_PASSWORD=fzap123, ADMIN_TOKEN=secret_key, FZAP_WEBHOOK_SECRET=webhook_secret_secure_sismo) instead of reading from .env",
+      "ResponseGrid API URL uses an obviously fake/placeholder UUID: /emergencies/11111111-1111-4111-8111-111111111111/public/needs — likely a test endpoint that may not return real data",
+      "patch.js modifies the compiled Fzap binary (/fzap/dist/main.js) with a string-replace — this will silently break whenever the fzap Docker image is updated",
+      "No tests of any kind — zero test coverage for the deduplication logic, routing, or auth middleware",
+      "In-memory cache and task queue are process-local; any restart loses all cached responses and any in-flight queue state",
+      "Single contributor, 8 commits, 2 days old — no evidence of sustained maintenance capacity"
     ]
   },
   "signals": {
@@ -129,5 +128,33 @@
       "Dockerfile": 321
     },
     "archived": false
+  },
+  "evaluation": {
+    "solves_real_problem": "yes",
+    "real_problem_reasoning": "WhatsApp is the dominant communication channel for Venezuelans, and the bot directly addresses the three most urgent post-earthquake needs: locating missing persons across two live registries simultaneously, finding active shelters by city, and locating donation centers. The dual-source deduplication logic (localizadosvenezuela.com + sosvenezuela2026.com) with name normalization and status prioritization is a real, carefully-reasoned implementation — not a UI facade. Privacy protections for minors show the team thought about ground-level deployment realities.",
+    "problem_severity": "critical",
+    "impact_potential": 4,
+    "product_quality": 3,
+    "live_demo_status": "partial",
+    "live_demo_notes": "The wa.me/584225252437 link resolves and redirects to a valid WhatsApp profile named \"Terremoto Venezuela,\" confirming the number exists and is registered. It is not possible to verify bot response behavior via WebFetch (requires an actual WhatsApp client). The demo video at youtube.com/shorts/hB-zcKp5Cak is present and linked. A notable red flag is that the ResponseGrid integration uses a placeholder UUID (11111111-1111-4111-8111-111111111111) suggesting that feature may return no real data in production.",
+    "diffusion": {
+      "score": 3,
+      "ready_to_promote": true,
+      "available_assets": [
+        "live-demo",
+        "demo-video",
+        "clear-value-prop"
+      ],
+      "recommended_angle": "Post the WhatsApp number directly with a one-tap CTA: 'Si tienes un familiar desaparecido en Venezuela, escríbele a este número de WhatsApp — el bot busca en tiempo real en hospitales, refugios y registros comunitarios.' Lead with the phone number, not the tech. Use the YouTube short as the visual proof.",
+      "gaps": [
+        "No screenshots of actual bot responses to attach to posts",
+        "No branding assets or logo",
+        "No evidence of real users or testimonials yet",
+        "ResponseGrid integration likely non-functional (placeholder UUID) — should not be advertised until confirmed working",
+        "Hardcoded credentials in docker-compose files are a liability if repo is promoted publicly"
+      ]
+    },
+    "overall_recommendation": "promote",
+    "one_line_pitch": "Escribe un nombre o cédula en WhatsApp y en segundos el bot busca simultáneamente en hospitales, refugios y registros comunitarios del terremoto Venezuela 2026."
   }
 }

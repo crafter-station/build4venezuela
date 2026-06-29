@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 # Usage: collect-signals.sh <github_url> <workdir>
 # Emits raw repo signals as JSON to stdout. Shallow-clones into <workdir>/<repo>.
-set -euo pipefail
+# NB: no `-e`/`pipefail` — `find … | head` legitimately triggers SIGPIPE (141)
+# on large repos, which would otherwise kill the script mid-run. Each step has
+# its own fallback instead.
+set -u
 
 RAW_URL="$1"
 WORKDIR="$2"

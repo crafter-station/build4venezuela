@@ -10,29 +10,30 @@
   "db_description": "## What did you build?\nA Spanish-first Telegram bot — **@DEV_VEZbot** — that gives Venezuelans clear\nemergency information (shelters, safe water, health, humanitarian aid) just by\nchatting in plain Spanish. No app, no sign-up.\n\nUnder the hood it's an AI agent built on **surfcall** (by Gecko): a layer that\nmakes any API usable by an AI agent *without writing integration code*. surfcall\nreads the SOS Venezuela 2026 API, turns it into the right tools, and makes the\ncorrect call on the first try — so answers come from live data, not guesses.\n\n## Who is it for?\nAnyone in Venezuela who needs emergency info fast and isn't a developer — reached\nwhere they already are (Telegram), in the language they speak (Spanish). And for\nthe SOS Venezuela project: a zero-friction front door to their data.\n\n## How does it help?\n- Turns a developer API into something a regular person can just *ask*.\n- Real-time answers from SOS Venezuela 2026 data.\n- Free, no install, no registration — any phone with Telegram.\n- Open source (MIT). We also fed improvements back to the SOS Venezuela API\n(an OpenAPI spec + endpoint suggestions) so others can build on it too.\n- **Reusable for any source:** bring an API or dataset and we make it         \nagent-usable — one click if it has an OpenAPI, or we integrate it by hand.\nSOS Venezuela is just the first.\n\n## What should people try first?\nOpen **t.me/DEV_VEZbot** and ask, in Spanish:\n- \"¿Dónde hay un refugio cerca de mí?\"\n- \"¿El agua de mi zona es segura para tomar?\"\n- \"¿Cómo pido o doy ayuda?\"",
   "lifecycle_status": "ready_to_use",
   "analysis": {
-    "summary": "A Spanish-first Telegram bot that acts as an AI agent over the SOS Venezuela 2026 public humanitarian API. Users can query missing/found persons, map reports, damage assessments, and earthquake news via natural language in Telegram — no app install, no registration. The bot uses a manual Anthropic tool-use loop (with OpenRouter as a free fallback), mediated by the team's own \"surfcall\" library that auto-generates LLM tool definitions from an OpenAPI spec. The repo also includes a Next.js 16 landing page deployed on Vercel. The Python bot code is genuinely well-crafted for a hackathon: per-user rate limiting, graceful error degradation, prompt-injection defense, provider abstraction. The main weaknesses are zero test files, no CI, in-memory state, and a dependency on an unpublished GitHub-only library (surfcall).",
-    "project_type": "Telegram AI chatbot + landing page",
+    "summary": "A Spanish-first Telegram bot that acts as an AI agent over the SOS Venezuela 2026 public humanitarian API, built for the Build4Venezuela 2026 hackathon. The project consists of two parts: a Python bot (the core product) powered by Claude Haiku or a free OpenRouter LLM, and a Next.js landing page deployed on Vercel. The bot lets Venezuelans query missing-persons data, hazard reports, aggregate stats, structural damage, and news in natural language — no app install required. The code is genuinely thoughtful for a hackathon build: clean injection patterns, explicit prompt-injection defense, privacy-aware data handling, and graceful Spanish-language degradation on every error path. The main weaknesses are zero tests in this repo, no CI, an in-memory-only rate limiter, and a hard dependency on the team's own `gecko-surf` package whose public availability is unclear.",
+    "project_type": "Telegram AI chatbot (Python) + Next.js landing page",
     "stack": {
       "frontend": [
         "Next.js 16",
         "React 19",
-        "Tailwind CSS 4"
+        "Tailwind CSS 4",
+        "TypeScript"
       ],
       "backend": [
         "Python 3.11+",
         "python-telegram-bot 21",
         "anthropic SDK",
-        "openai SDK (OpenRouter)"
+        "openai SDK (OpenRouter)",
+        "gecko-surf (surfcall)"
       ],
       "database": [],
       "infra_deploy": [
         "Vercel (landing page)",
-        "long-polling Telegram bot (manual deploy)"
+        "Long-polling Telegram bot (self-hosted)"
       ],
       "ai_ml": [
         "Claude Haiku 4.5 (Anthropic)",
-        "Llama 3.3 70B (OpenRouter free)",
-        "surfcall (custom OpenAPI-to-tool engine)"
+        "Llama 3.3 70B via OpenRouter (free default)"
       ],
       "languages": [
         "Python",
@@ -41,82 +42,80 @@
       ]
     },
     "architecture": {
-      "pattern": "AI agent loop (manual Anthropic Messages API tool-use loop) + Telegram transport",
+      "pattern": "Agentic tool-use loop (Claude Messages API) layered over a thin Telegram transport; landing page is a separate Next.js app",
       "uses_orm": false,
-      "orm_or_db_layer": "None — fully stateless, no database. Rate limiter state is in-memory (dict) and resets on restart.",
-      "api_design": "Consumes the SOS Venezuela 2026 public REST API via a hand-authored OpenAPI spec and the surfcall abstraction layer; exposes 5 allow-listed read-only endpoints to the LLM (getReports, searchPersons, getPersonStats, getRecentDamage, getNews).",
-      "separation_of_concerns": "Excellent for a hackathon: bot.py (Telegram wiring), agent.py (LLM loop), surfcall_tools.py (API boundary + safety), providers.py (LLM provider abstraction), config.py (env secrets + system prompt). Each module has a clear, documented responsibility.",
-      "modularity": "High. The LLM client is injected so the agent loop is testable offline; provider (Anthropic vs OpenRouter) is a one-env-var switch; surfcall is the sole integration point with the external API.",
+      "orm_or_db_layer": "No database — all data comes from the public SOS Venezuela 2026 REST API via the team's surfcall/gecko-surf library",
+      "api_design": "5 read-only tool endpoints (getReports, searchPersons, getPersonStats, getRecentDamage, getNews) defined via OpenAPI spec and exposed to the LLM through an explicit allow-list; no write operations possible",
+      "separation_of_concerns": "Excellent for a hackathon: bot.py handles Telegram transport, agent.py owns the LLM loop, surfcall_tools.py wraps API access, providers.py abstracts LLM choice, config.py holds secrets and the system prompt",
+      "modularity": "High — LLM provider is pluggable (Anthropic vs OpenRouter adapter), tools are injected, the agent loop is testable offline via a 'recorded' mode",
       "notable_patterns": [
-        "Manual agentic tool-use loop bounded by max_iters to prevent infinite loops",
-        "Prompt injection defense: API results treated as data not instructions, explicitly stated in system prompt",
-        "Allow-list of tool names enforced in surfcall_tools.call() — agent cannot call write endpoints even if injected",
-        "Per-user sliding-window rate limiter protecting ~90 req/min upstream budget",
-        "Message chunking for Telegram's 4096-char limit",
-        "Dual LLM provider: Anthropic Haiku for reliability, OpenRouter free model as zero-cost default"
+        "Explicit dependency injection for offline testability",
+        "Prompt-injection defense: API results treated as data not instructions (documented in code)",
+        "Per-user sliding-window rate limiter (8 req/min default)",
+        "Graceful degradation: every error path returns a Spanish fallback message, never leaks internals or crashes",
+        "Offline 'recorded' mode ($0, synthesized responses from schema) for zero-network testing"
       ]
     },
     "code_organization": {
       "score": 4,
-      "directory_structure": "Clean two-part structure: bot/ (Python agent) and app/+components/ (Next.js landing). Each Python module has a single responsibility and a module-level docstring explaining its role and design decisions.",
-      "naming_quality": "Excellent — function and variable names are descriptive and match their behavior (handle_message, resolve_command, chunk_message, tools_for_llm, etc.).",
-      "documentation_quality": "Unusually good for a hackathon. Module-level docstrings explain design rationale. Inline comments explain non-obvious decisions (e.g. why BLE001 is suppressed, why the free model is default). README is bilingual and accurate.",
-      "reasoning": "The Python bot code reads like production-quality library code: injected dependencies, no global mutable state except the in-memory rate limiter, explicit degradation paths. The .next build directory is mistakenly committed, and no tests exist despite the code being architected for testability."
+      "directory_structure": "Clean two-module layout: bot/ (Python agent) and app/+components/ (Next.js landing). Each Python file has a single clear responsibility; files are small and well-named.",
+      "naming_quality": "Excellent — functions like handle_message, resolve_command, chunk_message are self-explanatory; constants like RATE_LIMIT_ES and WELCOME_ES are explicit about language intent",
+      "documentation_quality": "Above average for a hackathon: every Python module has a docstring explaining its role in the system, comments explain design decisions (why recorded mode, why allow-list, why degradation strategy)",
+      "reasoning": "The code reads like it was written by someone who cares about maintainability, not just getting something to run. Pure functions, injection patterns, and explicit safety boundaries are rare at hackathon quality."
     },
     "production_readiness": {
-      "score": 3,
+      "score": 2,
       "has_auth": false,
       "has_error_handling": true,
       "has_logging": false,
       "has_env_config": true,
       "has_deploy_config": false,
-      "secrets_handling": "Secrets come only from environment variables. config.py validates required vars at startup and raises a message naming the missing var name, never a value. No hardcoded tokens or keys found anywhere.",
-      "security_notes": "Prompt injection defense is explicitly encoded in the system prompt and in surfcall_tools (API results treated as data). Tool allow-list prevents write operations. Privacy: no personal data stored, API already masks cedulas/coords. Missing: no Dockerfile, no process manager config, no webhook mode (runs long-polling only).",
-      "scalability_notes": "Single-process long-polling bot with in-memory rate limiter — not horizontally scalable. Rate limiter resets on restart. For a crisis scenario with high traffic this is a real bottleneck. Landing page on Vercel scales fine.",
-      "reasoning": "Solid fundamentals (error handling, secrets, rate limiting, graceful degradation) but no CI, no tests, no logging, no deployment config, and in-memory-only state. The surfcall dependency is a GitHub-only package not on PyPI, making reproducible deploys fragile."
+      "secrets_handling": "Secrets come exclusively from environment variables; the config module explicitly checks for missing vars and raises without leaking values; .env.example provided, real .env is gitignored",
+      "security_notes": "Prompt-injection defense is explicitly coded (tool results treated as data not instructions); allow-list prevents the agent from calling any write operations; no auth surface since the bot is public-access by design",
+      "scalability_notes": "Rate limiter is in-memory and process-local — resets on restart, does not scale across multiple bot instances. Long-polling Telegram mode requires a persistent single process. No Dockerfile or deployment config present.",
+      "reasoning": "Error handling and secret management are genuinely solid, but there is no CI, no Dockerfile, no logging infrastructure, no distributed rate limiting, and no tests in this repo. It is a working demo, not a deployable production service."
     },
     "maturity": {
       "score": 2,
       "has_readme": true,
       "has_tests": false,
       "has_ci": false,
-      "is_real_or_boilerplate": "Real, functional implementation — there is a live bot at t.me/DEV_VEZbot per README, a demo GIF committed, and actual OpenAPI spec authored against the live SOS Venezuela API. Not boilerplate. However, created and fully built within a single day (all 13 commits on June 29, 2026).",
-      "reasoning": "No test files exist anywhere despite the code being architected for offline testability (injected dependencies, pure functions). No CI pipeline. The critical surfcall dependency is a non-PyPI GitHub repo that could vanish or break. The project is a working hackathon prototype, not a maintained service."
+      "is_real_or_boilerplate": "Real, purpose-built code. The agent loop, provider adapter, rate limiter, and OpenAPI spec are all original and functional — not scaffold or copy-paste boilerplate.",
+      "reasoning": "Created on June 29, 2026 with 15 commits and 3 contributors in a single day. The README is detailed and there is a demo GIF and a live bot link, suggesting it actually runs. However, there are zero test files in this repo and no CI pipeline."
     },
     "viability": {
       "score": 3,
-      "reasoning": "Strong concept and execution for a hackathon: Telegram reaches Venezuelans without app installs, Spanish-first design is appropriate, natural-language interface lowers the barrier for non-technical users in crisis. Real data integration with the SOS Venezuela 2026 API is demonstrated. Key risks: the surfcall library is the team's own unpublished package (single point of failure), long-polling won't scale under crisis-level load, and there is no persistence so the bot state resets on any restart. If the surfcall dependency were stabilized and the bot moved to webhook mode with a process manager, this would be genuinely deployable."
+      "reasoning": "The core concept is strong — Telegram is the right channel for Venezuela (no app install, works on low-end phones), Spanish-first NLP over real humanitarian data is the right UX. The tech stack works and the bot is reportedly live. The main risks are: dependency on gecko-surf (team's own package, unclear PyPI availability and stability), no persistent deployment infrastructure, and in-memory-only rate limiting that will not survive restarts or horizontal scaling."
     },
     "key_features": [
-      "Natural-language Telegram interface in Spanish (and English) for querying SOS Venezuela 2026 humanitarian data",
-      "AI agent loop using Claude Haiku 4.5 or free Llama 3.3 70B via OpenRouter",
-      "People search: query missing/found persons by name via /buscar or free text",
-      "Map reports: collapsed buildings, gas leaks, blocked roads, shelters, supply centers",
-      "Aggregate statistics on missing/found counts",
-      "Latest verified earthquake news via Telegram",
-      "Per-user sliding-window rate limiting (8 req/min default)",
-      "Prompt-injection defense: API results treated as data, not instructions",
-      "Tool allow-list: only 5 public read endpoints exposed to the LLM",
-      "Offline/recorded mode for $0 testing without network",
-      "Next.js 16 landing page deployed on Vercel with ES/EN i18n",
-      "MCP server mode to expose the SOS Venezuela API to Claude Code/Cursor"
+      "Natural-language Spanish queries over SOS Venezuela 2026 humanitarian API",
+      "People finder: search missing or found persons by name (fuzzy, privacy-masked)",
+      "Hazard map reports: collapsed buildings, gas leaks, blocked roads, shelters",
+      "Aggregate stats: total missing, found, minors counts",
+      "Earthquake news feed",
+      "Per-user rate limiting (8 req/min sliding window)",
+      "Offline 'recorded' mode for zero-cost testing",
+      "Pluggable LLM: Anthropic Haiku or free OpenRouter Llama 3.3 70B",
+      "Telegram message chunking to handle long AI replies within 4096-char limit",
+      "Bilingual landing page (ES/EN) on Vercel"
     ],
     "domain_tags": [
       "people-finder",
       "alerts-notifications",
+      "comms-chat",
       "aid-logistics",
-      "comms-chat"
+      "shelter-mapping"
     ],
-    "merge_potential": "Low-medium. The bot is a self-contained Telegram client over a specific external API and has no shared database or auth layer to merge with. It could complement a shelter-mapping or people-finder project by providing a conversational Telegram interface to that project's API, if the target project exposes an OpenAPI spec (which surfcall can consume). The landing page is redundant with a full-stack project.",
+    "merge_potential": "The OpenAPI spec authored for SOS Venezuela 2026 is a standalone contribution that could be adopted by other projects. The Telegram bot is a complete, distinct channel that does not overlap with web-based projects. Could be integrated as a notification/query layer alongside mapping or shelter projects without conflicts.",
     "red_flags": [
-      "Critical dependency on surfcall (git+https://github.com/GeckoVision/surfcall) — unpublished, not on PyPI, single point of failure for the entire bot",
-      "No test files exist despite the code being explicitly architected for offline testability",
-      "No CI pipeline — no automated quality gate",
-      "In-memory rate limiter resets on every restart; under crisis load, restarts lose all state",
-      "Long-polling mode only — not horizontally scalable, one process handles all traffic",
-      "No logging — failed tool calls and agent errors are silently degraded with no observability",
-      ".next build artifacts committed to the repository (should be gitignored)",
-      "No Dockerfile or process manager config — deployment is manual and undocumented beyond README"
+      "No tests in this repo (bot.py hints tests may exist in the sibling surfcall repo, but they are not here)",
+      "No CI/CD pipeline",
+      "Hard dependency on gecko-surf (team's own library) — if it is not on PyPI or the repo disappears, the bot stops working",
+      "In-memory rate limiter resets on every process restart and does not work across multiple instances",
+      "No Dockerfile or deployment manifest — running in production requires manual setup",
+      "No logging infrastructure — failures in production would be invisible",
+      "Long-polling Telegram mode requires a persistent process, not suitable for serverless deployment",
+      "The 'canonical run path' described in README requires cloning a separate surfcall repo, adding deployment friction"
     ]
   },
   "signals": {
@@ -124,19 +123,46 @@
     "stars": 0,
     "forks": 1,
     "contributors": 3,
-    "commit_count": 13,
+    "commit_count": 15,
     "code_loc": 12376,
     "created_at": "2026-06-29T03:02:16Z",
-    "pushed_at": "2026-06-29T04:39:24Z",
+    "pushed_at": "2026-06-29T17:45:19Z",
     "license": "MIT",
     "languages_bytes": {
       "JavaScript": 272512,
       "HTML": 66267,
       "RouterOS Script": 48815,
       "TypeScript": 26454,
-      "Python": 25207,
+      "Python": 25195,
       "CSS": 872
     },
     "archived": false
+  },
+  "evaluation": {
+    "solves_real_problem": "yes",
+    "real_problem_reasoning": "Earthquake victims in Venezuela need to find missing persons, locate shelters, check water safety, and access humanitarian aid — all under conditions where installing a new app is not realistic. This bot lives inside Telegram (already widely used), requires no registration, costs nothing, and responds in Spanish. It queries live SOS Venezuela 2026 data rather than static FAQs, meaning answers reflect the actual evolving situation. The channel choice (Telegram), language choice (Spanish-first), and data source (real API) are all correctly matched to the target population. This is a genuine need being addressed with an appropriate tool.",
+    "problem_severity": "critical",
+    "impact_potential": 4,
+    "product_quality": 3,
+    "live_demo_status": "partial",
+    "live_demo_notes": "The Vercel landing page (https://ayuda-venezuela-wine.vercel.app/) loads cleanly and presents a well-structured pitch with a primary CTA linking to the Telegram bot @DEV_VEZbot. The actual interactive product lives on Telegram and could not be verified from the web fetch alone, so the demo is \"partial\" — the storefront is live but the bot's current uptime is unconfirmed. No demo video exists to compensate for this gap.",
+    "diffusion": {
+      "score": 3,
+      "ready_to_promote": true,
+      "available_assets": [
+        "live-demo",
+        "clear-value-prop"
+      ],
+      "recommended_angle": "Reach earthquake victims where they already are: just open Telegram and ask @DEV_VEZbot in Spanish where to find a shelter, whether the water is safe, or how to search for a missing person — no app download, no signup, no cost.",
+      "gaps": [
+        "No demo video showing an actual Telegram conversation with the bot",
+        "No screenshots of the bot responding to real queries",
+        "No confirmed evidence of real users or usage data",
+        "The bot's live uptime is not independently verifiable without Telegram access",
+        "Dependency on gecko-surf (team's own library) is a fragility not explained in the landing page pitch"
+      ]
+    },
+    "overall_recommendation": "promote",
+    "one_line_pitch": "Venezuelans can find shelters, missing loved ones, and safe water just by asking @DEV_VEZbot on Telegram in plain Spanish — powered by live SOS Venezuela data, free, no app needed."
   }
 }
