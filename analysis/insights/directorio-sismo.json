@@ -1,0 +1,123 @@
+{
+  "project_slug": "directorio-sismo",
+  "name": "Directorio sismo",
+  "repo_url": "https://github.com/jeannetteafuentesr/venezuela-solidaria",
+  "live_url": "https://directorio-sismo.netlify.app/",
+  "video_url": "https://vimeo.com/1205079199?share=copy&fl=sv&fe=ci",
+  "countries": [
+    "Venezuela"
+  ],
+  "db_description": "I built a repository of all resources that I've found, developed by citizens to accelerate search and rescue and provide help.\n\nTime is of the essence, so information needs to be centralized in one place. Venezuelans need access to a single platform to find whatever they need at the moment.",
+  "lifecycle_status": "ready_to_use",
+  "analysis": {
+    "summary": "Venezuela Solidaria (Directorio Sismo) is a pure static HTML/CSS/JavaScript website deployed on Netlify that curates and presents a categorized directory of earthquake relief resources for Venezuela. The site links out to ~40 external platforms (missing persons, health, donations, shelters, engineers, pets) rather than providing novel functionality itself. Content is hardcoded in index.html and must be updated manually by editing HTML. The \"admin\" panel is a client-side instruction page with a hardcoded password visible in source. User suggestions are collected via Netlify Forms and reviewed manually before being added to the HTML. Bilingual ES/EN support is implemented in vanilla JS.",
+    "project_type": "Static HTML link directory / curated aggregator",
+    "stack": {
+      "frontend": [
+        "HTML5",
+        "CSS3",
+        "Vanilla JavaScript"
+      ],
+      "backend": [],
+      "database": [],
+      "infra_deploy": [
+        "Netlify",
+        "Netlify Forms"
+      ],
+      "ai_ml": [],
+      "languages": [
+        "HTML",
+        "CSS",
+        "JavaScript"
+      ]
+    },
+    "architecture": {
+      "pattern": "Static site — no backend, no build system, no framework",
+      "uses_orm": false,
+      "orm_or_db_layer": "None — no database exists; all content is hardcoded in index.html",
+      "api_design": "None — external links only; Netlify Forms handles form submissions via POST without any custom API",
+      "separation_of_concerns": "Minimal — CSS, HTML structure, and JS logic are all in a single monolithic index.html file",
+      "modularity": "None — everything is in three flat HTML files with no imports, modules, or components",
+      "notable_patterns": [
+        "Category filter implemented in vanilla JS using data-cat attributes",
+        "Bilingual ES/EN toggle using data-en attributes and localStorage for persistence",
+        "Netlify Forms integration via data-netlify attribute for serverless form handling",
+        "Client-side-only admin panel with hardcoded password in JavaScript source"
+      ]
+    },
+    "code_organization": {
+      "score": 2,
+      "directory_structure": "Five files total: index.html (1105 lines), admin.html (432 lines), gracias.html, README.txt, og-image.jpg — flat structure with no subdirectories",
+      "naming_quality": "Clear and descriptive Spanish naming throughout; CSS class names like .categoria-grupo, .tarjeta, .filtro-btn are self-explanatory",
+      "documentation_quality": "README.txt is a minimal two-paragraph instruction note to the maintainer with an email address; no technical documentation",
+      "reasoning": "The HTML is well-structured and the CSS is polished with CSS variables and consistent design tokens. However, everything lives in a single flat file with no modularity, making updates tedious and error-prone at scale."
+    },
+    "production_readiness": {
+      "score": 1,
+      "has_auth": false,
+      "has_error_handling": false,
+      "has_logging": false,
+      "has_env_config": false,
+      "has_deploy_config": false,
+      "secrets_handling": "Admin password 'Venezuela2025!' is hardcoded in plaintext JavaScript inside admin.html and visible to anyone who views source — there is no real auth",
+      "security_notes": "The admin panel password is completely ineffective as security — it is readable in browser devtools. Anyone can view and bypass it. No HTTPS enforcement config, no CSP headers, no rate limiting on forms.",
+      "scalability_notes": "Not scalable — adding resources requires manually editing HTML and redeploying. The Netlify free tier handles static hosting fine for a directory site at this scale.",
+      "reasoning": "The site is live on Netlify and functional for its purpose as a link directory. However, there is no real auth, no error handling infrastructure, no environment config, and no deploy config file (netlify.toml). The hardcoded admin password is a significant red flag even for a static site."
+    },
+    "maturity": {
+      "score": 2,
+      "has_readme": true,
+      "has_tests": false,
+      "has_ci": false,
+      "is_real_or_boilerplate": "Real — actively maintained with 30 commits over 3 days, all updating index.html to add curated resources. Not boilerplate but also not a novel application.",
+      "reasoning": "The site is deployed and actively updated (last push June 29 2026). However, it has no tests, no CI/CD pipeline, no dependency management, and the 'admin' functionality is fictional — updating the site requires manually editing HTML."
+    },
+    "viability": {
+      "score": 2,
+      "reasoning": "The site functions as a curated aggregator and is already deployed, which has real humanitarian value during the disaster. However, as a hackathon submission it provides no novel technology — it links to other projects rather than building new functionality. The manual maintenance model does not scale and the hardcoded content means updates require developer intervention."
+    },
+    "key_features": [
+      "Curated directory of ~40 verified earthquake relief resources across 7 categories",
+      "Category filter buttons to show/hide resource groups",
+      "Bilingual ES/EN toggle with localStorage persistence",
+      "Netlify Forms for users to suggest new resources or send feedback",
+      "GoFundMe banner and donation links prominently featured",
+      "Responsive mobile-first design with Venezuelan flag color scheme",
+      "Domain preview URLs auto-generated from link hrefs via JavaScript",
+      "Admin panel with instructional content (not functional management)"
+    ],
+    "domain_tags": [
+      "donations-aid",
+      "people-finder",
+      "shelter-mapping",
+      "medical-health",
+      "mental-health",
+      "volunteer-coordination",
+      "structural-inspection"
+    ],
+    "merge_potential": "Low — this is a standalone curated directory site that links to other projects. It does not expose an API or share data structures that could integrate with other hackathon projects. It could theoretically serve as a landing/hub page that references other winning projects.",
+    "red_flags": [
+      "Admin password 'Venezuela2025!' is hardcoded in client-side JavaScript and visible to anyone in browser devtools — provides zero security",
+      "All content is hardcoded in HTML; adding or removing a resource requires editing source code and redeploying",
+      "The 'admin panel' is purely decorative — it has no ability to actually manage content, showing static hardcoded stats (8 resources, 1 pending) rather than live data",
+      "No database or CMS means the site cannot scale or be maintained by non-developers",
+      "No CI/CD or netlify.toml configuration — deployment is manual",
+      "30 commits are all titled 'Update index.html' with no meaningful commit messages"
+    ]
+  },
+  "signals": {
+    "accessible": true,
+    "stars": 0,
+    "forks": 0,
+    "contributors": 1,
+    "commit_count": 30,
+    "code_loc": 0,
+    "created_at": "2026-06-26T16:53:19Z",
+    "pushed_at": "2026-06-29T11:36:22Z",
+    "license": null,
+    "languages_bytes": {
+      "HTML": 86983
+    },
+    "archived": false
+  }
+}

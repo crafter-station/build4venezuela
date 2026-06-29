@@ -1,0 +1,212 @@
+[
+  {
+    "slug": "psicoayudave",
+    "name": "Psico Ayuda Venezuela",
+    "repo_url": "https://github.com/enBonnet/psico-support",
+    "source_field": "contribute_in_url"
+  },
+  {
+    "slug": "proto-bloom-sismo",
+    "name": "Bloom-Sismo",
+    "repo_url": "https://github.com/DevAndrew64/Bloom-Sismo",
+    "source_field": "project_url"
+  },
+  {
+    "slug": "doomedag",
+    "name": "Doomedag",
+    "repo_url": "https://github.com/uset82/iFoundYou",
+    "source_field": "description_markdown"
+  },
+  {
+    "slug": "acopiovzla",
+    "name": "AcopioVzla",
+    "repo_url": "https://github.com/nobelaar/acopio-vzla",
+    "source_field": "contribute_in_url"
+  },
+  {
+    "slug": "mapeo-de-signos-vitales-tiempo-real",
+    "name": "Ruview",
+    "repo_url": "https://github.com/ruvnet/ruview",
+    "source_field": "project_url"
+  },
+  {
+    "slug": "venezuela-response-hub",
+    "name": "Venezuela Response Hub",
+    "repo_url": "https://github.com/LauZulu/vzla-response-hub",
+    "source_field": "contribute_in_url"
+  },
+  {
+    "slug": "beacon-rescate",
+    "name": "Beacon Rescate",
+    "repo_url": "https://github.com/jmvidal26/Beacon-rescate.git",
+    "source_field": "contribute_in_url"
+  },
+  {
+    "slug": "localizadosvzlabot",
+    "name": "LocalizadosVzlaBot — Localizador de Personas, Refugios y Donativos Terremoto Venezuela (2026)",
+    "repo_url": "https://github.com/Paraguanads/Venezuelan-Tracker-WhatsApp-bot",
+    "source_field": "contribute_in_url"
+  },
+  {
+    "slug": "farove",
+    "name": "FaroVE — Plataforma de Reunificación Familiar",
+    "repo_url": "https://github.com/luacantu/rescue-track",
+    "source_field": "contribute_in_url"
+  },
+  {
+    "slug": "busca-chat",
+    "name": "BuscaChat",
+    "repo_url": "https://github.com/DiegoMucha/buscachat",
+    "source_field": "contribute_in_url"
+  },
+  {
+    "slug": "aid-trace",
+    "name": "AidTrace | RastroAyuda",
+    "repo_url": "https://github.com/LuisAlejandroCR/AidTrace-RastroAyuda",
+    "source_field": "contribute_in_url"
+  },
+  {
+    "slug": "vidas-ve",
+    "name": "VidasVE",
+    "repo_url": "https://github.com/aldoapicella",
+    "source_field": "contribute_in_url"
+  },
+  {
+    "slug": "sismos-venezuela",
+    "name": "Sismología VE",
+    "repo_url": "https://github.com/sephirods/venezuelasismos",
+    "source_field": "contribute_in_url"
+  },
+  {
+    "slug": "lanna-naty",
+    "name": "Puente Venezuela",
+    "repo_url": "https://github.com/lannahbett/puentevenezuela",
+    "source_field": "contribute_in_url"
+  },
+  {
+    "slug": "apoyo-venezuela-org",
+    "name": "Apoyo Venezuela",
+    "repo_url": "https://github.com/mfranceschit/apoyo-venezuela",
+    "source_field": "contribute_in_url"
+  },
+  {
+    "slug": "ayudave",
+    "name": "AyudaVE — Red P2P de Coordinación Humanitaria",
+    "repo_url": "https://github.com/gaboclus/ayudave",
+    "source_field": "contribute_in_url"
+  },
+  {
+    "slug": "rastro",
+    "name": "Rastro",
+    "repo_url": "https://github.com/danieibazgc/rastro",
+    "source_field": "contribute_in_url"
+  },
+  {
+    "slug": "zerena",
+    "name": "zerena",
+    "repo_url": "https://github.com/CarolMonroe22/zerena",
+    "source_field": "contribute_in_url"
+  },
+  {
+    "slug": "ayuda-venezuela-bot",
+    "name": "Ayuda Venezuela",
+    "repo_url": "https://github.com/GeckoVision/ayuda-venezuela-bot",
+    "source_field": "contribute_in_url"
+  },
+  {
+    "slug": "reencuentros-terremotos-venezuela",
+    "name": "Reencuentros Terremotos Venezuela",
+    "repo_url": "https://github.com/iacastillo90/ReencuentroTerremotoVenezuela",
+    "source_field": "contribute_in_url"
+  },
+  {
+    "slug": "confia",
+    "name": "Confia",
+    "repo_url": "https://github.com/JuanMarchetto/confia",
+    "source_field": "contribute_in_url"
+  },
+  {
+    "slug": "reestructuramos",
+    "name": "Reestructuramos - Inspeccion Estructural Post Sismo",
+    "repo_url": "https://github.com/comandoconstrucciones/reestructuramos-pwa",
+    "source_field": "contribute_in_url"
+  },
+  {
+    "slug": "venemed",
+    "name": "Venemed",
+    "repo_url": "https://github.com/raulandreroman/venemed",
+    "source_field": "contribute_in_url"
+  },
+  {
+    "slug": "hub",
+    "name": "Hub de Datos",
+    "repo_url": "https://github.com/mawmawmaw/venezuela-ayuda",
+    "source_field": "contribute_in_url"
+  },
+  {
+    "slug": "guacamalla",
+    "name": "GuacaMalla - Mesh sync entre dispositivos",
+    "repo_url": "https://github.com/vmlcode/guacamaya-net",
+    "source_field": "contribute_in_url"
+  },
+  {
+    "slug": "venezuela-juntos",
+    "name": "Venezuela Juntos (Missing Persons Facial Recognition)",
+    "repo_url": "https://github.com/OnBeIt/Venezuela_Juntos_v2",
+    "source_field": "project_url"
+  },
+  {
+    "slug": "apoyo-venezuela",
+    "name": "Apoyo Venezuela",
+    "repo_url": "https://github.com/javierdejesusda/apoyo-venezuela",
+    "source_field": "contribute_in_url"
+  },
+  {
+    "slug": "directorio-sismo",
+    "name": "Directorio sismo",
+    "repo_url": "https://github.com/jeannetteafuentesr/venezuela-solidaria",
+    "source_field": "contribute_in_url"
+  },
+  {
+    "slug": "centraliza-ayuda",
+    "name": "Centraliza Ayuda",
+    "repo_url": "https://github.com/kevinesaa/centraliza-ayuda-venezuela",
+    "source_field": "contribute_in_url"
+  },
+  {
+    "slug": "rsh",
+    "name": "Red Sinergia Humanitaria (RSH)",
+    "repo_url": "https://github.com/rethPach/rsh",
+    "source_field": "contribute_in_url"
+  },
+  {
+    "slug": "terrave",
+    "name": "TerraVE",
+    "repo_url": "https://github.com/rainvare/terraVE",
+    "source_field": "contribute_in_url"
+  },
+  {
+    "slug": "resqlink",
+    "name": "ResQLink",
+    "repo_url": "https://github.com/otobonh/resqlink-ai",
+    "source_field": "contribute_in_url"
+  },
+  {
+    "slug": "responsegrid",
+    "name": "responsegrid.app",
+    "repo_url": "https://github.com/GlobalEmergency/ResponseGrid",
+    "source_field": "contribute_in_url"
+  },
+  {
+    "slug": "found-people-telegram-bot",
+    "name": "Personas Encontradas Bot",
+    "repo_url": "https://github.com/edwinvrgs/found-people-ve-bot",
+    "source_field": "project_url"
+  },
+  {
+    "slug": "data-team",
+    "name": "VZLA_DEDUP",
+    "repo_url": "https://github.com/mathiasaiva/VZLA_DEDUP",
+    "source_field": "contribute_in_url"
+  }
+]

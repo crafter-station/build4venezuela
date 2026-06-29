@@ -1,0 +1,134 @@
+{
+  "project_slug": "venemed",
+  "name": "Venemed",
+  "repo_url": "https://github.com/raulandreroman/venemed",
+  "live_url": "https://venemed.vercel.app/",
+  "video_url": "",
+  "countries": [
+    "Argentina",
+    "Venezuela"
+  ],
+  "db_description": "VeneMed — Coordinación de donaciones para centros de salud, con orden y a tiempo.\n\nHospitales, refugios y centros de acopio reciben donaciones de forma descoordinada. Muchos insumos se desperdician porque nadie tiene visibilidad real de qué se necesita. El resultado es doble: recursos comunitarios desperdiciados y centros colapsados que ya no pueden procesar más ayuda.\n\nCómo funciona: Los centros publican solicitudes con ventanas cortas de tiempo (12, 24 o 48 horas) indicando exactamente lo que necesitan. Los donantes navegan la lista sin login: ven en tiempo real lo que cada centro está pidiendo y por cuánto tiempo. Esa información es compartible en redes, para que más gente sepa dónde llevar ayuda antes de que la ventana cierre. Si un centro entra en saturación, puede publicar un aviso de exceso para frenar donaciones de un ítem específico.\n\nPara quién. El centro de salud (acceso por WhatsApp, panel propio para crear y gestionar solicitudes) y el donante (acceso público, sin registro). Pensado mobile-first y para funcionar con conexión inestable.\n\nObjetivo. Que la ayuda llegue donde y cuando hace falta — y que ningún recurso comunitario se pierda en el camino.",
+  "lifecycle_status": "in_development",
+  "analysis": {
+    "summary": "VeneMed is a time-windowed medical supply matching platform connecting Venezuelan health centers with donors. Centers register via phone OTP, pass an admin moderation queue, and the public donor feed shows their active \"need\" or \"surplus\" requests with configurable expiry windows. An automated cron job expires overdue requests. Built with Next.js App Router, Drizzle ORM, and Supabase Auth. Deployed live at venemed.vercel.app. The code quality is exceptionally high for a hackathon — atomic transactions, TOCTOU race condition handling, JWT-verified auth, audit trail, and tag-based cache invalidation. Critical gap: center-authored request creation is explicitly deferred to \"slice 2\" and currently 404s, meaning health centers cannot self-serve post new supply needs yet.",
+    "project_type": "Next.js full-stack web application (App Router + Server Actions)",
+    "stack": {
+      "frontend": [
+        "Next.js 16.2.9 (App Router)",
+        "React 19",
+        "Tailwind CSS v4"
+      ],
+      "backend": [
+        "Next.js Server Actions",
+        "Next.js API Routes (cron endpoint)"
+      ],
+      "database": [
+        "PostgreSQL (Supabase-hosted)",
+        "Drizzle ORM",
+        "postgres-js driver"
+      ],
+      "infra_deploy": [
+        "Vercel (live at venemed.vercel.app)",
+        "GitHub Actions (CI + e2e + scheduled cron every 5 min)",
+        "Supabase Auth (phone OTP)",
+        "Local Supabase CLI for dev/e2e"
+      ],
+      "ai_ml": [],
+      "languages": [
+        "TypeScript",
+        "CSS",
+        "JavaScript"
+      ]
+    },
+    "architecture": {
+      "pattern": "Next.js App Router with route groups: (public) donor feed, (center) health center back-office, (admin) moderation queue",
+      "uses_orm": true,
+      "orm_or_db_layer": "Drizzle ORM over postgres-js; Supabase used exclusively for Auth (phone OTP); RLS is explicitly bypassed — all data access goes through Drizzle with server-side authz (requireAdmin / requireCenter)",
+      "api_design": "Server Actions for all mutations; RSC page components for reads; single secured REST endpoint for the cron expiry job (/api/cron/expire-requests, Bearer token)",
+      "separation_of_concerns": "Excellent layering: src/db/(schema, queries, admin-queries, jobs, index), src/lib/auth/(require-admin, require-center, current-center), src/lib/registro/validation (isomorphic), Server Actions co-located per route group",
+      "modularity": "High — server-only markers on data modules, shared isomorphic validation module (no Zod by design), explicit type exports, unstable_cache with fine-grained tag invalidation per entity",
+      "notable_patterns": [
+        "Atomic transactions with audit trail for every moderation action and cron expiry",
+        "TOCTOU race condition closed via DB unique index on membership(user_id) + catch(23505) reroute",
+        "JWT-verified getUser() (not getSession()) used at every auth gate",
+        "Cron endpoint fail-closed: missing CRON_SECRET env var blocks the request rather than allowing open access",
+        "unstable_cache keyed on normalized filter JSON with revalidateTag on mutation",
+        "Denormalized city + categories array on request row for efficient donor feed queries without extra joins"
+      ]
+    },
+    "code_organization": {
+      "score": 5,
+      "directory_structure": "Exemplary: route groups (public)/(center)/(admin) mirror product surfaces; src/db/ is cleanly split into schema, queries, admin-queries, jobs; src/lib/ has auth/, geo/, supabase/, registro/; docs/specs/ holds detailed feature specs and a data-model diagram",
+      "naming_quality": "Excellent throughout — English identifiers, Spanish user-facing copy, consistent naming conventions across schema enums, query return types, and UI components",
+      "documentation_quality": "Outstanding for a hackathon: inline comments explain design decisions and tradeoffs (TOCTOU, clock authority, cache strategy, OTP rate-limit gotchas, open-redirect prevention); docs/specs/*.md provides product specs per feature slice",
+      "reasoning": "The code reads like a senior engineer wrote it with a deliberate architecture — explicit server-only markers, isomorphic validation module, thorough comment discipline explaining WHY not what. Default README is the only blemish."
+    },
+    "production_readiness": {
+      "score": 4,
+      "has_auth": true,
+      "has_error_handling": true,
+      "has_logging": false,
+      "has_env_config": true,
+      "has_deploy_config": true,
+      "secrets_handling": "CRON_SECRET loaded from environment and fail-closed (missing secret blocks the request). SUPABASE_SERVICE_ROLE_KEY and DB URLs via Vercel env integration. .env.example documents every required variable with commentary. No secrets committed.",
+      "security_notes": "Auth via Supabase phone OTP; JWT getUser() (not getSession()) at every gate; admin authorization re-verified in DB (is_platform_admin) on every Server Action; UUID validation on all moderation inputs; phone canonicalized server-side from OTP-verified session (client-supplied phone never trusted). No app-level rate limiting beyond Supabase's OTP limits. RLS bypassed by design (Drizzle + service role) — documented risk.",
+      "scalability_notes": "Stateless Next.js on Vercel scales horizontally. Drizzle uses transaction pooler (port 6543) for runtime, direct connection for migrations. Cron runs on GitHub Actions external to Vercel Hobby plan. unstable_cache with 60s revalidate reduces DB load on donor feed. No queue or worker infrastructure — adequate for expected hackathon load.",
+      "reasoning": "Live deployment, correct SSR cookie handling, atomic transactions everywhere, secured cron, comprehensive env documentation. Docked one point for no structured logging/observability, no app-layer rate limiting, and RLS entirely absent (Drizzle bypasses it, service role key exposure would be catastrophic)."
+    },
+    "maturity": {
+      "score": 3,
+      "has_readme": true,
+      "has_tests": true,
+      "has_ci": true,
+      "is_real_or_boilerplate": "Real — substantial domain logic: center registration wizard, admin moderation with audit trail, donor feed with multi-filter search, time-windowed expiry cron. This is not scaffolding.",
+      "reasoning": "Three GitHub Actions workflows (CI lint+tsc, e2e with ephemeral local Supabase, scheduled cron). Playwright e2e covers center auth, registration, and admin moderation flows with proper async assertions. However the project is 1 day old, has 1 contributor, 16 commits, the README is default Next.js boilerplate, and the core center request-creation flow is explicitly deferred (currently 404s)."
+    },
+    "viability": {
+      "score": 4,
+      "reasoning": "Strong domain fit for Venezuelan earthquake relief — medical centers posting supply needs, donors finding and acting on them, admin moderation to prevent abuse, and automated expiry to keep the feed fresh. The donor feed, center auth + registration, admin queue, and cron are all complete and deployed. The critical missing piece is center-authored request creation (explicitly marked 'slice 2; 404 for now' in code), which means health centers cannot self-serve post new needs without direct DB seeding. Given the code quality, adding request creation would take hours not days."
+    },
+    "key_features": [
+      "Public donor feed with city/center-type/supply-category filters and free-text search across center name, city, and supply item names",
+      "Phone OTP authentication for health center staff (Supabase Auth + Venezuelan number normalization)",
+      "Multi-step center registration wizard with isomorphic validation and TOCTOU-safe DB transaction",
+      "Admin moderation queue (approve/reject/suspend) with append-only audit trail per center",
+      "Time-windowed supply requests (need or surplus) with configurable window hours and automatic expiry",
+      "Automated cron expiry every 5 minutes via GitHub Actions calling a Bearer-secured API endpoint",
+      "Modal-based request detail view with parallel route (@modal intercept) for donor UX",
+      "Share tracking (WhatsApp/Instagram/X/copy-link) with analytics events stored per request",
+      "Center dashboard showing own requests with active/expiring-soon stat tiles"
+    ],
+    "domain_tags": [
+      "medical-health",
+      "donations-aid",
+      "aid-logistics"
+    ],
+    "merge_potential": "High — the architecture is clean and well-documented, the live deployment works, and the code quality is production-grade. The main blocker for real deployment is the missing center request-creation UI (slice 2), which is a bounded scope of work given the existing infrastructure. No significant refactoring would be needed to extend it.",
+    "red_flags": [
+      "Center request creation (posting new supply needs/surplus) is NOT implemented — the 'Crear solicitud' CTA links to /centro/solicitudes/nueva which explicitly 404s; health centers cannot self-serve post requests",
+      "README is default Next.js boilerplate — no project description, setup instructions, or deployment guide",
+      "No Supabase Row Level Security — all data access bypasses RLS via Drizzle + service role key; a service role key leak would expose all data",
+      "No application-layer rate limiting on registration or login endpoints beyond Supabase's built-in OTP limits",
+      "Cron reliability depends on GitHub Actions schedule (external to Vercel) — if the repo is forked or Actions are disabled, expiry stops working",
+      "Single contributor, 16 commits, created June 28 2026 — extremely new, no battle testing"
+    ]
+  },
+  "signals": {
+    "accessible": true,
+    "stars": 1,
+    "forks": 0,
+    "contributors": 1,
+    "commit_count": 16,
+    "code_loc": 8628,
+    "created_at": "2026-06-28T20:00:50Z",
+    "pushed_at": "2026-06-29T14:59:33Z",
+    "license": null,
+    "languages_bytes": {
+      "TypeScript": 276627,
+      "CSS": 2015,
+      "JavaScript": 1634
+    },
+    "archived": false
+  }
+}

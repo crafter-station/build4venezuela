@@ -1,0 +1,148 @@
+{
+  "project_slug": "ayudave",
+  "name": "AyudaVE — Red P2P de Coordinación Humanitaria",
+  "repo_url": "https://github.com/gaboclus/ayudave",
+  "live_url": "https://www.ayudahumanitariavenezuela.com/",
+  "video_url": "https://youtu.be/nFc4Y9NcahA",
+  "countries": [
+    "Venezuela"
+  ],
+  "db_description": "¿Qué construimos?\n\nConstruimos AyudaVE, una red P2P de coordinación humanitaria para Venezuela que conecta personas que quieren donar comida, agua, medicinas, dinero, cripto, transporte o tiempo con centros de acopio verificados que realmente lo necesitan.\n\nAyudaVE permite que cualquier persona pueda ayudar en menos de un minuto, sin registro obligatorio para donar, buscar centros o reportar información. Los centros de acopio pueden administrar sus necesidades, inventario, métodos de pago, horarios, solicitudes de voluntarios/transporte y actualizaciones.\n\nLa idea central es simple:\n\nNo se trata solo de donar. Se trata de saber qué falta, dónde falta, quién lo necesita, quién lo dona, quién lo transporta y si realmente llegó.\n\n¿Qué problema resuelve?\n\nDespués de una emergencia, la ayuda humanitaria suele quedar dispersa en WhatsApp, redes sociales, formularios, grupos y listas manuales. Esto genera varios problemas:\n\n* Duplicación de esfuerzos.\n* Centros saturados con ciertos insumos.\n* Falta de visibilidad sobre necesidades reales.\n* Información desactualizada.\n* Riesgo de fraude.\n* Poca claridad sobre si la ayuda realmente llegó.\n* Personas queriendo ayudar, pero sin saber a dónde ir o qué llevar.\n\nAyudaVE organiza esa coordinación en una plataforma simple, rápida y mobile-first, enfocada en conectar ayuda real con necesidades reales.\n\n¿Para quién es?\n\nAyudaVE está pensada para:\n\n* Personas que quieren donar comida, agua, medicinas, insumos, dinero, cripto o transporte.\n* Voluntarios que quieren saber dónde ayudar.\n* Transportistas que pueden mover ayuda entre zonas.\n* Centros de acopio que necesitan administrar inventario, necesidades y horarios.\n* Verificadores que pueden confirmar qué centros están activos.\n* Comunidades, iglesias, colegios, ONGs, instituciones y grupos ciudadanos organizando ayuda en campo.\n\n¿Cómo funciona?\n\nLa plataforma tiene varios flujos principales:\n\n1. Quiero ayudar\n    La persona indica su ubicación y el tipo de ayuda que puede aportar. La app le muestra centros cercanos y necesidades urgentes.\n2. Quiero donar\n    El usuario puede donar insumos físicos, comida, agua, medicinas, Pago Móvil, transferencia o cripto. También puede reportar su donación con evidencia.\n3. Quiero ser voluntario\n    Los voluntarios pueden registrarse, indicar sus habilidades y apoyar con transporte, clasificación, verificación, recolección o difusión.\n4. Soy un centro de acopio\n    Los centros pueden administrar stock, necesidades urgentes, métodos de donación, horarios, actualizaciones, solicitudes de voluntarios y transporte.\n5. Mapa y necesidades urgentes\n    Los usuarios pueden explorar centros cercanos, filtrar por estado/municipio/parroquia y ver qué se necesita con mayor urgencia.\n6. Trazabilidad de donaciones\n    La meta es que cada donación pueda pasar por estados como: reportada, pendiente de confirmar, confirmada por el centro, usada/entregada y evidenciada.\n\n¿Qué deberían probar primero?\n\n1. Entrar a:\n    https://www.ayudahumanitariavenezuela.com/\n2. Tocar “Quiero ayudar” o “Quiero donar”.\n3. Elegir una ubicación y el tipo de ayuda que puedes aportar.\n4. Revisar centros de acopio y necesidades urgentes.\n5. Probar el flujo de registrar una donación o crear un centro de acopio.\n6. Desde el rol de centro, probar la administración de necesidades, inventario, métodos de pago, horarios, voluntarios y transporte.\n\nDiferencial\n\nAyudaVE no busca ser solo otro mapa de centros de acopio.\n\nLa visión es convertirla en una capa operativa P2P que conecte donantes, voluntarios, transportistas y centros verificados usando:\n\n* Inventario en tiempo real.\n* Necesidades urgentes.\n* Centros verificados.\n* Métodos de donación.\n* Solicitudes de voluntarios y transporte.\n* Trazabilidad de donaciones.\n* Evidencia de recepción y entrega.\n\nIntegración con otros proyectos del hackathon\n\nQueremos integrarnos con una API centralizada del hackathon para consumir y compartir datos de centros, necesidades, stock, donaciones, voluntarios y reportes.\n\nAyudaVE puede funcionar como la interfaz P2P operativa para que la data de otros proyectos se convierta en acción:\n\nqué llevar, a dónde llevarlo, quién lo recibe y si fue confirmado.\n\nQué necesita el equipo\n\nNecesitamos data real y actualizada de centros de acopio: ubicación, responsables, horarios, contactos, métodos de donación, inventario disponible, necesidades urgentes y capacidad de recepción.\n\nTambién necesitamos voluntarios/verificadores en campo para confirmar qué centros están activos, qué insumos realmente necesitan y qué ayuda ya llegó.\n\nAdemás, buscamos apoyo para:\n\n* Validación con centros de acopio reales.\n* Integración con APIs centralizadas del hackathon.\n* Mejoras UX/UI mobile-first.\n* Integración con WhatsApp.\n* Automatización de inventario y stock mínimo.\n* Sistema de trazabilidad de donaciones.\n* Difusión con comunidades, aliados e instituciones.\n\nEstado actual\n\nAyudaVE ya está operativa en:\n\nhttps://www.ayudahumanitariavenezuela.com/\n\nLa plataforma cuenta con flujos para donantes, voluntarios, centros de acopio, mapa, necesidades, métodos de pago, inventario, actualizaciones y administración/verificación.",
+  "lifecycle_status": "ready_to_use",
+  "analysis": {
+    "summary": "AyudaVE is a real, actively deployed humanitarian platform (ayudahumanitariavenezuela.com) for Venezuela earthquake response. It is a Node.js server (no framework, native http module) with a hand-rolled router, dual-engine DB layer (SQLite for dev, PostgreSQL for prod), and a vanilla JS SPA frontend. The single server.js is 1082 lines of genuine, dense production logic — not boilerplate — covering missing persons, aid centers, donations, volunteers, emergency directory, seismic data, hospital OCR search, AI-powered photo matching (Gemini), and more. The project integrates 8+ external data sources and has real deployment infrastructure (Docker + Cloud Run, VM + Caddy + systemd, backup scripts). Significant gaps: no tests, no CI/CD pipeline, and in-memory rate limiting/session state that breaks under multi-instance Cloud Run scaling.",
+    "project_type": "Humanitarian coordination web platform (Node.js + vanilla JS SPA)",
+    "stack": {
+      "frontend": [
+        "Vanilla JS (SPA)",
+        "Leaflet/OpenStreetMap",
+        "HTML/CSS (no framework)"
+      ],
+      "backend": [
+        "Node.js 22 (native http, no framework)",
+        "Hand-rolled REST API router"
+      ],
+      "database": [
+        "SQLite (dev/local)",
+        "PostgreSQL via pg driver (production, Cloud SQL)"
+      ],
+      "infra_deploy": [
+        "Docker (Cloud Run)",
+        "Caddy (reverse proxy + auto-HTTPS)",
+        "systemd (VM deploy)",
+        "Google Cloud Storage (image uploads)",
+        "Google Cloud SQL (Postgres 16)"
+      ],
+      "ai_ml": [
+        "Google Gemini 2.5 Flash (photo-based person search)"
+      ],
+      "languages": [
+        "JavaScript (Node.js CommonJS)"
+      ]
+    },
+    "architecture": {
+      "pattern": "Monolith — single-file server with hand-rolled REST router + static file serving",
+      "uses_orm": false,
+      "orm_or_db_layer": "Raw SQL via thin abstraction layer (store.js) that switches between SQLite (store-sqlite.js) and PostgreSQL (store-pg.js) via DATABASE_URL env var. All queries are parameterized; no ORM used.",
+      "api_design": "REST JSON API with ~40 endpoints; route matching via compiled pattern array. Auth via Bearer token in Authorization header (session tokens stored in DB). Some GET endpoints expose CDN cache headers.",
+      "separation_of_concerns": "Good for a single-file server: DB abstraction in store*.js, storage abstraction in storage.js, text normalization in text-normalize.js, search logic in person-search.js, external imports in import-*.js, AI in assistant-gemini.js.",
+      "modularity": "Server logic is monolithic (all API handlers in server.js) but supporting modules are well separated. Each external data source has its own import module.",
+      "notable_patterns": [
+        "Dual-DB strategy: SQLite for local dev, PG for prod, switched by env var",
+        "Idempotent schema migration on startup with ADD COLUMN try/catch pattern",
+        "Privacy-preserving visit counting (SHA-256 IP+UA hash per day, salt not stored)",
+        "Gemini AI integration for photo-based missing person search with graceful degradation",
+        "Collaborative ingestion bookmarklet to bypass geo-blocking of source data",
+        "In-memory rate limiting (RL Map) and brute-force lockout (loginAttempts Map) — not multi-instance safe",
+        "scrypt PIN hashing with per-user salt and timing-safe compare"
+      ]
+    },
+    "code_organization": {
+      "score": 3,
+      "directory_structure": "Flat root with server.js as monolith, import-*.js modules per data source, store*.js for DB engines, public/ for frontend SPA, deploy/ for infra scripts, docs/ with full documentation set.",
+      "naming_quality": "Excellent: file and function names are consistently descriptive and in Spanish matching the domain, variable names are clear.",
+      "documentation_quality": "Exceptional for a hackathon: CHANGELOG, CONTRIBUTING.md, DOCUMENTACION.md, DESARROLLO.md, DESPLIEGUE.md, INTEGRACIONES.md, MANUAL-USUARIO.md, architecture SVG. .env.example is thorough with inline comments.",
+      "reasoning": "The module separation is thoughtful and naming is excellent, but cramming all 40+ API handlers into one 1082-line server.js creates a maintainability risk. The documentation quality is far above hackathon norms."
+    },
+    "production_readiness": {
+      "score": 4,
+      "has_auth": true,
+      "has_error_handling": true,
+      "has_logging": true,
+      "has_env_config": true,
+      "has_deploy_config": true,
+      "secrets_handling": "All secrets via environment variables; .env.example documents every variable with clear [PROD] annotations; .env in .gitignore; no secrets found in code.",
+      "security_notes": "Strong: scrypt PIN hashing with random salt and timing-safe compare; rate limiting (120 req/min/IP); login brute-force lockout (5 attempts, 10-min ban); CSP, X-Frame-Options, Referrer-Policy, X-Content-Type-Options headers; path traversal protection on static serving; safeUrl() to block XSS via javascript: URIs; CORS restricted to ingest endpoint only.",
+      "scalability_notes": "In-memory rate limiting (RL Map) and brute-force lockout (loginAttempts Map) are instance-local and will not work correctly when Cloud Run scales to multiple instances. PostgreSQL pool is configured (PG_POOL env). GCS for shared image storage is correct. Seed/init locks use DB metrics table to prevent multi-instance races.",
+      "reasoning": "Deployed in production with real traffic, proper security headers, scrypt auth, env-based config, Docker + Cloud Run + systemd deployment paths, backup scripts, and a /healthz endpoint. Main gaps are no tests, no CI, and in-memory state that breaks multi-instance scaling."
+    },
+    "maturity": {
+      "score": 3,
+      "has_readme": true,
+      "has_tests": false,
+      "has_ci": false,
+      "is_real_or_boilerplate": "Real — actively deployed at ayudahumanitariavenezuela.com with real data (missing persons, aid centers). Code is dense, domain-specific logic with no AI-generated skeleton patterns.",
+      "reasoning": "The project is live and functional with a CHANGELOG showing two documentation versions and active commits through June 29. However, only 5 commits, 2 contributors, no automated tests, and no CI/CD pipeline limit the maturity score despite the code quality."
+    },
+    "viability": {
+      "score": 4,
+      "reasoning": "Already deployed to a real domain with real earthquake victims data integrated from 8+ Venezuelan sources. The dual-DB strategy, Dockerfile, systemd service, Caddy config, and backup scripts mean it can be spun up on any cloud VM in minutes. The lack of tests is a risk for safe ongoing contributions but does not block deployment."
+    },
+    "key_features": [
+      "Missing/found persons registry with fuzzy name search (accent/typo tolerant) and AI photo matching via Gemini 2.5 Flash",
+      "Aid center (centro de acopio) management with inventory tracking (entradas/salidas/beneficiarios) and logistics dashboard",
+      "Donation tracking with automatic inventory entry creation for physical goods",
+      "Volunteer registration and application to aid centers",
+      "Emergency directory (hospitals, ambulances, fire departments) auto-imported from redayudavenezuela.com",
+      "Hospital patient search from OCR dataset",
+      "Seismic data (USGS aftershock feed) refreshed every 15 minutes",
+      "Service status reports (electricity/water/medicine/fuel) from reporte-ve API",
+      "Affected buildings data from terremotovenezuela.com",
+      "Help requests (SOS) module with urgency levels",
+      "Lost/found pets module",
+      "Admin dashboard with time-series charts, live activity feed, and logistics overview",
+      "Collaborative bookmarklet ingestion to bypass geo-blocking of Venezuelan data sources",
+      "Privacy-preserving anonymous visitor metrics (IP hashed, not stored)"
+    ],
+    "domain_tags": [
+      "people-finder",
+      "shelter-mapping",
+      "donations-aid",
+      "family-reunification",
+      "medical-health",
+      "seismic-data",
+      "structural-inspection",
+      "volunteer-coordination",
+      "aid-logistics",
+      "alerts-notifications"
+    ],
+    "merge_potential": "High — already deployed to production at ayudahumanitariavenezuela.com with real Venezuelan earthquake data. Covers the broadest set of humanitarian domains of any single project reviewed. The platform is functional end-to-end and the clean env-var configuration makes it deployable immediately on any cloud provider.",
+    "red_flags": [
+      "No automated tests of any kind — entire codebase is untested",
+      "No CI/CD pipeline — no .github/actions or equivalent",
+      "In-memory rate limiting (RL Map) and brute-force lockout (loginAttempts Map) will not function correctly when Cloud Run scales beyond one instance, creating a security gap under load",
+      "All 40+ API handlers crammed into a single 1082-line server.js — maintainability risk for new contributors",
+      "SQL queries stored as ad-hoc strings throughout server.js (though all appear parameterized, making injection unlikely but hard to audit at scale)",
+      "Only 5 commits total — difficult to assess iteration history or contribution patterns"
+    ]
+  },
+  "signals": {
+    "accessible": true,
+    "stars": 7,
+    "forks": 2,
+    "contributors": 2,
+    "commit_count": 5,
+    "code_loc": 7204,
+    "created_at": "2026-06-27T08:13:24Z",
+    "pushed_at": "2026-06-29T01:51:19Z",
+    "license": "Apache-2.0",
+    "languages_bytes": {
+      "HTML": 2708375,
+      "JavaScript": 439235,
+      "CSS": 41658,
+      "Shell": 3460,
+      "Dockerfile": 369
+    },
+    "archived": false
+  }
+}

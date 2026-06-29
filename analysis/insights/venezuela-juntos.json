@@ -1,0 +1,134 @@
+{
+  "project_slug": "venezuela-juntos",
+  "name": "Venezuela Juntos (Missing Persons Facial Recognition)",
+  "repo_url": "https://github.com/OnBeIt/Venezuela_Juntos_v2",
+  "live_url": "https://github.com/OnBeIt/Venezuela_Juntos_v2",
+  "video_url": "https://youtu.be/k4PaAmArSfU",
+  "countries": [
+    "Germany"
+  ],
+  "db_description": "## What was built?\n\n  **Venezuela Juntos** is a humanitarian face-matching web app designed to reunite Venezuelan families separated by disaster or displacement.\n\n  ## How it works\n\nRepo: https://github.com/OnBeIt/Venezuela_Juntos_v2\n\n  - Families upload a photo of a missing person with their name\n  - Rescuers upload a photo of someone they have found along with a contact phone number or email\n  - The system automatically compares faces using AI-powered ArcFace recognition\n  - Any pair exceeding the similarity threshold appears on the public Matches page with the rescuer's contact details\n  - The app is fully bilingual, Spanish (default) and English\n\n  ## Who is it for?\n\n  Rescuers, volunteers, NGOs, and families searching for loved ones in Venezuelan disaster or displacement scenarios.\n\n  ## Tech stack\n\n  Python · FastAPI · InsightFace (ArcFace) · SQLite · Jinja2 · Tailwind CSS · Docker · Railway\n\n  ## Try it\n\n  Run the app, accept the disclaimer, and use the navigation to report a missing person or register someone who has been found.",
+  "lifecycle_status": "ready_to_use",
+  "analysis": {
+    "summary": "Venezuela Juntos is a FastAPI server-rendered web application for disaster-relief family reunification. Families upload photos of missing persons; rescuers upload photos of people they found with contact info. The app cross-matches faces using InsightFace ArcFace (buffalo_l, 512-d embeddings), stores confirmed matches in SQLite, and publishes them on a public page so families can contact the finder. The ML pipeline is genuinely implemented and functional. Deployment is Dockerized and documented for Railway.",
+    "project_type": "Family reunification web app with embedded facial recognition",
+    "stack": {
+      "frontend": [
+        "Jinja2 templates",
+        "Tailwind CSS (CDN)",
+        "HTML"
+      ],
+      "backend": [
+        "FastAPI",
+        "uvicorn"
+      ],
+      "database": [
+        "SQLite",
+        "SQLAlchemy 2.x ORM"
+      ],
+      "infra_deploy": [
+        "Docker",
+        "Railway (documented)"
+      ],
+      "ai_ml": [
+        "InsightFace buffalo_l (ArcFace)",
+        "ONNX Runtime (CPU-only)",
+        "OpenCV headless",
+        "NumPy vectorized cosine similarity"
+      ],
+      "languages": [
+        "Python",
+        "HTML"
+      ]
+    },
+    "architecture": {
+      "pattern": "Monolithic server-rendered MVC with async ThreadPoolExecutor for CPU-bound ML",
+      "uses_orm": true,
+      "orm_or_db_layer": "SQLAlchemy 2.x declarative ORM over SQLite; 3 tables: MissingPerson, FoundPerson, Match; embeddings stored as raw float32 BLOBs",
+      "api_design": "Server-rendered HTML with POST/redirect/GET pattern; no JSON API endpoints; static file serving for uploaded photos via StaticFiles mount",
+      "separation_of_concerns": "Clean: main.py (routes only), database.py (models + engine), matching.py (ML orchestration thin wrapper), lib/facerec.py (InsightFace engine with CLI)",
+      "modularity": "Minimal but coherent for its size; facerec.py is a reusable standalone toolkit with CLI support independent of the web app",
+      "notable_patterns": [
+        "Model warmup on startup via asynccontextmanager lifespan to avoid first-request timeout",
+        "Vectorized cosine similarity using NumPy matrix @ probe (O(N) but in one GPU-less op)",
+        "ThreadPoolExecutor(max_workers=2) offloads blocking face inference from the async event loop",
+        "UUID-prefixed filenames prevent collisions on upload"
+      ]
+    },
+    "code_organization": {
+      "score": 4,
+      "directory_structure": "Flat and clean: 4 Python source files at root, templates/ dir, lib/ dir for the AI engine. No unnecessary nesting.",
+      "naming_quality": "Excellent — MissingPerson, FoundPerson, Match, search_pool, embed, warmup, embedding_to_blob are all self-documenting",
+      "documentation_quality": "Unusually thorough for a hackathon: README documents all routes, DB schema, matching algorithm, env vars, Docker/Railway steps, and known limitations section",
+      "reasoning": "Code reads clearly with no dead code or commented-out blocks. Module boundaries are logical. The README is honest about limitations (no deduplication, no pagination, no admin UI, no notifications), which reflects genuine authorship rather than boilerplate."
+    },
+    "production_readiness": {
+      "score": 2,
+      "has_auth": false,
+      "has_error_handling": true,
+      "has_logging": false,
+      "has_env_config": true,
+      "has_deploy_config": true,
+      "secrets_handling": "No secrets or API keys used; DATA_DIR and INSIGHTFACE_HOME are the only env vars, both documented",
+      "security_notes": "No authentication on any endpoint — anyone can submit fake missing/found person reports or view all matches. No CSRF protection on forms. File extension is checked but content type is not validated (no magic-byte check). No rate limiting on upload endpoints. The matches page exposes uploaded photos and contact info publicly with no access control.",
+      "scalability_notes": "SQLite is single-writer — concurrent uploads will serialize or fail under load. O(N) linear scan loads all embeddings into memory on every upload (no vector index). ThreadPoolExecutor capped at 2 workers means at most 2 simultaneous face-recognition requests. 280 MB model held in memory on CPU only. No pagination on /matches could slow rendering as dataset grows.",
+      "reasoning": "The Dockerfile and Railway deployment docs are solid. However, the complete absence of auth is a serious production gap — in a disaster scenario, bad actors could flood the system with fake reports. SQLite and single-threaded ML inference will not scale past a few concurrent users."
+    },
+    "maturity": {
+      "score": 2,
+      "has_readme": true,
+      "has_tests": false,
+      "has_ci": false,
+      "is_real_or_boilerplate": "Real — the facial recognition pipeline (InsightFace, ArcFace embedding, vectorized cosine similarity, DB match storage) is genuinely implemented, not AI-generated scaffolding",
+      "reasoning": "8 commits over ~2 days, zero tests, no CI config. The core ML logic is functional and thoughtfully structured, but the project is clearly a hackathon prototype that has not been hardened for production."
+    },
+    "viability": {
+      "score": 3,
+      "reasoning": "The core concept is technically sound and the ArcFace matching pipeline is correctly implemented (L2-normed embeddings, vectorized cosine similarity, configurable threshold). The app is deployable today via Docker/Railway. However, the 0.40 similarity threshold is low and could produce false matches — in a disaster relief context this risk is especially harmful (wrong family reunification). No auth, no rate limiting, and SQLite's write concurrency limit are the main blockers for real-world use at any scale."
+    },
+    "key_features": [
+      "Photo upload for missing persons (family) and found persons (rescuer) with contact info",
+      "Automatic face matching using InsightFace ArcFace (buffalo_l) 512-d embeddings on every upload",
+      "Vectorized cosine similarity matrix multiply across all opposite-pool embeddings in one NumPy op",
+      "Public /matches page showing confirmed face pairs with similarity percentage and contact info",
+      "Model warmup at startup (lifespan hook) to preload 280MB model and avoid first-request timeout",
+      "CPU-only ONNX Runtime inference offloaded to ThreadPoolExecutor to keep async loop unblocked",
+      "Dockerfile with Railway volume instructions for persistent SQLite DB and model cache",
+      "DATA_DIR env var for portable data directory (DB + uploads)"
+    ],
+    "domain_tags": [
+      "family-reunification",
+      "people-finder"
+    ],
+    "merge_potential": "Low — self-contained monolith with no shared API, SDK, or component boundaries; the facerec.py toolkit could be extracted as a library for other projects doing face matching",
+    "red_flags": [
+      "No authentication on any endpoint — fake missing/found person reports can be submitted by anyone",
+      "No file content-type validation, only extension check — malformed files could trigger downstream errors",
+      "O(N) linear scan loads all embeddings into RAM on every upload — degrades with dataset growth and has no vector index",
+      "SQLite single-writer cannot handle concurrent uploads; will serialize or error under real-world load",
+      "0.40 cosine similarity threshold (ArcFace default) may be too permissive and produce false-positive matches that mislead grieving families",
+      "No CSRF protection on form submissions",
+      "No rate limiting on upload endpoints — trivially abused",
+      "No deduplication: uploading the same photo twice creates a self-match record",
+      "No notification mechanism (email/SMS) when a match is found — families must actively poll the /matches page",
+      "ThreadPoolExecutor(max_workers=2) hard-caps concurrent face recognition to 2 requests system-wide"
+    ]
+  },
+  "signals": {
+    "accessible": true,
+    "stars": 0,
+    "forks": 0,
+    "contributors": 1,
+    "commit_count": 8,
+    "code_loc": 985,
+    "created_at": "2026-06-26T23:21:21Z",
+    "pushed_at": "2026-06-27T00:00:56Z",
+    "license": null,
+    "languages_bytes": {
+      "HTML": 44013,
+      "Python": 37008,
+      "Dockerfile": 374
+    },
+    "archived": false
+  }
+}

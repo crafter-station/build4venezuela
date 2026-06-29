@@ -1,6 +1,9 @@
 import { sql } from "drizzle-orm";
 import {
+  boolean,
   index,
+  integer,
+  jsonb,
   numeric,
   pgTable,
   primaryKey,
@@ -127,4 +130,72 @@ export const projectCategories = pgTable(
       .default(sql`now()`),
   },
   (table) => [index("project_categories_category_id_idx").on(table.categoryId)],
+);
+
+export const projectInsights = pgTable(
+  "project_insights",
+  {
+    projectId: uuid("project_id")
+      .primaryKey()
+      .references(() => projects.id, { onDelete: "cascade" }),
+
+    // repo identity
+    repoUrl: text("repo_url").notNull(),
+    repoSourceField: text("repo_source_field"),
+    repoAccessible: boolean("repo_accessible").notNull().default(true),
+
+    // raw git/github signals
+    stars: integer("stars"),
+    forks: integer("forks"),
+    contributors: integer("contributors"),
+    commitCount: integer("commit_count"),
+    codeLoc: integer("code_loc"),
+    license: text("license"),
+    repoCreatedAt: timestamp("repo_created_at", { withTimezone: true }),
+    repoPushedAt: timestamp("repo_pushed_at", { withTimezone: true }),
+    languages: jsonb("languages"),
+
+    // technical analysis
+    summary: text("summary"),
+    projectType: text("project_type"),
+    domainTags: text("domain_tags").array().notNull().default(sql`'{}'`),
+    usesOrm: boolean("uses_orm"),
+    ormOrDbLayer: text("orm_or_db_layer"),
+    maturityScore: integer("maturity_score"),
+    productionReadinessScore: integer("production_readiness_score"),
+    codeOrganizationScore: integer("code_organization_score"),
+    viabilityScore: integer("viability_score"),
+    stack: jsonb("stack"),
+    architecture: jsonb("architecture"),
+    redFlags: text("red_flags").array().notNull().default(sql`'{}'`),
+    analysis: jsonb("analysis"),
+
+    // product evaluation
+    solvesRealProblem: text("solves_real_problem"),
+    problemSeverity: text("problem_severity"),
+    impactPotential: integer("impact_potential"),
+    productQuality: integer("product_quality"),
+    diffusionScore: integer("diffusion_score"),
+    diffusionReady: boolean("diffusion_ready"),
+    liveDemoStatus: text("live_demo_status"),
+    overallRecommendation: text("overall_recommendation"),
+    oneLinePitch: text("one_line_pitch"),
+    evaluation: jsonb("evaluation"),
+
+    analyzedAt: timestamp("analyzed_at", { withTimezone: true })
+      .notNull()
+      .default(sql`now()`),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .default(sql`now()`),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .default(sql`now()`),
+  },
+  (table) => [
+    index("project_insights_recommendation_idx").on(
+      table.overallRecommendation,
+    ),
+    index("project_insights_viability_idx").on(table.viabilityScore.desc()),
+  ],
 );

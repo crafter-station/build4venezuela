@@ -1,0 +1,139 @@
+{
+  "project_slug": "terrave",
+  "name": "TerraVE",
+  "repo_url": "https://github.com/rainvare/terraVE",
+  "live_url": "https://terra-ve.vercel.app/",
+  "video_url": "",
+  "countries": [
+    "Venezuela",
+    "Argentina"
+  ],
+  "db_description": "TerraVE es una plataforma web que combina memoria ciudadana con visión computacional para responder dos preguntas críticas post-desastre: ¿Qué existía aquí? → Levantamiento ciudadano de infraestructura perdida ¿Qué quedó en pie? → Clasificación automática de daño estructural por foto El resultado: un mapa vivo.",
+  "lifecycle_status": "ready_to_use",
+  "analysis": {
+    "summary": "TerraVE is a Next.js 14 App Router web platform that combines citizen-sourced infrastructure memory with AI-powered structural damage classification. Citizens can report infrastructure locations (schools, clinics, pharmacies, markets) with \"before\" photos, then upload \"after\" photos post-earthquake which are sent to a Hugging Face ViT model for automated damage classification. Results are displayed on an interactive Leaflet map with a traffic-light semaphore system. A dashboard cross-references citizen reports with Sentinel-1 SAR satellite data and UNOSAT population exposure data. The app is live at terra-ve.vercel.app with 92 commits. Core flows are implemented end-to-end, but several critical issues exist: the AI model is a generic image classifier (not fine-tuned for structural damage), there is zero authentication, a PATCH endpoint blindly passes user-supplied JSON to the DB, and the dashboard depends on Supabase views (stats_dashboard, poblacion_expuesta, coincidencias_satelital) absent from the committed schema file.",
+    "project_type": "Full-stack web app (Next.js 14 App Router) — citizen mapping + AI structural damage assessment platform",
+    "stack": {
+      "frontend": [
+        "Next.js 14",
+        "React 18",
+        "TypeScript",
+        "Tailwind CSS",
+        "Leaflet",
+        "react-leaflet"
+      ],
+      "backend": [
+        "Next.js API Routes (serverless)"
+      ],
+      "database": [
+        "Supabase (PostgreSQL + PostGIS)",
+        "Supabase Storage"
+      ],
+      "infra_deploy": [
+        "Vercel"
+      ],
+      "ai_ml": [
+        "Hugging Face Inference API",
+        "google/vit-base-patch16-224 (generic ViT, not damage-specific)"
+      ],
+      "languages": [
+        "TypeScript",
+        "CSS",
+        "JavaScript"
+      ]
+    },
+    "architecture": {
+      "pattern": "Next.js App Router fullstack monolith with serverless API routes",
+      "uses_orm": false,
+      "orm_or_db_layer": "Supabase JS client (BaaS — no ORM; direct table queries via supabase-js v2)",
+      "api_design": "REST via Next.js route handlers; pagination implemented in GET /api/lugares; GeoJSON output for map consumption; CORS headers on public data endpoints",
+      "separation_of_concerns": "Clean: lib/ for DB/AI/geo utilities, components/ for UI, app/api/ for server endpoints, types/index.ts for shared type definitions",
+      "modularity": "Good modularity for a hackathon — classify.ts, supabase.ts, and geo.ts are properly separated; components are single-purpose",
+      "notable_patterns": [
+        "Graceful AI degradation (photo saved even when HF API fails)",
+        "PostGIS GIST spatial index on lat/lng for proximity queries",
+        "Supabase RLS enabled but fully permissive (open public read/write, intentional for hackathon)",
+        "Server client uses anon key (not service role) — operates under RLS as anon user",
+        "GeoJSON FeatureCollection output consumed directly by Leaflet map",
+        "Haversine distance calculation implemented natively"
+      ]
+    },
+    "code_organization": {
+      "score": 4,
+      "directory_structure": "Well-organized: app/ (pages + API routes), components/ (client UI), lib/ (utilities), types/ (shared TS types) — textbook Next.js App Router layout",
+      "naming_quality": "Consistent Spanish naming for domain entities (lugares, reportes_dano, color_semaforo) with clear English for infrastructure code; no ambiguity",
+      "documentation_quality": "TerraVE_API.md documents the API, supabase-schema.sql is fully annotated with section headers and comments, inline code comments are meaningful",
+      "reasoning": "Code is clean, idiomatic TypeScript throughout with proper type exports and imports. Minor issues: .gitkeep files scattered in tree indicate scaffolded-first approach, and some components inline Supabase URL/key directly rather than using the lib/supabase.ts abstraction."
+    },
+    "production_readiness": {
+      "score": 2,
+      "has_auth": false,
+      "has_error_handling": true,
+      "has_logging": true,
+      "has_env_config": true,
+      "has_deploy_config": false,
+      "secrets_handling": "Environment variables used correctly (NEXT_PUBLIC_ prefix for client-safe keys, HF_TOKEN server-only); no .env files committed; no lockfile present (no package-lock.json or yarn.lock visible)",
+      "security_notes": "Critical: PATCH /api/lugares/[id] passes raw request body directly to supabase.update(body) with no field allowlist — any client can overwrite any column. No rate limiting on classify endpoint (HF API costs money per call). No file size or MIME type validation on image uploads. Recursive retry on HF 503 could stack overflow under load. All storage buckets and DB tables are fully open to public writes.",
+      "scalability_notes": "Vercel serverless + Supabase scales horizontally without config. Pagination implemented for lugares list (1000-row pages). PostGIS indexes in place. No caching layer beyond HTTP Cache-Control headers. Image uploads as base64 in JSON body could hit Vercel's 5MB body limit for large images.",
+      "reasoning": "The app has solid error handling (try/catch in every API route with meaningful status codes) and graceful AI degradation, but zero authentication, a raw-body PATCH vulnerability, no tests, no CI/CD, and missing lockfile make it unsuitable for production without hardening."
+    },
+    "maturity": {
+      "score": 2,
+      "has_readme": true,
+      "has_tests": false,
+      "has_ci": false,
+      "is_real_or_boilerplate": "Real — substantial business logic: full damage classification pipeline, pagination, GeoJSON conversion, Haversine distance, semaphore mapping, HF API integration with retry. Not boilerplate.",
+      "reasoning": "92 commits and a live deployment demonstrate real effort, but there are zero tests, no CI/CD pipeline, no Dockerfile, and no lockfile. The dashboard references three Supabase views (stats_dashboard, poblacion_expuesta, coincidencias_satelital) that are absent from the committed schema — unclear if they exist in the live DB or if the dashboard is partially broken."
+    },
+    "viability": {
+      "score": 3,
+      "reasoning": "The concept is well-executed and uniquely useful — combining citizen memory (pre-earthquake infrastructure) with AI post-damage classification and satellite SAR data is a strong differentiator. Core citizen reporting and map flows work end-to-end. The fatal weakness is the AI model: google/vit-base-patch16-224 is a generic ImageNet classifier, not trained on structural damage, so 'sin_dano' vs 'destruido' outputs will be unreliable. The label-mapping hack (checking for 'ruins', 'house' etc. in ViT labels) is fragile. Replacing with a damage-specific model (xView2, RescueNet fine-tune) would significantly improve real-world utility."
+    },
+    "key_features": [
+      "Citizen infrastructure registry with before-photo upload (schools, clinics, pharmacies, markets)",
+      "AI-powered structural damage classification via Hugging Face ViT with graceful fallback",
+      "Traffic-light semaphore damage visualization (green/yellow/orange/red) on interactive Leaflet map",
+      "Satellite SAR damage zone overlay (Sentinel-1 integration via dano_satelital table)",
+      "Population exposure dashboard cross-referencing UNOSAT data by municipality (MMI intensity zones)",
+      "PostGIS spatial indexing for proximity queries",
+      "GeoJSON API for map consumption",
+      "Google Maps geocoding for address-to-coordinate conversion",
+      "Venezuela bounding-box validation for geo inputs",
+      "Photo storage in Supabase Storage with public CDN URLs"
+    ],
+    "domain_tags": [
+      "structural-inspection",
+      "mapping-geo",
+      "seismic-data",
+      "aid-logistics"
+    ],
+    "merge_potential": "Medium — the citizen-reporting and map infrastructure is solid and deployable quickly. The structural damage AI is the weakest link and needs a domain-specific model swap before results can be trusted. The PATCH endpoint security hole must be fixed before any public launch. Dashboard views need to be committed to the schema or verified as existing in production.",
+    "red_flags": [
+      "PATCH /api/lugares/[id] accepts arbitrary JSON body and passes it directly to supabase.update() — no field allowlist, allows overwriting any column",
+      "AI model (google/vit-base-patch16-224) is a generic ImageNet classifier not trained on structural damage — damage classifications will be unreliable in real use",
+      "Recursive retry on HF 503 in classifyDamage() has no depth limit — can cause stack overflow under sustained load",
+      "Three Supabase views (stats_dashboard, poblacion_expuesta, coincidencias_satelital) queried in dashboard are absent from supabase-schema.sql — dashboard may be partially non-functional",
+      "No rate limiting on /api/classify — any user can trigger costly HF API calls repeatedly",
+      "No authentication — completely open public writes with no spam or misinformation protection",
+      "No lockfile (package-lock.json/yarn.lock) committed — builds are not reproducible",
+      "No file size or MIME-type validation on base64 image uploads — potential for abuse"
+    ]
+  },
+  "signals": {
+    "accessible": true,
+    "stars": 0,
+    "forks": 0,
+    "contributors": 1,
+    "commit_count": 92,
+    "code_loc": 3532,
+    "created_at": "2026-06-27T01:44:26Z",
+    "pushed_at": "2026-06-29T12:39:30Z",
+    "license": "MIT",
+    "languages_bytes": {
+      "TypeScript": 132228,
+      "CSS": 2812,
+      "JavaScript": 303
+    },
+    "archived": false
+  }
+}
