@@ -1,0 +1,148 @@
+{
+  "project_slug": "generador-de-fichas-de-busqueda-venezuela",
+  "name": "Generador de fichas de busquedas para redes sociales",
+  "repo_url": "https://github.com/gerameraki/Fichas-de-busqueda-Venezuela",
+  "live_url": "https://fichasdebusqueda.netlify.app",
+  "video_url": "",
+  "countries": [
+    "México"
+  ],
+  "db_description": "# Generador de Fichas SOS - Sismo 2026 🚨\n\nUna aplicación web de código abierto diseñada para la **rápida generación de fichas de búsqueda de personas desaparecidas** en situaciones de crisis y desastres naturales, enfocada en zonas con conectividad extremadamente limitada.\n\n## 📌 Utilidad del Proyecto\n\nDurante emergencias como el Sismo de 2026, la difusión de información veraz, estructurada y legible en redes sociales puede salvar vidas. Esta herramienta permite a cualquier persona generar rápidamente una ficha con foto y detalles clave (ubicación, señas particulares, contacto) en un formato cuadrado (1:1) optimizado para plataformas como WhatsApp, Instagram, X (Twitter) y Facebook.\n\n### Principios de *Crisis UX* (Diseño para Emergencias):\n- **Cero distracciones:** Interfaz directa y sin elementos innecesarios.\n- **Alto contraste visual:** Uso estratégico de colores de alerta (rojo brillante) y tipografías grandes para información crítica (como el número de contacto).\n- **Formatos estandarizados:** Oculta dinámicamente los campos vacíos para evitar generar \"ruido visual\" en la ficha generada.\n\n---\n\n## ⚡ Rendimiento en Redes de Baja Velocidad (3G / EDGE)\n\nEl mayor desafío en una zona de desastre es la caída de las telecomunicaciones. Esta aplicación ha sido desarrollada pensando estrictamente en **redes 35kbps o Edge**. \n\nPara lograr esto, utilizamos **[Astro](https://astro.build/)** y aplicamos las siguientes optimizaciones drásticas:\n\n1. **Generación de Sitios Estáticos (SSG):** Todo el HTML y CSS se pre-renderiza en la compilación. El servidor no hace procesamiento en tiempo real, simplemente entrega los archivos planos al instante.\n2. **Cero Javascript de Frameworks:** Por defecto, Astro envía `0kb` de Javascript del framework al cliente. La interactividad de esta aplicación se maneja con minúsculas \"Islas de Astro\" utilizando Vanilla Javascript (JS puro).\n3. **Procesamiento de Imágenes Offline:** A diferencia de otras plataformas, **el usuario NUNCA sube la foto a un servidor**. La imagen seleccionada se procesa, recorta y dibuja localmente usando la API de `Canvas` del propio teléfono inteligente. Esto elimina el cuello de botella más grande en redes lentas: la subida de archivos pesados.\n4. **Cero dependencias externas:** No cargamos tipografías desde Google Fonts ni librerías de terceros (se utilizan las `system-ui` de cada dispositivo móvil).\n\n---\n\n## 🛠️ Cómo Funciona\n\n1. **Llena los datos:** El usuario ingresa la información de la persona (nombre, foto, edad, última ubicación y señas).\n2. **Previsualización en Vivo:** Un motor Javascript dibuja la ficha en tiempo real sobre una etiqueta `<canvas>`.\n3. **Descarga y Difunde:** Con un solo clic, se exporta una imagen `.png` de alta calidad (1080x1080) lista para compartir, junto a un texto pre-formateado que el usuario puede copiar a su portapapeles.\n4. **Privacidad total:** Ningún dato, nombre o fotografía sale del navegador del usuario. Todo es temporal y se procesa localmente.\n\n---\n\n## 🔒 Privacidad y Manejo de Datos\n\nPara cuidar tu seguridad y la de tus seres queridos, **no almacenamos, ni recopilamos, ni enviamos absolutamente nada de la información introducida en esta herramienta a nuestros servidores ni a ninguna base de datos externa.** Todo el procesamiento (incluyendo el manejo de fotos y la generación final de la ficha) se ejecuta 100% de manera local en el navegador o dispositivo del usuario. Al cerrar la aplicación, los datos no persisten en nuestros sistemas, garantizando privacidad total.\n\n---\n\n## 🚀 Guía para Desarrolladores (Haz un Fork)\n\n¡Toda ayuda es bienvenida! Si deseas mejorar esta herramienta, traducirla, o adaptarla para otras emergencias, el proyecto es completamente tuyo.\n\n### Requisitos previos\n- [Node.js](https://nodejs.org/en/) (Versión 18 o superior)\n- NPM o PNPM\n\n### Instalación local\n\n1. **Haz un Fork** de este repositorio y clónalo en tu computadora:\n   ```bash\n   git clone https://github.com/TU-USUARIO/venezuela.git\n   ```\n\n2. **Instala las dependencias:**\n   ```bash\n   cd venezuela\n   npm install\n   ```\n\n3. **Inicia el servidor de desarrollo:**\n   ```bash\n   npm run dev\n   ```\n   *La aplicación estará disponible en `http://localhost:4321`.*\n\n### Estructura de Archivos Principal\n\n- `src/pages/index.astro`: Contiene toda la interfaz principal, el formulario, y la lógica nativa en Javascript que dibuja sobre el `<canvas>`.\n- `src/layouts/Layout.astro`: Define la estructura base HTML, los meta tags y colores generales.\n- `src/styles/global.css`: Configuraciones globales de TailwindCSS.\n\n### Comandos Útiles\n\n| Comando | Acción |\n| :--- | :--- |\n| `npm run dev` | Inicia el servidor local en modo desarrollo. |\n| `npm run build` | Compila la aplicación para producción en la carpeta `/dist/`. |\n| `npm run preview` | Permite previsualizar localmente la versión compilada de producción. |\n\n## 🤝 Contribuciones\n\nSiéntete libre de abrir *Issues* si encuentras un bug o tienes sugerencias, o manda un *Pull Request* directamente. Asegúrate de probar que la generación de imágenes sigue funcionando y mantén el principio de \"0 kilobytes innecesarios\".",
+  "lifecycle_status": "ready_to_use",
+  "analysis": {
+    "summary": "A pure client-side Astro static site that generates \"fichas de búsqueda\" (missing-person search cards) for earthquake victims in Venezuela. Users fill a form, a browser Canvas engine renders a 1080x1080 PNG card with the person's photo, last known location, physical traits, and contact info in real time. The card can be downloaded as PNG or copied as a pre-formatted WhatsApp message. Everything runs entirely in the browser — no server, no uploads, no database. Designed explicitly for EDGE/3G conditions.",
+    "project_type": "Static web application (Astro SSG, pure frontend, offline-capable)",
+    "stack": {
+      "frontend": [
+        "Astro 7",
+        "Tailwind CSS 4",
+        "Vanilla JavaScript (inline)",
+        "Browser Canvas API"
+      ],
+      "backend": [],
+      "database": [],
+      "infra_deploy": [],
+      "ai_ml": [],
+      "languages": [
+        "TypeScript (inline Astro script blocks)",
+        "HTML",
+        "CSS"
+      ]
+    },
+    "architecture": {
+      "pattern": "Single-page static site (SSG), zero-backend",
+      "uses_orm": false,
+      "orm_or_db_layer": "None — localStorage used only for session persistence of form data and compressed photo",
+      "api_design": "None — entirely client-side with no API calls",
+      "separation_of_concerns": "Poor — all application logic (form handling, Canvas rendering, image compression, text generation, DOM management) is monolithically embedded in a single 1058-line index.astro file",
+      "modularity": "Minimal — Layout.astro provides only the HTML shell; Welcome.astro is unused default scaffold boilerplate; everything else lives in one file",
+      "notable_patterns": [
+        "Crisis UX: progress tracker, high-contrast red palette, mobile floating action button, modal preview",
+        "Image compression: local Canvas resize to max 800px at JPEG 0.75 quality before rendering",
+        "DOM reparenting: preview card moves between desktop sticky column and mobile modal via appendChild",
+        "localStorage persistence: form state and compressed photo survive page refresh",
+        "Zero external font/icon CDN dependencies — uses system-ui fonts only"
+      ]
+    },
+    "code_organization": {
+      "score": 2,
+      "directory_structure": "Standard Astro scaffold: src/pages, src/layouts, src/components, src/assets, src/styles. Only index.astro, Layout.astro, and global.css contain real code.",
+      "naming_quality": "Adequate — DOM IDs and JS variable names are descriptive and in Spanish (matching the target audience), function names like drawWrappedText and renderCropImage are clear.",
+      "documentation_quality": "README is thorough and explains design decisions (0kb JS framework philosophy, EDGE optimization). AGENTS.md is Astro boilerplate. Code has inline Spanish comments.",
+      "reasoning": "All application logic is packed into one 1058-line Astro file with no component extraction, making the codebase hard to maintain or test. The Welcome.astro file is untouched default Astro scaffolding that was never removed."
+    },
+    "production_readiness": {
+      "score": 2,
+      "has_auth": false,
+      "has_error_handling": false,
+      "has_logging": false,
+      "has_env_config": false,
+      "has_deploy_config": false,
+      "secrets_handling": "N/A — no secrets required; purely static site with no API keys or server-side logic",
+      "security_notes": "Privacy-by-design: no data ever leaves the browser. No XSS vectors introduced via innerHTML (Canvas text rendering). No auth surface to attack.",
+      "scalability_notes": "Inherently infinitely scalable as a static asset — any CDN can serve it. The bottleneck would be the CDN edge, not the app itself.",
+      "reasoning": "No CI, no deploy config (no Dockerfile, no netlify.toml, no vercel.json), no tests, and a single commit from hackathon day. The app is deployable via 'astro build' to any static host but requires manual setup. Error handling is minimal (try/catch on localStorage quota, clipboard fallback to alert)."
+    },
+    "maturity": {
+      "score": 2,
+      "has_readme": true,
+      "has_tests": false,
+      "has_ci": false,
+      "is_real_or_boilerplate": "Real functional application with genuine domain logic — the Canvas rendering engine, image compression pipeline, text formatting for WhatsApp, and crisis UX patterns are all hand-written and purposeful. However, Welcome.astro is unremoved default Astro boilerplate, and the repo has exactly 1 commit.",
+      "reasoning": "Created and pushed on hackathon day (June 29, 2026) with a single commit. The core feature — generating and downloading missing-person cards — works end-to-end, but there are no tests, no CI pipeline, and no deployment automation."
+    },
+    "viability": {
+      "score": 3,
+      "reasoning": "The concept is well-matched to the crisis context: offline-capable, works on EDGE/3G, no server infrastructure required, privacy-preserving, outputs WhatsApp-ready content. The implementation is functional and could be deployed to GitHub Pages, Netlify, or Vercel in under 10 minutes. The main limitation is that cards are generated and shared peer-to-peer with no central registry, meaning there is no search/aggregation capability across reports."
+    },
+    "key_features": [
+      "Real-time Canvas rendering of 1080x1080 missing-person cards as the user fills the form",
+      "Local image compression (Canvas + JPEG 75% at max 800px) — zero server upload required",
+      "Download as PNG and copy pre-formatted WhatsApp/social media text in one click",
+      "Form progress tracker showing 6 required fields completion percentage",
+      "Session persistence via localStorage (survives page refresh)",
+      "Responsive design: desktop sticky preview column + mobile bottom-sheet modal",
+      "All 25 Venezuelan states in the location selector",
+      "Medical alert field with conditional reveal animation",
+      "Designed for EDGE/3G: zero external CDN fonts or JS framework payload"
+    ],
+    "domain_tags": [
+      "people-finder",
+      "family-reunification"
+    ],
+    "merge_potential": "This is a self-contained client-side tool with a fundamentally different model from any backend/database project — it generates distributable assets rather than storing records. It could be linked from a central portal as a standalone tool, but does not merge with systems that aggregate missing-person data without adding a submission API. High standalone deployment value; low integration value with data-aggregation projects.",
+    "red_flags": [
+      "Single commit (hackathon day creation) — no iteration history",
+      "Welcome.astro is unremoved default Astro scaffold boilerplate, indicating rushed setup",
+      "All 1058 lines of application logic in a single monolithic index.astro file — no component separation",
+      "No tests of any kind",
+      "No CI/CD configuration",
+      "No deploy configuration (no Dockerfile, no netlify.toml, no vercel.json)",
+      "localStorage clear bug: btnClearForm removes key 'sosFormData' but data is saved under key 'sos_form_data' — clear form does not actually wipe localStorage",
+      "Canvas draw function creates new Image() objects on every redraw without caching, causing potential flicker when photo is set"
+    ]
+  },
+  "signals": {
+    "accessible": true,
+    "stars": 0,
+    "forks": 0,
+    "contributors": 1,
+    "commit_count": 1,
+    "code_loc": 0,
+    "created_at": "2026-06-29T17:02:37Z",
+    "pushed_at": "2026-06-29T17:02:40Z",
+    "license": null,
+    "languages_bytes": {
+      "Astro": 55610,
+      "JavaScript": 523,
+      "CSS": 22
+    },
+    "archived": false
+  },
+  "evaluation": {
+    "solves_real_problem": "yes",
+    "real_problem_reasoning": "In earthquake disasters, family reunification is a race against time. Venezuela's 2026 earthquake left many missing. WhatsApp and social media are the primary coordination channels for most Venezuelans, but there is no standard format for missing-person posts. This tool fills that gap directly: it generates a properly formatted, high-contrast 1080x1080 PNG card with the person's photo, location, physical description, and contact info — purpose-built for viral sharing on WhatsApp, Instagram, and X. The \"zero upload\" local processing is a genuine technical insight, not marketing fluff: uploading a photo over EDGE/3G in a disaster zone is the primary bottleneck, and this tool eliminates it entirely.",
+    "problem_severity": "high",
+    "impact_potential": 4,
+    "product_quality": 3,
+    "live_demo_status": "working",
+    "live_demo_notes": "The app loads at https://fichasdebusqueda.netlify.app and presents a fully functional multi-section form (basic info, last known location with all 25 Venezuelan states, health/appearance, and reporter contact). A live progress tracker, local photo compression notice, preview panel, and download/share buttons are all visible. The site prominently communicates privacy (\"ningún dato ni foto se envía a internet\") and appears ready for immediate use by anyone searching for a missing relative.",
+    "diffusion": {
+      "score": 4,
+      "ready_to_promote": true,
+      "available_assets": [
+        "live-demo",
+        "clear-value-prop"
+      ],
+      "recommended_angle": "Crea y comparte una ficha de búsqueda para personas desaparecidas en segundos — sin subir ningún dato a internet, funciona incluso en redes 3G y Edge. Herramienta gratuita, open source, hecha para la emergencia sísmica de Venezuela 2026.",
+      "gaps": [
+        "no demo video showing the card generation flow",
+        "no screenshots of a finished card output",
+        "no branding or logo beyond functional UI",
+        "no real user testimonials or confirmed usage in the field"
+      ]
+    },
+    "overall_recommendation": "promote",
+    "one_line_pitch": "Genera una ficha de búsqueda profesional para personas desaparecidas en Venezuela y compártela en WhatsApp en segundos — todo procesado localmente, sin subir ningún dato a internet, funciona en redes 3G."
+  }
+}

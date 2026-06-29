@@ -10,31 +10,34 @@
   "db_description": "Puente Venezuela\nA web-based humanitarian coordination platform built for the Build4Venezuela hackathon, following the June 24, 2026, earthquakes in Venezuela.\n\nWhat it does\nConnects those in need of help with those who can offer help in real time:\n\nInteractive map with pins showing needs and offers of help\nQuick reports — anyone can report a need or offer help without having to create an account\nFilters by category — water, food, shelter, medicine, rescue, volunteers, transportation\nReal-time status—pending, in progress, or resolved\nResponsive design—works on mobile and desktop.",
   "lifecycle_status": "ready_to_use",
   "analysis": {
-    "summary": "Puente Venezuela is a map-based humanitarian coordination PWA that lets earthquake victims and volunteers post geo-tagged needs/offers without registration. Built in a single day (June 28-29, 2026) using Lovable.dev (AI-assisted), it has a real Supabase backend with 8 SQL migrations, Supabase Realtime subscriptions, photo upload with client-side image compression, bilingual (ES/EN) UI, a nearby-match algorithm (Haversine), WhatsApp sharing, and a volunteer assignment flow. The feature set is genuinely useful for a disaster scenario. However there are no tests, no CI/CD, no deploy config, the .env file with real credentials is committed, and the entire reports table is open to anonymous writes with no rate limiting — creating serious spam/vandalism risk for a real deployment.",
-    "project_type": "Humanitarian coordination PWA (geo-tagged needs/offers map)",
+    "summary": "Puente Venezuela is a bilingual (ES/EN) humanitarian coordination PWA built in one day for the Build4Venezuela hackathon. It provides an interactive Leaflet map where anyone (no account required) can post needs or offers of aid after the 2026 Venezuelan earthquakes, with real-time Supabase subscriptions, volunteer assignment, status tracking, and photo uploads with client-side compression. The project has real, working domain logic and is connected to a live Supabase project — it is not empty scaffolding — but it carries significant production risks: Supabase credentials are committed to the repo, anonymous update RLS policies are fully permissive (anyone can mark any report resolved), and there are no tests, no CI, and no rate limiting.",
+    "project_type": "Bilingual humanitarian-aid coordination PWA (React 19 + TanStack Start SSR + Supabase BaaS)",
     "stack": {
       "frontend": [
         "React 19",
-        "TanStack Router",
-        "TanStack Start (SSR)",
-        "TanStack Query",
-        "Tailwind v4",
-        "Radix UI / shadcn-ui",
-        "react-leaflet / Leaflet",
-        "Vite",
-        "workbox (PWA)"
+        "TanStack Router/Start",
+        "TailwindCSS v4",
+        "Radix UI",
+        "Leaflet / react-leaflet",
+        "React Query",
+        "vite-plugin-pwa / Workbox",
+        "Sonner (toasts)",
+        "Zod (client validation)"
       ],
       "backend": [
-        "TanStack Start server functions (Node/Nitro)",
-        "Supabase (BaaS)"
-      ],
-      "database": [
-        "PostgreSQL via Supabase",
-        "Supabase Realtime",
+        "TanStack Start server functions (SSR edge-like)",
+        "Supabase PostgreSQL + RLS",
+        "Supabase Realtime (postgres_changes)",
         "Supabase Storage (report-attachments bucket)"
       ],
+      "database": [
+        "Supabase PostgreSQL",
+        "PLpgSQL triggers (updated_at)",
+        "8 migrations tracking schema evolution"
+      ],
       "infra_deploy": [
-        "None configured — no Dockerfile, no GitHub Actions, no Vercel/Railway config"
+        "Lovable Cloud (auto-deploy)",
+        "Vite + Bun"
       ],
       "ai_ml": [],
       "languages": [
@@ -44,28 +47,27 @@
       ]
     },
     "architecture": {
-      "pattern": "Full-stack SPA/SSR hybrid (TanStack Start) + Supabase BaaS",
+      "pattern": "SSR/SPA hybrid — TanStack Start file-based routing with createServerFn for DB access, React Query for client-side cache and realtime invalidation",
       "uses_orm": false,
-      "orm_or_db_layer": "Raw SQL migrations via Supabase CLI; Supabase JS client (supabase-js v2) used directly as the data-access layer — no ORM",
-      "api_design": "TanStack Start createServerFn for server-side mutations (listReports, createReport, updateStatus, assignReport); client-side Supabase JS for storage and realtime subscriptions",
-      "separation_of_concerns": "Routes own page logic; reusable components in src/components; server functions isolated in src/lib/*.functions.ts; i18n, upload, distance, PWA in separate lib modules",
-      "modularity": "Good for a hackathon: components, lib utilities, and routes are cleanly separated; the UI component library (40+ shadcn-ui primitives) is boilerplate but not in the way",
+      "orm_or_db_layer": "Supabase JS client used directly inside server functions; no ORM — raw Supabase query builder (.from().select().eq()). Zod schemas validate inputs before DB writes.",
+      "api_design": "No traditional REST or GraphQL API; TanStack Start server functions act as type-safe RPC endpoints (listReports, createReport, updateStatus, assignReport, listAttachmentsByReport). Client talks to server functions via React Query queryFn.",
+      "separation_of_concerns": "Clean: server functions in src/lib/*.functions.ts, UI components in src/components/, routes in src/routes/, i18n in src/lib/i18n.tsx, upload logic in src/lib/upload.ts. Components import server functions but do not embed SQL.",
+      "modularity": "Good — single-purpose files, shared Supabase client via src/integrations/supabase/client.ts, shared types via generated src/integrations/supabase/types.ts. 8 Supabase migrations track schema evolution.",
       "notable_patterns": [
-        "Zod input validation on every server function",
-        "Supabase Realtime subscriptions invalidate TanStack Query cache on table changes",
-        "Client-side Haversine distance for nearby-match suggestions",
-        "Canvas-based image compression before upload (max 1600px, 0.82 JPEG quality)",
-        "Bilingual dictionary-based i18n (ES/EN) stored in React context",
-        "PWA service worker via Workbox with strict guards for preview environments",
-        "WhatsApp deep-link share from report detail panel"
+        "No-auth by design: anonymous INSERT and UPDATE allowed via explicit RLS policies for emergency accessibility",
+        "Client-side image compression before upload (canvas, max 1600px, 0.82 quality JPEG)",
+        "Supabase Realtime subscription invalidates React Query cache on postgres_changes",
+        "Distance-based match suggestions using haversine utility (src/lib/distance.ts)",
+        "Custom lightweight i18n context (ES/EN dictionary, localStorage persistence)",
+        "PWA manifest + service worker registered via pwa-register.ts"
       ]
     },
     "code_organization": {
-      "score": 3,
-      "directory_structure": "Clear: src/routes (pages), src/components (UI), src/lib (utilities and server functions), src/integrations/supabase (client + types), supabase/migrations. No deeply nested confusion.",
-      "naming_quality": "Good: file names match their purpose (reports.functions.ts, attachments.functions.ts, distance.ts, upload.ts). Component names are descriptive.",
-      "documentation_quality": "README exists but is minimal. AGENTS.md present (intent layer). Inline comments are sparse but the code is readable. No JSDoc.",
-      "reasoning": "The codebase is clean and well-structured for a Lovable.dev-generated project built in under 24 hours. The separation of server functions from UI components is commendable, but there is zero test coverage and no inline documentation beyond occasional comments."
+      "score": 4,
+      "directory_structure": "Logical: routes/, components/, lib/, integrations/supabase/, hooks/, assets/. Server functions clearly separated from UI. Migration files are ordered and named with UUIDs.",
+      "naming_quality": "Consistent and descriptive — createReport, listReports, updateStatus, assignReport match their DB operations exactly. Components named by domain (ReportForm, ReportDetail, MapView, AttachmentsGallery).",
+      "documentation_quality": "README explains setup, tech stack, and DB schema in Portuguese (slight inconsistency — UI is ES/EN but README is PT). AGENTS.md present. Code has minimal inline comments but is self-explanatory.",
+      "reasoning": "The codebase is clean, idiomatic TypeScript with consistent patterns throughout. Main deduction: no JSDoc/inline comments on non-obvious logic, README language mismatch (PT vs ES/EN app), and no tests."
     },
     "production_readiness": {
       "score": 2,
@@ -74,53 +76,52 @@
       "has_logging": false,
       "has_env_config": true,
       "has_deploy_config": false,
-      "secrets_handling": "CRITICAL: .env file with real Supabase project ID, anon key, and URL is committed to the repository. The anon key is designed to be public, but committing .env is still bad practice and the service_role key could end up there too.",
-      "security_notes": "Anonymous UPDATE on the entire reports table is explicitly granted (USING(true) WITH CHECK(true)) to handle disaster-scenario no-login usage — meaning anyone can mark any report resolved or assign themselves to it. Anonymous INSERT on report_attachments is also fully open with no rate limiting or file-type enforcement beyond the client-side check. No CSRF mitigation beyond TanStack Start's built-in protections.",
-      "scalability_notes": "Supabase scales horizontally; the stateless server functions are fine. However, no pagination on listReports (fetches all rows on every load), no search index on reports, and no rate limiting — a coordinated spam attack could flood the map and render it unusable.",
-      "reasoning": "The app has a real working backend and proper Supabase RLS, but the deliberate choice to allow fully anonymous writes with no rate limiting is a significant production risk. There is no deploy config, no CI, and credentials are committed. It is functional for a demo but needs hardening before real disaster deployment."
+      "secrets_handling": "CRITICAL: .env with real Supabase project URL, anon key, and project ID is committed to the repository. Anon key is designed to be semi-public but the project ID being exposed combined with overly permissive RLS is a concern.",
+      "security_notes": "Anonymous RLS policy allows any visitor to UPDATE any report (mark as resolved, change status, assign themselves). This could be deliberately abused to sabotage active relief reports. No rate limiting on report creation. No input sanitization beyond Zod max-length constraints.",
+      "scalability_notes": "Supabase handles scaling for the DB and realtime. The listReports server function fetches ALL reports with no pagination — this will degrade as the dataset grows. Client-side filtering of a large dataset is also problematic.",
+      "reasoning": "Core flow works and error handling (Zod validation + React Query error callbacks + toast feedback) is solid. However, committed credentials, absent rate limiting, fully permissive anonymous update policy, no logging, no CI, and no tests prevent a higher score."
     },
     "maturity": {
       "score": 2,
       "has_readme": true,
       "has_tests": false,
       "has_ci": false,
-      "is_real_or_boilerplate": "Real logic — not empty scaffolding. The reports CRUD, photo upload with compression, real-time subscriptions, Haversine matching, bilingual i18n, and volunteer assignment flow are all genuinely implemented and connected to a live Supabase instance.",
-      "reasoning": "Created in a single day via Lovable.dev with 62 commits. Core features work end-to-end but there are zero tests, no CI/CD pipeline, and no deployment configuration. The 8 SQL migrations show iterative feature development but the overall artifact is a functional hackathon prototype, not a mature product."
+      "is_real_or_boilerplate": "Real working logic — not empty scaffolding. Built via Lovable (AI-assisted) but the domain code (server functions, RLS policies, realtime subscriptions, image compression, i18n, matching logic) is genuine. 62 commits across a single hackathon day showing iterative refinement.",
+      "reasoning": "All 62 commits happened on June 28-29 2026 (one day). No tests whatsoever, no CI pipeline, no Dockerfile. The Supabase project is live and the app is functionally complete for the core use case, but it lacks the stability indicators expected for production deployment at scale."
     },
     "viability": {
       "score": 3,
-      "reasoning": "The concept is directly relevant (needs/offers coordination on a live map after earthquakes) and the implementation covers the most critical flows: reporting without signup, map visualization, volunteer assignment, nearby matching, and emergency contact numbers. The blocking risks for real deployment are: fully open anonymous writes (spam), no rate limiting, no moderation, and no deploy infra. These are fixable in days, not weeks, making it viable with effort."
+      "reasoning": "The core value proposition is well-executed: anonymous report submission, real-time map, bilingual UI, photo evidence, volunteer assignment, and emergency contacts. These are exactly the right features for a post-disaster coordination tool. The no-auth barrier is a deliberate and sensible design choice for a disaster scenario. Main blockers to higher score: the permissive anonymous UPDATE policy could be weaponized to corrupt active relief data, listReports fetches without pagination, and there is no admin/moderation capability."
     },
     "key_features": [
-      "Anonymous geo-tagged need/offer reports (no login required)",
-      "Interactive Leaflet map with urgency-sized, color-coded markers (red=need, green=offer)",
-      "Supabase Realtime live updates — map refreshes when any report changes",
-      "Nearby-match algorithm: shows opposite-type reports in the same category within an adjustable radius (Haversine)",
-      "Volunteer self-assignment with name and contact (marks report in_progress)",
-      "Photo upload with client-side canvas compression (max 5 photos, 5MB each, 1600px max)",
-      "Bilingual UI (Spanish/English) with localStorage persistence",
-      "Advanced filters: type, category, status, time period, min urgency, photos-only",
-      "WhatsApp deep-link sharing of individual reports",
-      "Emergency contacts page (Venezuela 911, Bomberos 171, Protección Civil, Cruz Roja, FUNVISIS)",
-      "PWA with service worker (Workbox) for installability and offline indicator"
+      "Interactive Leaflet map with color-coded markers by type (need=red, offer=green), status (in_progress=amber, resolved=grey), and urgency-scaled size",
+      "Anonymous report creation (no account required) with Zod-validated server functions",
+      "Photo upload with client-side canvas compression (max 1600px, JPEG 0.82) and Supabase Storage; up to 5 photos per report",
+      "Supabase Realtime subscriptions for live map updates without page refresh",
+      "Volunteer assignment: any user can claim a report and mark as in_progress/resolved",
+      "Nearby match suggestions using haversine distance (needs matched to nearby offers in same category)",
+      "Bilingual ES/EN UI with custom i18n context and localStorage persistence",
+      "PWA (manifest, service worker via Workbox, offline indicator)",
+      "Emergency contacts page with clickable tel: links for 911, bomberos, Cruz Roja, FUNVISIS",
+      "Advanced filtering: type, category, status, time period, minimum urgency, photos-only filter, text search"
     ],
     "domain_tags": [
-      "mapping-geo",
       "aid-logistics",
+      "mapping-geo",
       "volunteer-coordination",
       "alerts-notifications",
-      "shelter-mapping"
+      "donations-aid"
     ],
-    "merge_potential": "Medium. The map+report core is solid and unique enough to stand alone, but the fully open anonymous write model and absence of any spam protection would need resolution before deploying alongside other systems. The bilingual support and WhatsApp integration are directly reusable.",
+    "merge_potential": "Medium — the focused scope, clean code, and real working core functionality make this a strong candidate for merging or cross-pollinating. The bilingual i18n system, client-side image compression utility, Supabase Realtime integration pattern, and the no-auth anonymous reporting design are all reusable. Before production use, the anonymous UPDATE RLS policy must be tightened and pagination added to listReports.",
     "red_flags": [
-      ".env with real Supabase credentials committed to the repository",
-      "Fully open anonymous UPDATE on all reports (anyone can resolve/reassign any report)",
-      "No rate limiting on report creation or file uploads — trivially spammable",
+      "Real Supabase credentials (.env with project URL, anon key, project ID) committed to the public git repository",
+      "Anonymous RLS UPDATE policy is fully permissive — any visitor can mark any report as resolved or change its status, enabling sabotage of active relief operations",
+      "listReports fetches all rows without pagination — will cause performance degradation and potential timeouts as data grows",
+      "No rate limiting on report creation — trivially spammable, which would pollute the map during a crisis",
       "No tests of any kind (unit, integration, or e2e)",
-      "No CI/CD pipeline or deployment configuration",
-      "listReports fetches all rows with no pagination — will degrade at scale",
-      "Built entirely with Lovable.dev AI generation in under 24 hours — limited human review of edge cases",
-      "No content moderation or report flagging mechanism"
+      "No CI/CD pipeline — no automated quality gates before deploy",
+      "No admin/moderation interface — no way to delete spam or fake reports",
+      "README written in Portuguese while the app UI is Spanish/English — suggests low-effort documentation"
     ]
   },
   "signals": {
@@ -140,5 +141,34 @@
       "JavaScript": 1250
     },
     "archived": false
+  },
+  "evaluation": {
+    "solves_real_problem": "yes",
+    "real_problem_reasoning": "Puente Venezuela directly addresses the coordination gap after the June 24, 2026, Venezuelan earthquakes: victims need to signal needs (water, food, shelter, medicine, rescue) and volunteers need to find them. The no-account-required anonymous reporting is a deliberate and smart design choice for disaster scenarios where friction kills lives. The bilingual ES/EN interface, real-time Leaflet map, photo uploads, volunteer assignment, and haversine-based nearby matching are all the right features for post-earthquake aid logistics. The problem is real, urgent, and the feature set maps tightly to it.",
+    "problem_severity": "high",
+    "impact_potential": 4,
+    "product_quality": 3,
+    "live_demo_status": "partial",
+    "live_demo_notes": "The app loads cleanly at https://puentevenezuela.lovable.app/ and presents a polished Spanish-language landing page with navigation to Map, Emergency contacts, and About sections. All statistics counters show 0 (no live reports yet), so the map is empty. The structural shell — routing, PWA manifest, UI components — is live and functional, but there is no real field data populating it. A first-time visitor sees a compelling pitch but cannot immediately experience the core interactive map with actual reports. The app is working, not broken, but it is at zero-data state.",
+    "diffusion": {
+      "score": 3,
+      "ready_to_promote": false,
+      "available_assets": [
+        "live-demo",
+        "clear-value-prop",
+        "branding"
+      ],
+      "recommended_angle": "Lead with the specific problem — earthquake survivors in Venezuela need help NOW — and position Puente Venezuela as the fastest way to connect: open the map, drop a pin, done. Emphasize the zero-friction no-account design. Show a screenshot or short screen recording of the map with at least a few sample pins to make it feel alive. The tagline 'Cada minuto cuenta' is strong and should anchor any social post.",
+      "gaps": [
+        "demo-video",
+        "screenshots of populated map with real or sample data",
+        "real-users or any usage proof",
+        "stats showing > 0 reports/resolved cases",
+        "no rate limiting or moderation (sabotage risk before promoting widely)",
+        "permissive anonymous UPDATE RLS policy must be fixed before wide promotion to avoid bad actors corrupting relief data"
+      ]
+    },
+    "overall_recommendation": "improve-first",
+    "one_line_pitch": "Puente Venezuela lets earthquake survivors report urgent needs and volunteers offer help instantly on a live map — no account, no barriers, just open and pin."
   }
 }

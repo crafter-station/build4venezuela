@@ -1,0 +1,171 @@
+{
+  "project_slug": "redacopiovnzla",
+  "name": "Red Acaopio Vnzla",
+  "repo_url": "https://github.com/Chappie21/VnzlCentrosDeInsumos",
+  "live_url": "https://www.redacopiovnzla.com/",
+  "video_url": "",
+  "countries": [
+    "Venezuela"
+  ],
+  "db_description": "# Centros de Acopio — Ayuda que llega donde se necesita\n\n## ¿Qué es?\n\nUna aplicación que conecta a quienes **quieren ayudar** con los **centros de acopio** que reciben y reparten insumos durante una emergencia.\n\nEn vez de no saber a dónde llevar una donación o qué hace falta realmente, la app muestra, en un mapa, los centros cercanos y **qué necesita cada uno en este momento**: agua, medicamentos, ropa, alimentos o herramientas.\n\n## ¿Cómo ayuda?\n\n- **A quien quiere donar:** encuentra el centro más cercano y ve qué le hace falta, para llevar lo que de verdad se necesita y no lo que sobra.\n- **A los centros:** llevan el control de lo que entra y sale, y avisan automáticamente cuándo un insumo está **urgente**, **normal** o **suficiente**.\n- **A la comunidad:** la información está siempre actualizada y es confiable, porque un equipo revisa que los centros sean reales.\n\nEl resultado: menos desorden, menos desperdicio y la ayuda llegando más rápido a donde hace falta.\n\n## ¿Quiénes la usan?\n\n- **Personas que donan** — buscan un centro y ven sus necesidades.\n- **Voluntarios** — ayudan a registrar lo que llega y se reparte.\n- **Responsables de un centro (jefes)** — administran el centro, su equipo y su inventario.\n- **Equipo de verificación** — confirma que cada centro sea legítimo.\n\n## Cómo se usa\n\n### Si quieres donar\n1. Abre la app y mira el **mapa** o la **lista de centros** cerca de ti.\n2. Entra a un centro para ver **qué necesita** y si está **recibiendo en este momento**.\n3. Arma tu donación en la app y llévala al centro: ahí la registran al recibirla.\n\n> No necesitas crear una cuenta para mirar el mapa y las necesidades.\n\n### Si eres voluntario o responsable de un centro\n1. **Crea tu cuenta** (con tu cédula y una contraseña, o con Google).\n2. **Registra tu centro**: nombre, ubicación en el mapa y el inventario con el que inicias (puedes cargarlo a mano o importarlo desde un Excel).\n3. Suma a tu equipo: **invita voluntarios** con un enlace o un código QR.\n4. **Mantén el inventario al día**: cada vez que entra una donación o sale un envío, queda registrado. El sistema lleva la cuenta por ti.\n5. **Configura las alertas**: define, para cada insumo, cuándo se considera *urgente* y cuándo *suficiente*. A partir de ahí, **la etiqueta de cada insumo se actualiza sola** según el stock, sin que tengas que cambiarla a mano.\n\n### Cómo se mantiene la confianza\n- Un **equipo de verificación** revisa los centros y los marca como verificados.\n- Cualquier persona puede **reportar** un centro que ya no exista o tenga información incorrecta.\n\n## En resumen\n\nLa app es el puente entre la **ayuda disponible** y la **ayuda necesaria**: muestra dónde están los centros, qué les falta y lo mantiene actualizado, para que cada donación cuente.",
+  "lifecycle_status": "ready_to_use",
+  "analysis": {
+    "summary": "VnzlCentrosDeInsumos is a production-grade emergency logistics platform for Venezuelan aid collection centers (\"centros de acopio\"). It is a Turborepo monorepo with a NestJS REST API, a Next.js 16 PWA-ready web frontend, and a shared Prisma 7/PostgreSQL package. The system manages supply center directories, real-time inventory tracking via an immutable audit trail (Historial), QR-based donation scanning, shipment dispatch with guías, volunteer role management, team invitations via JWT tokens, community reporting, and a moderation panel. It is live at https://vnzl-centros-de-insumos-web.vercel.app. The code is clearly not boilerplate — it contains 13k+ LOC of substantive domain logic, 157 commits, 4 contributors, 21 test files, 3 CI pipelines, Railway deployment config, and a Dockerfile. The main production concern is local-disk file storage for center photos, which would break in a multi-instance deployment, and the absence of versioned Prisma migrations (using db push).",
+    "project_type": "Full-stack web app (monorepo: NestJS API + Next.js frontend + shared Prisma package)",
+    "stack": {
+      "frontend": [
+        "Next.js 16",
+        "React 19",
+        "Tailwind CSS 4",
+        "TanStack Query",
+        "Leaflet (map)",
+        "Vitest (tests)"
+      ],
+      "backend": [
+        "NestJS 11",
+        "Express 5",
+        "JWT (@nestjs/jwt)",
+        "bcryptjs",
+        "ioredis",
+        "class-validator",
+        "Google OAuth (google-auth-library)"
+      ],
+      "database": [
+        "PostgreSQL 16",
+        "Prisma 7 (ORM)",
+        "Redis (cache + rate limiting)"
+      ],
+      "infra_deploy": [
+        "Railway (API, Docker multi-stage)",
+        "Vercel (web)",
+        "GitHub Actions CI (3 workflows)",
+        "Docker / docker-compose (local dev)",
+        "Sentry (error tracking)"
+      ],
+      "ai_ml": [],
+      "languages": [
+        "TypeScript"
+      ]
+    },
+    "architecture": {
+      "pattern": "Monorepo (Turborepo) with layered NestJS modules — Controller/Service per domain entity, shared DB package",
+      "uses_orm": true,
+      "orm_or_db_layer": "Prisma 7 with PostgreSQL adapter (@prisma/adapter-pg). All inventory mutations go through Historial audit rows in transactions (enforced 'golden rule'). Explicit Prisma `select` allowlists prevent PII leakage.",
+      "api_design": "REST via NestJS controllers. Versioned cache invalidation in Redis (bump integer key, include in cache key). Rate limiting per fingerprint/IP using Redis fixed-window. JWT Bearer tokens for users (cedula+password and Google OAuth) and separate admin sessions.",
+      "separation_of_concerns": "Clear separation: `packages/database` owns schema/client, `packages/venezuela` owns domain logic (cedula parsing, geo data), `apps/api` owns business logic and HTTP, `apps/web` owns UI. Guards (Sestion/Identidad/Voluntario/Jefe/Admin/RateLimit) enforce all authorization at the controller layer.",
+      "modularity": "Good. Each domain entity has its own service/controller file. Shared packages published as workspace deps. Constants in dedicated files (cache, pagination, rate-limit).",
+      "notable_patterns": [
+        "Immutable audit trail: cantidadTotal only changed via Historial rows in DB transactions",
+        "Redis cache versioning: a single incr key invalidates all paginated/filtered cache entries without SCAN",
+        "Explicit Prisma select allowlists per consumer (card, detalle, miCentro, moderacion, publico) to prevent PII exposure",
+        "RBAC via composable NestJS guards (AdminGuard, JefeGuard, VoluntarioGuard, IdentidadGuard, SesionGuard)",
+        "Venezuelan cedula parsing + external validation (api.cedula.com.ve) as best-effort background task",
+        "Geospatial proximity via Haversine in-memory with bounding-box pre-filter in DB",
+        "Community reporting (fingerprint-based, upsert 1/device/center) with moderation queue"
+      ]
+    },
+    "code_organization": {
+      "score": 5,
+      "directory_structure": "apps/{web,api}, packages/{database,venezuela}, docs/ (feature-level markdown), .github/workflows/. Files are consistently named by domain entity. Route grouping in Next.js uses (app) and (full) layout groups.",
+      "naming_quality": "Excellent. Spanish domain names match the problem domain (Centro, Insumo, Historial, Envio, Voluntario). TypeScript types are precise and consistently named (CentroCard, MiCentro, CentroDetalle, CentroModeracion). 'ponytail' comments clearly mark known tech debt.",
+      "documentation_quality": "High. Extensive inline comments explaining design decisions, security rationale, and known limitations. Feature-level docs in docs/. AGENTS.md with AI coding context. .env.example with all vars documented.",
+      "reasoning": "The codebase reads like it was written by experienced engineers who cared about maintainability. Domain logic, auth, caching, and PII handling are all well-reasoned and documented. The 'ponytail' pattern for flagging deferred decisions is notably disciplined."
+    },
+    "production_readiness": {
+      "score": 4,
+      "has_auth": true,
+      "has_error_handling": true,
+      "has_logging": true,
+      "has_env_config": true,
+      "has_deploy_config": true,
+      "secrets_handling": "JWT_SECRET and GOOGLE_CLIENT_ID in env vars. Default fallback 'dev-only-change-me' in app.module.ts is a minor risk (should panic if unset in production, but Sentry + CORS env gating make production misconfiguration unlikely in practice).",
+      "security_notes": "CORS restricted to WEB_ORIGIN in production. Input validated with class-validator + whitelist:true (strips unknown fields). Explicit Prisma select allowlists prevent PII leakage. Rate limiting on create endpoints. Admin sessions use separate JWT claim type 'admin' checked at guard level. bcryptjs (cost 10) for passwords.",
+      "scalability_notes": "Redis cache with versioned invalidation scales public directory reads well. Photo storage is local disk (breaks horizontal scaling — explicitly flagged as ponytail). Geospatial sorting is in-memory (candidateCap=500 rows, fine until ~1000 centers). No versioned Prisma migrations (uses db push) — schema changes in production could be destructive.",
+      "reasoning": "This is a polished MVP with real production infrastructure. The two concrete production gaps are local-disk photo storage and absence of versioned migrations. Everything else (auth, rate limiting, caching, error tracking, CI, deployment) is properly wired."
+    },
+    "maturity": {
+      "score": 4,
+      "has_readme": true,
+      "has_tests": true,
+      "has_ci": true,
+      "is_real_or_boilerplate": "Real — substantive domain logic throughout, 157 commits, 4 contributors, deployed app, idiomatic use of Prisma transactions, Redis versioned caching, and Venezuelan-specific validation (cedula parsing, estado/municipio whitelist).",
+      "reasoning": "4 contributors and 157 commits over 3 days signals rapid but genuine development. 21 test files with proper Prisma mocks and 3 CI pipelines (api, web, migrations with drift detection) demonstrate engineering discipline. The 'ponytail' deferred items are clearly scoped and non-blocking."
+    },
+    "viability": {
+      "score": 4,
+      "reasoning": "The core aid-center logistics loop (create center, manage inventory via QR scan, track shipments, invite volunteers) is fully implemented and deployed. The moderation panel allows the team to verify real centers vs. fake ones, which is critical for trust in an emergency context. The two blockers for true production scale (photo storage, versioned migrations) are fixable in hours. This is ready to serve real earthquake victims with minimal additional work."
+    },
+    "key_features": [
+      "Public directory of aid centers with geospatial search (Haversine + bounding box), filterable by urgency, open status, and verification",
+      "QR code-based donation scanning — donors scan a center QR, volunteers scan donor QR items to register supplies",
+      "Immutable inventory audit trail (Historial) enforced by DB transactions — stock can never drift",
+      "Shipment (envío) dispatch with printable guías and QR tracking",
+      "RBAC: Jefe (owner) vs. Voluntario roles within each center; Admin for platform moderation",
+      "Team invitation flow: JWT-signed QR/link, 24h TTL, requires complete identity to redeem",
+      "Community reporting system (anonymous fingerprint-based) with moderation queue sorted by report count",
+      "Center verification panel with photo evidence, GPS vs. declared address comparison, and cedula verification of the responsible person",
+      "Venezuelan cedula format validation + live verification against api.cedula.com.ve",
+      "Redis-backed versioned cache for public endpoints + fixed-window rate limiting on write endpoints",
+      "Google OAuth + cedula/password dual login with profile completion onboarding flow",
+      "Sentry error tracking on both API and web",
+      "3 GitHub Actions CI pipelines with migration drift detection"
+    ],
+    "domain_tags": [
+      "aid-logistics",
+      "donations-aid",
+      "mapping-geo",
+      "volunteer-coordination"
+    ],
+    "merge_potential": "High. The project is focused, well-documented, and already deployed. It fills a concrete gap (supply center directory + inventory management) that other projects likely don't duplicate. The modular monorepo structure and REST API make integration straightforward. The only prerequisite for a merge/deploy is migrating photo storage from local disk to object storage (e.g., S3/R2).",
+    "red_flags": [
+      "Local disk storage for center photos (/uploads/) will break in any multi-instance or serverless deployment — explicitly acknowledged as 'ponytail' but unresolved",
+      "No versioned Prisma migrations — railway.json pre-deploy uses `prisma db push` which can silently drop columns in production schema changes",
+      "JWT_SECRET has in-code fallback 'dev-only-change-me' in app.module.ts — should panic on startup if unset in NODE_ENV=production",
+      "Candidate cap of 500 rows for geospatial search means centers beyond the 500th nearest are invisible in proximity queries — acceptable now but will degrade as network grows"
+    ]
+  },
+  "signals": {
+    "accessible": true,
+    "stars": 0,
+    "forks": 0,
+    "contributors": 4,
+    "commit_count": 157,
+    "code_loc": 13379,
+    "created_at": "2026-06-26T21:17:54Z",
+    "pushed_at": "2026-06-29T01:40:08Z",
+    "license": null,
+    "languages_bytes": {
+      "TypeScript": 468930,
+      "CSS": 1667,
+      "Dockerfile": 1651,
+      "JavaScript": 679
+    },
+    "archived": false
+  },
+  "evaluation": {
+    "solves_real_problem": "yes",
+    "real_problem_reasoning": "Post-earthquake supply logistics in Venezuela suffer from a coordination vacuum: donors don't know where to go, centers don't know what's coming, and aid gets misallocated. This platform directly attacks that with a live directory of aid centers, real-time inventory levels with urgency indicators (urgente/normal/suficiente), QR-based donation scanning, shipment tracking, and a moderation layer to prevent fake centers from entering the network. It is one of the most operationally complete disaster-logistics solutions in the hackathon — it covers the full donor-to-shelf loop rather than just a landing page or a form.",
+    "problem_severity": "high",
+    "impact_potential": 4,
+    "product_quality": 4,
+    "live_demo_status": "partial",
+    "live_demo_notes": "The domain https://www.redacopiovnzla.com/ resolves and returns content (title \"Red Acopio Venezuela\" is rendered), but WebFetch cannot execute JavaScript so the Next.js SPA does not render its interactive UI. The Vercel deployment (https://vnzl-centros-de-insumos-web.vercel.app) shows the same minimal server-rendered shell. This is almost certainly a functioning JavaScript-rendered app that WebFetch cannot fully evaluate — the technical evidence (Vercel deploy, Railway API, PostgreSQL + Redis on Railway, Sentry tracking active) strongly suggests the full app is live. However, a human visiting the URL would need to verify the map, login, and inventory flows are operational.",
+    "diffusion": {
+      "score": 4,
+      "ready_to_promote": true,
+      "available_assets": [
+        "live-demo",
+        "clear-value-prop"
+      ],
+      "recommended_angle": "Frame it around the donor's friction: 'You want to donate but don't know where to go or what's needed.' Then show the solution — open the map, see the nearest verified aid center, see exactly what it urgently needs right now, bring that. Emphasize the verification and real-time inventory angle as the differentiator over WhatsApp groups and word-of-mouth coordination.",
+      "gaps": [
+        "demo-video",
+        "screenshots",
+        "real-users",
+        "branding"
+      ]
+    },
+    "overall_recommendation": "spotlight",
+    "one_line_pitch": "Red Acopio Venezuela conecta a donadores con los centros de acopio más cercanos en tiempo real — sabés qué le falta a cada centro antes de salir de casa, y el centro sabe exactamente qué va a llegar."
+  }
+}
