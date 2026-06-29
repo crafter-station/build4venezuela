@@ -196,7 +196,13 @@
       "project": "project",
       "projects": "projects",
       "vote": "vote",
-      "votes": "votes"
+      "votes": "votes",
+      "statuses": {
+        "all": "All statuses",
+        "ready_to_use": "Ready to use",
+        "in_development": "In development",
+        "idea": "Idea"
+      }
     },
     "categories": {
       "personas": {
@@ -257,6 +263,12 @@
     "slugLabel": "Project slug",
     "slugPlaceholder": "cool-slug",
     "nameLabel": "Project name",
+    "lifecycleStatusLabel": "Project status",
+    "lifecycleStatuses": {
+      "ready_to_use": "Ready to use",
+      "in_development": "In development",
+      "idea": "Idea"
+    },
     "projectUrlLabel": "Project link",
     "countriesLabel": "Participant countries",
     "countriesPlaceholder": "Venezuela, Colombia, United States",
@@ -276,6 +288,12 @@
     },
     "builtBy": "Built by",
     "countries": "Countries",
+    "status": "Status",
+    "statuses": {
+      "ready_to_use": "Ready to use",
+      "in_development": "In development",
+      "idea": "Idea"
+    },
     "openProject": "Open project",
     "watchDemo": "Watch demo",
     "contribute": "Contribute",

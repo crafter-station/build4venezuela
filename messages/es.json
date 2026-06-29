@@ -196,7 +196,13 @@
       "project": "proyecto",
       "projects": "proyectos",
       "vote": "voto",
-      "votes": "votos"
+      "votes": "votos",
+      "statuses": {
+        "all": "Todos los estados",
+        "ready_to_use": "Listo para usar",
+        "in_development": "En desarrollo",
+        "idea": "Idea"
+      }
     },
     "categories": {
       "personas": {
@@ -257,6 +263,12 @@
     "slugLabel": "Slug del proyecto",
     "slugPlaceholder": "slug-genial",
     "nameLabel": "Nombre del proyecto",
+    "lifecycleStatusLabel": "Estado del proyecto",
+    "lifecycleStatuses": {
+      "ready_to_use": "Listo para usar",
+      "in_development": "En desarrollo",
+      "idea": "Idea"
+    },
     "projectUrlLabel": "Enlace del proyecto",
     "countriesLabel": "Países participantes",
     "countriesPlaceholder": "Venezuela, Colombia, Estados Unidos",
@@ -276,6 +288,12 @@
     },
     "builtBy": "Construido por",
     "countries": "Países",
+    "status": "Estado",
+    "statuses": {
+      "ready_to_use": "Listo para usar",
+      "in_development": "En desarrollo",
+      "idea": "Idea"
+    },
     "openProject": "Abrir proyecto",
     "watchDemo": "Ver demo",
     "contribute": "Contribuir",

@@ -11,9 +11,15 @@ import {
   type ResolvedCluster,
 } from "@/lib/projects/categories";
 import { fetchProjects, projectQueryKeys } from "@/lib/projects/queries";
-import { type Project, sortProjectsByVotes } from "@/lib/projects/schema";
+import {
+  type Project,
+  type ProjectLifecycleStatus,
+  projectLifecycleStatuses,
+  sortProjectsByVotes,
+} from "@/lib/projects/schema";
 
 type CategoryFilter = string;
+type StatusFilter = "all" | ProjectLifecycleStatus;
 
 type RealtimeProjectsGridProps = {
   initialProjects: Project[];
@@ -36,6 +42,7 @@ export function RealtimeProjectsGrid({
   const t = useTranslations("Projects.grid");
   const queryClient = useQueryClient();
   const [activeCategory, setActiveCategory] = useState<CategoryFilter>("all");
+  const [activeStatus, setActiveStatus] = useState<StatusFilter>("all");
   const { data: projects = [], isFetching } = useQuery({
     initialData: initialProjects,
     queryFn: fetchProjects,
@@ -63,16 +70,35 @@ export function RealtimeProjectsGrid({
     }
     return map;
   }, [tagged]);
+  const statusCounts = useMemo(() => {
+    const map = new Map<ProjectLifecycleStatus, number>();
+    for (const { project } of tagged) {
+      map.set(
+        project.lifecycleStatus,
+        (map.get(project.lifecycleStatus) ?? 0) + 1,
+      );
+    }
+    return map;
+  }, [tagged]);
   const visibleClusters = useMemo(
     () => clusters.filter((cluster) => (counts.get(cluster.id) ?? 0) > 0),
     [clusters, counts],
   );
-  const visible = useMemo(
+  const categoryVisible = useMemo(
     () =>
       activeCategory === "all"
         ? tagged
         : tagged.filter((entry) => entry.categoryId === activeCategory),
     [tagged, activeCategory],
+  );
+  const visible = useMemo(
+    () =>
+      activeStatus === "all"
+        ? categoryVisible
+        : categoryVisible.filter(
+            ({ project }) => project.lifecycleStatus === activeStatus,
+          ),
+    [categoryVisible, activeStatus],
   );
   const activeMeta =
     activeCategory === "all" ? null : clusterById.get(activeCategory);
@@ -170,6 +196,24 @@ export function RealtimeProjectsGrid({
         ))}
       </div>
 
+      <div className="mb-6 flex flex-wrap gap-2">
+        <CategoryChip
+          active={activeStatus === "all"}
+          count={projects.length}
+          label={t("statuses.all")}
+          onClick={() => setActiveStatus("all")}
+        />
+        {projectLifecycleStatuses.map((status) => (
+          <CategoryChip
+            active={activeStatus === status}
+            count={statusCounts.get(status) ?? 0}
+            key={status}
+            label={t(`statuses.${status}`)}
+            onClick={() => setActiveStatus(status)}
+          />
+        ))}
+      </div>
+
       {activeMeta ? (
         <div className="mb-6 border-accent border-l-2 bg-card px-5 py-4">
           <p className="font-mono text-xs uppercase tracking-[0.24em] text-accent">
@@ -212,6 +256,11 @@ export function RealtimeProjectsGrid({
               <p className="font-mono text-xs uppercase tracking-[0.24em] text-muted-foreground">
                 {project.countries.join(" / ")}
               </p>
+              <p className="border border-accent px-2 py-1 font-mono text-[0.6rem] font-bold uppercase tracking-[0.16em] text-accent">
+                {t(`statuses.${project.lifecycleStatus}`)}
+              </p>
+            </div>
+            <div className="mt-3 flex justify-end">
               {/* ponytail: singular/plural needed — "1 votes" reads wrong and breaks trust */}
               <p className="font-mono text-xs uppercase tracking-[0.18em] text-primary">
                 {project.votesCount}{" "}

@@ -12,6 +12,7 @@ process.env.UPSTASH_REDIS_REST_TOKEN = "test-upstash-token";
 const validProject = {
   slug: "civic-dashboard",
   name: "Civic Dashboard",
+  lifecycleStatus: "ready_to_use" as const,
   projectUrl: "https://example.com",
   countries: "Venezuela",
   participantName: "Build Team",

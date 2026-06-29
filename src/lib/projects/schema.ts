@@ -5,6 +5,7 @@ export type Project = {
   slug: string;
   name: string;
   status: ProjectStatus;
+  lifecycleStatus: ProjectLifecycleStatus;
   projectUrl: string;
   countries: string[];
   participantName: string;
@@ -32,6 +33,14 @@ export type ProjectComment = {
 };
 
 export type ProjectStatus = "draft" | "published" | "hidden";
+
+export const projectLifecycleStatuses = [
+  "ready_to_use",
+  "in_development",
+  "idea",
+] as const;
+
+export type ProjectLifecycleStatus = (typeof projectLifecycleStatuses)[number];
 
 export function sortProjectsByVotes(projects: Project[]) {
   return [...projects].sort(
@@ -89,6 +98,7 @@ const urlSchema = z.string().trim().url("Enter a valid URL.");
 export const projectFormSchema = z.object({
   slug: slugSchema,
   name: z.string().trim().min(2, "Name is required.").max(120),
+  lifecycleStatus: z.enum(projectLifecycleStatuses).default("ready_to_use"),
   projectUrl: urlSchema,
   countries: z.string().trim().min(2, "Add at least one participant country."),
   participantName: z
@@ -151,6 +161,7 @@ export function projectToFormValues(project: Project) {
   return {
     slug: project.slug,
     name: project.name,
+    lifecycleStatus: project.lifecycleStatus,
     projectUrl: project.projectUrl,
     countries: project.countries.join(", "),
     participantName: project.participantName,
@@ -164,6 +175,7 @@ export function formDataToValues(formData: FormData) {
   return {
     slug: String(formData.get("slug") ?? ""),
     name: String(formData.get("name") ?? ""),
+    lifecycleStatus: String(formData.get("lifecycleStatus") ?? "ready_to_use"),
     projectUrl: String(formData.get("projectUrl") ?? ""),
     countries: String(formData.get("countries") ?? ""),
     participantName: String(formData.get("participantName") ?? ""),

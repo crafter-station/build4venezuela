@@ -16,6 +16,7 @@ import type {
   ProjectComment,
   ProjectCommentInput,
   ProjectFormInput,
+  ProjectLifecycleStatus,
   ProjectStatus,
 } from "./schema";
 import {
@@ -29,6 +30,7 @@ type ProjectRow = {
   slug: string;
   name: string;
   status?: ProjectStatus | null;
+  lifecycle_status?: ProjectLifecycleStatus | null;
   project_url: string;
   countries: string[];
   participant_name: string;
@@ -106,6 +108,8 @@ function rowToProject(
     slug: row.slug,
     name: row.name,
     status: (row.status ?? "published") as ProjectStatus,
+    lifecycleStatus: (row.lifecycleStatus ??
+      "ready_to_use") as ProjectLifecycleStatus,
     projectUrl: row.projectUrl,
     countries: row.countries,
     participantName: row.participantName,
@@ -147,6 +151,7 @@ function toProject(row: ProjectRow): Project {
     slug: row.slug,
     name: row.name,
     status: row.status ?? "published",
+    lifecycleStatus: row.lifecycle_status ?? "ready_to_use",
     projectUrl: row.project_url,
     countries: row.countries,
     participantName: row.participant_name,
@@ -183,6 +188,7 @@ function toLocalRow(
     slug: input.slug,
     name: input.name,
     status: "published",
+    lifecycle_status: input.lifecycleStatus,
     project_url: input.projectUrl,
     countries: normalizeCountries(input.countries),
     participant_name: input.participantName,
@@ -238,6 +244,7 @@ function toProjectInput(
   return {
     slug: input.slug,
     name: input.name,
+    lifecycleStatus: input.lifecycleStatus,
     projectUrl: input.projectUrl,
     countries: normalizeCountries(input.countries),
     participantName: input.participantName,

@@ -13,7 +13,10 @@ import {
   projectQueryKeys,
   saveProject,
 } from "@/lib/projects/queries";
-import type { ProjectFormState } from "@/lib/projects/schema";
+import {
+  type ProjectFormState,
+  projectLifecycleStatuses,
+} from "@/lib/projects/schema";
 
 type ProjectFormProps = {
   initialState: ProjectFormState;
@@ -24,6 +27,7 @@ type ProjectFormProps = {
 const projectFormFields = [
   "slug",
   "name",
+  "lifecycleStatus",
   "projectUrl",
   "countries",
   "participantName",
@@ -39,7 +43,10 @@ function projectFormValuesFromState(
   values: ProjectFormState["values"],
 ): ProjectFormValues {
   return Object.fromEntries(
-    projectFormFields.map((field) => [field, values[field] ?? ""]),
+    projectFormFields.map((field) => [
+      field,
+      values[field] ?? (field === "lifecycleStatus" ? "ready_to_use" : ""),
+    ]),
   ) as ProjectFormValues;
 }
 
@@ -86,7 +93,11 @@ export function ProjectForm({
   });
 
   function handleValueChange(field: ProjectFormField) {
-    return (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    return (
+      event: ChangeEvent<
+        HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+      >,
+    ) => {
       setValues((currentValues) => ({
         ...currentValues,
         [field]: event.target.value,
@@ -143,6 +154,27 @@ export function ProjectForm({
           value={values.name}
         />
         <FieldError message={errors.name} />
+      </label>
+
+      <label className="grid gap-2" htmlFor="project-lifecycle-status">
+        <span className="font-mono text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground">
+          {t("lifecycleStatusLabel")}
+        </span>
+        <select
+          className="flex h-10 w-full border border-input bg-background px-3 py-2 font-mono text-sm uppercase tracking-[0.12em] text-foreground ring-offset-background transition file:border-0 file:bg-transparent file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          id="project-lifecycle-status"
+          name="lifecycleStatus"
+          onChange={handleValueChange("lifecycleStatus")}
+          required
+          value={values.lifecycleStatus}
+        >
+          {projectLifecycleStatuses.map((status) => (
+            <option key={status} value={status}>
+              {t(`lifecycleStatuses.${status}`)}
+            </option>
+          ))}
+        </select>
+        <FieldError message={errors.lifecycleStatus} />
       </label>
 
       <label className="grid gap-2" htmlFor="project-url">

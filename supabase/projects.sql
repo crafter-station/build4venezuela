@@ -3,6 +3,7 @@ create table if not exists public.projects (
   slug text not null unique,
   name text not null,
   status text not null default 'published' check (status in ('draft', 'published', 'hidden')),
+  lifecycle_status text not null default 'ready_to_use' check (lifecycle_status in ('ready_to_use', 'in_development', 'idea')),
   project_url text not null,
   countries text[] not null default '{}',
   participant_name text not null,
@@ -21,12 +22,15 @@ create table if not exists public.projects (
 
 alter table public.projects alter column video_url set default '';
 alter table public.projects add column if not exists status text not null default 'published';
+alter table public.projects add column if not exists lifecycle_status text not null default 'ready_to_use';
 alter table public.projects add column if not exists published_at timestamptz default now();
 alter table public.projects add column if not exists contribute_in_url text not null default '';
 alter table public.projects add column if not exists owner_name text not null default '';
 alter table public.projects add column if not exists owner_image_url text not null default '';
 alter table public.projects drop constraint if exists projects_status_check;
 alter table public.projects add constraint projects_status_check check (status in ('draft', 'published', 'hidden'));
+alter table public.projects drop constraint if exists projects_lifecycle_status_check;
+alter table public.projects add constraint projects_lifecycle_status_check check (lifecycle_status in ('ready_to_use', 'in_development', 'idea'));
 update public.projects set published_at = created_at where published_at is null and status = 'published';
 update public.projects set owner_name = participant_name where owner_name = '';
 

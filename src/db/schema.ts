@@ -27,6 +27,7 @@ export const projects = pgTable(
     slug: text("slug").notNull().unique(),
     name: text("name").notNull(),
     status: text("status").notNull().default("published"),
+    lifecycleStatus: text("lifecycle_status").notNull().default("ready_to_use"),
     projectUrl: text("project_url").notNull(),
     countries: text("countries").array().notNull().default(sql`'{}'`),
     participantName: text("participant_name").notNull(),
