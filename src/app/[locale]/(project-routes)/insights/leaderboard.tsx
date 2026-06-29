@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import {
   Table,
@@ -15,11 +16,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import {
-  SEVERITY_RANK,
-  TIER_COLOR,
-  TIER_LABEL,
-} from "@/lib/insights/constants";
+import { SEVERITY_RANK, TIER_COLOR } from "@/lib/insights/constants";
 import type { InsightNode } from "@/lib/insights/types";
 
 type SortKey =
@@ -32,53 +29,16 @@ type SortKey =
   | "loc"
   | "severity";
 
-const COLS: { key: SortKey; label: string; desc: string }[] = [
-  {
-    key: "viability",
-    label: "Viab",
-    desc: "Viability (1–5): how realistically this can be deployed and maintained to actually help victims — weighs maturity, production-readiness, and how complete the core function is.",
-  },
-  {
-    key: "production",
-    label: "Prod",
-    desc: "Production-readiness (1–5): auth, error handling, logging, secret handling, security, scalability, and deploy config in the code.",
-  },
-  {
-    key: "product",
-    label: "Prod-Q",
-    desc: "Product quality (1–5): how complete and usable the actual product is (not the code) — judged from the live demo where one exists.",
-  },
-  {
-    key: "diffusion",
-    label: "Diff",
-    desc: "Diffusion readiness (1–5): how ready it is to create promo/social content right now — working demo, video, screenshots, clear value prop.",
-  },
-  {
-    key: "maturity",
-    label: "Mat",
-    desc: "Maturity (1–5): real working software vs. boilerplate — real logic, tests, CI, commit history, README.",
-  },
-  {
-    key: "severity",
-    label: "Sev",
-    desc: "Problem severity: how urgent the victim-facing problem it addresses is (critical › high › medium › low).",
-  },
-  {
-    key: "stars",
-    label: "★",
-    desc: "GitHub stars on the repository — a rough popularity / social-proof signal.",
-  },
-  {
-    key: "loc",
-    label: "LOC",
-    desc: "Lines of code in real source files (excludes dependencies and build output) — a rough size/effort signal.",
-  },
+const COLS: SortKey[] = [
+  "viability",
+  "production",
+  "product",
+  "diffusion",
+  "maturity",
+  "severity",
+  "stars",
+  "loc",
 ];
-
-const COL_PROJECT_DESC =
-  "The project name and its repository type (web app, PWA, bot, etc.). Click a row to open full detail.";
-const COL_TIER_DESC =
-  "Overall recommendation: Spotlight (back heavily) › Promote › Merge candidate › Improve first › Deprioritize.";
 
 function val(n: InsightNode, k: SortKey): number {
   if (k === "stars") return n.signals.stars;
@@ -98,6 +58,8 @@ export function Leaderboard({
   onHover: (s: string | null) => void;
   onSelect: (s: string) => void;
 }) {
+  const t = useTranslations("Insights.leaderboard");
+  const tShared = useTranslations("Insights.shared");
   const [sort, setSort] = useState<SortKey>("viability");
 
   const rows = useMemo(
@@ -121,10 +83,10 @@ export function Leaderboard({
                     <span className="cursor-help underline decoration-dotted decoration-muted-foreground underline-offset-4" />
                   }
                 >
-                  Project
+                  {t("columns.project.label")}
                 </TooltipTrigger>
                 <TooltipContent side="top" align="start">
-                  {COL_PROJECT_DESC}
+                  {t("columns.project.description")}
                 </TooltipContent>
               </Tooltip>
             </TableHead>
@@ -135,34 +97,34 @@ export function Leaderboard({
                     <span className="cursor-help underline decoration-dotted decoration-muted-foreground underline-offset-4" />
                   }
                 >
-                  Tier
+                  {t("columns.tier.label")}
                 </TooltipTrigger>
                 <TooltipContent side="top" align="start">
-                  {COL_TIER_DESC}
+                  {t("columns.tier.description")}
                 </TooltipContent>
               </Tooltip>
             </TableHead>
-            {COLS.map((c) => (
-              <TableHead key={c.key} className="text-right">
+            {COLS.map((column) => (
+              <TableHead key={column} className="text-right">
                 <Tooltip>
                   <TooltipTrigger
                     render={
                       <button
                         type="button"
-                        onClick={() => setSort(c.key)}
+                        onClick={() => setSort(column)}
                         className={`cursor-help font-mono text-[10px] uppercase tracking-widest hover:text-foreground ${
-                          sort === c.key
+                          sort === column
                             ? "text-accent"
                             : "text-muted-foreground"
                         }`}
                       />
                     }
                   >
-                    {c.label}
-                    {sort === c.key ? " ↓" : ""}
+                    {t(`columns.${column}.label`)}
+                    {sort === column ? " ↓" : ""}
                   </TooltipTrigger>
                   <TooltipContent side="top" align="end">
-                    {c.desc}
+                    {t(`columns.${column}.description`)}
                   </TooltipContent>
                 </Tooltip>
               </TableHead>
@@ -194,7 +156,7 @@ export function Leaderboard({
                     borderColor: TIER_COLOR[n.tier],
                   }}
                 >
-                  {TIER_LABEL[n.tier]}
+                  {tShared(`tiers.${n.tier}`)}
                 </span>
               </TableCell>
               <ScoreCell v={n.scores.viability} />

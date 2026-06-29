@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import {
   Bar,
@@ -62,6 +63,7 @@ function countTech(
 }
 
 export function StackCharts({ nodes }: { nodes: InsightNode[] }) {
+  const t = useTranslations("Insights.stackCharts");
   const tech = useMemo(
     () =>
       countTech(nodes, TECH, ["frontend", "backend", "database"]).slice(0, 12),
@@ -75,42 +77,45 @@ export function StackCharts({ nodes }: { nodes: InsightNode[] }) {
   const types = useMemo(() => {
     const m = new Map<string, number>();
     for (const n of nodes) {
-      const t = n.type.toLowerCase();
-      const bucket = t.includes("telegram")
-        ? "Telegram bot"
-        : t.includes("whatsapp")
-          ? "WhatsApp bot"
-          : t.includes("android") || t.includes("mobile")
-            ? "Mobile app"
-            : t.includes("pwa")
-              ? "PWA"
-              : t.includes("static") || t.includes("jamstack")
-                ? "Static site"
-                : t.includes("api") || t.includes("pipeline")
-                  ? "API / pipeline"
-                  : "Web app";
-      m.set(bucket, (m.get(bucket) ?? 0) + 1);
+      const projectType = n.type.toLowerCase();
+      const bucket = projectType.includes("telegram")
+        ? "types.telegramBot"
+        : projectType.includes("whatsapp")
+          ? "types.whatsappBot"
+          : projectType.includes("android") || projectType.includes("mobile")
+            ? "types.mobileApp"
+            : projectType.includes("pwa")
+              ? "types.pwa"
+              : projectType.includes("static") ||
+                  projectType.includes("jamstack")
+                ? "types.staticSite"
+                : projectType.includes("api") ||
+                    projectType.includes("pipeline")
+                  ? "types.apiPipeline"
+                  : "types.webApp";
+      const label = t(bucket);
+      m.set(label, (m.get(label) ?? 0) + 1);
     }
     return [...m.entries()]
       .map(([name, value]) => ({ name, value }))
       .sort((a, b) => b.value - a.value);
-  }, [nodes]);
+  }, [nodes, t]);
 
   const orm = useMemo(() => {
     let withOrm = 0;
     for (const n of nodes) if (n.stack.usesOrm) withOrm++;
     return [
-      { name: "Raw SQL / BaaS client", value: nodes.length - withOrm },
-      { name: "Uses an ORM", value: withOrm },
+      { name: t("dataLayer.rawSql"), value: nodes.length - withOrm },
+      { name: t("dataLayer.orm"), value: withOrm },
     ];
-  }, [nodes]);
+  }, [nodes, t]);
 
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-      <ChartBlock title="Most-used tech" data={tech} color="#16c7e8" />
-      <ChartBlock title="Project types" data={types} color="#ffd83d" />
-      <ChartBlock title="Databases" data={dbs} color="#b388ff" />
-      <ChartBlock title="Data layer" data={orm} color="#ff4a63" />
+      <ChartBlock title={t("titles.tech")} data={tech} color="#16c7e8" />
+      <ChartBlock title={t("titles.types")} data={types} color="#ffd83d" />
+      <ChartBlock title={t("titles.databases")} data={dbs} color="#b388ff" />
+      <ChartBlock title={t("titles.dataLayer")} data={orm} color="#ff4a63" />
     </div>
   );
 }

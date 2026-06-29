@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { TIER_COLOR } from "@/lib/insights/constants";
 import type { InsightEdge, InsightNode } from "@/lib/insights/types";
@@ -25,6 +26,7 @@ export function OverlapNetwork({
   onHover,
   onSelect,
 }: Props) {
+  const t = useTranslations("Insights.overlapNetwork");
   const pos = useMemo(
     () => Object.fromEntries(nodes.map((n) => [n.slug, n])),
     [nodes],
@@ -130,7 +132,7 @@ export function OverlapNetwork({
         <ZoomBtn label="⤢" onClick={() => setView({ k: 1, x: 0, y: 0 })} />
       </div>
       <div className="pointer-events-none absolute bottom-2 left-2 z-10 font-mono text-[10px] text-muted-foreground">
-        scroll to zoom · drag to pan
+        {t("instructions")}
         {view.k !== 1 && ` · ${view.k.toFixed(1)}×`}
       </div>
 
@@ -140,13 +142,13 @@ export function OverlapNetwork({
         className="h-[360px] w-full touch-none select-none"
         style={{ cursor: grabbing ? "grabbing" : "grab" }}
         role="img"
-        aria-label="Project overlap network"
+        aria-label={t("ariaLabel")}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={endPan}
         onPointerCancel={endPan}
       >
-        <title>Project overlap network</title>
+        <title>{t("ariaLabel")}</title>
         <g transform={`translate(${view.x} ${view.y}) scale(${view.k})`}>
           {/* edges */}
           {edges.map((e) => {

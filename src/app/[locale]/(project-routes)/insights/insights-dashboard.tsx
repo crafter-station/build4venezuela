@@ -1,12 +1,8 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
-import {
-  TIER_COLOR,
-  TIER_LABEL,
-  TIER_ORDER,
-  tagLabel,
-} from "@/lib/insights/constants";
+import { TIER_COLOR, TIER_ORDER, tagLabel } from "@/lib/insights/constants";
 import type { InsightDataset, Tier } from "@/lib/insights/types";
 import { Leaderboard } from "./leaderboard";
 import { OverlapNetwork } from "./overlap-network";
@@ -15,6 +11,8 @@ import { StackCharts } from "./stack-charts";
 import { TriageQuadrant } from "./triage-quadrant";
 
 export function InsightsDashboard({ dataset }: { dataset: InsightDataset }) {
+  const t = useTranslations("Insights.dashboard");
+  const tShared = useTranslations("Insights.shared");
   const [tier, setTier] = useState<Tier | null>(null);
   const [tag, setTag] = useState<string | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
@@ -58,41 +56,46 @@ export function InsightsDashboard({ dataset }: { dataset: InsightDataset }) {
         {/* header */}
         <div className="mb-8 border-border border-b pb-8">
           <p className="font-mono text-sm uppercase tracking-[0.28em] text-accent">
-            Internal triage
+            {t("eyebrow")}
           </p>
           <h1 className="mt-4 font-mono text-[clamp(2.5rem,7vw,6rem)] font-black uppercase leading-[0.85] tracking-[-0.07em]">
-            Project Insights
+            {t("title")}
           </h1>
           <p className="mt-4 max-w-2xl font-mono text-muted-foreground text-sm">
-            {dataset.count} repositories analyzed for stack, architecture,
-            maturity, viability, and diffusion readiness — built to spot
-            overlap, merge candidates, and what's ready to spotlight.
+            {t("description", { count: dataset.count })}
           </p>
         </div>
 
         {/* stat tiles */}
         <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-          <Tile label="Analyzed" value={dataset.count} />
+          <Tile label={t("stats.analyzed")} value={dataset.count} />
           {TIER_ORDER.filter((t) => tierCounts.get(t)).map((t) => (
             <Tile
               key={t}
-              label={TIER_LABEL[t]}
+              label={tShared(`tiers.${t}`)}
               value={tierCounts.get(t) ?? 0}
               color={TIER_COLOR[t]}
               active={tier === t}
               onClick={() => setTier(tier === t ? null : t)}
             />
           ))}
-          <Tile label="Promo-ready" value={promoteReady} />
-          <Tile label="Total LOC" value={`${Math.round(totalLoc / 1000)}k`} />
+          <Tile label={t("stats.promoReady")} value={promoteReady} />
+          <Tile
+            label={t("stats.totalLoc")}
+            value={t("stats.locValue", { count: Math.round(totalLoc / 1000) })}
+          />
         </div>
 
         {/* filter bar */}
         <div className="mb-6 flex flex-wrap items-center gap-2">
           <span className="font-mono text-muted-foreground text-xs uppercase tracking-widest">
-            Domain
+            {t("filters.domain")}
           </span>
-          <Chip active={!tag} onClick={() => setTag(null)} label="All" />
+          <Chip
+            active={!tag}
+            onClick={() => setTag(null)}
+            label={t("filters.all")}
+          />
           {tagCounts.map(([t, c]) => (
             <Chip
               key={t}
@@ -110,7 +113,7 @@ export function InsightsDashboard({ dataset }: { dataset: InsightDataset }) {
               }}
               className="ml-2 font-mono text-accent text-xs underline underline-offset-4 hover:opacity-80"
             >
-              clear filters
+              {t("filters.clear")}
             </button>
           )}
         </div>
@@ -118,8 +121,8 @@ export function InsightsDashboard({ dataset }: { dataset: InsightDataset }) {
         {/* charts grid */}
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <Panel
-            title="Triage quadrant"
-            subtitle="impact × production-readiness · bubble = stars · color = tier"
+            title={t("panels.triage.title")}
+            subtitle={t("panels.triage.subtitle")}
           >
             <TriageQuadrant
               nodes={nodes}
@@ -130,8 +133,8 @@ export function InsightsDashboard({ dataset }: { dataset: InsightDataset }) {
             />
           </Panel>
           <Panel
-            title="Overlap network"
-            subtitle="edges = shared domain tags (≥3) · clusters = duplicate solutions"
+            title={t("panels.overlap.title")}
+            subtitle={t("panels.overlap.subtitle")}
           >
             <OverlapNetwork
               nodes={nodes}
@@ -147,8 +150,10 @@ export function InsightsDashboard({ dataset }: { dataset: InsightDataset }) {
         {/* leaderboard */}
         <div className="mt-4">
           <Panel
-            title="Leaderboard"
-            subtitle={`${filtered.length} project${filtered.length === 1 ? "" : "s"} · click a row for detail`}
+            title={t("panels.leaderboard.title")}
+            subtitle={t("panels.leaderboard.subtitle", {
+              count: filtered.length,
+            })}
           >
             <Leaderboard
               nodes={filtered}
@@ -161,7 +166,10 @@ export function InsightsDashboard({ dataset }: { dataset: InsightDataset }) {
 
         {/* stack charts */}
         <div className="mt-4">
-          <Panel title="Tech landscape" subtitle="across all analyzed repos">
+          <Panel
+            title={t("panels.tech.title")}
+            subtitle={t("panels.tech.subtitle")}
+          >
             <StackCharts nodes={nodes} />
           </Panel>
         </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useMemo } from "react";
 import {
   PolarAngleAxis,
@@ -16,12 +17,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import {
-  SCORE_KEYS,
-  TIER_COLOR,
-  TIER_LABEL,
-  tagLabel,
-} from "@/lib/insights/constants";
+import { SCORE_KEYS, TIER_COLOR, tagLabel } from "@/lib/insights/constants";
 import type { InsightEdge, InsightNode } from "@/lib/insights/types";
 
 export function ProjectDrawer({
@@ -37,6 +33,8 @@ export function ProjectDrawer({
   onClose: () => void;
   onSelect: (s: string) => void;
 }) {
+  const t = useTranslations("Insights.drawer");
+  const tShared = useTranslations("Insights.shared");
   const overlaps = useMemo(() => {
     if (!node) return [];
     const out: { slug: string; name: string; shared: string[] }[] = [];
@@ -52,7 +50,7 @@ export function ProjectDrawer({
 
   const radarData = node
     ? SCORE_KEYS.map((s) => ({
-        axis: s.label,
+        axis: t(`scores.${s.key}`),
         value: node.scores[s.key],
       }))
     : [];
@@ -75,7 +73,7 @@ export function ProjectDrawer({
                     borderColor: TIER_COLOR[node.tier],
                   }}
                 >
-                  {TIER_LABEL[node.tier]}
+                  {tShared(`tiers.${node.tier}`)}
                 </span>
                 <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-widest">
                   {node.type} · {node.severity}
@@ -90,11 +88,15 @@ export function ProjectDrawer({
                 </SheetDescription>
               )}
               <div className="mt-1 flex flex-wrap gap-3 font-mono text-[11px]">
-                {node.repoUrl && <Link href={node.repoUrl} label="repo ↗" />}
-                {node.liveUrl && /^https?:/.test(node.liveUrl) && (
-                  <Link href={node.liveUrl} label="live ↗" />
+                {node.repoUrl && (
+                  <Link href={node.repoUrl} label={t("links.repo")} />
                 )}
-                {node.videoUrl && <Link href={node.videoUrl} label="video ↗" />}
+                {node.liveUrl && /^https?:/.test(node.liveUrl) && (
+                  <Link href={node.liveUrl} label={t("links.live")} />
+                )}
+                {node.videoUrl && (
+                  <Link href={node.videoUrl} label={t("links.video")} />
+                )}
               </div>
             </SheetHeader>
 
@@ -129,39 +131,66 @@ export function ProjectDrawer({
                   </ResponsiveContainer>
                 </div>
                 <div className="grid grid-cols-2 gap-2 font-mono text-xs">
-                  <Sig label="Stars" value={node.signals.stars} />
-                  <Sig label="Commits" value={node.signals.commits} />
-                  <Sig label="LOC" value={node.signals.loc.toLocaleString()} />
-                  <Sig label="Contributors" value={node.signals.contributors} />
-                  <Sig label="License" value={node.signals.license ?? "none"} />
-                  <Sig label="Real problem" value={node.solvesRealProblem} />
-                  <Sig label="Live demo" value={node.liveDemoStatus} />
+                  <Sig label={t("signals.stars")} value={node.signals.stars} />
                   <Sig
-                    label="ORM"
-                    value={node.stack.usesOrm ? "yes" : "raw SQL"}
+                    label={t("signals.commits")}
+                    value={node.signals.commits}
+                  />
+                  <Sig
+                    label={t("signals.loc")}
+                    value={node.signals.loc.toLocaleString()}
+                  />
+                  <Sig
+                    label={t("signals.contributors")}
+                    value={node.signals.contributors}
+                  />
+                  <Sig
+                    label={t("signals.license")}
+                    value={node.signals.license ?? t("none")}
+                  />
+                  <Sig
+                    label={t("signals.realProblem")}
+                    value={node.solvesRealProblem}
+                  />
+                  <Sig
+                    label={t("signals.liveDemo")}
+                    value={node.liveDemoStatus}
+                  />
+                  <Sig
+                    label={t("signals.orm")}
+                    value={node.stack.usesOrm ? t("yes") : t("rawSql")}
                   />
                 </div>
               </div>
 
-              <Section title="Summary">
+              <Section title={t("sections.summary")}>
                 <p className="font-mono text-xs text-muted-foreground">
                   {node.summary}
                 </p>
               </Section>
 
-              <Section title="Stack">
-                <StackLine label="Frontend" items={node.stack.frontend} />
-                <StackLine label="Backend" items={node.stack.backend} />
-                <StackLine label="Database" items={node.stack.database} />
+              <Section title={t("sections.stack")}>
+                <StackLine
+                  label={t("stack.frontend")}
+                  items={node.stack.frontend}
+                />
+                <StackLine
+                  label={t("stack.backend")}
+                  items={node.stack.backend}
+                />
+                <StackLine
+                  label={t("stack.database")}
+                  items={node.stack.database}
+                />
                 {node.stack.ai_ml.length > 0 && (
-                  <StackLine label="AI/ML" items={node.stack.ai_ml} />
+                  <StackLine label={t("stack.aiMl")} items={node.stack.ai_ml} />
                 )}
                 <p className="mt-2 font-mono text-[11px] text-muted-foreground">
                   {node.stack.pattern}
                 </p>
               </Section>
 
-              <Section title="Domain tags">
+              <Section title={t("sections.domainTags")}>
                 <div className="flex flex-wrap gap-1.5">
                   {node.tags.map((t) => (
                     <span
@@ -175,7 +204,9 @@ export function ProjectDrawer({
               </Section>
 
               {overlaps.length > 0 && (
-                <Section title={`Overlaps with (${overlaps.length})`}>
+                <Section
+                  title={t("sections.overlaps", { count: overlaps.length })}
+                >
                   <div className="space-y-1.5">
                     {overlaps.map((o) => (
                       <button
@@ -186,7 +217,7 @@ export function ProjectDrawer({
                       >
                         <span className="truncate font-bold">{o.name}</span>
                         <span className="shrink-0 text-accent text-[10px]">
-                          {o.shared.length} shared
+                          {t("sharedCount", { count: o.shared.length })}
                         </span>
                       </button>
                     ))}
@@ -195,7 +226,7 @@ export function ProjectDrawer({
               )}
 
               {node.redFlags.length > 0 && (
-                <Section title="Red flags">
+                <Section title={t("sections.redFlags")}>
                   <ul className="space-y-1">
                     {node.redFlags.map((r) => (
                       <li
@@ -209,29 +240,32 @@ export function ProjectDrawer({
                 </Section>
               )}
 
-              <Section title="Diffusion readiness">
+              <Section title={t("sections.diffusionReadiness")}>
                 <p className="font-mono text-xs">
                   {node.diffusion.ready ? (
-                    <span className="text-primary">Ready to promote</span>
+                    <span className="text-primary">{t("readyToPromote")}</span>
                   ) : (
-                    <span className="text-muted-foreground">Not yet</span>
+                    <span className="text-muted-foreground">{t("notYet")}</span>
                   )}
                   {node.diffusion.assets.length > 0 && (
                     <span className="text-muted-foreground">
                       {" "}
-                      · assets: {node.diffusion.assets.join(", ")}
+                      ·{" "}
+                      {t("assets", {
+                        assets: node.diffusion.assets.join(", "),
+                      })}
                     </span>
                   )}
                 </p>
                 {node.diffusion.angle && (
                   <p className="mt-2 font-mono text-[11px] text-muted-foreground">
-                    <span className="text-foreground">Angle:</span>{" "}
+                    <span className="text-foreground">{t("angle")}</span>{" "}
                     {node.diffusion.angle}
                   </p>
                 )}
               </Section>
 
-              <Section title="Merge potential">
+              <Section title={t("sections.mergePotential")}>
                 <p className="font-mono text-[11px] text-muted-foreground">
                   {node.mergePotential}
                 </p>

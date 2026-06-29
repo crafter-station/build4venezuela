@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import {
   CartesianGrid,
   Cell,
@@ -12,7 +13,7 @@ import {
   YAxis,
   ZAxis,
 } from "recharts";
-import { TIER_COLOR, TIER_LABEL } from "@/lib/insights/constants";
+import { TIER_COLOR } from "@/lib/insights/constants";
 import type { InsightNode } from "@/lib/insights/types";
 
 // deterministic [-0.28, 0.28] jitter from slug so stacked integer scores spread
@@ -37,6 +38,8 @@ export function TriageQuadrant({
   onHover,
   onSelect,
 }: Props) {
+  const t = useTranslations("Insights.triageQuadrant");
+  const tShared = useTranslations("Insights.shared");
   const data = nodes.map((n) => ({
     slug: n.slug,
     name: n.name,
@@ -51,7 +54,7 @@ export function TriageQuadrant({
   return (
     <div className="relative">
       <div className="pointer-events-none absolute top-2 right-3 z-10 font-mono text-[10px] text-foreground/70 uppercase tracking-widest">
-        ← ship-ready · high impact ↑
+        {t("hint")}
       </div>
       <ResponsiveContainer width="100%" height={360}>
         <ScatterChart margin={{ top: 16, right: 16, bottom: 28, left: 0 }}>
@@ -59,13 +62,13 @@ export function TriageQuadrant({
           <XAxis
             type="number"
             dataKey="x"
-            name="Production-readiness"
+            name={t("productionReadiness")}
             domain={[0.5, 5.5]}
             ticks={[1, 2, 3, 4, 5]}
             tick={{ fill: "#a6a6a6", fontSize: 11, fontFamily: "monospace" }}
             stroke="#333"
             label={{
-              value: "PRODUCTION-READINESS →",
+              value: t("productionReadinessAxis"),
               position: "bottom",
               fill: "#a6a6a6",
               fontSize: 10,
@@ -75,14 +78,14 @@ export function TriageQuadrant({
           <YAxis
             type="number"
             dataKey="y"
-            name="Impact"
+            name={t("impact")}
             domain={[0.5, 5.5]}
             ticks={[1, 2, 3, 4, 5]}
             tick={{ fill: "#a6a6a6", fontSize: 11, fontFamily: "monospace" }}
             stroke="#333"
             width={40}
             label={{
-              value: "IMPACT",
+              value: t("impactAxis"),
               angle: -90,
               position: "insideLeft",
               fill: "#a6a6a6",
@@ -95,7 +98,9 @@ export function TriageQuadrant({
           <ReferenceLine y={3.5} stroke="#444" strokeDasharray="3 3" />
           <Tooltip
             cursor={{ strokeDasharray: "3 3", stroke: "#444" }}
-            content={<QuadrantTooltip />}
+            content={
+              <QuadrantTooltip tierLabel={(tier) => tShared(`tiers.${tier}`)} />
+            }
           />
           <Scatter
             data={data}
@@ -132,10 +137,13 @@ export function TriageQuadrant({
 function QuadrantTooltip({
   active,
   payload,
+  tierLabel,
 }: {
   active?: boolean;
   payload?: Array<{ payload: { node: InsightNode } }>;
+  tierLabel: (tier: InsightNode["tier"]) => string;
 }) {
+  const t = useTranslations("Insights.triageQuadrant.tooltip");
   if (!active || !payload?.length) return null;
   const n = payload[0].payload.node;
   return (
@@ -144,11 +152,12 @@ function QuadrantTooltip({
         {n.name}
       </div>
       <div className="text-muted-foreground">
-        {TIER_LABEL[n.tier]} · {n.signals.stars}★ · {n.severity}
+        {tierLabel(n.tier)} · {n.signals.stars}★ · {n.severity}
       </div>
       <div className="mt-1 text-muted-foreground">
-        impact {n.scores.impact} · prod {n.scores.production} · viab{" "}
-        {n.scores.viability}
+        {t("impact", { score: n.scores.impact })} ·{" "}
+        {t("production", { score: n.scores.production })} ·{" "}
+        {t("viability", { score: n.scores.viability })}
       </div>
     </div>
   );
