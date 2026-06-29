@@ -142,6 +142,7 @@
       },
       "whatsapp": "WhatsApp",
       "discord": "Discord",
+      "watch": { "label": "观看闭幕活动直播" },
       "description": "正式活动即将闭幕，但工作还会继续：继续改进你的项目，参与现有项目，或提出委内瑞拉仍然需要解决的问题。",
       "poweredBy": "技术支持"
     },

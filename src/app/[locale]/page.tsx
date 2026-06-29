@@ -2,12 +2,27 @@ import { createHash } from "node:crypto";
 import { headers } from "next/headers";
 import Image from "next/image";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import type { CSSProperties } from "react";
 import { SponsorLink } from "@/components/sponsor-link";
 import { Countdown } from "./countdown";
 import { RealtimeVisitors } from "./realtime-visitors";
 
 const assetPath = "/BFV/assets/";
 const closureEventTargetIso = "2026-07-02T00:00:00.000Z";
+
+const watchChannels = [
+  { label: "Kick", href: "https://kick.com/build4venezuela", color: "#53fc18" },
+  {
+    label: "Twitch",
+    href: "https://twitch.tv/build4venezuela",
+    color: "#9146ff",
+  },
+  {
+    label: "YouTube",
+    href: "https://youtube.com/@build4venezuela",
+    color: "#ff0033",
+  },
+] as const;
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -161,6 +176,36 @@ export default async function Home({ params }: Props) {
                   labels={countdownLabels}
                   targetIso={closureEventTargetIso}
                 />
+              </div>
+              <div className="mt-6 border-border border-t pt-5">
+                <p className="text-[clamp(0.7rem,1.4vw,0.85rem)] font-bold leading-snug tracking-[0.2em] text-foreground/70">
+                  {t("hero.watch.label")}
+                </p>
+                <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
+                  {watchChannels.map((channel) => (
+                    <a
+                      className="group inline-flex items-center gap-2 border px-4 py-2.5 text-xs font-bold tracking-[0.18em] transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-4 focus-visible:ring-offset-background"
+                      href={channel.href}
+                      key={channel.label}
+                      rel="noreferrer"
+                      style={
+                        {
+                          borderColor: channel.color,
+                          color: channel.color,
+                          "--tw-ring-color": channel.color,
+                        } as CSSProperties
+                      }
+                      target="_blank"
+                    >
+                      <span
+                        aria-hidden="true"
+                        className="h-2 w-2 rounded-full transition group-hover:scale-125"
+                        style={{ backgroundColor: channel.color }}
+                      />
+                      {channel.label}
+                    </a>
+                  ))}
+                </div>
               </div>
             </div>
             <div className="mt-4 flex justify-center gap-4 text-xs font-light tracking-[0.24em] text-foreground/65 sm:gap-6 sm:text-sm">

@@ -142,6 +142,7 @@
       },
       "whatsapp": "WhatsApp",
       "discord": "Discord",
+      "watch": { "label": "Regarder l'événement de clôture en direct" },
       "description": "L'événement formel se clôture, mais le travail continue : améliorez votre projet, contribuez à un projet existant ou proposez ce dont le Venezuela a encore besoin.",
       "poweredBy": "Propulsé par"
     },

@@ -142,6 +142,7 @@
       },
       "whatsapp": "WhatsApp",
       "discord": "Discord",
+      "watch": { "label": "Mira el evento de cierre en vivo" },
       "description": "El evento formal se clausura, pero el trabajo continúa: sigue mejorando tu proyecto, colabora con uno existente o propone lo que Venezuela todavía necesita.",
       "poweredBy": "Impulsado por"
     },
