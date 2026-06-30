@@ -93,7 +93,22 @@
       "liveUrl": "https://AcopioVzla.vercel.app",
       "videoUrl": "",
       "x": 537,
-      "y": 506
+      "y": 506,
+      "security": {
+        "risk": "critical",
+        "auditedAt": "2026-06-29",
+        "issueUrl": "https://github.com/nobelaar/saman/issues/6",
+        "findings": [
+          {
+            "severity": "critical",
+            "title": "Live Supabase service_role JWT hardcoded in committed seed script (full RLS bypass + auth admin)"
+          },
+          {
+            "severity": "medium",
+            "title": "Commenter email addresses (PII) publicly readable via anon key and rendered in UI"
+          }
+        ]
+      }
     },
     {
       "slug": "aidtrace",
@@ -180,7 +195,18 @@
       "liveUrl": "https://aidtrace-rastroayuda.vercel.app/",
       "videoUrl": "https://youtu.be/adx0cZFm-5g",
       "x": 609,
-      "y": 561
+      "y": 561,
+      "security": {
+        "risk": "medium",
+        "auditedAt": "2026-06-29",
+        "issueUrl": "https://github.com/LuisAlejandroCR/AidTrace-RastroAyuda/issues/1",
+        "findings": [
+          {
+            "severity": "medium",
+            "title": "Unauthenticated relay/webhook endpoint triggers gas-paid on-chain writes with the relayer private key"
+          }
+        ]
+      }
     },
     {
       "slug": "apoyo-venezuela-org",
@@ -263,7 +289,18 @@
       "liveUrl": "https://www.apoyovenezuela.org",
       "videoUrl": "https://youtu.be/jVl5LC6cV7Y",
       "x": 617,
-      "y": 488
+      "y": 488,
+      "security": {
+        "risk": "low",
+        "auditedAt": "2026-06-29",
+        "issueUrl": null,
+        "findings": [
+          {
+            "severity": "low",
+            "title": "Trust-based place-hiding can be abused to censor legitimate aid locations (integrity/availability)"
+          }
+        ]
+      }
     },
     {
       "slug": "apoyo-venezuela",
@@ -354,7 +391,26 @@
       "liveUrl": "https://apoyovenezuela.com",
       "videoUrl": "",
       "x": 562,
-      "y": 525
+      "y": 525,
+      "security": {
+        "risk": "high",
+        "auditedAt": "2026-06-29",
+        "issueUrl": "https://github.com/javierdejesusda/apoyo-venezuela/issues/54",
+        "findings": [
+          {
+            "severity": "high",
+            "title": "Public Supabase anon key grants direct bulk read of the locations table, exposing full-precision GPS coordinates and reporter contact columns that the app's API deliberately hides/rounds"
+          },
+          {
+            "severity": "medium",
+            "title": "Unauthenticated INSERT into locations and needs via the public anon key, bypassing the server-side report throttle"
+          },
+          {
+            "severity": "low",
+            "title": "Public 'fotos' storage bucket allows unauthenticated image uploads"
+          }
+        ]
+      }
     },
     {
       "slug": "ayuda-venezuela-bot",
@@ -442,7 +498,13 @@
       "liveUrl": "https://ayuda-venezuela-wine.vercel.app/",
       "videoUrl": "",
       "x": 507,
-      "y": 584
+      "y": 584,
+      "security": {
+        "risk": "none",
+        "auditedAt": "2026-06-29",
+        "issueUrl": null,
+        "findings": []
+      }
     },
     {
       "slug": "ayudave",
@@ -533,7 +595,18 @@
       "liveUrl": "https://www.ayudahumanitariavenezuela.com/",
       "videoUrl": "https://youtu.be/nFc4Y9NcahA",
       "x": 522,
-      "y": 534
+      "y": 534,
+      "security": {
+        "risk": "high",
+        "auditedAt": "2026-06-29",
+        "issueUrl": "https://github.com/gaboclus/ayudave/issues/4",
+        "findings": [
+          {
+            "severity": "high",
+            "title": "Listado público /api/persons expone PII de contacto (incl. menores) sin autenticación — fix propuesto en PR #3"
+          }
+        ]
+      }
     },
     {
       "slug": "beacon-rescate",
@@ -607,7 +680,13 @@
       "liveUrl": "https://github.com/jmvidal26/Beacon-rescate.git",
       "videoUrl": "",
       "x": 762,
-      "y": 957
+      "y": 957,
+      "security": {
+        "risk": "none",
+        "auditedAt": "2026-06-29",
+        "issueUrl": null,
+        "findings": []
+      }
     },
     {
       "slug": "busca-chat",
@@ -692,7 +771,30 @@
       "liveUrl": "https://ayudandoavenezuela.netlify.app/#",
       "videoUrl": "",
       "x": 377,
-      "y": 618
+      "y": 618,
+      "security": {
+        "risk": "high",
+        "auditedAt": "2026-06-29",
+        "issueUrl": "https://github.com/DiegoMucha/buscachat/issues/6",
+        "findings": [
+          {
+            "severity": "high",
+            "title": "Unauthenticated bulk endpoint exposes missing-person PII with pagination/enumeration"
+          },
+          {
+            "severity": "high",
+            "title": "Unauthenticated single-record lookup and name search enable targeted PII enumeration (IDOR)"
+          },
+          {
+            "severity": "high",
+            "title": "Unauthenticated bot endpoints allow data injection, SSRF, and PII lookup"
+          },
+          {
+            "severity": "medium",
+            "title": "Shared in-memory web-chat store readable, poisonable, and clearable by any anonymous client"
+          }
+        ]
+      }
     },
     {
       "slug": "centraliza-ayuda",
@@ -769,7 +871,13 @@
       "liveUrl": "https://kevinesaa.github.io/centraliza-ayuda-venezuela/",
       "videoUrl": "",
       "x": 510,
-      "y": 474
+      "y": 474,
+      "security": {
+        "risk": "none",
+        "auditedAt": "2026-06-29",
+        "issueUrl": null,
+        "findings": []
+      }
     },
     {
       "slug": "confia",
@@ -848,7 +956,13 @@
       "liveUrl": "https://confia-rose.vercel.app/",
       "videoUrl": "",
       "x": 326,
-      "y": 472
+      "y": 472,
+      "security": {
+        "risk": "none",
+        "auditedAt": "2026-06-29",
+        "issueUrl": null,
+        "findings": []
+      }
     },
     {
       "slug": "data-team",
@@ -928,7 +1042,13 @@
       "liveUrl": "https://github.com/DataVenezuela/VZLA_DEDUP",
       "videoUrl": "",
       "x": 498,
-      "y": 651
+      "y": 651,
+      "security": {
+        "risk": "none",
+        "auditedAt": "2026-06-29",
+        "issueUrl": null,
+        "findings": []
+      }
     },
     {
       "slug": "directorio-sismo",
@@ -1009,7 +1129,18 @@
       "liveUrl": "https://directorio-sismo.netlify.app/",
       "videoUrl": "https://vimeo.com/1205079199?share=copy&fl=sv&fe=ci",
       "x": 527,
-      "y": 444
+      "y": 444,
+      "security": {
+        "risk": "medium",
+        "auditedAt": "2026-06-29",
+        "issueUrl": "https://github.com/jeannetteafuentesr/venezuela-solidaria/issues/1",
+        "findings": [
+          {
+            "severity": "medium",
+            "title": "Hardcoded admin password in client-side JavaScript (committed and live)"
+          }
+        ]
+      }
     },
     {
       "slug": "doomedag",
@@ -1100,7 +1231,18 @@
       "liveUrl": "https://dommedag.netlify.app/",
       "videoUrl": "",
       "x": 436,
-      "y": 568
+      "y": 568,
+      "security": {
+        "risk": "high",
+        "auditedAt": "2026-06-29",
+        "issueUrl": "https://github.com/uset82/iFoundYou/issues/1",
+        "findings": [
+          {
+            "severity": "high",
+            "title": "Gateway privilege escalation: any authenticated user can self-promote and read/intercept the entire mesh relay message queue"
+          }
+        ]
+      }
     },
     {
       "slug": "erqk-crisis-map",
@@ -1185,7 +1327,26 @@
       "liveUrl": "https://erqk-crisis-map.netlify.app",
       "videoUrl": "",
       "x": 499,
-      "y": 508
+      "y": 508,
+      "security": {
+        "risk": "high",
+        "auditedAt": "2026-06-29",
+        "issueUrl": "https://github.com/liderrj/crisis-map/issues/1",
+        "findings": [
+          {
+            "severity": "high",
+            "title": "Unauthenticated single-request suppression of any incident (no_longer_exists resolves immediately)"
+          },
+          {
+            "severity": "medium",
+            "title": "Public GET /confirmations leaks per-device pseudonymous identifiers (deviceId)"
+          },
+          {
+            "severity": "low",
+            "title": "All mutation/upload endpoints require only a self-generated deviceId header; images can be uploaded to ANY incident with no ownership check"
+          }
+        ]
+      }
     },
     {
       "slug": "farove",
@@ -1266,7 +1427,14 @@
       "liveUrl": "https://faro-ve.vercel.app/",
       "videoUrl": "",
       "x": 433,
-      "y": 450
+      "y": 450,
+      "security": {
+        "risk": "none",
+        "auditedAt": "2026-06-29",
+        "issueUrl": null,
+        "findings": [],
+        "notAudited": true
+      }
     },
     {
       "slug": "found-people-telegram-bot",
@@ -1340,7 +1508,30 @@
       "liveUrl": "https://github.com/edwinvrgs/found-people-ve-bot",
       "videoUrl": "",
       "x": 259,
-      "y": 960
+      "y": 960,
+      "security": {
+        "risk": "critical",
+        "auditedAt": "2026-06-29",
+        "issueUrl": "https://github.com/venezuela-war-room/found-people-ve-bot/issues/40",
+        "findings": [
+          {
+            "severity": "critical",
+            "title": "Unauthenticated bulk API leaks ~30,751 located-person records including minors (names, ages, locations, family members)"
+          },
+          {
+            "severity": "high",
+            "title": "Unauthenticated API returns full unmasked Venezuelan national ID (cedula) and allows lookup by cedula"
+          },
+          {
+            "severity": "medium",
+            "title": "IP rate limit (the only control on the PII endpoints) is bypassable via spoofed X-Forwarded-For"
+          },
+          {
+            "severity": "low",
+            "title": "GET /api/people: unauthenticated, fully enumerable victim name/info listing"
+          }
+        ]
+      }
     },
     {
       "slug": "generador-de-fichas-de-busqueda-venezuela",
@@ -1415,7 +1606,13 @@
       "liveUrl": "https://fichasdebusqueda.netlify.app",
       "videoUrl": "",
       "x": 40,
-      "y": 480
+      "y": 480,
+      "security": {
+        "risk": "none",
+        "auditedAt": "2026-06-29",
+        "issueUrl": null,
+        "findings": []
+      }
     },
     {
       "slug": "guacamalla",
@@ -1501,7 +1698,18 @@
       "liveUrl": "https://guacamalla.org",
       "videoUrl": "https://www.youtube.com/watch?v=d21xoFurccc",
       "x": 456,
-      "y": 600
+      "y": 600,
+      "security": {
+        "risk": "medium",
+        "auditedAt": "2026-06-29",
+        "issueUrl": "https://github.com/vmlcode/guacamaya-net/issues/14",
+        "findings": [
+          {
+            "severity": "medium",
+            "title": "Public unauthenticated GET /channels/:id/records exposes exact GPS coordinates and distress type of SOS senders, fully enumerable"
+          }
+        ]
+      }
     },
     {
       "slug": "lanna-naty",
@@ -1596,7 +1804,30 @@
       "liveUrl": "https://puentevenezuela.lovable.app/",
       "videoUrl": "",
       "x": 573,
-      "y": 492
+      "y": 492,
+      "security": {
+        "risk": "critical",
+        "auditedAt": "2026-06-29",
+        "issueUrl": "https://github.com/lannahbett/puentevenezuela/issues/1",
+        "findings": [
+          {
+            "severity": "critical",
+            "title": "Unauthenticated public read of all victim PII via reports table (anon RLS SELECT)"
+          },
+          {
+            "severity": "high",
+            "title": "Public storage bucket + anon-readable attachments table expose uploaded photos and allow arbitrary uploads"
+          },
+          {
+            "severity": "medium",
+            "title": "Anonymous UPDATE of any report (IDOR / data-integrity tampering)"
+          },
+          {
+            "severity": "low",
+            "title": "Anonymous INSERT into reports enables spam / data poisoning"
+          }
+        ]
+      }
     },
     {
       "slug": "localizadosvzlabot",
@@ -1680,7 +1911,22 @@
       "liveUrl": "https://wa.me/584225252437",
       "videoUrl": "https://youtube.com/shorts/hB-zcKp5Cak?feature=share",
       "x": 444,
-      "y": 512
+      "y": 512,
+      "security": {
+        "risk": "medium",
+        "auditedAt": "2026-06-29",
+        "issueUrl": "https://github.com/Paraguanads/Venezuelan-Tracker-WhatsApp-bot/issues/1",
+        "findings": [
+          {
+            "severity": "medium",
+            "title": "Predictable default webhook secret committed in docker-compose files enables webhook auth bypass"
+          },
+          {
+            "severity": "low",
+            "title": "Predictable default Postgres password and Fzap admin token in committed dev compose, with admin/user token reuse"
+          }
+        ]
+      }
     },
     {
       "slug": "proto-bloom-sismo",
@@ -1758,7 +2004,18 @@
       "liveUrl": "https://github.com/DevAndrew64/Bloom-Sismo",
       "videoUrl": "",
       "x": 399,
-      "y": 549
+      "y": 549,
+      "security": {
+        "risk": "high",
+        "auditedAt": "2026-06-29",
+        "issueUrl": "https://github.com/DevAndrew64/Bloom-Sismo/issues/2",
+        "findings": [
+          {
+            "severity": "high",
+            "title": "Full plaintext PII map (cedula + full name) embedded in public client, defeating the Bloom-filter privacy design"
+          }
+        ]
+      }
     },
     {
       "slug": "psicoayudave",
@@ -1846,7 +2103,13 @@
       "liveUrl": "https://psicoayudaven.com/",
       "videoUrl": "",
       "x": 328,
-      "y": 40
+      "y": 40,
+      "security": {
+        "risk": "none",
+        "auditedAt": "2026-06-29",
+        "issueUrl": null,
+        "findings": []
+      }
     },
     {
       "slug": "rastro",
@@ -1936,7 +2199,26 @@
       "liveUrl": "https://rastro-six.vercel.app",
       "videoUrl": "",
       "x": 485,
-      "y": 556
+      "y": 556,
+      "security": {
+        "risk": "critical",
+        "auditedAt": "2026-06-29",
+        "issueUrl": "https://github.com/danieibazgc/rastro/issues/1",
+        "findings": [
+          {
+            "severity": "critical",
+            "title": "Unauthenticated bulk PII exposure via GET /api/personas (full missing-persons records incl. national ID, DOB, family phone, shelter location)"
+          },
+          {
+            "severity": "critical",
+            "title": "RLS policy grants anonymous public read AND write of the entire personas (PII) table"
+          },
+          {
+            "severity": "medium",
+            "title": "Unauthenticated creation of missing-person records (data poisoning / fake reports)"
+          }
+        ]
+      }
     },
     {
       "slug": "redacopiovnzla",
@@ -2023,7 +2305,13 @@
       "liveUrl": "https://www.redacopiovnzla.com/",
       "videoUrl": "",
       "x": 575,
-      "y": 451
+      "y": 451,
+      "security": {
+        "risk": "none",
+        "auditedAt": "2026-06-29",
+        "issueUrl": null,
+        "findings": []
+      }
     },
     {
       "slug": "reencuentros-terremotos-venezuela",
@@ -2131,7 +2419,30 @@
       "liveUrl": "https://docs.google.com/document/d/1yMHR8gaIBqEYeovXp8bD5t1unz7eXPqF/edit",
       "videoUrl": "",
       "x": 476,
-      "y": 527
+      "y": 527,
+      "security": {
+        "risk": "critical",
+        "auditedAt": "2026-06-29",
+        "issueUrl": "https://github.com/iacastillo90/ReencuentroTerremotoVenezuela/issues/2",
+        "findings": [
+          {
+            "severity": "critical",
+            "title": "Raw victim PII dataset committed to public repo (17k names, 2,451 with national ID + hospital)"
+          },
+          {
+            "severity": "high",
+            "title": "Hardcoded JWT signing/verification secret enables admin token forgery"
+          },
+          {
+            "severity": "medium",
+            "title": "MinIO media bucket set public-read combined with unauthenticated upload and AI endpoints"
+          },
+          {
+            "severity": "medium",
+            "title": "Unauthenticated n8n webhook ingestion endpoints (no signature/secret)"
+          }
+        ]
+      }
     },
     {
       "slug": "reestructuramos",
@@ -2224,7 +2535,22 @@
       "liveUrl": "https://app.reestructuramos.com",
       "videoUrl": "https://youtube.com/shorts/FO0MElqIggs",
       "x": 488,
-      "y": 426
+      "y": 426,
+      "security": {
+        "risk": "medium",
+        "auditedAt": "2026-06-29",
+        "issueUrl": "https://github.com/comandoconstrucciones/reestructuramos-pwa/issues/1",
+        "findings": [
+          {
+            "severity": "medium",
+            "title": "inspections table is anon-readable at column granularity (RLS select using(true)), exposing inspector signatures, free-text comments and exact GPS beyond the public map's needs"
+          },
+          {
+            "severity": "low",
+            "title": "Public Supabase Storage bucket 'inspection-photos' is anonymously listable and readable"
+          }
+        ]
+      }
     },
     {
       "slug": "responsegrid",
@@ -2314,7 +2640,18 @@
       "liveUrl": "https://responsegrid.app",
       "videoUrl": "",
       "x": 543,
-      "y": 477
+      "y": 477,
+      "security": {
+        "risk": "low",
+        "auditedAt": "2026-06-29",
+        "issueUrl": null,
+        "findings": [
+          {
+            "severity": "low",
+            "title": "Unauthenticated donor contact-to-name confirmation oracle on /donation-intakes/lookup-contact"
+          }
+        ]
+      }
     },
     {
       "slug": "resqlink",
@@ -2411,7 +2748,38 @@
       "liveUrl": "https://resqlink-ai.netlify.app/",
       "videoUrl": "https://www.youtube.com/watch?v=6kjdjAPa208",
       "x": 482,
-      "y": 474
+      "y": 474,
+      "security": {
+        "risk": "high",
+        "auditedAt": "2026-06-29",
+        "issueUrl": "https://github.com/otobonh/resqlink-ai/issues/1",
+        "findings": [
+          {
+            "severity": "high",
+            "title": "Incidents table (victim reports: GPS, address, photos, descriptions) is world-readable via the public anon key"
+          },
+          {
+            "severity": "medium",
+            "title": "Resources table (contact phone numbers, addresses) is world-readable via the public anon key"
+          },
+          {
+            "severity": "high",
+            "title": "Unauthenticated INSERT into incidents and resources allows injecting false emergencies"
+          },
+          {
+            "severity": "medium",
+            "title": "social_feed_items grants public INSERT/UPDATE/DELETE to the anon role"
+          },
+          {
+            "severity": "low",
+            "title": "Unauthenticated AI endpoints proxy to OpenAI on arbitrary input (cost/abuse)"
+          },
+          {
+            "severity": "low",
+            "title": "Feed sync endpoint is fully open when CRON_SECRET is unset (fail-open auth)"
+          }
+        ]
+      }
     },
     {
       "slug": "sara",
@@ -2495,7 +2863,26 @@
       "liveUrl": "https://github.com/daniquishpecod4/SARAB4VE",
       "videoUrl": "",
       "x": 521,
-      "y": 398
+      "y": 398,
+      "security": {
+        "risk": "critical",
+        "auditedAt": "2026-06-29",
+        "issueUrl": "https://github.com/daniquishpecod4/SARAB4VE/issues/10",
+        "findings": [
+          {
+            "severity": "critical",
+            "title": "Public, unauthenticated GET /api/help-requests leaks full victim PII (names, contact details, exact GPS) in bulk"
+          },
+          {
+            "severity": "high",
+            "title": "Unauthenticated POST /api/help-requests/:id/accept hijacks open requests and re-exposes requester PII"
+          },
+          {
+            "severity": "high",
+            "title": "Unauthenticated POST /api/help-requests/:id/resolve lets anyone close active relief requests"
+          }
+        ]
+      }
     },
     {
       "slug": "sismos-venezuela",
@@ -2581,7 +2968,22 @@
       "liveUrl": "https://terremotos.wasmer.app/",
       "videoUrl": "",
       "x": 557,
-      "y": 406
+      "y": 406,
+      "security": {
+        "risk": "critical",
+        "auditedAt": "2026-06-29",
+        "issueUrl": "https://github.com/sephirods/venezuelasismos/issues/1",
+        "findings": [
+          {
+            "severity": "critical",
+            "title": "Production server SSH credentials committed in DEPLOY.md (public repo)"
+          },
+          {
+            "severity": "medium",
+            "title": "Scraper cron auth token committed and used over cleartext HTTP"
+          }
+        ]
+      }
     },
     {
       "slug": "terrave",
@@ -2668,7 +3070,26 @@
       "liveUrl": "https://terra-ve.vercel.app/",
       "videoUrl": "",
       "x": 603,
-      "y": 431
+      "y": 431,
+      "security": {
+        "risk": "high",
+        "auditedAt": "2026-06-29",
+        "issueUrl": "https://github.com/rainvare/terraVE/issues/1",
+        "findings": [
+          {
+            "severity": "high",
+            "title": "Unauthenticated mass-assignment PATCH on /api/lugares/[id] (full-body update, no auth, no field whitelist)"
+          },
+          {
+            "severity": "medium",
+            "title": "Unauthenticated PATCH on /api/report/[id] lets anyone alter any damage classification"
+          },
+          {
+            "severity": "low",
+            "title": "Open unauthenticated geocoding proxy (/api/geocode) with no rate limit burns owner's Google Maps quota"
+          }
+        ]
+      }
     },
     {
       "slug": "venemed",
@@ -2749,7 +3170,13 @@
       "liveUrl": "https://venemed.vercel.app/",
       "videoUrl": "",
       "x": 599,
-      "y": 662
+      "y": 662,
+      "security": {
+        "risk": "none",
+        "auditedAt": "2026-06-29",
+        "issueUrl": null,
+        "findings": []
+      }
     },
     {
       "slug": "venezuela-juntos",
@@ -2835,7 +3262,26 @@
       "liveUrl": "https://github.com/OnBeIt/Venezuela_Juntos_v2",
       "videoUrl": "https://youtu.be/k4PaAmArSfU",
       "x": 960,
-      "y": 373
+      "y": 373,
+      "security": {
+        "risk": "high",
+        "auditedAt": "2026-06-29",
+        "issueUrl": "https://github.com/OnBeIt/Venezuela_Juntos_v2/issues/1",
+        "findings": [
+          {
+            "severity": "high",
+            "title": "Public /matches endpoint leaks victim PII and rescuer contact info with no authentication"
+          },
+          {
+            "severity": "medium",
+            "title": "Public /uploads static mount serves victims' face photos without authentication"
+          },
+          {
+            "severity": "low",
+            "title": "All data-entry and matching endpoints are unauthenticated, enabling anonymous PII submission and probe-matching abuse"
+          }
+        ]
+      }
     },
     {
       "slug": "venezuela-response-hub",
@@ -2923,7 +3369,13 @@
       "liveUrl": "https://vzlaresponsehub.org",
       "videoUrl": "https://youtu.be/SljWt38myP8",
       "x": 540,
-      "y": 564
+      "y": 564,
+      "security": {
+        "risk": "none",
+        "auditedAt": "2026-06-29",
+        "issueUrl": null,
+        "findings": []
+      }
     }
   ],
   "edges": [
