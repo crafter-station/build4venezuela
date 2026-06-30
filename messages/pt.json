@@ -142,7 +142,9 @@
       },
       "whatsapp": "WhatsApp",
       "discord": "Discord",
-      "watch": { "label": "Assista ao evento de encerramento ao vivo" },
+      "watch": {
+        "label": "Assista ao evento de encerramento ao vivo"
+      },
       "description": "O evento formal se encerra, mas o trabalho continua: siga melhorando seu projeto, colabore com um existente ou proponha o que a Venezuela ainda precisa.",
       "poweredBy": "Impulsionado por"
     },
@@ -155,10 +157,22 @@
       "latestInfoQuery": "Quais são as últimas notícias sobre os terremotos na Venezuela?"
     },
     "impactStats": [
-      { "value": "01", "label": "continue trabalhando no seu projeto" },
-      { "value": "02", "label": "colabore com uma equipe existente" },
-      { "value": "03", "label": "proponha um novo problema para resolver" },
-      { "value": "04", "label": "projete para recuperação, não só resposta" }
+      {
+        "value": "01",
+        "label": "continue trabalhando no seu projeto"
+      },
+      {
+        "value": "02",
+        "label": "colabore com uma equipe existente"
+      },
+      {
+        "value": "03",
+        "label": "proponha um novo problema para resolver"
+      },
+      {
+        "value": "04",
+        "label": "projete para recuperação, não só resposta"
+      }
     ],
     "principles": {
       "eyebrow": "Princípios de ação coletiva",
@@ -265,7 +279,9 @@
   "Projects": {
     "eyebrow": "Project list",
     "title": "Shipped work",
-    "submitCta": { "label": "Submit yours" },
+    "submitCta": {
+      "label": "Submit yours"
+    },
     "grid": {
       "empty": "No projects yet. Be the first one to add a build.",
       "syncing": "Syncing live feed...",
@@ -549,7 +565,18 @@
         "loc": {
           "label": "LOC",
           "description": "Lines of code in real source files (excludes dependencies and build output) — a rough size/effort signal."
+        },
+        "security": {
+          "label": "Seg",
+          "description": "Risco de exposição de segurança da auditoria automática (endpoints de PII abertos, segredos vazados, falta de autenticação). Clique para ordenar."
         }
+      },
+      "risk": {
+        "critical": "Crítico",
+        "high": "Alto",
+        "medium": "Médio",
+        "low": "Baixo",
+        "none": "Limpo"
       }
     },
     "triageQuadrant": {
@@ -602,7 +629,8 @@
         "overlaps": "Overlaps with ({count})",
         "redFlags": "Red flags",
         "diffusionReadiness": "Diffusion readiness",
-        "mergePotential": "Merge potential"
+        "mergePotential": "Merge potential",
+        "security": "Auditoria de segurança"
       },
       "stack": {
         "frontend": "Frontend",
@@ -614,7 +642,21 @@
       "readyToPromote": "Ready to promote",
       "notYet": "Not yet",
       "assets": "assets: {assets}",
-      "angle": "Angle:"
+      "angle": "Angle:",
+      "security": {
+        "badge": "Risco {risk}",
+        "risk": {
+          "critical": "Crítico",
+          "high": "Alto",
+          "medium": "Médio",
+          "low": "Baixo",
+          "none": "Limpo"
+        },
+        "auditedAt": "Auditado {date}",
+        "notAudited": "Não auditado — não foi possível clonar o repositório.",
+        "clean": "Nenhum problema de exposição encontrado nesta auditoria.",
+        "issueLink": "Ver issue de divulgação →"
+      }
     },
     "stackCharts": {
       "titles": {
