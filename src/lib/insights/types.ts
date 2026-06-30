@@ -7,6 +7,22 @@ export type Tier =
 
 export type Severity = "critical" | "high" | "medium" | "low";
 
+export type SecurityRisk = Severity | "none";
+
+export type SecurityFinding = {
+  severity: Severity;
+  title: string;
+};
+
+export type SecurityAudit = {
+  risk: SecurityRisk;
+  auditedAt: string;
+  issueUrl: string | null;
+  findings: SecurityFinding[];
+  // true when the repo could not be cloned, so no audit was performed
+  notAudited?: boolean;
+};
+
 export type InsightNode = {
   slug: string;
   name: string;
@@ -54,6 +70,7 @@ export type InsightNode = {
   repoUrl: string;
   liveUrl: string;
   videoUrl: string;
+  security?: SecurityAudit;
   x: number;
   y: number;
 };

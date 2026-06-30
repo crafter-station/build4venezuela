@@ -142,7 +142,9 @@
       },
       "whatsapp": "WhatsApp",
       "discord": "Discord",
-      "watch": { "label": "观看闭幕活动直播" },
+      "watch": {
+        "label": "观看闭幕活动直播"
+      },
       "description": "正式活动即将闭幕，但工作还会继续：继续改进你的项目，参与现有项目，或提出委内瑞拉仍然需要解决的问题。",
       "poweredBy": "技术支持"
     },
@@ -155,10 +157,22 @@
       "latestInfoQuery": "委内瑞拉地震的最新情况是什么？"
     },
     "impactStats": [
-      { "value": "01", "label": "继续完善你的项目" },
-      { "value": "02", "label": "与现有团队协作" },
-      { "value": "03", "label": "提出新的待解决问题" },
-      { "value": "04", "label": "为恢复而设计，而不只是应急" }
+      {
+        "value": "01",
+        "label": "继续完善你的项目"
+      },
+      {
+        "value": "02",
+        "label": "与现有团队协作"
+      },
+      {
+        "value": "03",
+        "label": "提出新的待解决问题"
+      },
+      {
+        "value": "04",
+        "label": "为恢复而设计，而不只是应急"
+      }
     ],
     "principles": {
       "eyebrow": "集体行动原则",
@@ -265,7 +279,9 @@
   "Projects": {
     "eyebrow": "Project list",
     "title": "Shipped work",
-    "submitCta": { "label": "Submit yours" },
+    "submitCta": {
+      "label": "Submit yours"
+    },
     "grid": {
       "empty": "No projects yet. Be the first one to add a build.",
       "syncing": "Syncing live feed...",
@@ -549,7 +565,18 @@
         "loc": {
           "label": "LOC",
           "description": "Lines of code in real source files (excludes dependencies and build output) — a rough size/effort signal."
+        },
+        "security": {
+          "label": "安全",
+          "description": "来自自动审计的安全暴露风险（开放的PII端点、泄露的密钥、缺少身份验证）。点击排序。"
         }
+      },
+      "risk": {
+        "critical": "严重",
+        "high": "高",
+        "medium": "中",
+        "low": "低",
+        "none": "无风险"
       }
     },
     "triageQuadrant": {
@@ -602,7 +629,8 @@
         "overlaps": "Overlaps with ({count})",
         "redFlags": "Red flags",
         "diffusionReadiness": "Diffusion readiness",
-        "mergePotential": "Merge potential"
+        "mergePotential": "Merge potential",
+        "security": "安全审计"
       },
       "stack": {
         "frontend": "Frontend",
@@ -614,7 +642,21 @@
       "readyToPromote": "Ready to promote",
       "notYet": "Not yet",
       "assets": "assets: {assets}",
-      "angle": "Angle:"
+      "angle": "Angle:",
+      "security": {
+        "badge": "{risk}风险",
+        "risk": {
+          "critical": "严重",
+          "high": "高",
+          "medium": "中",
+          "low": "低",
+          "none": "无风险"
+        },
+        "auditedAt": "审计于 {date}",
+        "notAudited": "未审计 — 无法克隆该仓库。",
+        "clean": "本次审计未发现暴露问题。",
+        "issueLink": "查看披露 issue →"
+      }
     },
     "stackCharts": {
       "titles": {

@@ -142,7 +142,9 @@
       },
       "whatsapp": "WhatsApp",
       "discord": "Discord",
-      "watch": { "label": "Watch the closure event live" },
+      "watch": {
+        "label": "Watch the closure event live"
+      },
       "description": "The formal event is closing, but the work continues: keep improving projects, contribute to existing ones, or propose what Venezuela still needs.",
       "poweredBy": "Powered by"
     },
@@ -155,10 +157,22 @@
       "latestInfoQuery": "What's the latest on the Venezuela earthquakes?"
     },
     "impactStats": [
-      { "value": "01", "label": "continue working on your project" },
-      { "value": "02", "label": "collaborate with an existing team" },
-      { "value": "03", "label": "propose a new problem to solve" },
-      { "value": "04", "label": "design for recovery, not only response" }
+      {
+        "value": "01",
+        "label": "continue working on your project"
+      },
+      {
+        "value": "02",
+        "label": "collaborate with an existing team"
+      },
+      {
+        "value": "03",
+        "label": "propose a new problem to solve"
+      },
+      {
+        "value": "04",
+        "label": "design for recovery, not only response"
+      }
     ],
     "principles": {
       "eyebrow": "Collective action principles",
@@ -265,7 +279,9 @@
   "Projects": {
     "eyebrow": "Project list",
     "title": "Shipped work",
-    "submitCta": { "label": "Submit yours" },
+    "submitCta": {
+      "label": "Submit yours"
+    },
     "grid": {
       "empty": "No projects yet. Be the first one to add a build.",
       "syncing": "Syncing live feed...",
@@ -549,7 +565,18 @@
         "loc": {
           "label": "LOC",
           "description": "Lines of code in real source files (excludes dependencies and build output) — a rough size/effort signal."
+        },
+        "security": {
+          "label": "Sec",
+          "description": "Security exposure risk from the automated audit (open PII endpoints, leaked secrets, missing auth). Click to sort."
         }
+      },
+      "risk": {
+        "critical": "Critical",
+        "high": "High",
+        "medium": "Medium",
+        "low": "Low",
+        "none": "Clean"
       }
     },
     "triageQuadrant": {
@@ -602,7 +629,8 @@
         "overlaps": "Overlaps with ({count})",
         "redFlags": "Red flags",
         "diffusionReadiness": "Diffusion readiness",
-        "mergePotential": "Merge potential"
+        "mergePotential": "Merge potential",
+        "security": "Security audit"
       },
       "stack": {
         "frontend": "Frontend",
@@ -614,7 +642,21 @@
       "readyToPromote": "Ready to promote",
       "notYet": "Not yet",
       "assets": "assets: {assets}",
-      "angle": "Angle:"
+      "angle": "Angle:",
+      "security": {
+        "badge": "{risk} risk",
+        "risk": {
+          "critical": "Critical",
+          "high": "High",
+          "medium": "Medium",
+          "low": "Low",
+          "none": "Clean"
+        },
+        "auditedAt": "Audited {date}",
+        "notAudited": "Not audited — the repository could not be cloned.",
+        "clean": "No exposure issues found in this audit.",
+        "issueLink": "View disclosure issue →"
+      }
     },
     "stackCharts": {
       "titles": {

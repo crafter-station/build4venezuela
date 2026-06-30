@@ -142,7 +142,9 @@
       },
       "whatsapp": "WhatsApp",
       "discord": "Discord",
-      "watch": { "label": "Regarder l'événement de clôture en direct" },
+      "watch": {
+        "label": "Regarder l'événement de clôture en direct"
+      },
       "description": "L'événement formel se clôture, mais le travail continue : améliorez votre projet, contribuez à un projet existant ou proposez ce dont le Venezuela a encore besoin.",
       "poweredBy": "Propulsé par"
     },
@@ -155,9 +157,18 @@
       "latestInfoQuery": "Quelles sont les dernières nouvelles sur les tremblements de terre au Venezuela ?"
     },
     "impactStats": [
-      { "value": "01", "label": "continuez à travailler sur votre projet" },
-      { "value": "02", "label": "collaborez avec une équipe existante" },
-      { "value": "03", "label": "proposez un nouveau problème à résoudre" },
+      {
+        "value": "01",
+        "label": "continuez à travailler sur votre projet"
+      },
+      {
+        "value": "02",
+        "label": "collaborez avec une équipe existante"
+      },
+      {
+        "value": "03",
+        "label": "proposez un nouveau problème à résoudre"
+      },
       {
         "value": "04",
         "label": "concevez pour la reconstruction, pas seulement la réponse"
@@ -268,7 +279,9 @@
   "Projects": {
     "eyebrow": "Project list",
     "title": "Shipped work",
-    "submitCta": { "label": "Submit yours" },
+    "submitCta": {
+      "label": "Submit yours"
+    },
     "grid": {
       "empty": "No projects yet. Be the first one to add a build.",
       "syncing": "Syncing live feed...",
@@ -552,7 +565,18 @@
         "loc": {
           "label": "LOC",
           "description": "Lines of code in real source files (excludes dependencies and build output) — a rough size/effort signal."
+        },
+        "security": {
+          "label": "Séc",
+          "description": "Risque d'exposition de sécurité selon l'audit automatique (endpoints PII ouverts, secrets divulgués, authentification manquante). Cliquez pour trier."
         }
+      },
+      "risk": {
+        "critical": "Critique",
+        "high": "Élevé",
+        "medium": "Moyen",
+        "low": "Faible",
+        "none": "Sain"
       }
     },
     "triageQuadrant": {
@@ -605,7 +629,8 @@
         "overlaps": "Overlaps with ({count})",
         "redFlags": "Red flags",
         "diffusionReadiness": "Diffusion readiness",
-        "mergePotential": "Merge potential"
+        "mergePotential": "Merge potential",
+        "security": "Audit de sécurité"
       },
       "stack": {
         "frontend": "Frontend",
@@ -617,7 +642,21 @@
       "readyToPromote": "Ready to promote",
       "notYet": "Not yet",
       "assets": "assets: {assets}",
-      "angle": "Angle:"
+      "angle": "Angle:",
+      "security": {
+        "badge": "Risque {risk}",
+        "risk": {
+          "critical": "Critique",
+          "high": "Élevé",
+          "medium": "Moyen",
+          "low": "Faible",
+          "none": "Sain"
+        },
+        "auditedAt": "Audité {date}",
+        "notAudited": "Non audité — le dépôt n'a pas pu être cloné.",
+        "clean": "Aucun problème d'exposition trouvé lors de cet audit.",
+        "issueLink": "Voir l'issue de divulgation →"
+      }
     },
     "stackCharts": {
       "titles": {

@@ -1,4 +1,4 @@
-import type { Severity, Tier } from "./types";
+import type { SecurityRisk, Severity, Tier } from "./types";
 
 // Poster palette (see src/app/globals.css): bg #000, primary #ffd83d,
 // accent #16c7e8, destructive #ff4a63, muted-foreground #a6a6a6.
@@ -31,6 +31,25 @@ export const SEVERITY_RANK: Record<Severity, number> = {
   high: 2,
   medium: 1,
   low: 0,
+};
+
+// Security exposure risk (separate axis from the product `severity` score).
+// Poster palette: destructive #ff4a63 (red), #ff8a3d (amber), primary #ffd83d
+// (yellow), muted #a6a6a6 (grey), #3ad29f (green = clean).
+export const SECURITY_RISK_COLOR: Record<SecurityRisk, string> = {
+  critical: "#ff4a63",
+  high: "#ff8a3d",
+  medium: "#ffd83d",
+  low: "#a6a6a6",
+  none: "#3ad29f",
+};
+
+export const SECURITY_RISK_RANK: Record<SecurityRisk, number> = {
+  critical: 4,
+  high: 3,
+  medium: 2,
+  low: 1,
+  none: 0,
 };
 
 export const SCORE_KEYS = [

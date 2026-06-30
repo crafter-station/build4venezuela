@@ -142,7 +142,9 @@
       },
       "whatsapp": "WhatsApp",
       "discord": "Discord",
-      "watch": { "label": "クロージングイベントをライブで視聴" },
+      "watch": {
+        "label": "クロージングイベントをライブで視聴"
+      },
       "description": "公式イベントは閉じますが、活動は続きます。自分のプロジェクトを改善し、既存のものに貢献し、ベネズエラにまだ必要なものを提案してください。",
       "poweredBy": "提供"
     },
@@ -155,10 +157,22 @@
       "latestInfoQuery": "ベネズエラの地震に関する最新情報は？"
     },
     "impactStats": [
-      { "value": "01", "label": "自分のプロジェクトを続ける" },
-      { "value": "02", "label": "既存チームと協力する" },
-      { "value": "03", "label": "新しい解決課題を提案する" },
-      { "value": "04", "label": "対応だけでなく復旧のために設計する" }
+      {
+        "value": "01",
+        "label": "自分のプロジェクトを続ける"
+      },
+      {
+        "value": "02",
+        "label": "既存チームと協力する"
+      },
+      {
+        "value": "03",
+        "label": "新しい解決課題を提案する"
+      },
+      {
+        "value": "04",
+        "label": "対応だけでなく復旧のために設計する"
+      }
     ],
     "principles": {
       "eyebrow": "共同アクションの原則",
@@ -265,7 +279,9 @@
   "Projects": {
     "eyebrow": "Project list",
     "title": "Shipped work",
-    "submitCta": { "label": "Submit yours" },
+    "submitCta": {
+      "label": "Submit yours"
+    },
     "grid": {
       "empty": "No projects yet. Be the first one to add a build.",
       "syncing": "Syncing live feed...",
@@ -549,7 +565,18 @@
         "loc": {
           "label": "LOC",
           "description": "Lines of code in real source files (excludes dependencies and build output) — a rough size/effort signal."
+        },
+        "security": {
+          "label": "セキュ",
+          "description": "自動監査によるセキュリティ露出リスク（公開PIIエンドポイント、漏洩した秘密情報、認証の欠如）。クリックで並べ替え。"
         }
+      },
+      "risk": {
+        "critical": "重大",
+        "high": "高",
+        "medium": "中",
+        "low": "低",
+        "none": "クリーン"
       }
     },
     "triageQuadrant": {
@@ -602,7 +629,8 @@
         "overlaps": "Overlaps with ({count})",
         "redFlags": "Red flags",
         "diffusionReadiness": "Diffusion readiness",
-        "mergePotential": "Merge potential"
+        "mergePotential": "Merge potential",
+        "security": "セキュリティ監査"
       },
       "stack": {
         "frontend": "Frontend",
@@ -614,7 +642,21 @@
       "readyToPromote": "Ready to promote",
       "notYet": "Not yet",
       "assets": "assets: {assets}",
-      "angle": "Angle:"
+      "angle": "Angle:",
+      "security": {
+        "badge": "{risk}リスク",
+        "risk": {
+          "critical": "重大",
+          "high": "高",
+          "medium": "中",
+          "low": "低",
+          "none": "クリーン"
+        },
+        "auditedAt": "監査日 {date}",
+        "notAudited": "未監査 — リポジトリをクローンできませんでした。",
+        "clean": "この監査で露出の問題は見つかりませんでした。",
+        "issueLink": "開示Issueを見る →"
+      }
     },
     "stackCharts": {
       "titles": {
