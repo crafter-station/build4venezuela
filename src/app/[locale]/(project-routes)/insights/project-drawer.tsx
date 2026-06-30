@@ -17,7 +17,12 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { SCORE_KEYS, TIER_COLOR, tagLabel } from "@/lib/insights/constants";
+import {
+  SCORE_KEYS,
+  SECURITY_RISK_COLOR,
+  TIER_COLOR,
+  tagLabel,
+} from "@/lib/insights/constants";
 import type { InsightEdge, InsightNode } from "@/lib/insights/types";
 
 export function ProjectDrawer({
@@ -78,6 +83,19 @@ export function ProjectDrawer({
                 <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-widest">
                   {node.type} · {node.severity}
                 </span>
+                {node.security && node.security.risk !== "none" && (
+                  <span
+                    className="border px-1.5 py-0.5 font-mono text-[10px] uppercase"
+                    style={{
+                      color: SECURITY_RISK_COLOR[node.security.risk],
+                      borderColor: SECURITY_RISK_COLOR[node.security.risk],
+                    }}
+                  >
+                    {t("security.badge", {
+                      risk: t(`security.risk.${node.security.risk}`),
+                    })}
+                  </span>
+                )}
               </div>
               <SheetTitle className="font-mono text-2xl font-black uppercase leading-tight tracking-tight">
                 {node.name}
@@ -162,6 +180,12 @@ export function ProjectDrawer({
                   />
                 </div>
               </div>
+
+              {node.security && (
+                <Section title={t("sections.security")}>
+                  <SecurityBlock security={node.security} />
+                </Section>
+              )}
 
               <Section title={t("sections.summary")}>
                 <p className="font-mono text-xs text-muted-foreground">
@@ -275,6 +299,66 @@ export function ProjectDrawer({
         )}
       </SheetContent>
     </Sheet>
+  );
+}
+
+function SecurityBlock({ security }: { security: InsightNode["security"] }) {
+  const t = useTranslations("Insights.drawer.security");
+  if (!security) return null;
+  const color = SECURITY_RISK_COLOR[security.risk];
+
+  return (
+    <div className="space-y-3">
+      <div className="flex flex-wrap items-center gap-2">
+        <span
+          className="border px-1.5 py-0.5 font-mono text-[10px] uppercase"
+          style={{ color, borderColor: color }}
+        >
+          {t("badge", { risk: t(`risk.${security.risk}`) })}
+        </span>
+        <span className="font-mono text-[10px] text-muted-foreground">
+          {t("auditedAt", { date: security.auditedAt })}
+        </span>
+      </div>
+
+      {security.notAudited ? (
+        <p className="font-mono text-[11px] text-muted-foreground">
+          {t("notAudited")}
+        </p>
+      ) : security.findings.length > 0 ? (
+        <ul className="space-y-1">
+          {security.findings.map((f) => (
+            <li
+              key={f.title}
+              className="flex gap-2 font-mono text-[11px] text-foreground"
+            >
+              <span
+                className="shrink-0 font-bold uppercase"
+                style={{ color: SECURITY_RISK_COLOR[f.severity] }}
+              >
+                {f.severity}
+              </span>
+              <span className="text-muted-foreground">{f.title}</span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="font-mono text-[11px]" style={{ color }}>
+          {t("clean")}
+        </p>
+      )}
+
+      {security.issueUrl && (
+        <a
+          href={security.issueUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-block font-mono text-[11px] text-accent underline underline-offset-4 hover:opacity-80"
+        >
+          {t("issueLink")}
+        </a>
+      )}
+    </div>
   );
 }
 

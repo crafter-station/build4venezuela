@@ -16,7 +16,12 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { SEVERITY_RANK, TIER_COLOR } from "@/lib/insights/constants";
+import {
+  SECURITY_RISK_COLOR,
+  SECURITY_RISK_RANK,
+  SEVERITY_RANK,
+  TIER_COLOR,
+} from "@/lib/insights/constants";
 import type { InsightNode } from "@/lib/insights/types";
 
 type SortKey =
@@ -27,7 +32,8 @@ type SortKey =
   | "maturity"
   | "stars"
   | "loc"
-  | "severity";
+  | "severity"
+  | "security";
 
 const COLS: SortKey[] = [
   "viability",
@@ -36,6 +42,7 @@ const COLS: SortKey[] = [
   "diffusion",
   "maturity",
   "severity",
+  "security",
   "stars",
   "loc",
 ];
@@ -44,6 +51,7 @@ function val(n: InsightNode, k: SortKey): number {
   if (k === "stars") return n.signals.stars;
   if (k === "loc") return n.signals.loc;
   if (k === "severity") return SEVERITY_RANK[n.severity];
+  if (k === "security") return SECURITY_RISK_RANK[n.security?.risk ?? "none"];
   return n.scores[k];
 }
 
@@ -167,6 +175,12 @@ export function Leaderboard({
               <TableCell className="text-right font-mono text-[10px] text-muted-foreground uppercase">
                 {n.severity}
               </TableCell>
+              <TableCell className="text-right">
+                <RiskBadge
+                  node={n}
+                  label={t(`risk.${n.security?.risk ?? "none"}`)}
+                />
+              </TableCell>
               <TableCell className="text-right font-mono tabular-nums">
                 {n.signals.stars}
               </TableCell>
@@ -180,6 +194,19 @@ export function Leaderboard({
         </TableBody>
       </Table>
     </TooltipProvider>
+  );
+}
+
+function RiskBadge({ node, label }: { node: InsightNode; label: string }) {
+  const risk = node.security?.risk ?? "none";
+  const color = SECURITY_RISK_COLOR[risk];
+  return (
+    <span
+      className="inline-block whitespace-nowrap border px-1.5 py-0.5 font-mono text-[10px] uppercase"
+      style={{ color, borderColor: color }}
+    >
+      {label}
+    </span>
   );
 }
 
