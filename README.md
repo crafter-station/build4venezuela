@@ -92,7 +92,7 @@ Supabase schema files live in `supabase/`:
 - `supabase/migrations/20260626000000_create_projects.sql`
 - `supabase/migrations/20260626010000_create_project_comments.sql`
 
-The project store uses Supabase when configured and falls back to `.data/projects.json` locally if Supabase calls fail.
+The project store uses Supabase when configured (`DATABASE_URL`/Supabase env vars set) and only falls back to `.data/projects.json` locally when no database is configured at all — e.g. local development without those env vars. Once a database is configured, a runtime error is logged and propagated as a 500/503 response instead of silently falling back to the local file.
 
 ## Project Features
 

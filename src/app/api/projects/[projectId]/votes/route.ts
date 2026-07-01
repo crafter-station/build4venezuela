@@ -1,6 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import { runMutation } from "@/lib/api-mutation";
+import { runMutation, runQuery } from "@/lib/api-mutation";
 import {
   checkRateLimit,
   rateLimitKey,
@@ -16,10 +16,19 @@ export async function GET(_request: Request, { params }: Props) {
   const { projectId } = await params;
   const { userId } = await auth();
 
-  return NextResponse.json({
-    count: await getVoteCount(projectId),
-    voted: await hasVoted(projectId, userId ?? undefined),
-  });
+  const result = await runQuery("project.votes.get", { projectId }, () =>
+    Promise.all([
+      getVoteCount(projectId),
+      hasVoted(projectId, userId ?? undefined),
+    ]),
+  );
+
+  if ("response" in result) {
+    return result.response;
+  }
+
+  const [count, voted] = result.value;
+  return NextResponse.json({ count, voted });
 }
 
 export async function POST(request: Request, { params }: Props) {

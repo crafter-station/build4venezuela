@@ -147,7 +147,11 @@ async function writeLocalData(data: LocalData) {
   await writeFile(localStorePath, `${JSON.stringify(data, null, 2)}\n`);
 }
 
-async function withLocalFallback<T>(
+// Same contract as the projects store's withDbOperation: the local JSON
+// fallback only applies when Supabase isn't configured at all. Once it is
+// configured, a runtime error is logged and re-thrown instead of silently
+// falling back, so API routes can respond with an explicit 500/503.
+async function withDbOperation<T>(
   operation: () => Promise<T>,
   fallback: () => Promise<T>,
 ) {
@@ -160,19 +164,17 @@ async function withLocalFallback<T>(
   try {
     return await operation();
   } catch (error) {
-    logError("request.store.fallback", error);
-    return fallback();
+    logError("request.store.error", error);
+    throw error;
   }
 }
 
 export async function listSolutionRequests(voterId?: string) {
   const supabase = getSupabase();
 
-  return withLocalFallback(
+  return withDbOperation(
     async () => {
-      if (!supabase) {
-        return [];
-      }
+      
 
       const { data, error } = await supabase
         .from("solution_requests")
@@ -317,7 +319,7 @@ export async function createSolutionRequest(
     author_image_url: authorImageUrl,
   };
 
-  return withLocalFallback(
+  return withDbOperation(
     async () => {
       if (!supabase) {
         throw new Error("Supabase is not configured.");
@@ -355,7 +357,7 @@ export async function createSolutionRequest(
 export async function getSolutionRequestVoteCount(requestId: string) {
   const supabase = getSupabase();
 
-  return withLocalFallback(
+  return withDbOperation(
     async () => {
       if (!supabase) {
         return 0;
@@ -389,7 +391,7 @@ export async function hasSolutionRequestVoted(
 
   const supabase = getSupabase();
 
-  return withLocalFallback(
+  return withDbOperation(
     async () => {
       if (!supabase) {
         return false;
@@ -423,7 +425,7 @@ export async function toggleSolutionRequestVote(
 ) {
   const supabase = getSupabase();
 
-  return withLocalFallback(
+  return withDbOperation(
     async () => {
       if (!supabase) {
         throw new Error("Supabase is not configured.");
@@ -507,7 +509,7 @@ export async function createSolutionRequestComment(
     body: input.body,
   };
 
-  return withLocalFallback(
+  return withDbOperation(
     async () => {
       if (!supabase) {
         throw new Error("Supabase is not configured.");
@@ -548,7 +550,7 @@ export async function solutionRequestCommentBelongsToRequest(
 ) {
   const supabase = getSupabase();
 
-  return withLocalFallback(
+  return withDbOperation(
     async () => {
       if (!supabase) {
         return false;
@@ -580,7 +582,7 @@ export async function solutionRequestCommentBelongsToRequest(
 export async function getSolutionRequestCommentVoteCount(commentId: string) {
   const supabase = getSupabase();
 
-  return withLocalFallback(
+  return withDbOperation(
     async () => {
       if (!supabase) {
         return 0;
@@ -615,7 +617,7 @@ export async function hasSolutionRequestCommentVoted(
 
   const supabase = getSupabase();
 
-  return withLocalFallback(
+  return withDbOperation(
     async () => {
       if (!supabase) {
         return false;
@@ -649,7 +651,7 @@ export async function toggleSolutionRequestCommentVote(
 ) {
   const supabase = getSupabase();
 
-  return withLocalFallback(
+  return withDbOperation(
     async () => {
       if (!supabase) {
         throw new Error("Supabase is not configured.");
