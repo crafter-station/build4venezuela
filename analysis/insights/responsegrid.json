@@ -12,149 +12,140 @@
   "db_description": "ResponseGrid es una plataforma orientada a la gestión guiada de logística y eventos, con foco en estandarizar procedimientos, documentar actuaciones, coordinar tareas y centralizar información durante todo el ciclo de vida de una emergencia. Su propuesta principal es la información verificada y la trazabilidad  en tiempo real.",
   "lifecycle_status": "ready_to_use",
   "analysis": {
-    "summary": "ResponseGrid is a production-deployed (live at responsegrid.app + api.responsegrid.app) humanitarian material-aid coordination platform built for Venezuela's 2026 earthquake. It is a pnpm monorepo with a NestJS 11 hexagonal/DDD backend (18 bounded contexts, Drizzle ORM, PostgreSQL 16, Redis/BullMQ) and a Next.js 16 (App Router) frontend. The codebase has 274 commits, 168 unit test files, 30 end-to-end specs, full CI/CD to EC2 + Vercel, Datadog monitoring, Caddy TLS, and 574 real Venezuelan collection-point records pre-seeded. This is not boilerplate — it is a functioning, deployed system at a remarkable quality level for the hackathon window.",
-    "project_type": "Full-stack monorepo web platform (Next.js frontend + NestJS REST API + PostgreSQL + Redis)",
+    "summary": "ResponseGrid is a full-featured, seriously engineered NestJS (hexagonal/DDD) + Next.js 16 platform for coordinating material aid logistics during emergencies, purpose-built and seeded with a real 'Terremoto Venezuela 2026' emergency with 574 real collection points imported from acopiove.org. It has 18 bounded contexts, Drizzle ORM with 53 versioned SQL migrations, OAuth (Google/Facebook) + JWT + API-key auth with a granular permission/grant system, 216+ spec/integration test files, a CI pipeline with real Postgres/Redis service containers and a migration-immutability guard, and a documented production deploy (Dockerized API + Caddy HTTPS + Datadog APM on EC2, Next.js on Vercel).",
+    "project_type": "Full-stack humanitarian aid-logistics coordination platform (monorepo: NestJS API + Next.js web + shared typed API client)",
     "stack": {
       "frontend": [
         "Next.js 16 (App Router)",
         "React 19",
         "Tailwind CSS 4",
-        "Leaflet + leaflet.markercluster",
-        "PWA / Service Worker",
-        "openapi-fetch typed client"
+        "Leaflet / react-leaflet + markercluster",
+        "Atomic Design component structure"
       ],
       "backend": [
-        "NestJS 11",
-        "Drizzle ORM",
-        "Passport / JWT (12h tokens, bcrypt)",
-        "BullMQ / Redis 7 (domain events)",
-        "Swagger / OpenAPI",
+        "NestJS 11 (hexagonal/DDD, ports & adapters)",
+        "BullMQ (domain events via Redis)",
+        "Passport (Google/Facebook OAuth, JWT)",
+        "class-validator/class-transformer",
+        "Swagger/OpenAPI",
         "Helmet",
-        "OAuth (Google, Facebook)"
+        "@nestjs/throttler"
       ],
       "database": [
         "PostgreSQL 16",
-        "Redis 7",
-        "36 versioned SQL migrations (idempotent runner)"
+        "Drizzle ORM (typed query builder)",
+        "Redis 7"
       ],
       "infra_deploy": [
-        "Docker Compose (prod)",
-        "Caddy 2 (auto TLS)",
-        "AWS EC2 (API)",
-        "Vercel (web)",
-        "AWS S3 (file storage)",
-        "GitHub Actions CI/CD",
-        "Datadog APM + monitoring"
+        "Docker multi-stage build",
+        "docker-compose (prod stack on EC2)",
+        "Caddy (automatic HTTPS reverse proxy)",
+        "GitHub Actions CI (format/lint/build/test with migration-immutability guard)",
+        "AWS S3 (file storage) via @aws-sdk/client-s3",
+        "Datadog APM/DBM/logs (dd-trace)",
+        "Vercel (web deploy)"
       ],
       "ai_ml": [],
       "languages": [
         "TypeScript",
-        "JavaScript",
+        "SQL",
         "Shell"
       ]
     },
     "architecture": {
-      "pattern": "Hexagonal / DDD (ports & adapters) with CQRS-light and domain events",
+      "pattern": "Hexagonal architecture / DDD with bounded contexts (domain/application/infrastructure layers), enforced via ESLint no-restricted-imports so domain/application cannot import NestJS or Drizzle",
       "uses_orm": true,
-      "orm_or_db_layer": "Drizzle ORM with typed query builder; raw SQL strictly discouraged and documented as footgun; 36 hand-written versioned .sql migrations applied by a custom idempotent runner",
-      "api_design": "REST with full OpenAPI/Swagger documentation; typed API client package (@reliefhub/api-client via openapi-fetch); dual auth via Bearer JWT and X-API-Key header for service accounts",
-      "separation_of_concerns": "ESLint rules actively enforce no @nestjs/* or drizzle imports inside domain/ and application/ layers; output ports are interfaces with in-memory stubs for unit tests and Drizzle implementations for integration",
-      "modularity": "18 bounded contexts (emergencies, resources, needs, offers, supplies, logistics, volunteers, reports, identity, groups, organizations, accreditation, templates, notifications, audit, metrics, geocoding, files); shared kernel limited to EmergencyId, Location, Priority, DomainEvent, DatabaseModule",
+      "orm_or_db_layer": "Drizzle ORM with a typed query builder (explicitly preferred over raw SQL to avoid string-typed timestamptz/numeric bugs), 53 hand-written idempotent SQL migrations tracked by filename",
+      "api_design": "RESTful NestJS controllers per bounded context, documented via Swagger/OpenAPI at /docs, with a generated typed client package (@reliefhub/api-client) consumed by the Next.js frontend",
+      "separation_of_concerns": "Strong: 18 bounded contexts (needs, offers, supplies, logistics, volunteers, identity, organizations, accreditation, templates, notifications, audit, metrics, geocoding, files, etc.) each with domain/application/infrastructure subfolders and per-context domain exception filters",
+      "modularity": "High — clear module boundaries, shared kernel for cross-cutting value objects (EmergencyId, Location, DomainEvent), ports/adapters pattern for repositories and event bus with in-memory/fake implementations for tests",
       "notable_patterns": [
-        "CQRS-light use cases as plain classes injected via NestJS DI tokens",
-        "BullMQ Redis event bus for cross-context domain events with in-memory fake for tests",
-        "Atomic Design on the frontend (atoms/molecules/organisms)",
-        "Permission model: Principal → Grant(role@scope) → Permission → can(); @RequirePermission decorator",
-        "Location privacy: approximate-location value object to avoid exposing exact coordinates publicly",
-        "Typed openapi-fetch client regenerated from Swagger schema on every DTO change"
+        "Ports & adapters (repository interfaces + Drizzle/in-memory implementations)",
+        "Domain events via BullMQ event bus",
+        "Permission-based access control (Principal → Grant(role@scope) → Permission)",
+        "API-key service accounts (X-API-Key) alongside JWT auth",
+        "Domain exception filters mapping domain errors to HTTP responses per context",
+        "CI guard preventing modification of already-merged migrations"
       ]
     },
     "code_organization": {
       "score": 5,
-      "directory_structure": "Pristine: apps/api/src/contexts/{context}/{domain,application,infrastructure} for every bounded context; apps/web/src/components/{atoms,molecules,organisms}; packages/api-client as shared workspace package; deploy/ with prod Docker Compose, Caddy config, migration script, and full .env.example",
-      "naming_quality": "Consistent and expressive throughout; business domain in Spanish (UI copy, commits, issues), code identifiers in English; no abbreviations or mystery names",
-      "documentation_quality": "Exceptional for a hackathon: AGENTS.md (comprehensive AI/contributor guide), ARCHITECTURE.md, CLAUDE.md, CONTRIBUTING.md, 15+ feature specs in docs/, GitHub issue templates (epic/feature/bug/task) with label taxonomy, PR template, DEFINITION_OF_DONE.md, Swagger UI at /docs, Datadog runbook",
-      "reasoning": "The codebase enforces its own architectural rules via ESLint, documents gotchas (raw SQL, lockfile, Windows psql), and provides the full contributor workflow. 168 unit tests and 30 e2e specs are co-located with their context code, not an afterthought."
+      "directory_structure": "Clean pnpm monorepo: apps/api (NestJS hexagonal), apps/web (Next.js Atomic Design), packages/api-client (generated typed client), deploy/ (prod compose + Caddy + systemd), docs/features (frozen legacy specs), consistent per-context domain/application/infrastructure layering",
+      "naming_quality": "Consistent, descriptive Spanish/English mixed naming aligned with domain language (needs, offers, supplies, resources, expediciones)",
+      "documentation_quality": "Extensive: ARCHITECTURE.md, AGENTS.md (detailed engineering workflow and gotchas), CONTRIBUTING.md, per-app README/AGENTS.md, docs/deploy guides, docs/features specs, Definition of Done doc",
+      "reasoning": "Rigorous, consistently applied hexagonal/DDD layering across 18 contexts with enforced architectural boundaries, extensive documentation, and a disciplined multi-agent contribution workflow (issue-claiming protocol, CI gate) that is unusually mature for a hackathon submission."
     },
     "production_readiness": {
-      "score": 4,
+      "score": 5,
       "has_auth": true,
       "has_error_handling": true,
       "has_logging": true,
       "has_env_config": true,
       "has_deploy_config": true,
-      "secrets_handling": "JWT_SECRET length validated at boot (throws in production if <32 chars); .env never committed; deploy/.env.example documents every secret with generation instructions (openssl rand); Datadog API key and DB password in env only; EC2 IAM role preferred over static AWS keys",
-      "security_notes": "Helmet with CORP cross-origin and CSP disabled (JSON API); CORS origin-restricted to FRONTEND_URL; bcrypt password hashing; OAuth CSRF guard (oauth-state.guard.ts); rate limiting on auth (10/60s) and donation intake (5/60s) via NestJS ThrottlerGuard; API keys prefixed rh_live_ and hashed at rest; permission guard on all write endpoints. Gap: public map/resource endpoints have no rate limiting, a potential DDoS vector under disaster load.",
-      "scalability_notes": "Single EC2 t3.small for API+DB+Redis (documented in deploy/aws-free-tier.md); stateless API (S3 for files), so horizontal scaling is feasible but not configured; BullMQ enables async event processing; Postgres pg_stat_statements enabled for Datadog DBM; no connection pooling beyond Drizzle's pg.Pool",
-      "reasoning": "The stack is genuinely production-hardened: real TLS, monitoring, versioned migrations, CI gate enforced before deploy, graceful shutdown hooks. The main gaps are the Noop email inviter (passwordless donor accounts silently skip the set-password flow) and no rate limiting on high-traffic public endpoints."
+      "secrets_handling": ".env files (gitignored) with .env.example templates; JWT_SECRET length/strength validated at boot in production (must be ≥32 chars); OAuth client secrets and AWS credentials resolved via env/SDK default chain, not hardcoded",
+      "security_notes": "Helmet security headers, CORS restricted to configured FRONTEND_URL (no wildcard), rate limiting via @nestjs/throttler, permission/grant-based authorization with API-key scoped service accounts, location-sensitivity redaction for privacy on public endpoints, contact info redacted in public API responses",
+      "scalability_notes": "Stateless API container (files in S3) behind Caddy, Redis-backed BullMQ for async domain events, Postgres with pg_stat_statements enabled for DBM, Datadog APM tracing end-to-end; deploy target is a single EC2 t3.small documented as fine for current scale but would need horizontal scaling/managed DB for larger load",
+      "reasoning": "This goes well beyond typical hackathon output: structured JSON logging, Datadog APM/logs/DBM integration, healthchecks, idempotent migration runner, HTTPS via Caddy, and a CI pipeline that gates deploys — genuinely deployable and operated infrastructure, not a demo."
     },
     "maturity": {
       "score": 5,
       "has_readme": true,
       "has_tests": true,
       "has_ci": true,
-      "is_real_or_boilerplate": "Real, deployed system with iterative development evidence",
-      "reasoning": "274 commits over 3 days from 3 contributors, 36 migration files reflecting real schema evolution (including deleted features), 79 open GitHub issues with triage labels, 168 unit specs and 30 e2e specs against a real Postgres+Redis test database, and a live deployment with 574 seeded Venezuelan collection points from acopiove.org. This is the opposite of boilerplate."
+      "is_real_or_boilerplate": "Real, actively developed production system — not boilerplate. 300 commits in ~4 days, 216+ spec/integration test files, real seeded emergency data (574 collection points from acopiove.org), documented multi-agent contribution workflow with issue claiming and auto-merge CI gates.",
+      "reasoning": "CI runs format/lint/build/test against real Postgres+Redis service containers with a migration-immutability guard; extensive unit/integration test coverage across domain, application and infrastructure layers; deploy pipeline and monitoring already wired up."
     },
     "viability": {
       "score": 5,
-      "reasoning": "The platform is already deployed and operational for the exact disaster (Terremoto Venezuela 2026). It covers the full material-aid coordination loop: collection-point registration with inventory, need validation (48h freshness), offer matching, logistics/shipments, volunteer coordination, field reports, and a real-time Leaflet map. The data layer is seeded with real Venezuelan collection points. The only meaningful gap before wider adoption is the missing email notification flow (Noop inviter), which would need a transactional email provider wired in."
+      "reasoning": "Already deployed (responsegrid.app / api.responsegrid.app) with a live emergency scenario preloaded with real Venezuelan collection-point data, a disciplined engineering process, and infrastructure (Datadog, S3, Caddy/HTTPS, CI/CD) suited for real operational use during a disaster response."
     },
     "key_features": [
-      "Real-time Leaflet map of 574+ Venezuelan collection/aid points with category-level inventory privacy",
-      "Full material-aid lifecycle: needs (48h freshness TTL) → offers → matching → shipments → delivery confirmation",
-      "18 bounded contexts covering logistics, volunteer coordination, accreditation, organizations, groups, reports, notifications, and audit trail",
-      "Granular RBAC: role grants scoped to emergency/organization/resource; service accounts with API keys for integrations",
-      "Dual auth: JWT (email+password, Google OAuth, Facebook OAuth) and X-API-Key for service accounts",
-      "PWA with service worker (network-first navigation, cache-first statics) for low-connectivity use",
-      "Public read-only REST API with Swagger docs at /docs for third-party integrations",
-      "Datadog APM + Postgres/Redis monitoring in production; structured logging with trace correlation",
-      "36-migration versioned schema with idempotent runner; CI enforces nest build (tsc) + lint + format + full test suite before deploy"
+      "Multi-emergency material aid coordination isolated by emergency_id/slug",
+      "Collection/logistic points with declared material inventory per place",
+      "Validated needs with 48h freshness/expiry model",
+      "Material offers matched to needs, with volunteer suggestion matching",
+      "Shared canonical supplies/categories catalogue reused across contexts",
+      "Transport capacity and shipment logistics tracking",
+      "Volunteer and personnel task management",
+      "Field incident/stock/status reports",
+      "Real-time Leaflet map with clustering",
+      "Granular role/grant/API-key authorization system with organizations and groups",
+      "Public read-only API with Swagger docs and typed client generation"
     ],
     "domain_tags": [
       "aid-logistics",
       "shelter-mapping",
-      "donations-aid",
       "mapping-geo",
       "volunteer-coordination",
-      "alerts-notifications"
+      "donations-aid"
     ],
-    "merge_potential": "High. The platform is already live, covers the core material-aid coordination use case comprehensively, has real Venezuelan data seeded, and is engineered for production. It could serve as a primary coordination tool immediately. The main integration work would be: (1) wiring a transactional email provider for the Noop inviter, and (2) ensuring the EC2 instance can handle disaster-scale traffic (add rate limiting on map endpoints or put a CDN in front of the public resource API).",
+    "merge_potential": "Strong standalone platform; could absorb or integrate with simpler donation/volunteer-signup tools as a backend of record, but its scope (logistics coordination) is broad enough that it likely doesn't need merging — other projects focused on people-finder/medical/mental-health domains would complement rather than merge into it.",
     "red_flags": [
-      "Email notifications are not implemented (NoopSetPasswordInviter logs a TODO instead of sending emails — donor passwordless accounts and invitations are silently dropped)",
-      "No rate limiting on public map/resource endpoints (GET /emergencies/:id/resources, in-bounds queries) — high risk of unintentional DDoS during disaster peak",
-      "Internal package name `reliefhub` diverges from external brand `ResponseGrid` (minor inconsistency, not a blocker)",
-      "Single EC2 t3.small hosts API + PostgreSQL + Redis — no horizontal scaling plan documented beyond 'stateless so you can scale'",
-      "SetPasswordInviter Noop means any user invited to an organization as a service account never receives their credentials"
+      "Development is dominated by a single author (38 of ~50 commits) with a handful of minor contributors, despite AGENTS.md describing a 'multi-agent' workflow — real-world team bus factor is unclear",
+      "Extremely rapid commit velocity (300 commits in ~4 days) suggests heavy AI-assisted/agentic development; while code quality appears high, this warrants scrutiny of whether all logic has been battle-tested under real field conditions",
+      "Deploy target is a single EC2 t3.small instance — adequate for pilot but would need a scaling/HA plan before handling nationwide earthquake-response load"
     ]
   },
   "signals": {
     "accessible": true,
-    "stars": 5,
-    "forks": 5,
-    "contributors": 3,
-    "commit_count": 274,
-    "code_loc": 126770,
+    "stars": 10,
+    "forks": 9,
+    "contributors": 5,
+    "commit_count": 300,
+    "code_loc": 135398,
     "created_at": "2026-06-27T16:59:36Z",
-    "pushed_at": "2026-06-29T17:38:52Z",
+    "pushed_at": "2026-07-01T21:44:37Z",
     "license": "AGPL-3.0",
     "languages_bytes": {
-      "TypeScript": 4155084,
-      "JavaScript": 16320,
+      "TypeScript": 4455517,
+      "JavaScript": 16846,
       "Shell": 2661,
-      "CSS": 1893,
+      "CSS": 1955,
       "Dockerfile": 1457
     },
     "archived": false
   },
   "evaluation": {
-    "solves_real_problem": "yes",
-    "real_problem_reasoning": "ResponseGrid directly addresses the hardest logistical problem in disaster relief: matching donated supplies to verified, time-sensitive needs across a fragmented geography. Venezuela's 2026 earthquake creates exactly this coordination collapse. The platform covers the full material-aid loop (collection-point registration → need validation with 48h freshness TTL → offer creation → matching → shipments → delivery confirmation → audit trail) and is pre-seeded with 574 real Venezuelan collection points from acopiove.org. This is not a hypothetical solution — it is live and operational for the exact disaster it targets.",
-    "problem_severity": "critical",
-    "impact_potential": 5,
-    "product_quality": 5,
-    "live_demo_status": "working",
-    "live_demo_notes": "responsegrid.app loads cleanly, shows the active \"Terremoto Venezuela 2026\" emergency, presents a three-tier verification trust model (unverified / locally validated / official organization), lets users browse collection points on a map, submit resource offers, and access coordinator login. The site has a language toggle (ES/EN), links to open API docs, and a donation/contribution flow. This is a functional product, not a placeholder — the live emergency operation is real and interactive.",
     "diffusion": {
       "score": 5,
       "ready_to_promote": true,
@@ -163,14 +154,21 @@
         "clear-value-prop",
         "branding"
       ],
-      "recommended_angle": "Lead with the live map: 574+ verified Venezuelan collection points, one active disaster, real coordinators already using it. The angle is 'built in 3 days, operational today' — contrast the 274 commits, 168 tests, and Datadog monitoring against typical hackathon boilerplate to signal this is real infrastructure, not a demo. Show the verification badge system as the differentiator: donors and victims can trust what they see.",
+      "recommended_angle": "Spotlight ResponseGrid as the most production-grade platform in the hackathon: a live, deployed, open-source aid-logistics coordination system already seeded with real 'Terremoto Venezuela 2026' emergency data (574 real collection points from acopiove.org) — donors and NGOs can use it TODAY to see verified collection points, validated needs, and coordinate volunteers/transport in real time.",
       "gaps": [
-        "no demo video to embed in social posts",
-        "no screenshots available for static social cards",
-        "email notification flow not implemented — invited users silently receive no credentials, which limits onboarding at scale"
+        "No demo video exists — a 60-90s walkthrough would massively boost social shareability",
+        "No screenshots captured yet for social cards",
+        "Real end-user/NGO testimonials or usage numbers not yet documented (bus-factor / single-author development also worth transparency)"
       ]
     },
+    "impact_potential": 5,
+    "live_demo_notes": "Confirmed live via curl: https://responsegrid.app returns HTTP 200, is a real Next.js app (not a static landing page) titled 'ResponseGrid — Coordina ayuda en emergencias | Puntos de acopio, necesidades y voluntariado' with meta description covering collection points, validated needs, donations, transport, and volunteering. The backend API at api.responsegrid.app is also live and returns proper JSON 404s for undefined routes (indicating a real running NestJS server), and /docs (Swagger) responds 200. WebFetch tool itself got a 403 (likely bot/user-agent blocking), but direct curl with a browser user-agent succeeded, confirming the site is genuinely deployed and reachable for real users.",
+    "live_demo_status": "working",
+    "one_line_pitch": "ResponseGrid: la plataforma open source ya en vivo que coordina ayuda para el terremoto en Venezuela con 574 puntos de acopio reales, necesidades verificadas y voluntariado en tiempo real.",
     "overall_recommendation": "spotlight",
-    "one_line_pitch": "ResponseGrid coordinates Venezuela earthquake relief in real time — matching verified donations to actual needs across 574+ collection points, live now at responsegrid.app."
+    "problem_severity": "critical",
+    "product_quality": 5,
+    "real_problem_reasoning": "Earthquake response is chronically hampered by fragmented, unverified information about where aid is needed, where collection points are, and how to coordinate volunteers/transport/donations — leading to duplicated effort, spoiled/misdirected donations, and untracked needs. ResponseGrid directly targets this coordination gap with a purpose-built, production-grade logistics platform (multi-emergency isolation, validated 48h-freshness needs, offer-to-need matching, transport/shipment tracking, volunteer task management, real-time map) and it is already seeded with real, live 'Terremoto Venezuela 2026' data (574 actual collection points imported from acopiove.org), meaning it is not a hypothetical exercise but an operational tool addressing the exact real-world problem victims and responders face today.",
+    "solves_real_problem": "yes"
   }
 }

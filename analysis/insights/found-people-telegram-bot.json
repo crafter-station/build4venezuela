@@ -11,20 +11,23 @@
   "db_description": "## What did you build?\n\n**Personas Encontradas VE** is a Telegram bot and public API that helps people search public reports of individuals found or located after the earthquakes in Venezuela.\n\nIn emergencies, information is often scattered across spreadsheets, websites, community projects, and social posts. This project brings those public records into one searchable place, while keeping each result linked to its original source for verification.\n\nPeople can use the Telegram bot to search by name or Venezuelan ID number, browse recent records, check current sources, and submit found-person reports for review. Developers and organizations can also integrate through a stable public API.\n\n## Who is it for?\n\nThis is for families looking for loved ones, community volunteers organizing emergency information, local initiatives publishing found-person data, and developers building humanitarian tools.\n\n## How does it help?\n\n- Makes scattered public information searchable from Telegram.\n- Keeps records source-linked so people can verify them.\n- Supports citizen and partner reports.\n- Provides a public API for other tools and organizations.\n- Handles sensitive data carefully by avoiding unnecessary exposure of names, document IDs, raw messages, tokens, or private payloads in logs and analytics.\n\n## What should people try first?\n\nStart with the Telegram bot:\n\nhttps://t.me/encontrados_ve_bot\n\nTry:\n\n- `/ayuda` to see how it works.\n- `/buscar Nombre Apellido` to search by name.\n- `/buscar V12345678` to search by Venezuelan ID.\n- `/lista` to browse records.\n- `/fuentes` to see current data sources.\n\nThe project is open source here:\n\nhttps://github.com/edwinvrgs/found-people-ve-bot",
   "lifecycle_status": "ready_to_use",
   "analysis": {
-    "summary": "A genuinely deployed Telegram bot (t.me/encontrados_ve_bot) that aggregates found-persons data from 5 Venezuelan earthquake sources (venezuelatebusca.com, desaparecidosterremotovenezuela.com, encuentralos.tecnosoft.dev, desaparecidosvenezuela.com, sosvenezuela2026.com), stores deduplicated records in PostgreSQL, and exposes both a Telegram search interface and a REST API. Built in TypeScript with Fastify and Prisma. 77 commits in ~3 days of active development, with real CI, tests, and security-conscious code. The project is real, working, and already serving users.",
-    "project_type": "Telegram bot + REST API for earthquake victim people-finder, with multi-source data ingestion and deduplication",
+    "summary": "A production-deployed Telegram bot and public REST API for searching people reported found/located after the June 2026 Venezuela earthquakes, built with Fastify, Prisma/Postgres, and Zod, featuring a genuinely well-architected layered codebase (config/http/services/repositories/telegram/ingestion), 71 passing tests, CI, timing-safe auth, rate limiting, and an active deduplication/merge-audit pipeline for ingested data.",
+    "project_type": "Telegram bot + public REST API backend (Node.js/TypeScript) for a family-reunification/people-finder use case",
     "stack": {
       "frontend": [],
       "backend": [
-        "Node.js",
-        "Fastify",
+        "Node.js 22",
         "TypeScript",
-        "Prisma"
+        "Fastify",
+        "Zod",
+        "Pino"
       ],
       "database": [
-        "PostgreSQL (with unaccent extension)"
+        "PostgreSQL",
+        "Prisma ORM (Prisma Client + raw parameterized SQL for pg_trgm/unaccent search)"
       ],
       "infra_deploy": [
+        "Railway",
         "GitHub Actions CI"
       ],
       "ai_ml": [],
@@ -33,27 +36,27 @@
       ]
     },
     "architecture": {
-      "pattern": "Service/Repository with multi-layer ingestion pipeline",
+      "pattern": "Layered service architecture: Fastify HTTP layer -> services -> repositories -> Prisma/raw SQL, with a separate Telegram bot module and an ingestion pipeline for scraping/parsing public sources",
       "uses_orm": true,
-      "orm_or_db_layer": "Prisma ORM with heavy use of $queryRaw for bulk upserts, ILIKE unaccent searches, and performance-critical queries; parameterized throughout (no SQL injection risk)",
-      "api_design": "Fastify REST API (GET /api/people, GET/POST /api/v1/found-people, POST /api/ingest, DELETE /api/people) + Telegram webhook at POST /telegram/webhook; admin endpoints guarded by bearer auth; external report endpoint with timing-safe token comparison",
-      "separation_of_concerns": "Clean four-layer separation: src/ingestion (scraping + dedup), src/repositories (DB access), src/services (business logic), src/http + src/telegram (transport adapters)",
-      "modularity": "Each source has its own adapter in known-sources.ts; dedupe, sanitize, extract-person are isolated modules with corresponding test files",
+      "orm_or_db_layer": "Prisma Client for schema/migrations and simple queries, with parameterized Prisma.sql raw queries for Postgres-specific search (pg_trgm, unaccent, ILIKE) - a deliberate, documented hybrid approach rather than incidental raw SQL",
+      "api_design": "REST-ish Fastify routes with Zod schema validation on all inputs, versioned public API (/api/v1/found-people), separate admin/ingest endpoints behind bearer auth, and a Telegram webhook endpoint behind a secret-token guard",
+      "separation_of_concerns": "Good: config/env, http (app/routes/security/utils/schemas), services, repositories, telegram, ingestion, and analytics are all separated into distinct modules with clear responsibilities",
+      "modularity": "High - repository layer isolates DB access, services layer encapsulates business logic (search criteria building, dedupe, metrics), ingestion pipeline is decoupled from the HTTP server and run as a standalone script",
       "notable_patterns": [
-        "In-memory rate limiting via sliding-window bucket Map (works only single-process)",
-        "In-memory pending chat actions and search token Maps with TTL cleanup (state lost on restart)",
-        "Merge audit trail stored in FoundPeopleMergeAudit table with before/after snapshots",
-        "Idempotency-key header support on external report creation",
-        "PostHog analytics with hashed user identifiers for privacy",
-        "pino logger with explicit redact paths for all secrets/tokens"
+        "Timing-safe bearer token comparison for admin/external API auth",
+        "Per-key in-memory sliding-window rate limiting with periodic sweep",
+        "Idempotency-key support on external report creation",
+        "Deduplication/merge-audit pipeline for ingested records with an audit trail table",
+        "Privacy-conscious analytics: hashed identifiers instead of raw PII, explicit policy against logging tokens/cedulas/notes",
+        "Self-authored architecture audit doc (docs/architecture/backend-audit.md) tracking technical debt and decisions over time"
       ]
     },
     "code_organization": {
-      "score": 4,
-      "directory_structure": "Well-structured: src/{config,http,ingestion,repositories,services,telegram} with clear boundaries; prisma/migrations versioned; docs/architecture present",
-      "naming_quality": "Consistent, descriptive naming throughout; Spanish user-facing strings, English code identifiers",
-      "documentation_quality": "README, CONTRIBUTING.md, SECURITY.md, GitHub issue templates (bug, feature, data source, privacy/correction), PR template, docs/architecture/backend-audit.md all present",
-      "reasoning": "The codebase reflects deliberate architectural thinking with 77 commits in 3 days, test files paired with every module, and documentation covering security and contribution workflows. Minor deduction for no Dockerfile and no explicit OpenAPI schema."
+      "score": 5,
+      "directory_structure": "Clean, purposeful src/ layout: config, http, services, repositories, telegram, ingestion (with a dedupe subfolder), each test file colocated next to its implementation file",
+      "naming_quality": "Consistent, descriptive, domain-specific naming (found-people-service.ts, found-people-repository.ts, chat-registry, search-provider) with no generic placeholder names",
+      "documentation_quality": "Strong: detailed README with live bot/API links, API examples, CONTRIBUTING.md, SECURITY.md, GitHub issue templates, and a dated architecture-audit doc that honestly tracks resolved vs open risks",
+      "reasoning": "This is one of the better-organized hackathon repos: clear module boundaries, tests colocated with source, and unusually mature process docs (CONTRIBUTING, SECURITY, architecture audit) for a project this size."
     },
     "production_readiness": {
       "score": 4,
@@ -62,45 +65,44 @@
       "has_logging": true,
       "has_env_config": true,
       "has_deploy_config": false,
-      "secrets_handling": "All secrets via environment variables; pino logger redacts authorization headers, Telegram token, webhook secret, and DATABASE_URL; external API token comparison uses Node crypto timingSafeEqual",
-      "security_notes": "Rate limiting on all routes (Telegram, public API, admin, external reports); admin bearer comparison is NOT timing-safe (uses string !== directly) unlike the external report endpoint which does use timingSafeEqual — minor inconsistency; Telegram webhook verified via X-Telegram-Bot-Api-Secret-Token; HTML escaping for all user-facing Telegram output prevents injection",
-      "scalability_notes": "In-memory rate-limit buckets, pending chat action state, and search token cache are all Map-based and single-process only — horizontal scaling would require Redis or similar; PostgreSQL with unaccent extension must be pre-installed; no connection pool config beyond PG_POOL_MAX env var",
-      "reasoning": "The bot is live and handling real traffic. Auth, logging with secret redaction, error handling, and rate limiting are all properly implemented. The main production gap is no Dockerfile/compose file, and in-memory state that prevents horizontal scaling — acceptable for a hackathon deployment but would need Redis for any multi-instance setup."
+      "secrets_handling": ".env.example lists all required secrets (INGEST_SECRET, EXTERNAL_API_SECRET, TELEGRAM_WEBHOOK_SECRET, TELEGRAM_BOT_TOKEN, DATABASE_URL); no secrets committed; env.ts centralizes access; SECURITY.md documents a disclosure process",
+      "security_notes": "Admin and external-report endpoints require bearer tokens compared with timingSafeEqual; Telegram webhook validated via a secret header; all inputs validated with Zod; SQL uses Prisma tagged-template parameterization (no injection risk found); rate limiting on public, external, and admin endpoints; body size and request timeout limits set on Fastify instance",
+      "scalability_notes": "Rate limiting and dedup/merge caching are in-process (Map-based), so this only scales safely as a single instance - acceptable for current Railway single-service deployment but would need a shared store (Redis) for horizontal scaling",
+      "reasoning": "No Dockerfile in-repo, but the README documents a live production deployment on Railway with Prisma migrate-deploy as the schema source of truth; CI runs schema validation, typecheck, tests, build, and dependency audit on every PR, and all 71 tests plus typecheck pass locally."
     },
     "maturity": {
-      "score": 4,
+      "score": 5,
       "has_readme": true,
       "has_tests": true,
       "has_ci": true,
-      "is_real_or_boilerplate": "Real, deployed application — bot is live at t.me/encontrados_ve_bot with real user traffic analytics configured via PostHog",
-      "reasoning": "77 commits across 3 days of development, CI pipeline with 4 jobs (typecheck, smoke tests, build, security audit), test files covering ingestion/sanitize/search/repository/rate-limit modules, and a SECURITY.md with a disclosure policy. This is genuine engineering output, not scaffolding."
+      "is_real_or_boilerplate": "real, actively developed production system",
+      "reasoning": "52 commits, 71 passing unit/integration tests across 21 suites, GitHub Actions CI (schema validate, typecheck, smoke tests, build, npm audit), a live public bot (@encontrados_ve_bot) and public API deployed on Railway, plus process docs (CONTRIBUTING, SECURITY, architecture audit) - this is far beyond scaffolding."
     },
     "viability": {
-      "score": 4,
-      "reasoning": "The bot is already deployed and serving users (live Telegram link in package description). The multi-source aggregation from 5 active Venezuelan earthquake data APIs with deduplication, merge audit trail, and both Telegram and REST API interfaces makes it immediately useful. The only meaningful gaps before wider production deployment are a Dockerfile for reproducible deployments and a Redis-backed rate limiter for horizontal scaling."
+      "score": 5,
+      "reasoning": "Already deployed and operating in production against real post-earthquake data sources, with a working Telegram bot, versioned Postgres schema/migrations, dedupe/merge auditing for data quality, and a security/rate-limit posture appropriate for a public-facing service - this is the most production-ready and directly deployable project of the reviewed set."
     },
     "key_features": [
-      "Multi-source ingestion from 5 live Venezuelan earthquake people-finder APIs with pagination and retry logic",
-      "Content-addressable deduplication via source hash with merge audit trail (FoundPeopleMergeAudit table)",
-      "Telegram bot with name/ID search, paginated list, source attribution, feedback reporting, and admin commands",
-      "Rate limiting on all surfaces (Telegram chats, public API, admin API, external reports) with per-IP and per-chat keys",
-      "External REST API (GET /api/v1/found-people) with search by name, cedula, or free text for third-party integrations",
-      "External report ingestion endpoint with idempotency-key support for partner services to submit new sightings",
-      "ILIKE + unaccent search enabling accent-insensitive Spanish name matching",
-      "PostHog analytics with hashed identifiers preserving privacy while tracking search patterns",
-      "Scraping quality filters (isClearlyBadName, LOW_SIGNAL_PLACEHOLDER_NAMES set) to suppress junk data"
+      "Telegram bot search by name or Venezuelan cedula/ID with paginated results",
+      "Public read API (/api/v1/found-people) for third-party integrations with name/documentId/free-text search",
+      "Authenticated external-report submission endpoint with idempotency-key support",
+      "Admin ingest and delete endpoints protected by bearer auth",
+      "Automated ingestion pipeline scraping/consolidating multiple public found-person data sources with sanitization and extraction logic",
+      "Deduplication and merge-audit system that records before/after state when merging duplicate found-person records",
+      "Telegram chat registry for future broadcast messaging, with opt-out tracking",
+      "Privacy-preserving analytics via PostHog using hashed identifiers, plus structured Pino logging"
     ],
     "domain_tags": [
       "people-finder",
-      "family-reunification"
+      "family-reunification",
+      "comms-chat",
+      "alerts-notifications"
     ],
-    "merge_potential": "High — this is a working, live aggregation layer that could serve as the canonical people-finder backend for the hackathon, with its REST API already designed for third-party integration. Other projects could point their frontends at /api/v1/found-people rather than building their own scrapers.",
+    "merge_potential": "Strong candidate to be a core, standalone production service for the hackathon's people-finder need; other projects (shelter-mapping, donations-aid, volunteer-coordination) could integrate with its public /api/v1/found-people API rather than duplicating found-person search/dedupe logic.",
     "red_flags": [
-      "In-memory rate limiting (Map) is reset on every process restart and breaks under horizontal scaling — no Redis/shared store",
-      "Admin bearer token comparison uses direct string !== (not timing-safe) unlike the external API which correctly uses timingSafeEqual",
-      "No Dockerfile or docker-compose — deployment process is undocumented and potentially fragile",
-      "In-memory pending chat actions and search token Maps mean state is lost on restart, causing confusing UX for active Telegram conversations",
-      "PostgreSQL unaccent extension must be installed separately — not automated in migrations beyond CREATE EXTENSION IF NOT EXISTS"
+      "In-memory rate limiting and dedupe caches will not scale beyond a single server instance without a shared store",
+      "No Dockerfile or explicit deploy config committed to the repo (relies on Railway's implicit Node build), so deployment reproducibility outside Railway is undocumented",
+      "Data quality depends entirely on third-party scraped sources (OCR data, community sites) with no independent verification beyond source-hash dedup"
     ]
   },
   "signals": {
@@ -119,29 +121,28 @@
     "archived": false
   },
   "evaluation": {
-    "solves_real_problem": "yes",
-    "real_problem_reasoning": "Families separated by the Venezuela earthquake face a fragmented information landscape: found-person reports are scattered across 5+ spreadsheets, websites, and social posts with no unified search. This bot directly solves that by aggregating all those sources into a single searchable Telegram interface accessible on any phone, with name and cedula (national ID) search in Spanish — exactly the tools a family in crisis would use. The problem is severe, time-sensitive, and the solution is already live and serving users.",
-    "problem_severity": "critical",
-    "impact_potential": 5,
-    "product_quality": 4,
-    "live_demo_status": "no-public-demo",
-    "live_demo_notes": "The Telegram bot at t.me/encontrados_ve_bot is live and serving real users, but there is no public web UI or demo video. Evaluators and press cannot view the product without opening Telegram. A short screen recording of a /buscar query returning results would make promotion significantly easier.",
     "diffusion": {
       "score": 3,
       "ready_to_promote": true,
       "available_assets": [
-        "live-demo",
         "clear-value-prop"
       ],
-      "recommended_angle": "Frame it around the human moment: a family typing a name into Telegram and finding their relative in the list. Lead with the Telegram link (t.me/encontrados_ve_bot), call out the 5-source aggregation and cedula search, and emphasize that it is free, open-source, and already working today. Target Venezuelan diaspora communities and humanitarian orgs on Twitter/X and Instagram.",
       "gaps": [
-        "No demo video or screen recording of a live search",
-        "No screenshots showing the bot UI or a real result",
-        "No project logo or visual branding",
-        "No evidence of real user numbers or testimonials"
-      ]
+        "No demo video showing the bot in action",
+        "No screenshots of Telegram bot conversation/search results",
+        "No dedicated landing page or web demo (repo + Telegram link only)",
+        "Real usage/adoption numbers (how many families actually used it) not verifiable"
+      ],
+      "recommended_angle": "Lead with the live, working Telegram bot (@encontrados_ve_bot) as a real tool families can use RIGHT NOW to search for loved ones found/located after the Venezuela earthquakes — 'search by name or cedula in seconds, from Telegram, no app install needed' — paired with a screen-recording GIF of a /buscar query to compensate for the missing demo video."
     },
+    "impact_potential": 5,
+    "live_demo_notes": "No web demo URL provided (repo link only). The team's pitch references a live Telegram bot at https://t.me/encontrados_ve_bot with commands (/ayuda, /buscar, /lista, /fuentes), but per task instructions this counts as a repo/chat link rather than a verifiable public web demo, so status is set to no-public-demo. Could not independently interact with the bot in this environment.",
+    "live_demo_status": "no-public-demo",
+    "one_line_pitch": "Busca a tus seres queridos encontrados tras los terremotos en Venezuela directo desde Telegram — escribe /buscar y en segundos accedes a reportes verificados de personas localizadas.",
     "overall_recommendation": "promote",
-    "one_line_pitch": "Busca a tus seres queridos después del terremoto: un bot de Telegram que unifica 5 bases de datos venezolanas de personas encontradas y permite buscar por nombre o cédula en segundos."
+    "problem_severity": "critical",
+    "product_quality": 5,
+    "real_problem_reasoning": "Post-earthquake family reunification is a textbook critical humanitarian need: information about found/located persons is scattered across spreadsheets, community sites, and social posts, making it hard for families to find loved ones or verify reports. This project directly addresses that by consolidating public found-person data into a searchable Telegram bot (low-friction, no app install, works on basic phones/data connections common in crisis conditions) plus a public API so other humanitarian tools can reuse the data instead of duplicating scraping/dedupe work. It also thoughtfully handles sensitive PII (hashed analytics identifiers, no raw cedula/token logging) and keeps every record source-linked for verification, which matters enormously for trust in a domain prone to misinformation.",
+    "solves_real_problem": "yes"
   }
 }

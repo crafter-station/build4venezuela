@@ -793,9 +793,18 @@
           "none": "Sain"
         },
         "auditedAt": "Audité {date}",
+        "reauditedAt": "Ré-audité {date}",
+        "previously": "était {risk}",
         "notAudited": "Non audité — le dépôt n'a pas pu être cloné.",
         "clean": "Aucun problème d'exposition trouvé lors de cet audit.",
-        "issueLink": "Voir l'issue de divulgation →"
+        "allResolved": "Tous les problèmes signalés sont désormais corrigés.",
+        "issueLink": "Voir l'issue de divulgation →",
+        "status": {
+          "open": "ouvert",
+          "partial": "partiel",
+          "resolved": "corrigé",
+          "new": "nouveau"
+        }
       }
     },
     "stackCharts": {

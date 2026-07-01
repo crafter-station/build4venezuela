@@ -11,64 +11,63 @@
   "db_description": "Acopio nació como respuesta a un problema concreto: en situaciones de emergencia, la ayuda humanitaria se dispersa porque no existe información centralizada y actualizada sobre qué necesita cada centro de acopio. La comunicación ocurre por WhatsApp, el esfuerzo solidario se concentra en los centros más conocidos mientras otros quedan desabastecidos, y los voluntarios no saben a dónde ir ni qué llevar.\nAcopio resuelve esto con una plataforma web simple: cada centro registra su perfil y publica actualizaciones en tiempo real sobre sus necesidades. La ciudadanía accede a un feed público donde puede ver, filtrar y decidir cómo ayudar de forma concreta e informada.\nEl proyecto es gratuito, sin publicidad y de acceso abierto. Fue construido con React, Vite, Supabase y PostGIS, con foco en ser liviano, rápido de adoptar y fácil de operar incluso desde un celular básico. Entre más centros participan, más útil se vuelve para todos — es infraestructura solidaria que escala con la comunidad.",
   "lifecycle_status": "ready_to_use",
   "analysis": {
-    "summary": "Acopio-VZLA (also named \"saman\" internally) is a fully functional React SPA for registering and browsing Venezuelan earthquake aid-collection centers (centros de acopio). The app is already live on Vercel. It uses Supabase as the entire backend (Auth, PostgreSQL+PostGIS, Storage, Realtime) and implements a Twitter/Instagram-style feed of updates per center, community posts, comments, notifications via DB trigger, shelter announcements, and photo upload with client-side compression. Codebase is domain-specific, Spanish-language, and was built rapidly but deliberately over ~2 days with 23 commits. Tests exist and achieve ~99% line coverage. No CI, no server-side code beyond Supabase SQL/RLS.",
-    "project_type": "Frontend SPA (React/Vite) backed by Supabase BaaS",
+    "summary": "Acopio (rebranded Saman) is a mobile-first React/Vite/Supabase web app for tracking humanitarian collection centers (centros de acopio) after the 2025 Venezuela earthquake, letting coordinators post real-time needs and citizens find nearby centers, with a community feed, comments, notifications, and transport/lodging listings. It is a genuinely working MVP with real Supabase auth, RLS-secured Postgres/PostGIS schema, realtime subscriptions, image upload/compression, high test coverage, and CI, and is live-deployed at acopiovzla.vercel.app.",
+    "project_type": "web app",
     "stack": {
       "frontend": [
         "React 18",
-        "TypeScript",
         "Vite",
-        "Tailwind CSS",
-        "TanStack Query v5",
+        "TypeScript",
         "React Router v6",
-        "shadcn/ui primitives",
-        "Lucide React"
+        "TanStack Query",
+        "Tailwind CSS",
+        "lucide-react"
       ],
       "backend": [
-        "Supabase (Auth, PostgREST, Realtime, Storage)",
-        "PostgreSQL with PostGIS",
-        "PLpgSQL triggers and RPC functions"
+        "Supabase (BaaS) — no custom server"
       ],
       "database": [
-        "Supabase PostgreSQL",
-        "PostGIS (geom column + GIST index for KNN)",
-        "10 versioned migrations"
+        "Postgres via Supabase",
+        "PostGIS (geography/GIST index)",
+        "pgcrypto"
       ],
       "infra_deploy": [
-        "Vercel (live at acopiovzla.vercel.app)",
-        "Supabase Cloud"
+        "Vercel (live homepage, no vercel.json but auto-deploy)",
+        "Supabase CLI migrations",
+        "GitHub Actions CI (lint/typecheck/test/build/gitleaks)",
+        "lefthook pre-commit hooks"
       ],
       "ai_ml": [],
       "languages": [
         "TypeScript",
         "PLpgSQL",
-        "JavaScript",
+        "HTML",
+        "CSS",
         "Shell"
       ]
     },
     "architecture": {
-      "pattern": "Feature-sliced SPA with BaaS (no custom server)",
+      "pattern": "Feature-folder SPA (feature-sliced) consuming a BaaS directly from the client, no backend/API layer",
       "uses_orm": false,
-      "orm_or_db_layer": "Supabase JS SDK (@supabase/supabase-js) calling PostgREST and RPCs directly — no ORM. SQL logic lives in versioned PLpgSQL migrations and RPC functions (e.g. centros_cercanos using PostGIS KNN). RLS is the sole authorization layer.",
-      "api_design": "No custom API server. All data access goes through Supabase PostgREST (table queries), Supabase RPC (centros_cercanos geo query), Supabase Realtime (postgres_changes), and Supabase Storage.",
-      "separation_of_concerns": "Clean: src/features/{domain}/{queries,mutations,realtime}.ts holds data logic; src/components/ holds UI; src/pages/ holds route-level composition; src/lib/ holds singletons (supabase client, storage utils, geo). No feature logic bleeds into pages.",
-      "modularity": "Well-modularized by domain feature (centros, posts, notificaciones, anuncios, auth). Components further split into layout, post, centro, common, ui, toast, notificacion, anuncio subdirectories.",
+      "orm_or_db_layer": "Direct Supabase JS client (postgrest) calls in src/features/*/queries.ts and mutations.ts; DB logic (RLS, RPC functions like centros_cercanos, triggers) lives in versioned SQL migrations under supabase/migrations",
+      "api_design": "No REST/GraphQL API of its own; all data access goes through Supabase's auto-generated PostgREST API and RPC functions, called via @supabase/supabase-js from React Query hooks",
+      "separation_of_concerns": "Clean separation between features (auth/centros/posts/anuncios/notificaciones), UI components, and lib utilities (supabase client, storage/image compression, theme); each feature has queries.ts/mutations.ts with matching test files",
+      "modularity": "Good — small, focused files per feature and component, generated DB types (database.generated.ts) kept in sync via supabase gen types",
       "notable_patterns": [
-        "TanStack Query for all async state with cache invalidation on mutations",
-        "Optimistic updates implemented for post-util toggles",
-        "DB-level auto-notifications via PLpgSQL trigger (trg_notificar_comentario)",
-        "Realtime subscriptions scoped per-centro with proper useEffect cleanup",
-        "Client-side image compression before upload (canvas.toBlob quality loop)",
-        "RLS-enforced coordinador_id — never trusted from client payload",
-        "Nominatim geocoding with 1 req/sec throttle awareness for geocoding form fields"
+        "Row Level Security policies enforced at the Postgres level for every table (centros_acopio, posts, comentarios, notificaciones, anuncios)",
+        "Optimistic updates with TanStack Query onMutate/onError for 'útil' reactions",
+        "Realtime subscriptions (posts/realtime.ts, anuncios/realtime.ts) via Supabase channels",
+        "Client-side image compression before upload to Supabase Storage",
+        "PostGIS-based nearest-centers RPC (centros_cercanos) using ST_Distance/KNN operator",
+        "AI-assisted dev workflow artifacts (docs/superpowers plans/specs, AGENTS.md, .opencode) showing structured planning per feature"
       ]
     },
     "code_organization": {
       "score": 4,
-      "directory_structure": "Textbook feature-slice layout under src/features/, src/components/, src/pages/, src/lib/. Supabase migrations numbered sequentially (00001–00010). Test mocks isolated in src/test/mocks/. Docs in /docs with PRD.md and ARCHITECTURE.md.",
-      "naming_quality": "Consistently domain-appropriate Spanish naming throughout (centros_acopio, coordinador_id, necesidades, notificacion, anuncio) matching the real Venezuelan context. TypeScript interfaces are explicit and match DB schema.",
-      "documentation_quality": "README is detailed and accurate covering setup, migrations, testing, build, and security model. ARCHITECTURE.md and PRD.md provide additional product/technical context. Inline comments in migrations explain each section.",
-      "reasoning": "The codebase is organized well beyond typical hackathon quality, with clear feature separation, proper migration versioning, and meaningful documentation. Committed coverage-summary.json with a Linux path (/home/imn0p/) is a minor artifact of rushed workflow."
+      "directory_structure": "Clear feature-first layout (src/features, src/components, src/pages, src/lib, src/types) mirrored by supabase/migrations for schema evolution; docs/PRD.md and docs/ARCHITECTURE.md exist.",
+      "naming_quality": "Consistent Spanish domain naming (centros, anuncios, comentarios, necesidades) matching the product domain; TypeScript types generated from DB schema.",
+      "documentation_quality": "Above average for a hackathon project — PRD, ARCHITECTURE.md, CONTRIBUTING.md, per-feature planning docs, and .env.example are present.",
+      "reasoning": "Well-organized feature-sliced SPA with matching test files per module and DB-generated types, though the .opencode/.superpowers/.codegraph scaffolding folders add some clutter."
     },
     "production_readiness": {
       "score": 3,
@@ -76,67 +75,60 @@
       "has_error_handling": true,
       "has_logging": false,
       "has_env_config": true,
-      "has_deploy_config": false,
-      "secrets_handling": "VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env (gitignored). .env.example committed. The anon key is intentionally public per Supabase design; actual authorization is enforced by RLS.",
-      "security_notes": "RLS enforced on all tables (centros_acopio, posts, post_comentario, notificacion, anuncio, anuncio_util) and Storage buckets. coordinador_id always derived from auth.uid() server-side. Notification trigger uses SECURITY DEFINER. No custom API surface to exploit.",
-      "scalability_notes": "PostGIS KNN index for geo queries scales well. TanStack Query caching reduces redundant fetches. Realtime throttled to 2 events/second. Supabase free tier may hit connection limits under load; no connection pooling config visible.",
-      "reasoning": "The app is genuinely deployed and functional with proper RLS security. Gaps are: no CI pipeline, no Dockerfile or explicit deploy config (Vercel auto-detects), no structured error logging/monitoring, and no rate-limiting on write mutations beyond Supabase defaults."
+      "has_deploy_config": true,
+      "secrets_handling": ".env is gitignored and .env.example provided; an early commit briefly added a .env but it only contained a placeholder test URL/key, not real secrets; CI runs gitleaks secret scanning.",
+      "security_notes": "Auth via Supabase (email/password) with RLS policies scoping writes to the authenticated owner (coordinador_id/user_id) on every table; anon key is public by design (expected for Supabase). No rate limiting or abuse protection visible for post creation, and no server-side validation beyond Postgres constraints/RLS.",
+      "scalability_notes": "Fully offloaded to Supabase (Postgres/Auth/Storage/Realtime) which can scale reasonably for a regional MVP; PostGIS index for geo queries is a sound choice; no caching/CDN config beyond Vercel static hosting; no background jobs/queue for notification fan-out.",
+      "reasoning": "Genuinely deployed, functioning app (live URL) with real auth, DB constraints/RLS, image handling, and CI gates, but lacks structured logging/observability, rate limiting, and a formal deploy config file (vercel.json), keeping it below full production-grade."
     },
     "maturity": {
-      "score": 3,
+      "score": 4,
       "has_readme": true,
       "has_tests": true,
-      "has_ci": false,
-      "is_real_or_boilerplate": "Real, purpose-built application. Domain-specific logic throughout (Venezuelan cities, earthquake relief terminology, PostGIS KNN for nearby centers, PLpgSQL notification triggers). Not boilerplate.",
-      "reasoning": "23 commits in ~2 days shows rapid but genuine development. Test coverage is impressively high (99% lines, 92% functions via Vitest+MSW) for a hackathon. The absence of any CI config and the committed coverage file with a developer's local Linux path are hallmarks of move-fast hackathon velocity."
+      "has_ci": true,
+      "is_real_or_boilerplate": "real",
+      "reasoning": "33 commits, 28 test files with ~99% line coverage, GitHub Actions CI (lint/typecheck/test/build/gitleaks), pre-commit hooks via lefthook, 11 sequential SQL migrations reflecting iterative real feature work (comments, notifications, transport listings), and a live Vercel deployment — this is a functioning, actively iterated MVP, not empty scaffolding."
     },
     "viability": {
       "score": 4,
-      "reasoning": "The app is already live and usable at acopiovzla.vercel.app. The core value proposition — publicly browsable map of aid collection centers with real-time updates, coordinator-managed posts, community feed, and shelter announcements — directly addresses earthquake victim needs. The Supabase free tier can handle small-to-medium traffic; scaling to Supabase Pro is straightforward. The only real gap for sustained deployment is lack of monitoring and CI."
+      "reasoning": "The core loop (find nearby centers, see real-time needs, coordinators post updates, community interacts) is fully implemented end-to-end with a live deployment, solid data model, and RLS security, making it realistically deployable to help coordinate earthquake relief; remaining gaps are operational (logging/monitoring, abuse prevention, moderation) rather than missing core functionality."
     },
     "key_features": [
-      "Aid collection center registry with PostGIS-powered nearby search",
-      "Coordinator-managed posts per center with photo upload (client-side compression)",
-      "Real-time feed updates via Supabase Realtime (postgres_changes)",
-      "Community feed for general posts not tied to a center",
-      "Comments on posts with DB-trigger-based notifications to coordinators",
-      "Shelter availability announcements (hospedaje type, extensible)",
-      "Public read without login; write requires Supabase Auth",
-      "Geocoding via Nominatim (OpenStreetMap) with manual fallback",
-      "Mobile-first layout with responsive desktop sidebar",
-      "Light/dark theme support",
-      "Needs tagging (necesidades) with predefined + custom chips"
+      "Geolocation-based discovery of nearby collection centers via PostGIS RPC",
+      "Coordinator posts with 'necesidades' (needs) tags and photo uploads",
+      "Realtime feed updates via Supabase Realtime channels",
+      "Comments and 'útil' (helpful) reactions on posts with optimistic UI updates",
+      "In-app notifications for centro-related activity",
+      "Community wall and transport/lodging (anuncios) listings",
+      "Light/dark theme toggle, mobile bottom nav and desktop sidebar layouts"
     ],
     "domain_tags": [
-      "donations-aid",
-      "shelter-mapping",
       "aid-logistics",
+      "donations-aid",
       "mapping-geo",
-      "alerts-notifications",
-      "volunteer-coordination"
+      "volunteer-coordination",
+      "alerts-notifications"
     ],
-    "merge_potential": "Low — this is a self-contained SPA with its own Supabase backend. It could be featured as a standalone tool or linked from a portal, but its architecture (client-only, Supabase BaaS) makes it difficult to merge with server-rendered or differently-architected projects without significant rework.",
+    "merge_potential": "Strong candidate to be a primary/base project for aid-center coordination given its working data model, RLS security, and live deployment; could merge with a shelter-mapping or people-finder project by reusing its Supabase geo-query pattern (centros_cercanos RPC) and notification system as shared infrastructure.",
     "red_flags": [
-      "No CI/CD pipeline — no automated test runs on push, no build verification before deploy",
-      "Committed coverage/coverage-summary.json with developer's local Linux path reveals rushed workflow",
-      "Single contributor — bus-factor of 1 with no review process",
-      "No error monitoring or logging (no Sentry, no structured logs)",
-      "Supabase free tier has row/storage/bandwidth limits that could be hit in a real emergency surge",
-      "No rate-limiting on write mutations (centro creation, post creation) beyond Supabase defaults — potential for spam/abuse in a public emergency context"
+      "No rate limiting/abuse controls on post/anuncio creation, which is risky for a public emergency-info tool",
+      "No structured logging/monitoring/error-tracking (e.g., Sentry) despite being a live production deployment",
+      "All backend logic lives in Supabase RLS/RPC with no server-side validation layer, so correctness depends entirely on getting Postgres policies exactly right",
+      "Single contributor (bus factor of 1) despite CONTRIBUTING.md and PR template suggesting an intended team"
     ]
   },
   "signals": {
     "accessible": true,
     "stars": 1,
-    "forks": 0,
+    "forks": 1,
     "contributors": 1,
-    "commit_count": 23,
-    "code_loc": 7867,
+    "commit_count": 33,
+    "code_loc": 8181,
     "created_at": "2026-06-27T19:54:26Z",
-    "pushed_at": "2026-06-29T17:49:43Z",
+    "pushed_at": "2026-06-29T23:08:22Z",
     "license": null,
     "languages_bytes": {
-      "TypeScript": 259262,
+      "TypeScript": 270471,
       "PLpgSQL": 11590,
       "HTML": 2007,
       "JavaScript": 1980,
@@ -147,28 +139,29 @@
   },
   "evaluation": {
     "solves_real_problem": "yes",
-    "real_problem_reasoning": "Venezuela's earthquake response suffers from a well-documented coordination failure: aid collection centers communicate needs via WhatsApp, causing some centers to be overwhelmed while others go unnoticed. AcopioVzla directly targets this gap with a real-time, publicly browsable registry of centros de acopio, coordinator-managed need updates, PostGIS-powered proximity search, and shelter announcements. The problem is concrete, the solution is appropriately scoped, and the domain logic throughout the codebase (Venezuelan city names, earthquake relief terminology, necesidades tagging) confirms this is purpose-built for the actual crisis, not a generic template.",
+    "real_problem_reasoning": "Directly addresses a documented coordination failure in Venezuela earthquake relief: aid gets concentrated on well-known collection centers while others go unsupplied because needs information is scattered across WhatsApp chats with no central, real-time view. AcopioVzla centralizes centro-acopio profiles, live needs updates, geolocation-based discovery, and a public feed so volunteers/donors know exactly where to go and what to bring. This is a logistics/coordination problem, not a novelty, and the domain tags (aid-logistics, mapping-geo, volunteer-coordination) match a genuine relief bottleneck.",
     "problem_severity": "high",
     "impact_potential": 4,
-    "product_quality": 3,
+    "product_quality": 4,
     "live_demo_status": "partial",
-    "live_demo_notes": "The Vercel deployment at acopiovzla.vercel.app is confirmed live (signals.accessible: true, pushed 2026-06-29T17:49Z). WebFetch retrieved only the HTML shell title \"Saman — Conectando Venezuela\" because this is a client-side React SPA that requires JavaScript execution to render. The app is functionally deployed; WebFetch's inability to execute JS prevents visual confirmation of the rendered UI. No demo video is provided, so a reviewer cannot bypass the JS limitation with a recording.",
+    "live_demo_notes": "The live URL (https://AcopioVzla.vercel.app) returns HTTP 200 and serves a proper React/Vite SPA shell (title 'Saman — Conectando Venezuela', hashed JS/CSS bundles, theme script) confirming a real deployed build, but it is a client-side-rendered app so a static/headless fetch cannot see the actual rendered feed, map, or centro listings — could not visually verify live data (e.g. real registered centros) without a JS-executing browser or screenshots. No demo video exists to compensate. Given the strong backend evidence (Supabase auth+RLS, PostGIS geo RPC, realtime channels, ~99% test coverage, CI with lint/typecheck/test/build/gitleaks, 11 sequential schema migrations, 33 commits over ~2 days), this is very likely a genuinely working product, but it is not independently confirmed visually.",
     "diffusion": {
       "score": 3,
-      "ready_to_promote": true,
+      "ready_to_promote": false,
       "available_assets": [
         "live-demo",
-        "clear-value-prop"
+        "clear-value-prop",
+        "branding"
       ],
-      "recommended_angle": "Frame it as infrastructure solidaria: a free, open, real-time map connecting donors with the aid centers that actually need them — because in an earthquake, WhatsApp chaos costs lives. Highlight that any centro can register in minutes, needs update in real time, and anyone with a phone can find the nearest drop-off point.",
+      "recommended_angle": "Position as 'la app que centraliza qué necesita cada centro de acopio en tiempo real, para que la ayuda deje de perderse en cadenas de WhatsApp' — highlight the geolocation 'find nearest center' feature and the real-time needs feed as the concrete value for both volunteers and coordinators.",
       "gaps": [
-        "No demo video — a 60-second screen recording would dramatically increase share rate",
-        "No screenshots for social posts — static images of the feed/map view are missing",
-        "No branding assets (logo, OG image) visible — social previews will be blank",
-        "No real-user adoption data yet — zero evidence of centros actually registered, which weakens social proof"
+        "No demo video to show the actual working feed/map since the SPA can't be verified via static fetch or screenshot in this pass",
+        "No screenshots captured/available in the insight data",
+        "No evidence yet of real_users (registered centros or actual usage data) to cite in a testimonial-style post",
+        "Single contributor (bus factor 1) is a risk to mention only internally, not externally"
       ]
     },
     "overall_recommendation": "promote",
-    "one_line_pitch": "AcopioVzla conecta donantes con centros de acopio en tiempo real — porque en un terremoto, la información salva vidas."
+    "one_line_pitch": "Acopio (Saman): la plataforma que centraliza en tiempo real qué necesita cada centro de acopio en Venezuela, para que ningún voluntario llegue con las manos vacías ni ningún centro se quede sin ayuda."
   }
 }

@@ -1,0 +1,166 @@
+{
+  "project_slug": "vzla-encuentra",
+  "name": "Vzla Encuentra",
+  "repo_url": "https://github.com/jose1Almonte/leer_rostros",
+  "live_url": "https://vzlaencuentra.com/",
+  "video_url": "https://www.instagram.com/reel/DaHCIglxd4i/?igsh=cDZjZDV4emtnMmR6",
+  "countries": [
+    "Venezeuala"
+  ],
+  "db_description": "# Reencuentros\n\n## Reunimos familias separadas por la emergencia humanitaria en Venezuela\n\n**Reencuentros** es una plataforma web que usa reconocimiento facial para ayudar a localizar personas desaparecidas y reconectarlas con sus seres queridos.\n\n---\n\n## ¿Cómo funciona?\n\n### Si estás buscando a alguien\n\nSube una foto de la persona que buscas. El sistema la compara con todos los registros de personas encontradas y te muestra los candidatos con mayor similitud facial, ordenados por nivel de coincidencia.\n\n### Si encontraste a alguien\n\nRegistra a la persona con sus fotos y datos. Si alguien ya la está buscando, el sistema genera una alerta automática para conectar a ambas partes.\n\n### Si quieres verificar antes de registrar\n\nSubí una foto para saber si alguien está buscando a esa persona, sin necesidad de crear un registro.\n\n---\n\n## Características principales\n\n- **Búsqueda por foto**: tecnología de reconocimiento facial que encuentra coincidencias incluso cuando no hay nombres ni documentos.\n- **Protección de menores**: los nombres de niños, niñas y adolescentes se muestran protegidos en todas las respuestas públicas, incluso para administradores.\n- **Alertas automáticas**: cuando un familiar busca a alguien que ya fue registrado como encontrado — o viceversa — el sistema avisa inmediatamente.\n- **Moderación de contenido**: administradores revisan y aprueban las publicaciones antes de que aparezcan en búsquedas públicas.\n- **Testimonios de reencuentros**: cualquier persona puede compartir fotos o videos de reuniones exitosas, inspirando a otras familias a no perder la esperanza.\n- **Canales de reporte**: cualquier usuario puede reportar fallas técnicas o publicaciones inadecuadas.\n\n---\n\n## ¿Para quién es?\n\n- **Familiares** que buscan a una persona desaparecida.\n- **Rescatistas, voluntarios y organizaciones** que encuentran personas y necesitan identificar a quién avisar.\n- **Administradores** que moderan contenido, gestionan reportes y mantienen la integridad de la plataforma.\n\n---\n\n## El problema que resolvemos\n\nEn contextos de crisis humanitaria, migración masiva y desapariciones, las familias quedan separadas sin canales efectivos para reencontrarse. Los métodos tradicionales (carteles, redes sociales, listas de nombres) dependen de que alguien reconozca un nombre o una foto.\n\nReencuentros usa reconocimiento facial para cerrar esa brecha: una foto vale más que mil nombres, especialmente cuando se trata de niños que no hablan, adultos en shock, o personas sin documentos.\n\n---\n\n## Privacidad y seguridad\n\n- Los datos de menores se almacenan pero se protegen en todas las respuestas públicas.\n- Solo administradores autenticados pueden moderar, eliminar o acceder al listado completo de registros.\n- Las imágenes se almacenan de forma segura y las publicaciones pasan por moderación antes de ser visibles en búsquedas públicas.\n\n---\n\nHecho con ❤️ para Venezuela.",
+  "lifecycle_status": "ready_to_use",
+  "analysis": {
+    "summary": "Reencuentros (leer_rostros) is a production-grade FastAPI facial-recognition service to reunite missing persons with families after disasters: familiares upload a photo to search, rescatistas register found persons, and pgvector/InsightFace ArcFace embeddings do similarity matching, with a real admin panel, moderation, minors-privacy masking, testimonios, reportes, traceability history, and a live CI/CD deploy pipeline to a real domain (vzlaencuentra.com / symtechven.com).",
+    "project_type": "web app (FastAPI backend API + minimal static HTML admin/front) with facial recognition ML pipeline",
+    "stack": {
+      "frontend": [
+        "single static frontend/index.html (305 lines) — thin admin/demo UI, not a full SPA"
+      ],
+      "backend": [
+        "Python 3.11",
+        "FastAPI",
+        "psycopg3 + psycopg_pool",
+        "pydantic-settings",
+        "PyJWT",
+        "passlib/bcrypt"
+      ],
+      "database": [
+        "PostgreSQL 16",
+        "pgvector (HNSW cosine index)"
+      ],
+      "infra_deploy": [
+        "Docker",
+        "docker-compose",
+        "GitHub Actions CI (tests.yml required check)",
+        "GitHub Actions CD (deploy.yml, rsync+ssh to DigitalOcean droplet, pm2, nginx)",
+        "DigitalOcean Spaces (S3-compatible) with local-disk fallback"
+      ],
+      "ai_ml": [
+        "InsightFace buffalo_l (ArcFace w600k_r50, 512-dim embeddings)",
+        "RetinaFace detector",
+        "onnxruntime",
+        "opencv-python-headless",
+        "rotation-based embedding augmentation"
+      ],
+      "languages": [
+        "Python",
+        "HTML",
+        "Shell",
+        "Dockerfile"
+      ]
+    },
+    "architecture": {
+      "pattern": "layered / bounded-context architecture: FastAPI routes -> use_cases -> repositories -> Postgres, with a pure domain layer (matching policy, privacy rules, entities) independent of SQL/HTTP",
+      "uses_orm": false,
+      "orm_or_db_layer": "raw SQL via psycopg3 connection pool + pgvector extension, wrapped in per-context Repository classes (PersonaRepository, ReporteRepository, TestimonioRepository); no ORM",
+      "api_design": "REST-ish JSON/multipart FastAPI endpoints, documented extensively via OpenAPI tags/descriptions, with legacy-array and paginated {data,meta} response variants for backward compatibility",
+      "separation_of_concerns": "strong: domain/ (pure logic, no I/O), personas|reportes|testimonios/{repositories,use_cases}, shared/ (exceptions, helpers, SSRF-safe net), auth.py, storage.py, faces.py, database.py cleanly separated; main.py has no inline SQL for core tables",
+      "modularity": "high — bounded-context folders each with their own repository + use_cases + fakes for testing",
+      "notable_patterns": [
+        "Use-case pattern with dependency-injected repositories, testable via FakePersonaRepository/FakeReporteRepository without a DB or InsightFace",
+        "Domain exception -> HTTP status mapping centralized in _use_case_execute",
+        "Multi-embedding augmentation per photo (base + ±15° rotations) for pose robustness",
+        "MenoresPrivacy: minors' names masked below a confidence threshold across API boundary",
+        "SSRF-hardened URL image downloader (resolves + validates every redirect hop against private/loopback/link-local ranges) for the bulk-import endpoint",
+        "Idempotent schema migrations via ALTER TABLE ADD COLUMN IF NOT EXISTS + advisory lock to avoid multi-worker race on startup"
+      ]
+    },
+    "code_organization": {
+      "score": 5,
+      "directory_structure": "Clean bounded-context layout (app/{domain,personas,reportes,testimonios,shared}) mirrored in tests/, plus openspec/ change-management docs, scripts/ for local tooling and batch import, docker/ configs for standalone and compose deploys.",
+      "naming_quality": "Consistent Spanish domain naming (personas/buscada/encontrada) matching the business domain; use-case files named as verbs (RegistrarBusqueda, ModerarPersona) mapping 1:1 to endpoints.",
+      "documentation_quality": "Excellent — CLAUDE.md, AGENTS.md, ARQUITECTURA.md, API.md, DEPLOY.md, DOCKER.md, plus rich inline docstrings and an extensive OpenAPI description embedded in main.py.",
+      "reasoning": "Directory layout, naming and documentation all reflect a deliberately engineered, professionally organized codebase rather than hackathon scaffolding."
+    },
+    "production_readiness": {
+      "score": 5,
+      "has_auth": true,
+      "has_error_handling": true,
+      "has_logging": false,
+      "has_env_config": true,
+      "has_deploy_config": true,
+      "secrets_handling": ".env-based config via pydantic-settings with .env.example and env_template.py; JWT_SECRET/DB creds not committed; CI uses GitHub Actions secrets (SSH_PRIVATE_KEY, SSH_HOST, SSH_USER) for deploy; app fails fast / warns loudly if JWT_SECRET is unset.",
+      "security_notes": "bcrypt password hashing, JWT with expiry, admin-only endpoints via HTTPBearer dependency with is_active check, generic 401 to avoid user-enumeration, CORS restricted to real production origins (not '*'), SSRF protection on the URL-import endpoint (validates every redirect hop against private IP ranges, size-capped), minors' PII masked below match-confidence threshold. No rate limiting visible on public endpoints (login, search) which is a residual risk for brute force.",
+      "scalability_notes": "Uses a connection pool, pgvector HNSW index for fast ANN search at scale, pagination on all list endpoints, and multi-worker-safe schema init via Postgres advisory lock; InsightFace runs on CPUExecutionProvider only, which will be a throughput bottleneck under real load without GPU or horizontal scaling of the recognition step.",
+      "reasoning": "Has real auth, structured error handling mapped to HTTP codes, environment-driven config, working CI (required status check) and CD (auto-deploy with health check) to an actual production domain — this is far beyond a hackathon demo in operational maturity; the main gaps are no structured logging/observability and no explicit rate limiting."
+    },
+    "maturity": {
+      "score": 5,
+      "has_readme": true,
+      "has_tests": true,
+      "has_ci": true,
+      "is_real_or_boilerplate": "real, substantial hand/AI-engineered application with genuine domain logic, not boilerplate",
+      "reasoning": "12,259 LOC, 114 commits from 5 contributors, ~30 use-case test files with fake repositories achieving reported 100% coverage on use cases/domain/shared, working CI required-check + CD pipeline deploying to a live production host with a post-deploy health check, and iterative architecture-change tracking under openspec/."
+    },
+    "viability": {
+      "score": 5,
+      "reasoning": "This is already deployed to production (vzlaencuentra.com/symtechven.com) with a real facial-recognition matching pipeline, admin moderation, minors-privacy protections, and traceability history — directly addressing family reunification after a disaster; it is one of the most technically complete and operationally ready projects plausible for this hackathon category."
+    },
+    "key_features": [
+      "Facial similarity search (ArcFace/InsightFace + pgvector HNSW cosine) matching missing-person photos against found-person photos with confidence percentages",
+      "Dual-flow registration: familiar searches ('buscados') and rescatista registers found persons ('encontrados'), each surfacing reverse matches/alerts",
+      "Text-only fallback flow (no photo) matching by cédula/nombre for cases without a usable image",
+      "Traceability/history of sightings per found person (public trimmed view + full admin view with contact info)",
+      "Minors' PII masking below a match-confidence threshold across all public/admin responses",
+      "Admin panel: JWT+bcrypt auth, moderation of listings, reportes (bug/inappropriate content) triage, testimonios (reunion stories) approval workflow, real dashboard stats",
+      "Bulk import endpoint with SSRF-hardened image downloading and idempotency by external id",
+      "CI required test gate + automated CD to a live droplet with rsync, pm2 restart, and post-deploy health check"
+    ],
+    "domain_tags": [
+      "people-finder",
+      "family-reunification",
+      "shelter-mapping"
+    ],
+    "merge_potential": "This is a strong, largely self-contained flagship candidate rather than a merge target — other simpler people-finder or shelter-mapping projects in the hackathon could integrate as data sources/importers (the /encontrados/importar bulk-import endpoint is explicitly designed for this) rather than this project merging into something else.",
+    "red_flags": [
+      "No structured logging/observability (only print statements at startup) — will hamper incident response in a real deployment",
+      "No visible rate limiting on public endpoints like /admin/login or the search endpoints, leaving some brute-force/DoS exposure",
+      "InsightFace runs on CPUExecutionProvider only; will need infra scaling (GPU or horizontal workers) to handle real disaster-scale load",
+      "Frontend is a single 305-line static HTML file — the actual public-facing UI is minimal/thin compared to the backend's sophistication and would need real frontend work for broad public use"
+    ]
+  },
+  "signals": {
+    "accessible": true,
+    "stars": 5,
+    "forks": 3,
+    "contributors": 5,
+    "commit_count": 114,
+    "code_loc": 12259,
+    "created_at": "2026-06-26T11:56:03Z",
+    "pushed_at": "2026-07-01T19:23:47Z",
+    "license": null,
+    "languages_bytes": {
+      "Python": 441984,
+      "HTML": 19795,
+      "Shell": 1220,
+      "Dockerfile": 800
+    },
+    "archived": false
+  },
+  "evaluation": {
+    "solves_real_problem": "yes",
+    "real_problem_reasoning": "Family separation after a disaster is one of the most acute needs in a humanitarian emergency — survivors, rescuers, and shelters have no fast way to cross-reference 'missing' reports against 'found' persons, especially for children, unconscious/shocked adults, or people without documents. VzlaEncuentra directly targets this with facial-recognition matching (ArcFace/InsightFace + pgvector similarity search) between 'buscados' and 'encontrados' registries, plus a text-fallback flow for cases without usable photos, minors' PII protection, and admin moderation to prevent abuse of a sensitive dataset.",
+    "problem_severity": "critical",
+    "impact_potential": 5,
+    "product_quality": 5,
+    "live_demo_status": "working",
+    "live_demo_notes": "https://vzlaencuentra.com/ loads a real, installable PWA (manifest.webmanifest, Vite-built React SPA bundle at /assets/index-*.js returning 200 OK) titled \"VzlaEncuentra — S.O.S. Búsqueda de personas\" with copy explicitly referencing the Venezuela earthquake and facial recognition to reunite families. This sits on top of a genuinely production-grade FastAPI + PostgreSQL/pgvector backend (12,259 LOC, 114 commits, 5 contributors, CI required-check + automated CD to a DigitalOcean droplet with post-deploy health checks, JWT+bcrypt auth, SSRF-hardened bulk import, minors-privacy masking). Note: the technical insight report describes the frontend as a thin 305-line static admin HTML file, which understates what is actually deployed publicly — the live domain serves a full built SPA/PWA, not a bare static page.",
+    "diffusion": {
+      "score": 5,
+      "ready_to_promote": true,
+      "available_assets": [
+        "live-demo",
+        "demo-video",
+        "clear-value-prop",
+        "branding"
+      ],
+      "recommended_angle": "Lead with the human story: a working facial-recognition tool, live today at vzlaencuentra.com, that can reunite Venezuelan families separated by the earthquake — upload one photo and get matched against everyone registered as found. Pair the live demo link with the Instagram reel to show it in action.",
+      "gaps": [
+        "No confirmed real-user/real-match testimonial yet (a testimonios feature exists but needs a live success story for the post)",
+        "Could add a screenshot carousel of the actual search/upload flow for a static social post in addition to the video"
+      ]
+    },
+    "overall_recommendation": "spotlight",
+    "one_line_pitch": "VzlaEncuentra: sube una foto y el reconocimiento facial reúne en minutos a las familias separadas por el terremoto — ya en vivo en vzlaencuentra.com."
+  }
+}

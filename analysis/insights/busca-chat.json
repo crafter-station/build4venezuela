@@ -1,6 +1,6 @@
 {
   "project_slug": "busca-chat",
-  "name": "BuscaChat",
+  "name": "BuscaChat - Bot de WA/T para reencuentro de famlias",
   "repo_url": "https://github.com/DiegoMucha/buscachat",
   "live_url": "https://ayudandoavenezuela.netlify.app/#",
   "video_url": "",
@@ -12,64 +12,30 @@
     "Venezuela",
     "El Salvador"
   ],
-  "db_description": "# BuscaChat\n\n# Objetivo del Proyecto\n\n# ¿Como Funciona?\n\n# Equipo\n\n# Arquitectura",
+  "db_description": "# BuscaChat\n\nBuscaChat es un bot de Telegram y WhatsApp (En proceso) que ayuda a buscar y reportar personas desaparecidas tras la tragedia de los terremotos ocurridos en Venezuela.\n\n# Objetivo del Proyecto\nBuscaChat tiene como objetivo brindar una herramienta rápida, accesible y confiable que permita a las personas afectadas por los terremotos localizar a sus familiares y seres queridos, facilitando la identificación de personas desaparecidas, encontradas, heridas o trasladadas a refugios y hospitales, contribuyendo así a la reunificación familiar durante una emergencia humanitaria.\n\n# ¿Como Funciona?\nBuscaChat funciona como un bot de Telegram y WhatsApp (En proceso) que permite buscar y registrar personas afectadas por una emergencia de forma rápida y sencilla. Cuando un usuario realiza una búsqueda, el sistema consulta simultáneamente múltiples fuentes de información, unifica y elimina registros duplicados para mostrar los resultados más relevantes. Además, cualquier persona puede reportar nuevos casos de personas desaparecidas o encontradas, los cuales se incorporan a la base de datos y quedan disponibles para futuras consultas, facilitando la colaboración comunitaria y la reunificación familiar.\n\n# Equipo\n- Diego Mucha Alvarez \n- Andrea Granados García\n- Rebeca Castro Pineda\n- Juan Guevara Bustamante\n- Giovanny Valbuena\n- Luis Fernandez\n- Neptali Piña\n- Sergio Loza\nMas información sobre el equipo: https://acortar.link/ypHfAV\n\n# Arquitectura\n  Usuario → Telegram → Zavu → Railway (/webhook)\n  → FastAPI → router → handler → Zavu API → Telegram\n\n  Lenguaje:  Python 3.14\n  Framework: FastAPI + uvicorn\n  Plataforma: Zavu (multicanal)\n  HTTP:      aiohttp\n  DB:        SQLite (MVP)\n  Hosting:   Railway (Docker)\n  Tests:     pytest (103 tests)\n\n# Enlaces\n- Bot Telegram:   https://t.me/BuscaChatVzla_bot\n- Bot WhatsApp: https://api.whatsapp.com/send/?phone=584220300918&text=Hola,+me+gustaría%20buscar%20una%20persona%20por%20nombre%20o%20cédula\n- Código Repo 1: https://github.com/DiegoMucha/BuscaChat\n- Código Repo 2: https://github.com/gfurion/Buscachat-Telegram/",
   "lifecycle_status": "ready_to_use",
   "analysis": {
-    "summary": "BuscaChat is a production-deployed WhatsApp (and web) chatbot for family reunification after the Venezuela earthquake. It syncs missing-persons data from the sosvenezuela2026.com API into PostgreSQL+pgvector, exposes a REST API, and drives a multi-step conversational flow across WhatsApp Evolution API, WhatsApp Green API, Meta WhatsApp Cloud API, and a web chat widget. The codebase is genuinely functional with real integrations, 4 versioned Alembic migrations, CI/CD via GitHub Actions + SSH + Cloudflare tunnel, a systemd service file, unit and e2e tests using testcontainers, optional InsightFace facial recognition with pgvector HNSW index, and Redis-backed conversation state for horizontal scaling. This is one of the strongest hackathon submissions in the cohort.",
-    "project_type": "WhatsApp / web chatbot for missing-persons search and family reunification",
-    "stack": {
-      "frontend": [
-        "HTML/CSS/JS landing page",
-        "web chat widget (FastAPI-served)"
-      ],
-      "backend": [
-        "Python 3.12",
-        "FastAPI",
-        "SQLModel",
-        "APScheduler",
-        "httpx"
-      ],
-      "database": [
-        "PostgreSQL 18 + pgvector (HNSW index for face embeddings)",
-        "Redis (conversation state)"
-      ],
-      "infra_deploy": [
-        "GitHub Actions CI/CD",
-        "SSH + Cloudflare Access tunnel",
-        "systemd service",
-        "Docker Compose (dev)"
-      ],
-      "ai_ml": [
-        "InsightFace (buffalo_l ONNX model, face embedding + cosine similarity)",
-        "pgvector ANN search"
-      ],
-      "languages": [
-        "Python"
-      ]
-    },
     "architecture": {
-      "pattern": "Layered FastAPI service with adapter pattern for multi-channel messaging and external data sources",
+      "pattern": "Layered service architecture (FastAPI routers -> messaging pipeline/services -> SQLModel data layer), with adapter pattern for external integrations (WhatsApp Meta Cloud API, Venezuela Te Busca API, face matching engines)",
       "uses_orm": true,
-      "orm_or_db_layer": "SQLModel (SQLAlchemy ORM) for models and queries; raw PostgreSQL dialect INSERT ON CONFLICT for upserts; Alembic for schema migrations (4 versions); pgvector extension managed via migration",
-      "api_design": "REST API (FastAPI) with routers per channel (Evolution API, Green API, Meta, web chat); webhook endpoints per WhatsApp provider; private-token auth for admin endpoints; health + DB health check endpoints",
-      "separation_of_concerns": "Clean separation: adapters/ (external data sources), messaging/adapters/ (per-channel webhook parsing), messaging/conversation.py (state machine), messaging/pipeline.py (action dispatch), services/ (business logic), routers/ (HTTP layer), models.py (DB schema), scheduler.py (background jobs)",
-      "modularity": "Highly modular: FaceMatcher is a Protocol with InsightFace and Stub implementations; ConversationStateStore Protocol with InMemory and Redis backends; Notifier abstraction for WhatsApp sending; all injectable via FastAPI Depends",
+      "orm_or_db_layer": "SQLModel (SQLAlchemy 2.x) with Alembic migrations, raw psycopg3 driver, pgvector extension for face embedding similarity search",
+      "api_design": "FastAPI REST + webhook endpoints (WhatsApp Meta webhook with HMAC signature verification, web-chat tester endpoint, health checks); no public browsable REST API beyond that",
+      "separation_of_concerns": "Strong: routers/ (HTTP), services/ (business logic: search, ocr, bot_intake), messaging/ (conversation state machine, pipeline, adapters per channel), adapters/ (external API clients), face/ (pluggable matcher interface with stub and insightface implementations), models.py (schema)",
+      "modularity": "Good modularity via dependency injection (FastAPI Depends), pluggable interfaces for face matcher, notifier, and conversation state store (in-memory vs Redis) selected by config",
       "notable_patterns": [
-        "Adapter pattern for each WhatsApp API provider",
-        "Protocol-based dependency injection for FaceMatcher and ConversationStateStore",
-        "APScheduler background sync job with configurable retry + exponential backoff",
-        "pgvector HNSW index for face embedding nearest-neighbor search",
-        "Alembic auto-migration on startup (run_migrations() in lifespan)",
-        "Webhook event logging to DB for debugging",
-        "Rate-limited paginated sync from external SOS Venezuela API"
+        "Adapter pattern for messaging channels (Meta WhatsApp, web chat) unified via app/messaging/types.py",
+        "Strategy pattern for face matcher (stub vs insightface) and notifier (null vs green_api)",
+        "Idempotency/dedupe via unique message_id table for webhook messages",
+        "OpenTelemetry instrumentation wired for FastAPI/httpx/psycopg/redis/sqlalchemy with Honeycomb export",
+        "Background task processing for webhook messages (FastAPI BackgroundTasks) to ack quickly and process async"
       ]
     },
     "code_organization": {
-      "score": 4,
-      "directory_structure": "buscachat-python/app/ split into routers/, services/, messaging/, adapters/, face/, utils/; tests/ at sibling level; deploy/ has systemd unit and env sample; scripts/ has smoke test and deploy shell scripts",
-      "naming_quality": "Excellent: Spanish domain names (paso, buscar, registrar) in the conversation state machine are coherent; Python module and class names follow conventions; field names are descriptive",
-      "documentation_quality": "AGENTS.md at repo root for AI context; Bot_salva_vidas.md describes the use case; .env.sample is complete with comments; README exists; inline code comments are sparse but the code is readable",
-      "reasoning": "The directory layout is clean and purpose-driven with no dead code or boilerplate. The adapter and protocol patterns make the architecture self-documenting. Minor documentation gaps in the source files themselves."
+      "score": 5,
+      "directory_structure": "Clean, conventional FastAPI project layout: app/{routers,services,messaging,adapters,face,utils}, alembic/ for migrations, tests/ mirroring source, deploy/ and scripts/ for ops, plus a separate landing-page/ static site",
+      "naming_quality": "Consistent, descriptive snake_case naming; clear module boundaries (bot_intake.py, session_store.py, web_chat_store.py, insightface_matcher.py)",
+      "documentation_quality": "Bilingual (Spanish) README with setup, endpoints, telemetry doc (TELEMETRY.md), AGENTS.md for AI-agent contribution rules, and a project vision doc (Bot_salva_vidas.md)",
+      "reasoning": "Directory layout, naming, and docs reflect a deliberately engineered codebase rather than hackathon scaffolding; migrations are incremental and named meaningfully (e.g. 006_drop_sync_tables, 007_drop_webhook_event_logs) showing real iteration."
     },
     "production_readiness": {
       "score": 4,
@@ -78,95 +44,135 @@
       "has_logging": true,
       "has_env_config": true,
       "has_deploy_config": true,
-      "secrets_handling": "All secrets (DB URL, API tokens, Green API credentials, Meta access token, Evolution API key) are environment variables read via pydantic-settings from .env file; sample files provided; no secrets committed to git",
-      "security_notes": "Private API token auth protects admin endpoints; webhook auth via Evolution API apikey header; no rate limiting on public /missing_people or search endpoints (SQL injection risk is mitigated by ORM, but abuse/DoS is unguarded)",
-      "scalability_notes": "Redis-backed conversation state supports horizontal scaling; APScheduler runs in a single-process background thread so multi-instance deployment would require disabling the scheduler on all but one node; pgvector HNSW index enables fast face search at scale",
-      "reasoning": "Deployed to a real server (ssh.sumak.space) with Cloudflare tunnel, systemd restart policy, health check endpoints, and a CI/CD pipeline. The main gaps are missing rate limiting on public endpoints and the in-memory scheduler would need coordination in a multi-instance setup."
+      "secrets_handling": "Secrets via .env (gitignored) and GitHub Actions secrets (SERVER_SSH_DEPLOY_KEY); Meta webhook validates HMAC-SHA256 signature (x-hub-signature-256) against app secret; verify token for webhook subscription handshake; PRIVATE_API_TOKEN placeholder present. No JWT/user auth needed since it's a bot service, but inbound webhook auth is properly implemented.",
+      "security_notes": "Meta webhook signature verification uses hmac.compare_digest (timing-safe); chat identifiers are hashed (SHA-256/HMAC) before logging to avoid leaking raw phone numbers in logs; no obvious SQL injection risk since SQLModel/SQLAlchemy query builder is used throughout (no raw string interpolation in queries besides parameterized func.replace). Deploy relies on SSH key + Cloudflare Access tunnel rather than exposing SSH publicly.",
+      "scalability_notes": "Single-service deploy via systemd unit + docker-compose Postgres/Redis, not containerized/orchestrated (no Kubernetes/multi-instance setup); background tasks run in-process via FastAPI BackgroundTasks (not a durable queue), so long-running jobs could be lost on crash; conversation state can be swapped to Redis for horizontal scale but defaults to in-memory single-instance store.",
+      "reasoning": "Real deploy pipeline (GitHub Actions -> SSH via Cloudflare Access -> systemd service with rolling restart script), health checks, OpenTelemetry/Honeycomb observability, webhook signature verification, and structured logging with PII hashing are all present and functioning — well beyond hackathon-typical scaffolding, though it is a single-VM deployment without redundancy or a durable job queue."
     },
     "maturity": {
-      "score": 4,
+      "score": 5,
       "has_readme": true,
       "has_tests": true,
       "has_ci": true,
-      "is_real_or_boilerplate": "Real, functional application with genuine business logic, working integrations, and active deployment",
-      "reasoning": "36 commits from 7 contributors in 3 days; 4 Alembic migration versions showing iterative schema evolution; unit tests and testcontainers-based e2e tests for core flows (register, search by photo, mark found); GitHub Actions CI/CD pipeline actually deploys to production server via SSH."
+      "is_real_or_boilerplate": "real",
+      "reasoning": "73 commits from at least a few active contributors, 1174+ lines of tests covering conversation flow, face matching, OCR, search, webhook signature verification, and an external adapter with mocked fixtures (including real e2e tests using testcontainers); CI/CD workflow performs an actual remote deploy over SSH with retries; TELEMETRY.md and AGENTS.md show ongoing engineering discipline rather than one-shot AI scaffolding."
     },
     "viability": {
-      "score": 5,
-      "reasoning": "WhatsApp penetration in Venezuela is near-universal making this channel optimal for disaster response. The system integrates with sosvenezuela2026.com (a real active crisis platform), supports facial recognition for photo-based searches, and is already deployed. The multi-step conversational flow handles the full missing-person lifecycle: report intake, name/cedula/photo search, and marking as found with reporter notification."
+      "score": 4,
+      "reasoning": "The project already integrates with a real external missing-persons dataset (Venezuela Te Busca / SOS Venezuela sync), supports WhatsApp as the primary channel Venezuelans actually use, has working face-matching (pgvector + InsightFace) to help reunite families from photos, and is already deployed to a production server with monitoring — this is close to field-ready for earthquake victim search, needing mainly WhatsApp Business API approval/scale testing and durable job queueing for reliability at scale."
     },
     "key_features": [
-      "Multi-step WhatsApp conversational bot (search by name, cedula, or photo; register missing person; mark as found)",
-      "Automated sync from SOS Venezuela 2026 API with upsert and retry logic",
-      "Facial recognition via InsightFace buffalo_l model + pgvector HNSW cosine similarity search",
-      "Multi-provider WhatsApp support (Evolution API, Green API, Meta Cloud API)",
-      "Web chat widget as fallback channel",
-      "Redis-backed conversation state for horizontal scaling",
-      "Reporter notification via Green API when a photo match is found",
-      "Background scheduler with configurable interval, retry, and backoff",
-      "REST API for missing persons list/search with pagination and filtering",
-      "4-version Alembic migration chain including pgvector extension and HNSW index"
+      "WhatsApp chatbot (Meta Cloud API) for searching missing persons by name or cedula",
+      "Facial recognition matching (pgvector + InsightFace embeddings, 512-dim, HNSW index) to compare submitted photos against reported missing people",
+      "Integration/sync adapter with external 'Venezuela Te Busca' and SOS Venezuela missing-persons databases",
+      "OCR service for scanning Venezuelan cedula (ID) documents",
+      "Conversational state machine with pluggable in-memory or Redis session store for multi-turn bot conversations",
+      "Web-based chat tester UI (separate from WhatsApp) for local testing",
+      "Webhook deduplication/idempotency and background async processing of inbound messages",
+      "OpenTelemetry + Honeycomb observability and structured logging with hashed PII",
+      "Automated CI/CD deployment pipeline to a production VM via GitHub Actions + Cloudflare Access SSH tunnel",
+      "Static landing page for the project"
     ],
     "domain_tags": [
-      "family-reunification",
       "people-finder",
-      "comms-chat"
+      "family-reunification",
+      "comms-chat",
+      "mapping-geo"
     ],
-    "merge_potential": "High — this project occupies a unique niche (WhatsApp chatbot for family reunification with facial recognition) that complements shelter-mapping or aid-logistics tools. The REST API (/missing_people) could be consumed by other projects in the hackathon. The adapter pattern makes adding Telegram or SMS channels straightforward.",
+    "merge_potential": "High-value standalone service that other hackathon projects (e.g. shelter-mapping, volunteer-coordination) could integrate with via its missing-persons DB and WhatsApp bot, or by consuming its person-search API/adapter; its face-matching and OCR pipeline could be reused as a shared microservice.",
     "red_flags": [
-      "No rate limiting on public search and listing endpoints — could be abused or DoSed",
-      "Default private_api_token is 'dev-hackathon-token' in config.py (must be overridden in production .env, but easy to forget)",
-      "InsightFace runs on CPU (ctx_id=-1) — face embedding is slow without GPU; may bottleneck under load",
-      "APScheduler runs in-process: multi-instance deployment would double-sync the external API without coordination",
-      "In-memory conversation state is the default; a restarted server loses all active conversations"
-    ]
+      "Background job processing relies on in-process FastAPI BackgroundTasks rather than a durable queue, risking silent loss of in-flight messages on deploy/crash",
+      "Single-VM deployment (systemd + docker-compose) with no visible redundancy/failover for a life-critical service",
+      "Face matcher defaults to a lightweight 'stub' in dev/tests; real InsightFace matching is an optional dependency group that must be explicitly installed and enabled in production",
+      "Meta webhook signature verification silently passes (returns True) when app_secret is not configured, which could allow unauthenticated webhook calls if misconfigured in production"
+    ],
+    "summary": "Buscachat is a genuinely production-grade FastAPI service that powers a WhatsApp chatbot to help Venezuelans search for and report missing earthquake victims, combining a real external missing-persons dataset sync, pgvector-based facial recognition matching, cedula OCR, and a conversational pipeline, all backed by Postgres/Redis, Alembic migrations, OpenTelemetry observability, an extensive test suite, and an actual CI/CD deploy pipeline to a live server.",
+    "project_type": "Backend service (FastAPI chatbot/API) with an accompanying static landing page",
+    "stack": {
+      "frontend": [
+        "Vanilla HTML/CSS/JavaScript (landing-page/)",
+        "Server-rendered minimal web-chat tester via FastAPI"
+      ],
+      "backend": [
+        "Python 3.12",
+        "FastAPI",
+        "SQLModel/SQLAlchemy",
+        "Alembic",
+        "httpx",
+        "Redis client",
+        "pydantic-settings"
+      ],
+      "database": [
+        "PostgreSQL",
+        "pgvector extension",
+        "Redis (optional conversation state store)"
+      ],
+      "infra_deploy": [
+        "GitHub Actions CI/CD",
+        "systemd service",
+        "Docker Compose (Postgres/Redis)",
+        "Cloudflare Access/cloudflared SSH tunnel",
+        "OpenTelemetry + Honeycomb"
+      ],
+      "ai_ml": [
+        "InsightFace (buffalo_l) face embeddings",
+        "PaddleOCR (optional, cedula OCR)",
+        "pgvector cosine similarity / HNSW index"
+      ],
+      "languages": [
+        "Python",
+        "JavaScript",
+        "HTML",
+        "CSS",
+        "Shell"
+      ]
+    }
   },
   "signals": {
     "accessible": true,
     "stars": 2,
     "forks": 2,
     "contributors": 7,
-    "commit_count": 36,
-    "code_loc": 7379,
+    "commit_count": 73,
+    "code_loc": 5828,
     "created_at": "2026-06-26T20:46:10Z",
-    "pushed_at": "2026-06-29T16:04:13Z",
+    "pushed_at": "2026-07-01T17:42:03Z",
     "license": null,
     "languages_bytes": {
-      "Python": 245223,
+      "Python": 194466,
       "CSS": 20973,
       "HTML": 16590,
       "JavaScript": 4326,
-      "Shell": 1870,
+      "Shell": 1932,
       "Mako": 613
     },
     "archived": false
   },
   "evaluation": {
-    "solves_real_problem": "yes",
-    "real_problem_reasoning": "After a major earthquake, family separation is immediate and critical. Venezuela's near-universal WhatsApp adoption means a WhatsApp chatbot is the most accessible possible channel for victims who may have no internet browser but do have WhatsApp. BuscaChat covers the full missing-person lifecycle: reporting, searching by name/cedula/photo, and marking as found with automated notification to the original reporter. It also syncs in real time with sosvenezuela2026.com, an active crisis coordination platform, making the data actually relevant to the disaster. This is not a theoretical solution — the backend is deployed with a real CI/CD pipeline and systemd service.",
-    "problem_severity": "critical",
-    "impact_potential": 5,
-    "product_quality": 4,
-    "live_demo_status": "partial",
-    "live_demo_notes": "The Netlify landing page (ayudandoavenezuela.netlify.app) loads and presents a clean, branded value proposition with a three-step user flow. However, both the \"Iniciar en WhatsApp\" and \"Iniciar en Telegram\" buttons are empty anchor placeholders (#) — they do not connect to a real WhatsApp number or Telegram bot. The backend API and WhatsApp webhook server are reportedly deployed at ssh.sumak.space via Cloudflare tunnel and systemd, but this cannot be verified from the public demo URL. The web chat widget mentioned in the codebase is also not accessible from the landing page. Effective demo status is a working landing page with non-functional CTAs.",
     "diffusion": {
-      "score": 4,
+      "score": 3,
       "ready_to_promote": true,
       "available_assets": [
         "live-demo",
         "clear-value-prop",
         "branding"
       ],
-      "recommended_angle": "Lead with the WhatsApp angle — 'busca a tu familiar perdido directo desde WhatsApp' — and the facial recognition capability. Emphasize that it connects to the real sosvenezuela2026.com database already being used in the crisis. Target Venezuelan diaspora communities (Peru, Colombia, Ecuador) who are trying to locate relatives. The multi-country coverage in the project metadata makes it directly relevant to the diaspora audience.",
+      "recommended_angle": "A real WhatsApp/Telegram bot that uses facial recognition and a live missing-persons database to reunite Venezuelan earthquake victims with their families — frame it as 'search for your loved one from your phone in seconds.'",
       "gaps": [
-        "No working WhatsApp number or QR code exposed on the landing page — users cannot actually try the bot",
-        "No demo video showing the chatbot conversation flow end-to-end",
-        "No screenshots of actual WhatsApp interactions in the chatbot",
-        "Telegram links are placeholders — unclear if Telegram channel exists",
-        "Real-users signal is missing — no testimonials or usage metrics shown"
+        "No demo video showing the bot actually finding/matching a person end-to-end",
+        "Landing page itself has no embedded interactive demo — CTAs just link out to WhatsApp/Telegram",
+        "No screenshots of real bot conversations or face-match results",
+        "No visible evidence yet of real users/successful reunifications to cite as proof"
       ]
     },
+    "impact_potential": 5,
+    "live_demo_notes": "The live_url (https://ayudandoavenezuela.netlify.app/#) is a static marketing landing page (three-step explainer: 'Inicia el chat', 'Sube la foto', 'Recibe respuesta', plus privacy/mission copy) — it does NOT embed a working search or chat interface. It links out to a Telegram bot (https://t.me/BuscaChatVzla_bot) and a WhatsApp number, which is where the actual product lives; those were not independently verified via WebFetch in this pass. So the promotable public asset (the landing page) is not itself the working demo — the working demo is the bot, one click away.",
+    "live_demo_status": "partial",
+    "one_line_pitch": "BuscaChat: manda una foto por WhatsApp o Telegram y su IA de reconocimiento facial te ayuda a reencontrar a tu familia tras el terremoto.",
     "overall_recommendation": "promote",
-    "one_line_pitch": "BuscaChat lets Venezuelan earthquake victims search for missing relatives via WhatsApp — by name, cedula, or photo — using facial recognition connected to the live sosvenezuela2026.com crisis database."
+    "problem_severity": "critical",
+    "product_quality": 4,
+    "real_problem_reasoning": "Family reunification after mass-casualty disasters (earthquakes) is one of the most acute and time-critical needs for victims — every hour of delay in identifying missing/found/injured people compounds trauma and risk. BuscaChat directly targets this via a WhatsApp/Telegram bot (channels Venezuelans already use, unlike a web app requiring separate adoption), integrates with a real external missing-persons dataset ('Venezuela Te Busca'/SOS Venezuela), and adds facial recognition (pgvector + InsightFace) and cedula OCR to make search/report low-friction for panicked, possibly low-bandwidth users. This is squarely a life-critical problem, not a nice-to-have.",
+    "solves_real_problem": "yes"
   }
 }

@@ -1,0 +1,173 @@
+{
+  "project_slug": "mapeo-de-signos-vitales-tiempo-real",
+  "name": "Ruview",
+  "repo_url": "https://github.com/ruvnet/ruview",
+  "live_url": "https://github.com/ruvnet/ruview",
+  "video_url": "https://www.youtube.com/watch?v=k-8b8ki5nE8",
+  "countries": [
+    "Venezuela"
+  ],
+  "db_description": "Materiales: ESP32 \nπ RuView is a WiFi sensing platform that turns radio signals into spatial intelligence.\nEvery WiFi router already fills your space with radio waves. When people move, breathe, or even sit still, they disturb those waves in measurable ways. RuView captures these disturbances using Channel State Information (CSI) from low-cost ESP32 sensors and turns them into actionable data.",
+  "lifecycle_status": "ready_to_use",
+  "analysis": {
+    "summary": "RuView (ruvnet/ruview) is a large, mature, multi-language open-source WiFi CSI sensing platform that turns commodity WiFi signals into presence/vitals/pose detection, including a dedicated 'Mass Casualty Assessment Tool' (MAT) Rust crate explicitly designed for detecting survivors under rubble after earthquakes/collapses. It is a genuinely production-grade codebase (Rust workspace with DDD crates, Python/FastAPI backend, React/RN mobile app, extensive CI, Docker, monitoring) but it is an existing flagship open-source project by ruvnet (76k+ stars, 1000+ commits since June 2025), not a purpose-built Venezuela hackathon submission — there is no Venezuela-specific content anywhere in the repo.",
+    "project_type": "WiFi-CSI based spatial sensing / vital-signs / disaster survivor-detection platform (hardware+firmware+backend+mobile+dashboard)",
+    "stack": {
+      "frontend": [
+        "React (dashboard, Vite)",
+        "React Native/Expo (ui/mobile)",
+        "vanilla JS observatory/UI (ui/*.html + ui/components)"
+      ],
+      "backend": [
+        "Rust (Axum sensing-server, 15+ workspace crates)",
+        "Python FastAPI (archive/v1, wifi_densepose package)"
+      ],
+      "database": [
+        "SQLAlchemy + asyncpg/aiosqlite (Python v1)",
+        "Redis",
+        "SQLite (.claude/memory.db, .swarm/state.json — local tooling state, not app data)"
+      ],
+      "infra_deploy": [
+        "Docker/docker-compose (Dockerfile.rust, Dockerfile.python)",
+        "GitHub Actions (20+ workflow files: ci, cd, firmware, security-scan, dashboard-pages, docker builds)",
+        "Prometheus/Grafana/Fluentd monitoring configs"
+      ],
+      "ai_ml": [
+        "PyTorch/torchvision",
+        "ONNX/Candle inference",
+        "custom contrastive CSI encoder + pose estimation models (Hugging Face hosted)",
+        "spiking neural networks for edge adaptation"
+      ],
+      "languages": [
+        "Rust",
+        "Python",
+        "TypeScript/JavaScript",
+        "C (ESP32 firmware)",
+        "Shell"
+      ]
+    },
+    "architecture": {
+      "pattern": "Domain-driven design, event-driven microservice-ish workspace (Rust crates) + separate Python FastAPI service + edge firmware; anti-corruption-layer adapters between subsystems",
+      "uses_orm": true,
+      "orm_or_db_layer": "SQLAlchemy (async, Python) + Alembic migrations for v1 API; Rust side is largely in-memory/event-sourced with no traditional DB, using Redis and local state files",
+      "api_design": "REST (FastAPI/Axum) + WebSocket streaming + UDP ingestion from ESP32 sensors; bearer_auth.rs module present in Rust sensing-server",
+      "separation_of_concerns": "Strong — explicit DDD bounded contexts (domain/detection/localization/alerting/integration) inside the disaster-focused wifi-densepose-mat crate (~20.8k LOC), clear crate boundaries in the Rust workspace",
+      "modularity": "Very high modularity (15+ independently versioned/published Rust crates, vendored submodules rvcsi/rufield/ruvector, separate mobile app, separate dashboard)",
+      "notable_patterns": [
+        "Domain-Driven Design with bounded contexts",
+        "Event sourcing for survivor detection audit trail",
+        "Anti-corruption layer adapters between crates",
+        "Cryptographic (Ed25519) witness/attestation chain for measurement integrity",
+        "START-protocol-compatible triage classification (Immediate/Delayed/Minor/Deceased)"
+      ]
+    },
+    "code_organization": {
+      "score": 4,
+      "directory_structure": "Extremely well-organized for its scale: clear top-level separation of firmware/, python/, v2/ (Rust), ui/ (web+mobile+dashboard), docs/adr (150+ ADRs), scripts/, tests/, docker/, monitoring/",
+      "naming_quality": "Consistent, descriptive naming across crates and modules (e.g., wifi-densepose-mat/src/domain/survivor.rs, detection/breathing.rs)",
+      "documentation_quality": "Exceptional — extensive ADRs, user guides, troubleshooting docs, witness logs, README with benchmark tables and citations",
+      "reasoning": "This is one of the most thoroughly documented and structured repos of its kind, reflecting long-term engineering investment rather than hackathon-speed scaffolding."
+    },
+    "production_readiness": {
+      "score": 4,
+      "has_auth": true,
+      "has_error_handling": true,
+      "has_logging": true,
+      "has_env_config": true,
+      "has_deploy_config": true,
+      "secrets_handling": "example.env template, explicit rules against committing secrets, scripts/redact-secrets.py and scripts/rotate-npm-token.sh present",
+      "security_notes": "bearer_auth.rs + host_validation.rs in the Rust sensing server, dedicated security-scan.yml CI workflow, docs/security-audit-wasm-edge-vendor.md; however no Venezuela-specific deployment hardening, and the platform requires physical ESP32 hardware + calibration per site which is a major real-world deployment barrier for rapid disaster response",
+      "scalability_notes": "Designed for edge/offline operation (no cloud dependency), multi-node mesh scanning, but the MAT disaster-detection crate is explicitly a P1/roadmap integration ('not wired into the live server' per some sub-modules) rather than a battle-tested field tool",
+      "reasoning": "Engineering maturity (CI, Docker, monitoring, auth, tests) is genuinely production-grade for a hardware sensing platform, but the earthquake/disaster-specific MAT capability is architecturally designed yet not proven as an integrated, field-deployed product — it's a specialized crate within a much broader general-purpose WiFi sensing project."
+    },
+    "maturity": {
+      "score": 5,
+      "has_readme": true,
+      "has_tests": true,
+      "has_ci": true,
+      "is_real_or_boilerplate": "Real, substantial, actively developed software (421k LOC, 1054 commits, 25 contributors, commits as recent as 2026-06-27) — not boilerplate",
+      "reasoning": "1463+ claimed tests, 20+ CI workflows, Rust workspace with 1000+ passing tests, Python test suite, mobile Jest+Maestro e2e tests, deterministic cryptographic proof verification pipeline — this is a mature, long-running open-source project."
+    },
+    "viability": {
+      "score": 2,
+      "reasoning": "As a piece of engineering it is outstanding, but as a Build4Venezuela hackathon submission it is highly questionable: it is a pre-existing, massive, general-purpose commercial-grade WiFi sensing platform by a well-known open-source author (ruvnet) with zero Venezuela-specific content, requires custom ESP32 hardware ($9-15/node) plus per-room calibration, and its disaster-survivor detection (MAT) feature is explicitly flagged in its own docs as unvalidated/roadmap ('not wired into the live server', 'no accuracy claim', synthetic benchmarks). It is not something realistically deployable by hackathon organizers to help earthquake victims in the immediate term."
+    },
+    "key_features": [
+      "WiFi CSI-based through-wall presence, breathing rate, and heart-rate detection using $9 ESP32 sensors",
+      "Mass Casualty Assessment Tool (MAT) crate implementing START-protocol triage classification for disaster survivors",
+      "17-keypoint pose estimation and multi-person counting from RF signals alone (no cameras)",
+      "Home Assistant / Apple HomeKit / Google Home / Alexa smart-home integrations",
+      "Mobile app (React Native/Expo) with live vitals, zones, and alert screens plus e2e tests",
+      "Cryptographically attested (Ed25519) witness chain and deterministic proof-verification pipeline for measurement integrity"
+    ],
+    "domain_tags": [
+      "seismic-data",
+      "medical-health",
+      "structural-inspection"
+    ],
+    "merge_potential": "Low practical merge potential for a Venezuela hackathon initiative as-is: it is a foreign, enormous, hardware-dependent codebase (Rust/Python/firmware) that would require significant integration effort, physical ESP32 procurement/deployment, and validation of its explicitly-unproven disaster-detection accuracy before any real earthquake-response use; better suited as a long-term research reference than a near-term deployable aid tool.",
+    "red_flags": [
+      "No Venezuela-specific content anywhere in the repo — appears to be an existing general-purpose open-source project (ruvnet's flagship WiFi sensing platform) mapped to this hackathon slug rather than a project built for it",
+      "Disaster/survivor-detection (MAT) capability explicitly documented as unvalidated: 'not wired into the live server (P3), no accuracy claim', synthetic-only F1 benchmarks for some fusion modules",
+      "Requires specialized ESP32 hardware and per-room calibration, making rapid post-earthquake field deployment impractical without prior installation",
+      "Pose-estimation/presence accuracy claims in README were previously retracted and revised downward (100% presence claim retracted; 82.3% held-out accuracy reported instead), indicating a history of overstated results"
+    ]
+  },
+  "signals": {
+    "accessible": true,
+    "stars": 76087,
+    "forks": 10181,
+    "contributors": 25,
+    "commit_count": 1054,
+    "code_loc": 421079,
+    "created_at": "2025-06-07T04:32:30Z",
+    "pushed_at": "2026-07-01T18:46:05Z",
+    "license": "MIT",
+    "languages_bytes": {
+      "Rust": 8561463,
+      "Python": 2342912,
+      "JavaScript": 2159939,
+      "TypeScript": 931294,
+      "C": 556276,
+      "Shell": 476763,
+      "HTML": 244751,
+      "CSS": 180877,
+      "Makefile": 16300,
+      "CMake": 7291,
+      "Roff": 2188,
+      "Dockerfile": 2053,
+      "PowerShell": 1793,
+      "Swift": 927,
+      "Batchfile": 602,
+      "Mako": 581
+    },
+    "archived": false
+  },
+  "evaluation": {
+    "diffusion": {
+      "score": 1,
+      "ready_to_promote": false,
+      "available_assets": [
+        "demo-video"
+      ],
+      "recommended_angle": "Do not promote as a Venezuela hackathon project; if referenced at all, frame strictly as 'research reference: existing open-source WiFi sensing tech that could inspire future disaster-response tooling' — not as a submission-ready product for victims.",
+      "gaps": [
+        "No Venezuela-specific content, branding, or context anywhere in repo",
+        "No live/public demo, only a GitHub repo link reused as 'live_url'",
+        "Core disaster-detection feature (MAT) is explicitly self-documented as unvalidated and not wired into the live server",
+        "Requires physical ESP32 hardware and per-room calibration, making it undeployable in an actual post-earthquake scenario",
+        "Prior overstated accuracy claims (100% presence) were retracted, undermining credibility",
+        "Appears to be an existing massive open-source project (76k stars, created before the hackathon) mapped to this slug rather than genuinely built for it"
+      ]
+    },
+    "impact_potential": 2,
+    "live_demo_notes": "No public web demo; live_url just points back to the GitHub repo. A YouTube demo video exists (https://www.youtube.com/watch?v=k-8b8ki5nE8), but the underlying disaster-survivor detection capability is documented by the project itself as not wired into the live server and lacking real accuracy claims — so even the demo likely doesn't show a validated end-to-end earthquake-victim-detection flow.",
+    "live_demo_status": "no-public-demo",
+    "one_line_pitch": "Impressive WiFi-sensing engineering, but this is ruvnet's pre-existing 76k-star open-source project repurposed for the hackathon — not a validated tool ready to help earthquake victims today.",
+    "overall_recommendation": "deprioritize",
+    "problem_severity": "high",
+    "product_quality": 2,
+    "real_problem_reasoning": "Detecting survivors trapped under rubble via WiFi CSI addresses a genuinely critical need in earthquake response (search & rescue triage). However, this specific submission does not solve it in a usable way for Venezuela: it's a foreign, hardware-dependent, general-purpose sensing platform with zero Venezuela-specific adaptation, whose disaster/survivor-detection module (MAT) is explicitly flagged by the project's own docs as unvalidated ('no accuracy claim', 'not wired into the live server') and requires pre-installed calibrated ESP32 hardware — impossible to deploy rapidly after a real earthquake. The underlying problem is real and severe, but this project does not currently solve it for victims.",
+    "solves_real_problem": "no"
+  }
+}

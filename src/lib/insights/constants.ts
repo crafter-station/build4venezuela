@@ -1,4 +1,4 @@
-import type { SecurityRisk, Severity, Tier } from "./types";
+import type { FindingStatus, SecurityRisk, Severity, Tier } from "./types";
 
 // Poster palette (see src/app/globals.css): bg #000, primary #ffd83d,
 // accent #16c7e8, destructive #ff4a63, muted-foreground #a6a6a6.
@@ -50,6 +50,15 @@ export const SECURITY_RISK_RANK: Record<SecurityRisk, number> = {
   medium: 2,
   low: 1,
   none: 0,
+};
+
+// Per-finding resolution status on re-audit. Green = fixed, amber = partial,
+// red = still open, cyan = newly found this pass.
+export const FINDING_STATUS_COLOR: Record<FindingStatus, string> = {
+  resolved: "#3ad29f",
+  partial: "#ffd83d",
+  open: "#ff4a63",
+  new: "#16c7e8",
 };
 
 export const SCORE_KEYS = [

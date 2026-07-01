@@ -10,111 +10,104 @@
   "db_description": "# Rastro - Plataforma de Respuesta a Emergencias\n\nRastro es una plataforma de respuesta a emergencias post-terremoto, diseñada para facilitar la comunicación y logística en situaciones críticas. Está optimizada para ofrecer fricción mínima (no requiere registro para reportar) y garantizar un flujo de información verificada.\n\n## 🎯 ¿Para qué sirve?\n\nLa aplicación está dividida en tres módulos principales:\n\n1. **Mapa Colaborativo (`/mapa`):** Muestra reportes geolocalizados en tiempo real sobre necesidades de rescate, suministros y estado de vías.\n2. **Buscador de Personas (`/personas`):** Permite registrar y buscar personas en refugios (por nombre o cédula de identidad), facilitando la reunificación familiar.\n3. **Panel de Moderación (`/moderacion`):** Un área restringida donde los moderadores revisan, aprueban o rechazan los reportes ciudadanos antes de publicarlos en el mapa, evitando desinformación.\n\n## 🛠️ Stack Tecnológico\n\n- **Framework:** [Next.js 14](https://nextjs.org/) (App Router)\n- **Lenguaje:** [TypeScript](https://www.typescriptlang.org/)\n- **Estilos:** [Tailwind CSS](https://tailwindcss.com/)\n- **Base de Datos, Auth, Storage y Realtime:** [Supabase](https://supabase.com/)\n- **Mapas:** [Leaflet](https://leafletjs.com/) + `react-leaflet` + OpenStreetMap\n- **Formularios y Validación:** `react-hook-form` + `zod`\n- **Búsqueda:** `fuse.js` (Búsqueda fuzzy)\n- **Íconos:** `lucide-react`\n- **Hosting y Cron Jobs:** [Vercel](https://vercel.com/)",
   "lifecycle_status": "ready_to_use",
   "analysis": {
-    "summary": "Rastro is a post-earthquake emergency response platform built with Next.js 14 App Router and Supabase. It delivers three functional modules: a collaborative geolocated report map (Leaflet/OpenStreetMap), a shelter-based person registry with fuzzy search (fuse.js + Supabase), and a moderation panel that gates citizen reports before they appear publicly. The codebase is small (2,719 LOC) but coherent — real business logic exists, Zod validation is applied consistently at every API boundary, RLS is configured in Supabase, admin operations are properly isolated to server-side route handlers, and a Vercel cron job auto-archives stale reports. The main weaknesses are: no tests or CI, a privacy gap (persona PII is open-access by anon), and a shared-secret moderation auth that is not scalable.",
-    "project_type": "Web application — emergency coordination platform (Next.js fullstack)",
+    "summary": "Rastro is a Next.js 14 + Supabase single-app MVP for post-earthquake emergency response in Venezuela, with three real modules: a collaborative map of citizen-reported incidents (rescue/supplies/road status) with moderation workflow, a missing-persons/shelter registry-search tool, and a moderator approval panel. The code is coherent, uses Zod validation, RLS policies, a service-role/anon Supabase client split, Realtime subscriptions, and a Vercel cron job to auto-archive old reports, and is live-deployed at rastro-flax.vercel.app.",
+    "project_type": "web app (Next.js full-stack)",
     "stack": {
       "frontend": [
         "Next.js 14 (App Router)",
         "React 18",
+        "TypeScript",
         "Tailwind CSS",
-        "Leaflet / react-leaflet",
+        "react-leaflet/Leaflet",
         "react-hook-form",
-        "fuse.js",
-        "lucide-react"
+        "fuse.js"
       ],
       "backend": [
-        "Next.js Route Handlers (serverless)",
-        "Supabase (PostgREST + RLS)",
-        "Vercel Cron Jobs"
+        "Next.js Route Handlers (API routes)"
       ],
       "database": [
-        "Supabase (PostgreSQL)",
-        "uuid-ossp extension",
-        "PLpgSQL triggers & functions",
+        "Supabase Postgres",
+        "PL/pgSQL functions/triggers",
         "Row Level Security"
       ],
       "infra_deploy": [
-        "Vercel (hosting + cron)",
-        "Supabase (BaaS)"
+        "Vercel",
+        "Vercel Cron"
       ],
       "ai_ml": [],
       "languages": [
         "TypeScript",
         "PLpgSQL",
-        "CSS"
+        "CSS",
+        "JavaScript"
       ]
     },
     "architecture": {
-      "pattern": "Serverless BaaS — Next.js App Router with API Route Handlers backed by Supabase; no separate backend service",
+      "pattern": "Next.js App Router monolith with server route handlers calling a BaaS (Supabase) directly",
       "uses_orm": false,
-      "orm_or_db_layer": "Supabase JS client (query builder, not ORM); admin client (service role) isolated to server-only modules; atomic upvote via plpgsql RPC",
-      "api_design": "REST-style Next.js Route Handlers; GET/POST on /api/reportes, /api/personas, /api/refugios; PATCH on /api/moderacion/[id]; upvote via POST /api/reportes/[id]/upvote; cron via GET /api/cron/archivar",
-      "separation_of_concerns": "Clean split: supabase.ts (anon client) vs supabase-admin.ts (service role, server-only); validaciones.ts holds all Zod schemas; types/index.ts holds domain types; hooks/ separates data-fetching from UI",
-      "modularity": "Three feature modules (mapa, personas, moderacion) each with a server page.tsx and a client-side *ClientPage.tsx component; shared UI components in src/components/ui/",
+      "orm_or_db_layer": "Supabase JS client (PostgREST) — anon client for public reads, service-role admin client for privileged writes/moderation, plus a couple of Postgres RPC functions (incrementar_upvote, buscar_personas)",
+      "api_design": "REST-ish Next.js route handlers under src/app/api (reportes, personas, refugios, moderacion, moderacion/login, cron/archivar) with Zod-validated bodies and consistent JSON error responses",
+      "separation_of_concerns": "Clear split between client-safe supabase.ts (anon key) and server-only supabase-admin.ts (service role), centralized Zod schemas in validaciones.ts reused across API routes and forms",
+      "modularity": "Feature-based routing (mapa, reportar, personas, moderacion) each with page.tsx + Client component, plus shared hooks (useReportes, usePersonas, useGeolocalizacion) and small ui/mapa component folders",
       "notable_patterns": [
-        "Server/client split via *ClientPage pattern avoids leaking admin logic to browser",
-        "RLS enforces business rules at DB layer (pendiente state enforced on insert)",
-        "Cookie-based upvote rate-limit (httpOnly, 24h TTL)",
-        "Vercel cron with Bearer token guard auto-archives reports older than 7 days",
-        "Zod schemas shared between route validation and TypeScript inference"
+        "Supabase Realtime subscription in useReportes for live map updates",
+        "RLS policies enforcing insert-as-pending and public read of only published/unverified rows",
+        "SECURITY DEFINER Postgres function for atomic upvote increments",
+        "Vercel Cron with Bearer-token auth to auto-archive stale reports"
       ]
     },
     "code_organization": {
       "score": 4,
-      "directory_structure": "Well-structured: src/app/ for Next.js routing, src/lib/ for utilities, src/hooks/ for data-fetching hooks, src/components/ for UI, src/types/ for domain types, supabase/ for schema. Feature pages each have a server shell and a ClientPage component.",
-      "naming_quality": "Consistent Spanish naming that matches the domain (reportes, refugios, personas, moderacion); Zod schemas named *Schema, TypeScript types match DB columns.",
-      "documentation_quality": "README is thorough with setup steps and feature descriptions; AGENTS.md and MANUAL.md are present; inline comments explain non-obvious decisions (e.g., why supabaseAdmin is used, RLS bypass rationale).",
-      "reasoning": "The codebase is notably well-organized for a hackathon project — clean separation between public and admin clients, consistent patterns across all route handlers, and readable domain-aligned naming. Minor deduction for no architectural diagram and some duplication between /api/moderacion/route.ts GET and /api/moderacion/[id]/route.ts GET."
+      "directory_structure": "Clean, conventional Next.js App Router layout with logical grouping by feature and shared lib/hooks/types/components directories; only ~2800 LOC total so it stays easy to navigate",
+      "naming_quality": "Consistent Spanish domain naming (reportes, personas, refugios, moderacion) matched 1:1 between DB schema, types, and API routes",
+      "documentation_quality": "README, AGENTS.md and MANUAL.md all present with real usage/demo flow descriptions, not generic boilerplate",
+      "reasoning": "Small but well-structured codebase with consistent naming and real docs; loses a point for having no code comments beyond file headers and no architecture diagram."
     },
     "production_readiness": {
-      "score": 3,
+      "score": 2,
       "has_auth": true,
       "has_error_handling": true,
-      "has_logging": true,
+      "has_logging": false,
       "has_env_config": true,
       "has_deploy_config": true,
-      "secrets_handling": "Service role key is server-only (SUPABASE_SERVICE_ROLE_KEY, never prefixed NEXT_PUBLIC_); MODERACION_SECRET and CRON_SECRET stored as env vars; .env.example committed with empty values; no secrets in code.",
-      "security_notes": "Critical gap: personas table RLS allows anon SELECT with USING(TRUE) — displaced persons' PII (name, CI, birth date, health status, family phone) is world-readable via the public API with no auth required. Moderation auth is a single shared secret compared by equality (no timing-safe compare); cookie is httpOnly+lax but not marked secure in code (comment says Vercel applies it automatically). Upvote rate-limit is cookie-based — trivially bypassed by clearing cookies.",
-      "scalability_notes": "Serverless on Vercel + Supabase scales horizontally by default. No pagination on persona search (hard limit of 100 rows). Supabase free tier connection limits could be hit under load. No caching layer.",
-      "reasoning": "The project has solid fundamentals for a hackathon: env separation, RLS, Zod validation everywhere, and a cron job. The personas PII exposure is a real production blocker — health status and family contact data for disaster victims must not be publicly queryable. Fixing it requires adding a SELECT policy that restricts access (e.g., only authenticated users or a lookup-by-CI-only path)."
+      "secrets_handling": ".env.example documents required vars (Supabase URL/anon/service-role keys, MODERACION_SECRET, CRON_SECRET); service-role key correctly isolated to server-only module with a warning comment",
+      "security_notes": "Moderator 'auth' is a single shared plaintext secret compared to a cookie value (no hashing, no per-user accounts, no rate limiting on login attempts); RLS is reasonably designed (public insert forced to 'pendiente', public select restricted to visible states) but the 'personas' table SELECT/INSERT is fully open to anon with no auth, meaning anyone can read all registered persons' names, birthdates, health status, and family phone numbers (PII exposure risk for a vulnerable population) and anyone can spam-insert fake person records; no rate limiting anywhere; cron endpoint auth is skipped entirely outside NODE_ENV=production.",
+      "scalability_notes": "Relies entirely on Supabase managed Postgres + Vercel serverless functions, which scales fine for hackathon/pilot load; no caching layer, no pagination beyond a hardcoded limit(100) on personas search, no queueing for spikes in report submissions.",
+      "reasoning": "Deployed and functionally real (live URL, working Supabase backend, RLS, cron), but lacks structured logging/monitoring, has a weak single-secret moderator auth model, and exposes sensitive personas PII to any anonymous client — significant concerns for an app meant to protect real disaster victims' data."
     },
     "maturity": {
       "score": 2,
       "has_readme": true,
       "has_tests": false,
       "has_ci": false,
-      "is_real_or_boilerplate": "Real — contains genuine domain logic: SQL schema with RLS, triggers, seed data, Zod validation schemas, map integration, moderation workflow, and cron archiving. Not boilerplate.",
-      "reasoning": "Created June 28, 2026 with only 5 commits and 1 contributor — clearly hackathon-fresh. The code quality is above average for the age but there are zero tests and no CI pipeline. The live deployment (rastro-flax.vercel.app) suggests it has been built and runs."
+      "is_real_or_boilerplate": "real, working implementation (not boilerplate) but very early-stage",
+      "reasoning": "6 commits total, single contributor, no automated tests, no CI/CD pipeline; despite functioning end-to-end logic, this is a few-day hackathon build with no hardening or quality gates yet."
     },
     "viability": {
       "score": 3,
-      "reasoning": "The core loop — citizen submits geolocated report, moderator approves, report appears on public map — is fully implemented and deployed. The person-finder module addresses a real family-reunification need. The privacy gap on personas PII is a serious concern that must be patched before real deployment with victim data, but the fix is a one-line RLS policy change. The single-secret moderation auth is a liability at scale but workable for a small team. With those two fixes this is genuinely deployable."
+      "reasoning": "The core loop (report incident -> moderate -> publish to live map; register/search displaced persons in shelters) is genuinely implemented and deployed, addressing real earthquake-response needs (family reunification, aid/rescue reporting, shelter tracking), but the open PII exposure on the personas table, single-secret moderation auth, and total absence of tests/CI mean it needs real security and reliability work before trusting it with real victims' data at scale."
     },
     "key_features": [
-      "Geolocated citizen incident reports (rescue, supply, road conditions) submitted without registration",
-      "Moderation workflow: reports start as 'pendiente', moderators approve/reject/mark unverified before public display",
-      "Shelter-based person registry with CI and name search to support family reunification",
-      "Interactive Leaflet map showing verified and unverified reports with upvote mechanism",
-      "Atomic upvote via PostgreSQL RPC with cookie-based rate-limiting",
-      "Vercel cron job auto-archives reports older than 7 days at 3am UTC daily",
-      "Supabase RLS enforces that public inserts can only create 'pendiente' reports"
+      "Public collaborative incident map (rescue/supply/road-status reports) with geolocation and upvoting",
+      "Moderation queue with approve/reject/unverified workflow before reports go public",
+      "Realtime updates on the map via Supabase Realtime subscriptions",
+      "Missing-persons/shelter registry with fuzzy + cédula search across refugios",
+      "Automatic daily archival of stale reports via Vercel Cron",
+      "Zod-validated forms and API inputs shared between client and server"
     ],
     "domain_tags": [
-      "people-finder",
       "shelter-mapping",
-      "alerts-notifications",
-      "mapping-geo",
       "family-reunification",
-      "aid-logistics"
+      "aid-logistics",
+      "mapping-geo",
+      "volunteer-coordination"
     ],
-    "merge_potential": "The three modules (map, persons, moderation) are independently valuable and well-separated. The moderation panel and report schema could be reused by any other project needing citizen-sourced verified alerts. The personas/refugios data model is reusable for any shelter-tracking feature. Code is TypeScript-typed throughout, making integration straightforward.",
+    "merge_potential": "Could serve as the incident-reporting/map + shelter-registry module in a combined platform; its Supabase schema (refugios/reportes/personas) and moderation pattern are reusable building blocks, but its personas PII exposure should be fixed before combining with any people-finder feature from another project.",
     "red_flags": [
-      "personas table allows anon SELECT with USING(TRUE) — victim PII (health status, CI, family phone) is fully world-readable with no authentication required",
-      "Moderation auth is a plain shared-secret string comparison — no timing-safe equality, no rate-limit on the login endpoint",
-      "Zero automated tests — no unit, integration, or e2e tests present",
-      "No CI pipeline — no build verification on push",
-      "Upvote rate-limit is cookie-only — trivially bypassed; no server-side deduplication",
-      "persons_count counter updated via RPC that silently ignores errors ('ignorar error si la función no existe aún') — counter can drift from reality"
+      "personas table RLS allows anonymous SELECT and INSERT with no restriction, exposing full name, birthdate, health status, and family contact phone numbers of registered displaced persons to any unauthenticated client",
+      "Moderator authentication is a single shared plaintext secret string compared directly (no hashing, no per-account auth, no brute-force protection)",
+      "No automated tests or CI pipeline of any kind",
+      "Cron endpoint authorization is bypassed whenever NODE_ENV !== 'production', and CRON_SECRET defaults to empty string if unset"
     ]
   },
   "signals": {
@@ -122,13 +115,13 @@
     "stars": 0,
     "forks": 0,
     "contributors": 1,
-    "commit_count": 5,
-    "code_loc": 2719,
+    "commit_count": 6,
+    "code_loc": 2823,
     "created_at": "2026-06-28T03:04:36Z",
-    "pushed_at": "2026-06-29T02:04:22Z",
+    "pushed_at": "2026-06-29T18:53:35Z",
     "license": null,
     "languages_bytes": {
-      "TypeScript": 93644,
+      "TypeScript": 98477,
       "PLpgSQL": 9984,
       "CSS": 4546,
       "JavaScript": 227
@@ -136,30 +129,30 @@
     "archived": false
   },
   "evaluation": {
-    "solves_real_problem": "yes",
-    "real_problem_reasoning": "Rastro directly addresses three critical problems that arise immediately after an earthquake: (1) dispersed, unverified information about rescue needs, supply shortages, and road conditions — solved by a moderated geolocated report map; (2) family separation — solved by a shelter-based person registry searchable by name or national ID; (3) spread of misinformation in disaster contexts — solved by a moderation workflow that holds citizen reports in \"pendiente\" state until a human reviewer approves them. All three modules are implemented and deployed, not mocked. No registration is required to submit a report, which is exactly right for zero-friction disaster response.",
-    "problem_severity": "critical",
-    "impact_potential": 4,
-    "product_quality": 3,
-    "live_demo_status": "working",
-    "live_demo_notes": "The live URL (https://rastro-six.vercel.app) redirects (HTTP 307) but the app is fully functional at its pages. /mapa loads with an interactive emergency map, category filters (rescue, supplies, road conditions), and a report submission button. /personas loads a working person-finder search interface with name/CI lookup. The map shows a loading state with zero current reports (expected — it's a hackathon demo with no seed data). Navigation between Map, Report, People, and Moderation sections is accessible. The platform's tagline \"Datos colaborativos — verifica antes de actuar\" is visible and on-brand.",
     "diffusion": {
       "score": 3,
       "ready_to_promote": true,
       "available_assets": [
         "live-demo",
-        "clear-value-prop"
+        "clear-value-prop",
+        "branding"
       ],
-      "recommended_angle": "Lead with the family-reunification module — searching for a missing relative by cedula de identidad is an immediately visceral, human need. Pair that with the zero-registration report map to show that Rastro works at the moment of disaster, not after bureaucracy. Highlight the moderation layer as the differentiator against misinformation. Sample post (Spanish): 'Después del terremoto, cada minuto cuenta. Rastro te permite reportar necesidades de rescate sin crear cuenta, buscar familiares por cédula y ver en tiempo real dónde se necesita ayuda — todo verificado antes de publicar. rastro-six.vercel.app'",
+      "recommended_angle": "Show the three real modules in action (mapa colaborativo, búsqueda de personas en refugios, panel de moderación) with a short screen-recording, since there's no demo video yet — emphasize 'reporta sin registrarte, encuentra a tu familia' as the hook.",
       "gaps": [
-        "No demo video showing the map, report flow, and person search in action",
-        "No screenshots in the repo for social sharing",
-        "No branding assets (logo, OG image) for link previews",
-        "Zero seed data in the live demo makes the map feel empty — a recorded walkthrough or seeded demo environment would help communicate the value instantly",
-        "No real users or testimonials yet"
+        "no demo video exists — needs a screen recording since the live app is real and demoable",
+        "no screenshots captured/curated yet for social assets",
+        "no evidence of real users/pilot testing with actual disaster-response orgs",
+        "PII exposure bug on personas table should be flagged/fixed before wide public promotion, since promoting it could actually funnel real victims' sensitive data into an insecure table"
       ]
     },
+    "impact_potential": 4,
+    "live_demo_notes": "Verified via curl: https://rastro-six.vercel.app redirects (307) to /mapa, and /mapa, /personas, /moderacion all return 200 with fully rendered Next.js pages (real nav, title 'Rastro — Respuesta a Emergencias', map page chunk, forms). This is a working, deployed multi-page app, not a static landing page — WebFetch itself was blocked by the redirect but curl confirms real functional routes.",
+    "live_demo_status": "working",
+    "one_line_pitch": "Rastro: reporta emergencias sin registrarte, encuentra a tus familiares en refugios y coordina ayuda en un mapa colaborativo en tiempo real — ya funcionando en vivo.",
     "overall_recommendation": "promote",
-    "one_line_pitch": "Rastro lets earthquake victims report emergencies without signing up, find missing relatives by national ID, and trust that every map pin has been human-verified before going public."
+    "problem_severity": "critical",
+    "product_quality": 3,
+    "real_problem_reasoning": "Addresses two of the most acute post-earthquake needs: family reunification (missing-persons/shelter registry with fuzzy + cédula search) and real-time coordination of rescue/supply/road-status reports, both with zero-friction reporting (no signup required) which matters enormously in a crisis where victims have limited connectivity/time. A moderation layer to prevent disinformation on the map is a thoughtful, realistic touch for chaotic post-disaster information environments.",
+    "solves_real_problem": "yes"
   }
 }
