@@ -130,8 +130,28 @@
       "title": "construire des solutions technologiques pour le Venezuela.",
       "closure": {
         "label": "Événement de clôture",
-        "date": "Mercredi 1er juillet // 19:00 UTC-5 // en ligne"
+        "date": "Mercredi 1er juillet // 18:00 UTC-5 // en ligne"
       },
+      "showcase": {
+        "title": "Aujourd'hui : la présentation des projets",
+        "description": "Nous présentons les solutions créées pendant le hackathon pour aider face à l'urgence : recherche de personnes, refuges, dons, information vérifiée et signalements citoyens.",
+        "times": [
+          "18 h Colombie & Pérou",
+          "19 h Venezuela & Chili",
+          "20 h Argentine"
+        ],
+        "share": "Partagez le direct. Nous construisons pour le Venezuela."
+      },
+      "stats": [
+        {
+          "value": "+1000",
+          "label": "builders"
+        },
+        {
+          "value": "+80",
+          "label": "projets"
+        }
+      ],
       "countdown": {
         "labels": {
           "days": "Jours",

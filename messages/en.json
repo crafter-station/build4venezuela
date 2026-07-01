@@ -130,8 +130,28 @@
       "title": "build tech solutions for Venezuela.",
       "closure": {
         "label": "Closure event",
-        "date": "Wednesday, July 1 // 7:00 PM UTC-5 // online"
+        "date": "Wednesday, July 1 // 6:00 PM UTC-5 // online"
       },
+      "showcase": {
+        "title": "Today: the Build Showcase",
+        "description": "We present the solutions built during the hackathon to help in the emergency: people search, shelters, donations, verified information, and citizen reports.",
+        "times": [
+          "6 PM Colombia & Peru",
+          "7 PM Venezuela & Chile",
+          "8 PM Argentina"
+        ],
+        "share": "Share the live. We build for Venezuela."
+      },
+      "stats": [
+        {
+          "value": "+1000",
+          "label": "builders"
+        },
+        {
+          "value": "+80",
+          "label": "projects"
+        }
+      ],
       "countdown": {
         "labels": {
           "days": "Days",

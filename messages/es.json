@@ -130,8 +130,28 @@
       "title": "construir soluciones tech por Venezuela.",
       "closure": {
         "label": "Evento de clausura",
-        "date": "Miércoles 1 de julio // 7:00 PM UTC-5 // online"
+        "date": "Miércoles 1 de julio // 6:00 PM UTC-5 // online"
       },
+      "showcase": {
+        "title": "Hoy es la muestra de proyectos",
+        "description": "Presentamos las soluciones creadas durante la hackathon para ayudar en la emergencia: búsqueda de personas, refugios, donaciones, información verificada y reportes ciudadanos.",
+        "times": [
+          "6 PM Colombia y Perú",
+          "7 PM Venezuela y Chile",
+          "8 PM Argentina"
+        ],
+        "share": "Comparte el live. Construimos por Venezuela."
+      },
+      "stats": [
+        {
+          "value": "+1000",
+          "label": "builders"
+        },
+        {
+          "value": "+80",
+          "label": "proyectos"
+        }
+      ],
       "countdown": {
         "labels": {
           "days": "Días",

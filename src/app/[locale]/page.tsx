@@ -8,7 +8,7 @@ import { Countdown } from "./countdown";
 import { RealtimeVisitors } from "./realtime-visitors";
 
 const assetPath = "/BFV/assets/";
-const closureEventTargetIso = "2026-07-02T00:00:00.000Z";
+const closureEventTargetIso = "2026-07-01T23:00:00.000Z";
 
 const watchChannels = [
   { label: "Kick", href: "https://kick.com/build4venezuela", color: "#53fc18" },
@@ -22,6 +22,21 @@ const watchChannels = [
     href: "https://youtube.com/@build4venezuela",
     color: "#ff0033",
   },
+] as const;
+
+const socialChannels = [
+  { label: "Instagram", href: "https://www.instagram.com/build4venezuela/" },
+  {
+    label: "Facebook",
+    href: "https://www.facebook.com/profile.php?id=61591302428491",
+  },
+  {
+    label: "LinkedIn",
+    href: "https://www.linkedin.com/company/buildforvenezuela/",
+  },
+  { label: "TikTok", href: "https://www.tiktok.com/@build4venezuela" },
+  { label: "YouTube", href: "https://www.youtube.com/@build4venezuela" },
+  { label: "X", href: "https://x.com/Build4Venezuela" },
 ] as const;
 
 type Props = {
@@ -90,6 +105,8 @@ export default async function Home({ params }: Props) {
   const channels = t.raw("channels") as Channel[];
   const impactStats = t.raw("impactStats") as ImpactStat[];
   const countdownLabels = t.raw("hero.countdown.labels") as CountdownLabels;
+  const heroStats = t.raw("hero.stats") as ImpactStat[];
+  const showcaseTimes = t.raw("hero.showcase.times") as string[];
   const principles = t.raw("principles.items") as Principle[];
   const principleFilter = t.raw("principles.filter.items") as string[];
   const latestInfoHref = `https://www.perplexity.ai/?${new URLSearchParams({
@@ -158,10 +175,41 @@ export default async function Home({ params }: Props) {
             <p className="mx-auto mt-3 max-w-[920px] text-balance text-[clamp(1.2rem,2.35vw,2.1rem)] font-black leading-[1.2] tracking-[0.04em] text-foreground">
               {t("hero.title")}
             </p>
+            <div className="mt-5 flex flex-wrap items-baseline justify-center gap-x-8 gap-y-2 sm:gap-x-12">
+              {heroStats.map((stat) => (
+                <p className="flex items-baseline gap-3" key={stat.label}>
+                  <span className="text-[clamp(1.8rem,3.6vw,3rem)] font-black leading-none tracking-[-0.04em] text-primary">
+                    {stat.value}
+                  </span>
+                  <span className="text-xs font-bold tracking-[0.26em] text-foreground/70 sm:text-sm">
+                    {stat.label}
+                  </span>
+                </p>
+              ))}
+            </div>
           </div>
 
           <div className="w-full max-w-[860px] text-center font-mono uppercase">
             <div className="mx-auto max-w-[760px] border border-border bg-background/70 p-4 sm:p-5">
+              <p className="text-[clamp(1.05rem,2vw,1.6rem)] font-black leading-[1.2] tracking-[0.1em] text-accent">
+                {t("hero.showcase.title")}
+              </p>
+              <p className="mx-auto mt-3 max-w-[640px] text-balance text-[clamp(0.75rem,1.4vw,0.95rem)] font-light leading-relaxed tracking-[0.1em] text-foreground/80">
+                {t("hero.showcase.description")}
+              </p>
+              <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-[clamp(0.7rem,1.4vw,0.9rem)] font-bold tracking-[0.16em] text-foreground">
+                {showcaseTimes.map((time, index) => (
+                  <span className="flex items-center gap-4" key={time}>
+                    {index > 0 && (
+                      <span aria-hidden="true" className="text-foreground/35">
+                        {"//"}
+                      </span>
+                    )}
+                    {time}
+                  </span>
+                ))}
+              </div>
+              <div className="mt-5 border-border border-t pt-5" />
               <a
                 className="inline-flex border border-primary/70 px-4 py-3 text-xs font-bold tracking-[0.2em] text-primary transition hover:border-foreground hover:bg-foreground hover:text-background focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-4 focus-visible:ring-offset-background"
                 href="https://build4venezuela.com/luma"
@@ -204,6 +252,33 @@ export default async function Home({ params }: Props) {
                       />
                       {channel.label}
                     </a>
+                  ))}
+                </div>
+              </div>
+              <div className="mt-6 border-border border-t pt-5">
+                <p className="text-[clamp(0.7rem,1.4vw,0.85rem)] font-bold leading-snug tracking-[0.2em] text-foreground/70">
+                  {t("hero.showcase.share")}
+                </p>
+                <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs font-light tracking-[0.2em] text-foreground/65">
+                  {socialChannels.map((channel, index) => (
+                    <span
+                      className="flex items-center gap-4"
+                      key={channel.label}
+                    >
+                      {index > 0 && (
+                        <span aria-hidden="true" className="text-foreground/30">
+                          {"//"}
+                        </span>
+                      )}
+                      <a
+                        className="transition hover:text-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-4 focus-visible:ring-offset-background"
+                        href={channel.href}
+                        rel="noreferrer"
+                        target="_blank"
+                      >
+                        {channel.label}
+                      </a>
+                    </span>
                   ))}
                 </div>
               </div>
