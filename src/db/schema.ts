@@ -199,3 +199,73 @@ export const projectInsights = pgTable(
     index("project_insights_viability_idx").on(table.viabilityScore.desc()),
   ],
 );
+
+export const builderProfiles = pgTable(
+  "builder_profiles",
+  {
+    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+    userId: text("user_id").notNull().unique(),
+    name: text("name").notNull(),
+    role: text("role").notNull(),
+    customRole: text("custom_role").notNull().default(""),
+    description: text("description").notNull(),
+    linkedinUrl: text("linkedin_url").notNull().default(""),
+    portfolioUrl: text("portfolio_url").notNull().default(""),
+    availabilityVisible: boolean("availability_visible")
+      .notNull()
+      .default(false),
+    availability: jsonb("availability")
+      .$type<Record<string, number>>()
+      .notNull()
+      .default(sql`'{}'::jsonb`),
+    weeklyHours: integer("weekly_hours").notNull().default(0),
+    status: text("status").notNull().default("available"),
+    directoryVisible: boolean("directory_visible").notNull().default(true),
+    spamScore: numeric("spam_score", { mode: "number" }),
+    spamReason: text("spam_reason"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .default(sql`now()`),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .default(sql`now()`),
+  },
+  (table) => [
+    index("builder_profiles_role_idx").on(table.role),
+    index("builder_profiles_status_idx").on(table.status),
+    index("builder_profiles_weekly_hours_idx").on(table.weeklyHours),
+  ],
+);
+
+export const builderContactRequests = pgTable(
+  "builder_contact_requests",
+  {
+    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+    builderId: uuid("builder_id")
+      .notNull()
+      .references(() => builderProfiles.id, { onDelete: "cascade" }),
+    requesterUserId: text("requester_user_id").notNull(),
+    requesterName: text("requester_name").notNull().default(""),
+    requesterImageUrl: text("requester_image_url").notNull().default(""),
+    projectName: text("project_name").notNull(),
+    coverLetter: text("cover_letter").notNull(),
+    contactEmail: text("contact_email").notNull().default(""),
+    contactPhone: text("contact_phone").notNull().default(""),
+    status: text("status").notNull().default("pending"),
+    spamScore: numeric("spam_score", { mode: "number" }),
+    spamReason: text("spam_reason"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .default(sql`now()`),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .default(sql`now()`),
+  },
+  (table) => [
+    index("builder_contact_requests_builder_id_idx").on(table.builderId),
+    index("builder_contact_requests_requester_user_id_idx").on(
+      table.requesterUserId,
+    ),
+    index("builder_contact_requests_status_idx").on(table.status),
+  ],
+);

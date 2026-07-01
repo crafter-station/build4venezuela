@@ -2,6 +2,10 @@ import { gateway } from "@ai-sdk/gateway";
 import { generateObject, zodSchema } from "ai";
 import { z } from "zod";
 import { env } from "@/env";
+import type {
+  BuilderContactRequestInput,
+  BuilderProfileInput,
+} from "@/lib/builders/schema";
 import { logError } from "@/lib/log";
 import type {
   SolutionRequestCommentInput,
@@ -175,6 +179,96 @@ export async function checkSolutionRequestCommentForSpam(
     return { ...result.object, validationPassed: true };
   } catch (error) {
     logError("spam.requestComment", error);
+    return {
+      isSpam: false,
+      confidence: 0,
+      reason: "AI spam check failed. Please try again.",
+      validationPassed: false,
+    };
+  }
+}
+
+export async function checkBuilderProfileForSpam(
+  input: BuilderProfileInput,
+  spamValidationConfigured = Boolean(env.AI_GATEWAY_API_KEY),
+): Promise<SpamCheckResult> {
+  if (!spamValidationConfigured) {
+    return {
+      isSpam: false,
+      confidence: 0,
+      reason: "AI Gateway is not configured.",
+      validationPassed: false,
+    };
+  }
+
+  try {
+    const result = await generateObject({
+      model: gateway("anthropic/claude-sonnet-4.6"),
+      schema: zodSchema(spamResultSchema),
+      abortSignal: AbortSignal.timeout(SPAM_CHECK_TIMEOUT_MS),
+      system:
+        "You review builder profiles for a hackathon/community volunteer directory. Flag only clear spam, scams, unrelated ads, phishing, malicious links, gibberish, harassment, or abusive content. Do not reject legitimate skill descriptions, rough drafts, or early-career builders.",
+      prompt: JSON.stringify(
+        {
+          name: input.name,
+          role: input.role,
+          customRole: input.customRole,
+          description: input.description,
+          linkedinUrl: input.linkedinUrl,
+          portfolioUrl: input.portfolioUrl,
+        },
+        null,
+        2,
+      ),
+    });
+
+    return { ...result.object, validationPassed: true };
+  } catch (error) {
+    logError("spam.builderProfile", error);
+    return {
+      isSpam: false,
+      confidence: 0,
+      reason: "AI spam check failed. Please try again.",
+      validationPassed: false,
+    };
+  }
+}
+
+export async function checkBuilderContactRequestForSpam(
+  input: Omit<BuilderContactRequestInput, "projectSlug">,
+  spamValidationConfigured = Boolean(env.AI_GATEWAY_API_KEY),
+): Promise<SpamCheckResult> {
+  if (!spamValidationConfigured) {
+    return {
+      isSpam: false,
+      confidence: 0,
+      reason: "AI Gateway is not configured.",
+      validationPassed: false,
+    };
+  }
+
+  try {
+    const result = await generateObject({
+      model: gateway("anthropic/claude-sonnet-4.6"),
+      schema: zodSchema(spamResultSchema),
+      abortSignal: AbortSignal.timeout(SPAM_CHECK_TIMEOUT_MS),
+      system:
+        "You review private contact requests from project owners to builders. Flag only clear spam, scams, unrelated ads, phishing, malicious links, gibberish, harassment, or abusive content. Do not reject concise legitimate collaboration requests, rough project context, or volunteer outreach.",
+      prompt: JSON.stringify(
+        {
+          projectName: input.projectName,
+          coverLetter: input.coverLetter,
+          contactEmail: input.contactEmail,
+          contactPhone: input.contactPhone,
+        },
+        null,
+        2,
+      ),
+    });
+
+    return { ...result.object, validationPassed: true };
+  } catch (error) {
+    logError("spam.builderContactRequest", error);
     return {
       isSpam: false,
       confidence: 0,

@@ -7,8 +7,18 @@ const intlMiddleware = createMiddleware(routing);
 
 function isProtectedRoute(pathname: string) {
   const [, locale, segment] = pathname.split("/");
-  return routing.locales.some(
-    (supportedLocale) => supportedLocale === locale && segment === "submit",
+  const localizedProtectedRoute = routing.locales.some(
+    (supportedLocale) =>
+      supportedLocale === locale &&
+      (segment === "submit" ||
+        pathname === `/${locale}/builder/register` ||
+        pathname === `/${locale}/builder/requests`),
+  );
+
+  return (
+    localizedProtectedRoute ||
+    pathname === "/builder/register" ||
+    pathname === "/builder/requests"
   );
 }
 
@@ -21,6 +31,9 @@ function legacyLocalizedRedirect(request: Request) {
     "/submit",
     "/requests",
     "/recursos",
+    "/builders",
+    "/builder/register",
+    "/builder/requests",
     "/insights",
   ];
 

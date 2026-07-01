@@ -306,6 +306,28 @@ export async function listProjects() {
   );
 }
 
+export async function listProjectsByOwner(userId: string) {
+  return withLocalFallback(
+    async () => {
+      const rows = await db
+        .select({ project: projects, votesCount: voteCount })
+        .from(projects)
+        .leftJoin(projectVotes, eq(projectVotes.projectId, projects.id))
+        .where(eq(projects.ownerUserId, userId))
+        .groupBy(projects.id)
+        .orderBy(desc(projects.createdAt));
+
+      return rows.map((row) => rowToProject(row.project, row.votesCount));
+    },
+    async () => {
+      const data = await readLocalData();
+      return data.projects
+        .filter((project) => project.owner_user_id === userId)
+        .map((project) => toProject({ ...project, votes_count: 0 }));
+    },
+  );
+}
+
 export async function getProjectBySlug(slug: string) {
   return withLocalFallback(
     async () => {

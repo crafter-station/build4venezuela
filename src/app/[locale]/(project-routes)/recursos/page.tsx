@@ -2,7 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { ProjectShell } from "../project-shell";
 
 type Resource = {
-  key: "deck" | "projects" | "brand" | "github" | "discord";
+  key: "deck" | "projects" | "excel" | "brand" | "github" | "discord";
   title: string;
   description: string;
   href: string;
@@ -19,6 +19,11 @@ const resourceLinks = [
   {
     key: "projects",
     href: "https://docs.google.com/spreadsheets/d/1izXHF-aZOOu7VvfmbpH8TmVCFbjqwm2eqnpJN2ODrCo/htmlview?gid=608803999&pru=AAABnyqRshg*Od-l2t9POoYbazcuvEwnxw#gid=608803999",
+    external: true,
+  },
+  {
+    key: "excel",
+    href: "https://docs.google.com/spreadsheets/d/1izXHF-aZOOu7VvfmbpH8TmVCFbjqwm2eqnpJN2ODrCo/edit?usp=sharing",
     external: true,
   },
   {
