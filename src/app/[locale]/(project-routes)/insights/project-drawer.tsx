@@ -110,7 +110,7 @@ export function ProjectDrawer({
                   <Link href={node.repoUrl} label={t("links.repo")} />
                 )}
                 {node.liveUrl && /^https?:/.test(node.liveUrl) && (
-                  <Link href={node.liveUrl} label={t("links.live")} />
+                  <Link href={node.liveUrl} label={t("links.live")} keepReferrer />
                 )}
                 {node.videoUrl && (
                   <Link href={node.videoUrl} label={t("links.video")} />
@@ -399,12 +399,21 @@ function StackLine({ label, items }: { label: string; items: string[] }) {
   );
 }
 
-function Link({ href, label }: { href: string; label: string }) {
+function Link({
+  href,
+  label,
+  keepReferrer = false,
+}: {
+  href: string;
+  label: string;
+  keepReferrer?: boolean;
+}) {
   return (
     <a
       href={href}
       target="_blank"
-      rel="noopener noreferrer"
+      // keepReferrer: live_url links omit noreferrer so destinations see traffic came from here
+      rel={keepReferrer ? undefined : "noopener noreferrer"}
       className="text-accent underline underline-offset-4 hover:opacity-80"
     >
       {label}

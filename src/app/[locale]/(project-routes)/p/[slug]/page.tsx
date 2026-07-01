@@ -124,7 +124,6 @@ export default async function ProjectPage({ params }: Props) {
                 <a
                   className="inline-flex h-12 items-center border border-primary bg-primary px-5 font-mono text-sm font-bold uppercase tracking-[0.18em] text-primary-foreground transition hover:bg-primary/80"
                   href={project.projectUrl}
-                  rel="noreferrer"
                   target="_blank"
                 >
                   {t("openProject")}
