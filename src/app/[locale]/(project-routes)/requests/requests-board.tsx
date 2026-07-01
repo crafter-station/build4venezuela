@@ -52,6 +52,7 @@ export function RequestsBoard({
   const [name, setName] = useState("");
   const [descriptionMarkdown, setDescriptionMarkdown] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [expandedRequests, setExpandedRequests] = useState<Set<string>>(
     () => new Set(),
   );
@@ -67,7 +68,10 @@ export function RequestsBoard({
 
   const createMutation = useMutation({
     mutationFn: createSolutionRequest,
-    onError: (mutationError: Error) => setError(mutationError.message),
+    onError: (mutationError: Error) => {
+      setNotice(null);
+      setError(mutationError.message);
+    },
     onSuccess: (request) => {
       queryClient.setQueryData<SolutionRequest[]>(
         requestQueryKeys.list(),
@@ -81,6 +85,7 @@ export function RequestsBoard({
       setName("");
       setDescriptionMarkdown("");
       setError(null);
+      setNotice(t("requestSent"));
     },
   });
 
@@ -294,21 +299,33 @@ export function RequestsBoard({
     };
   }, [queryClient]);
 
+  useEffect(() => {
+    if (!notice) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => setNotice(null), 5000);
+    return () => window.clearTimeout(timeoutId);
+  }, [notice]);
+
   function submitRequest(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const trimmedName = name.trim();
     const trimmedDescription = descriptionMarkdown.trim();
 
     if (trimmedName.length < 3) {
+      setNotice(null);
       setError(t("errors.nameTooShort"));
       return;
     }
 
     if (trimmedDescription.length > maxDescriptionLength) {
+      setNotice(null);
       setError(t("errors.descriptionTooLong"));
       return;
     }
 
+    setNotice(null);
     createMutation.mutate({
       name: trimmedName,
       descriptionMarkdown: trimmedDescription,
@@ -362,6 +379,14 @@ export function RequestsBoard({
 
   return (
     <div className="grid gap-8 lg:grid-cols-[0.75fr_1.25fr]">
+      {notice ? (
+        <output
+          aria-live="polite"
+          className="fixed inset-x-4 bottom-4 z-50 border border-accent bg-background px-4 py-3 font-mono text-xs font-black uppercase leading-5 tracking-[0.14em] text-foreground shadow-2xl sm:left-auto sm:right-6 sm:w-80"
+        >
+          {notice}
+        </output>
+      ) : null}
       <aside className="border border-border bg-card p-5 lg:sticky lg:top-24 lg:self-start sm:p-6">
         <p className="font-mono text-sm uppercase tracking-[0.28em] text-accent">
           {t("formEyebrow")}

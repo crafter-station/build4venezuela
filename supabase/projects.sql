@@ -735,3 +735,83 @@ drop policy if exists "Project categories are readable" on public.project_catego
 create policy "Project categories are readable"
   on public.project_categories for select
   using (true);
+
+-- ---------------------------------------------------------------------------
+-- Builder network. Public directory reads are served through app APIs that
+-- sanitize hidden availability and never expose requester contact details.
+-- These tables intentionally have RLS enabled without public select policies.
+-- ---------------------------------------------------------------------------
+
+create table if not exists public.builder_profiles (
+  id uuid primary key default gen_random_uuid(),
+  user_id text not null unique,
+  name text not null,
+  role text not null check (role in (
+    'frontend_engineer',
+    'backend_engineer',
+    'fullstack_engineer',
+    'ai_engineer',
+    'designer',
+    'product_manager',
+    'devops_engineer',
+    'data_engineer',
+    'other'
+  )),
+  custom_role text not null default '' check (
+    role <> 'other' or char_length(trim(custom_role)) between 2 and 80
+  ),
+  description text not null check (char_length(trim(description)) between 40 and 2000),
+  linkedin_url text not null default '',
+  portfolio_url text not null default '',
+  availability_visible boolean not null default false,
+  availability jsonb not null default '{}'::jsonb,
+  weekly_hours integer not null default 0 check (weekly_hours between 0 and 84),
+  status text not null default 'available' check (status in ('available', 'busy', 'hidden')),
+  directory_visible boolean not null default true,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.builder_contact_requests (
+  id uuid primary key default gen_random_uuid(),
+  builder_id uuid not null references public.builder_profiles(id) on delete cascade,
+  requester_user_id text not null,
+  requester_name text not null default '',
+  requester_image_url text not null default '',
+  project_name text not null,
+  cover_letter text not null check (char_length(trim(cover_letter)) between 40 and 2000),
+  contact_email text not null default '',
+  contact_phone text not null default '',
+  status text not null default 'pending' check (status in ('pending', 'accepted', 'rejected')),
+  spam_score numeric,
+  spam_reason text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists builder_profiles_role_idx on public.builder_profiles(role);
+create index if not exists builder_profiles_status_idx on public.builder_profiles(status);
+create index if not exists builder_profiles_weekly_hours_idx on public.builder_profiles(weekly_hours);
+create index if not exists builder_profiles_directory_idx
+  on public.builder_profiles(status, directory_visible);
+create index if not exists builder_contact_requests_builder_id_idx
+  on public.builder_contact_requests(builder_id);
+create index if not exists builder_contact_requests_requester_user_id_idx
+  on public.builder_contact_requests(requester_user_id);
+create index if not exists builder_contact_requests_status_idx
+  on public.builder_contact_requests(status);
+
+drop trigger if exists builder_profiles_touch_updated_at on public.builder_profiles;
+create trigger builder_profiles_touch_updated_at
+  before update on public.builder_profiles
+  for each row
+  execute function public.touch_updated_at();
+
+drop trigger if exists builder_contact_requests_touch_updated_at on public.builder_contact_requests;
+create trigger builder_contact_requests_touch_updated_at
+  before update on public.builder_contact_requests
+  for each row
+  execute function public.touch_updated_at();
+
+alter table public.builder_profiles enable row level security;
+alter table public.builder_contact_requests enable row level security;
