@@ -9,9 +9,13 @@ export type Severity = "critical" | "high" | "medium" | "low";
 
 export type SecurityRisk = Severity | "none";
 
+// Resolution status of a finding on re-audit. Absent = original audit, treat as open.
+export type FindingStatus = "open" | "partial" | "resolved" | "new";
+
 export type SecurityFinding = {
   severity: Severity;
   title: string;
+  status?: FindingStatus;
 };
 
 export type SecurityAudit = {
@@ -19,6 +23,12 @@ export type SecurityAudit = {
   auditedAt: string;
   issueUrl: string | null;
   findings: SecurityFinding[];
+  // set when the repo was re-audited to check whether issues were fixed
+  reauditedAt?: string;
+  // overall risk at the previous audit, so the UI can show the delta
+  previousRisk?: SecurityRisk;
+  // short note on what changed between audits
+  reauditNote?: string;
   // true when the repo could not be cloned, so no audit was performed
   notAudited?: boolean;
 };
