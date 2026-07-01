@@ -1,0 +1,159 @@
+{
+  "project_slug": "conectavenezuela",
+  "name": "Conecta Venezuela",
+  "repo_url": "https://github.com/gabadabaduu/build4venezuela-acompa-amientopsicologico",
+  "live_url": "https://build4venezuela-acompa-amientopsicologico.onrender.com",
+  "video_url": "",
+  "countries": [
+    "Colombia",
+    "Venezuela",
+    "España"
+  ],
+  "db_description": "Brinda atención de emergencia y acompañamiento psicológico a las afectados de la tragedia, así como a sus familiares y testigos, tanto dentro como fuera de Venezuela. Además, centraliza una red de psiquiatras, psicólogos y terapeutas voluntarios que deseen ofrecer apoyo profesional a través de la plataforma, facilitando el acceso oportuno a servicios de salud mental para quienes más lo necesitan.",
+  "lifecycle_status": "in_development",
+  "analysis": {
+    "summary": "PsicologiaApoyo is an Angular 21 + Supabase mental-health support platform connecting guest users (via web form and WhatsApp) with volunteer psychologists, with an admin dashboard to manage volunteers and assign sessions. It has real, non-trivial backend logic: Postgres RLS policies, 5 Supabase Edge Functions (guest session creation, volunteer assignment, WhatsApp webhook with Meta HMAC signature verification, admin user creation), Postgres-backed rate limiting, and Google Calendar integration for scheduling.",
+    "project_type": "web app (Angular SPA + Supabase backend)",
+    "stack": {
+      "frontend": [
+        "Angular 21 (standalone components, signals)",
+        "Angular Forms",
+        "plain CSS"
+      ],
+      "backend": [
+        "Supabase Edge Functions (Deno/TypeScript)"
+      ],
+      "database": [
+        "Postgres (Supabase)",
+        "Row Level Security policies",
+        "PL/pgSQL RPC functions for rate limiting"
+      ],
+      "infra_deploy": [
+        "Supabase CLI (migrations, functions deploy)",
+        "no Dockerfile",
+        "no CI/CD workflow found"
+      ],
+      "ai_ml": [],
+      "languages": [
+        "TypeScript",
+        "PLpgSQL",
+        "HTML",
+        "CSS",
+        "Shell"
+      ]
+    },
+    "architecture": {
+      "pattern": "Layered SPA + BaaS: Angular services -> SupabaseService (single client) -> Postgres RLS; separate Deno Edge Functions handle privileged operations (guest session creation, volunteer assignment, admin creation, WhatsApp webhook) using a service-role client, with shared _shared/ modules for auth, cors, validation, rate-limit, notifications.",
+      "uses_orm": false,
+      "orm_or_db_layer": "Supabase JS client (typed .from(table) queries) on the frontend; direct supabase-js service-role client + Postgres RPC calls in edge functions. No traditional ORM.",
+      "api_design": "Supabase auto-generated REST/RPC for CRUD plus custom Deno Edge Functions (Deno.serve HTTP handlers) for privileged/cross-cutting operations (create-session, assign-volunteer, manage-volunteer-session, create-profile-user, whatsapp-webhook).",
+      "separation_of_concerns": "Reasonable: guards (auth, role, password-change) gate routes; services separate feature domains; edge functions isolate privileged logic from client; shared validation/auth/rate-limit modules avoid duplication across functions.",
+      "modularity": "Standalone Angular components with lazy loadComponent routing; edge functions share common _shared utilities rather than duplicating logic.",
+      "notable_patterns": [
+        "Row Level Security as primary authorization boundary, with service-role edge functions for privileged writes",
+        "HMAC-SHA256 verification of Meta/WhatsApp webhook signatures",
+        "Postgres RPC-based rate limiting (per-IP, per-phone, per-email, per-WhatsApp-number)",
+        "Dual-channel guest intake: public web form + WhatsApp Cloud API webhook feeding same guest_sessions table",
+        "Row-locking migration for volunteer assignment to avoid double-booking"
+      ]
+    },
+    "code_organization": {
+      "score": 4,
+      "directory_structure": "Clear Angular convention (pages/services/guards/models) plus a well-organized supabase/ directory with migrations, functions, and shared modules; also includes thoughts/, openspec/, and .claude/ planning artifacts from AI-assisted development workflow.",
+      "naming_quality": "Consistent, descriptive naming (guest-session-api.service.ts, assign-volunteer, manage-volunteer-session) in both Spanish-facing UI copy and English code identifiers.",
+      "documentation_quality": "CLAUDE.md gives a genuinely accurate architecture overview; README is default Angular CLI boilerplate (not customized); some in-repo design docs under openspec/ and thoughts/ describing real planned features.",
+      "reasoning": "Directory layout and naming reflect deliberate engineering, migrations are incrementally dated and each addresses a specific real bug/feature (row locking, backfills, schedule overlap checks), indicating iterative real development rather than generated scaffolding."
+    },
+    "production_readiness": {
+      "score": 3,
+      "has_auth": true,
+      "has_error_handling": true,
+      "has_logging": false,
+      "has_env_config": true,
+      "has_deploy_config": false,
+      "secrets_handling": "supabase/.env (committed, though values are placeholders) and .env.example both exist; src/environments/environment.ts commits a live Supabase anon key and a 'publicApiKey' secret directly into source control (CLAUDE.md explicitly acknowledges the anon key is committed by design, relying on RLS). The publicApiKey is a shared secret used to gate the public create-session endpoint but is exposed in the client bundle, which weakens its value as an API key.",
+      "security_notes": "RLS enabled on all tables with role-based policies; edge functions validate JWT via supabase auth.getUser() and check profile role server-side (not trusting client-asserted role); WhatsApp webhook verifies Meta HMAC signature; rate limiting implemented server-side via Postgres RPC. This is meaningfully more security-conscious than typical hackathon code.",
+      "scalability_notes": "Supabase-hosted Postgres + edge functions can scale reasonably for an MVP; no caching, queueing, or load considerations, but adequate for expected hackathon-scale usage (a single NGO/volunteer network).",
+      "reasoning": "No CI, no Dockerfile/deploy config beyond Supabase CLI, no structured logging beyond console.error, and a committed API-key-style secret are real gaps, but auth, RLS, rate limiting, and webhook signature verification show above-average production hygiene for a hackathon project."
+    },
+    "maturity": {
+      "score": 3,
+      "has_readme": true,
+      "has_tests": true,
+      "has_ci": false,
+      "is_real_or_boilerplate": "real",
+      "reasoning": "30 commits from 4 distinct contributors over ~4 days, iterative migrations fixing real bugs (row locking, overlap checks, backfills), working WhatsApp + Google Calendar integrations, and admin/volunteer workflows all indicate genuine, functioning development rather than empty scaffolding, though test coverage is shallow (mostly TestBed smoke tests, no e2e, no CI)."
+    },
+    "viability": {
+      "score": 4,
+      "reasoning": "Directly addresses a real post-disaster need (mental health support/triage connecting victims to volunteer psychologists via web and WhatsApp) with a working backend, RLS-based security, rate limiting, and multi-channel intake; main gaps before real deployment are CI/tests, secret hygiene, and structured logging/monitoring, but the core product is functional and thoughtfully built."
+    },
+    "key_features": [
+      "Guest intake via public web form and WhatsApp Cloud API webhook (dual-channel)",
+      "Volunteer psychologist assignment workflow with row-locking to prevent double-booking",
+      "Admin dashboard to register/manage volunteer psychologists",
+      "Role-based access (volunteer/admin) enforced both via Postgres RLS and edge function server-side checks",
+      "Postgres RPC-based rate limiting per IP/phone/email/WhatsApp number",
+      "Google Calendar integration utility for scheduling",
+      "Meta webhook HMAC signature verification for WhatsApp integration"
+    ],
+    "domain_tags": [
+      "mental-health",
+      "volunteer-coordination",
+      "comms-chat"
+    ],
+    "merge_potential": "Could integrate with other Build4Venezuela projects needing a mental-health/volunteer-referral channel, e.g. feeding cases from a shelter-mapping or people-finder tool into this system's guest-session intake, or sharing its WhatsApp webhook/notification infrastructure with other aid-logistics or alerts-notifications projects.",
+    "red_flags": [
+      "Live Supabase anon key and a 'publicApiKey' secret committed directly in src/environments/environment.ts (acknowledged in CLAUDE.md as intentional but still a hygiene concern for the API key)",
+      "No CI/CD pipeline and no Dockerfile/deploy configuration",
+      "Tests are shallow TestBed smoke tests only (service creation/init checks), no integration or e2e coverage, no test against real RLS behavior",
+      "No structured logging/monitoring beyond console.error in edge functions"
+    ]
+  },
+  "signals": {
+    "accessible": true,
+    "stars": 0,
+    "forks": 0,
+    "contributors": 4,
+    "commit_count": 30,
+    "code_loc": 3834,
+    "created_at": "2026-06-27T14:20:06Z",
+    "pushed_at": "2026-06-30T19:20:31Z",
+    "license": null,
+    "languages_bytes": {
+      "TypeScript": 115681,
+      "HTML": 37451,
+      "CSS": 29550,
+      "PLpgSQL": 29413,
+      "Shell": 2115
+    },
+    "archived": false
+  },
+  "evaluation": {
+    "diffusion": {
+      "score": 3,
+      "ready_to_promote": true,
+      "available_assets": [
+        "live-demo",
+        "clear-value-prop"
+      ],
+      "gaps": [
+        "No demo video showing the actual flow (guest intake, WhatsApp, admin dashboard)",
+        "No screenshots captured/available for social assets",
+        "Render free-tier cold start (503 on first hit) hurts first impression for a live demo link in a post",
+        "Committed Supabase anon key / publicApiKey in source is a hygiene red flag if surfaced publicly",
+        "README not customized from Angular CLI boilerplate, so first-glance repo impression is weak"
+      ],
+      "recommended_angle": "Highlight the dual-channel intake (web form + WhatsApp) connecting earthquake victims/families to volunteer psychologists in real time, with admin coordination and calendar scheduling — a real crisis mental-health triage tool, not just a landing page."
+    },
+    "impact_potential": 4,
+    "live_demo_notes": "The live URL (https://build4venezuela-acompa-amientopsicologico.onrender.com) returned HTTP 503 on first fetch attempt (Render cold-start), then HTTP 200 on retry. Inspecting the raw HTML confirms a real deployed Angular SPA: proper doctype, custom favicon, a themed CSS design system (teal/blue palette with CSS custom properties), and hashed JS/CSS bundle chunks (main-QCLO466T.js, styles-BIOXJJSK.css) — not a placeholder or default template. WebFetch's markdown-extraction pass could only see the raw <title>Psicologiaapoyo</title> because it doesn't execute client-side JS, so its own \"broken/minimal\" read is a false negative caused by the tool, not the site. Given the backend evidence (5 Supabase Edge Functions, RLS, WhatsApp HMAC webhook verification, rate limiting, Google Calendar integration, 30 real iterative commits from 4 contributors) and a live, non-boilerplate, styled front-end responding with 200, I classify this as a genuinely working, non-trivial product rather than a broken page, though cold-start latency is a real user-facing rough edge.",
+    "live_demo_status": "partial",
+    "one_line_pitch": "Conecta Venezuela conecta en minutos a víctimas, familiares y testigos del terremoto con psicólogos voluntarios — por web o WhatsApp — con triage, agenda y seguimiento reales, no solo una promesa.",
+    "overall_recommendation": "promote",
+    "problem_severity": "high",
+    "product_quality": 4,
+    "real_problem_reasoning": "Post-earthquake mental health support (for victims, bereaved families, and witnesses) is a well-documented, severe unmet need after disasters, and volunteer psychologist networks are typically hard to discover and coordinate. This project builds real infrastructure for that: dual-channel intake (public web form + WhatsApp Cloud API webhook with verified Meta HMAC signatures), a volunteer/admin assignment workflow with row-locking to prevent double-booking, role-based access enforced via Postgres RLS plus server-side checks, per-IP/phone/email rate limiting, and Google Calendar scheduling integration. This is materially more than a UI mockup — it is backend logic addressing real operational problems (spam/abuse via rate limiting, double-booked sessions via locking, secure WhatsApp intake) that a functioning volunteer-coordination service would actually need.",
+    "solves_real_problem": "yes"
+  }
+}

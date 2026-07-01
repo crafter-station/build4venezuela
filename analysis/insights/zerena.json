@@ -1,0 +1,154 @@
+{
+  "project_slug": "zerena",
+  "name": "zerena",
+  "repo_url": "https://github.com/CarolMonroe22/zerena",
+  "live_url": "https://zerena.help/",
+  "video_url": "https://youtu.be/F-a6HODywaU",
+  "countries": [
+    "El Salvador"
+  ],
+  "db_description": "## El problema\n\nEl 24 de junio de 2026, dos terremotos fuertes (magnitudes 7.2 y 7.5) sacudieron Venezuela con segundos de diferencia, con epicentro cerca de San Felipe y Yumare, en Yaracuy. Las réplicas no han parado: más de 140 hasta ahora, y cada una revive el miedo. El saldo es devastador: edificios y viviendas colapsadas, fallecidos, miles de heridos y muchas personas aún desaparecidas bajo los escombros. Familias enteras quedaron separadas o esperando noticias de los suyos.\n\nDetrás del daño físico hay un impacto emocional enorme: pánico, duelo, insomnio, culpa, y un miedo que vuelve con cada temblor. Las organizaciones de salud señalaron el apoyo psicosocial como una de las necesidades prioritarias, pero la ayuda profesional no alcanza para todos, y mucha gente, asustada y a veces sin señal, está sola justo en el momento en que más necesita a alguien.\n\n## La respuesta: Zerena\n\nZerena es una app de Primeros Auxilios Psicológicos (PAP) pensada para ese momento. Es offline y anónima: no pide registro, se instala en el teléfono como una app y funciona sin conexión, así que sostiene incluso cuando la red no responde. Todo su contenido se basa en protocolos reconocidos de salud mental en emergencias (OMS/OPS, IFRC, NCTSN, Save the Children, Pauline Boss) y está en revisión por profesionales.\n\nTiene dos caminos, según lo que necesites en el momento: calma para ti o herramientas para acompañar a alguien más.\n\n## Si necesitas calma para ti\n\n- Respira conmigo y ejercicios para volver al presente cuando el cuerpo se desborda.\n- ¿Cómo estás ahora?: un chequeo breve que te orienta hacia lo que puede ayudarte.\n- Esto que sientes es normal: entender el miedo, la culpa o el insomnio sin sentir que algo anda mal contigo.\n- Apoyo específico para descansar de noche, el duelo, perderlo todo, esperar por un desaparecido, las réplicas y estar lejos mientras tu gente sufre.\n- Una mano con el doomscrolling: seguir las noticias sin que te consuman.\n- Diario privado que se guarda solo en tu teléfono.\n\n## Si quieres ayudar a alguien\n\n- Entrenamiento para voluntarios: 14 módulos breves, una pantalla a la vez, con ejemplos y frases concretas. Cubre observar, escuchar, conectar, qué decir y qué no, pánico y shock, niños, adultos mayores, quién necesita más ayuda, pérdida ambigua (personas no encontradas), réplicas, acompañar desde lejos, y cómo cuidarte tú.\n- Guía rápida para el momento real: qué decir, ayudar a un niño o a un adulto mayor, acompañar a distancia, y qué hacer si alguien no mejora.\n\n## Además\n\n- Directorio de ayuda verificado con líneas de emergencia.\n- Red de apoyo: voluntarios, profesionales y organizaciones pueden sumarse.\n- Una luz del día: un mensaje breve de aliento que cambia cada día.\n\nZerena no es terapia y no reemplaza la atención profesional ni los servicios de emergencia. Es la mano que puede estar ahí, en el bolsillo, mientras llega el resto.\n\n## Pruébala primero\n\nÁbrela y elige \"Necesito calma para mí\" para respirar, o \"Quiero ayudar a alguien\" para hacer el entrenamiento. Instálala desde el navegador y te queda offline.",
+  "lifecycle_status": "ready_to_use",
+  "analysis": {
+    "summary": "Zerena is a Spanish-language offline-capable PWA delivering Psychological First Aid (PAP) content for Venezuelan earthquake survivors, built with TanStack Start + Supabase, deployed via Lovable Cloud. It has real, well-structured content routes (grief, panic, breathing, helping others), a staff triage inbox backed by Supabase with RLS policies and role-based access control, and anonymous public submission forms for support requests and volunteer network signups.",
+    "project_type": "web app (PWA)",
+    "stack": {
+      "frontend": [
+        "React 19",
+        "TanStack Router",
+        "TanStack Start",
+        "Tailwind CSS v4",
+        "shadcn/radix-ui",
+        "Vite"
+      ],
+      "backend": [
+        "TanStack Start server functions (Nitro)",
+        "Node/h3 server runtime"
+      ],
+      "database": [
+        "Supabase Postgres"
+      ],
+      "infra_deploy": [
+        "Lovable Cloud (lovable.app)",
+        "Bun package manager"
+      ],
+      "ai_ml": [],
+      "languages": [
+        "TypeScript",
+        "SQL (PL/pgSQL)",
+        "CSS",
+        "JavaScript (service worker)"
+      ]
+    },
+    "architecture": {
+      "pattern": "Full-stack React meta-framework (TanStack Start) with file-based routing and server functions; Supabase as BaaS for auth/db/RLS",
+      "uses_orm": false,
+      "orm_or_db_layer": "Supabase JS client (postgREST) for both client-side (anon key, RLS-scoped) and server-side (service role key for admin ops); no ORM, raw table queries via supabase-js",
+      "api_design": "TanStack Start createServerFn RPC-style handlers, not REST/GraphQL; zod input validation on mutation endpoints",
+      "separation_of_concerns": "Clear separation: client-safe supabase client vs client.server.ts (service role, admin-only, explicitly documented not to leak to bundle), auth-middleware.ts enforces JWT bearer auth before handler execution, recepcion.functions.ts adds defense-in-depth authorization checks on top of DB-level RLS",
+      "modularity": "Content routes are simple, focused files per topic (para-mi.*, para-ayudar.*); shared logic in src/lib; shadcn ui components isolated in components/ui",
+      "notable_patterns": [
+        "Defense-in-depth: explicit server-side role/ownership checks (assertCaseAccess) layered on top of Postgres RLS policies",
+        "Custom service worker with shell/runtime cache versioning for offline-first PWA behavior",
+        "Zod-validated server functions with typed responses",
+        "12 incremental Supabase SQL migrations building up support_requests/network_signups/session_notes/user_roles schema with RLS INSERT-only policies for anonymous submitters (no public SELECT)"
+      ]
+    },
+    "code_organization": {
+      "score": 4,
+      "directory_structure": "Clean, conventional TanStack Start layout: src/routes (file-based), src/components (+ui subfolder for shadcn primitives), src/lib (business logic/server fns), src/integrations/supabase (typed client layer), supabase/migrations (versioned SQL)",
+      "naming_quality": "Consistent, descriptive Spanish route naming (para-mi.*, para-ayudar.*) matching the app's dual audience (self-help vs helping others); functions and types clearly named",
+      "documentation_quality": "README and AGENTS.md present but mostly Lovable boilerplate/meta notes; inline code comments in Spanish explain security rationale (RLS + defense-in-depth) which is a good sign of real engineering thought, not just AI scaffolding",
+      "reasoning": "Structure and naming are clean and idiomatic for the framework; comments show deliberate security reasoning, though top-level docs are thin and largely tool-generated."
+    },
+    "production_readiness": {
+      "score": 3,
+      "has_auth": true,
+      "has_error_handling": true,
+      "has_logging": true,
+      "has_env_config": true,
+      "has_deploy_config": false,
+      "secrets_handling": "The .env file (containing Supabase project URL and anon/publishable JWT key) is committed to git history; while these are publishable/anon keys (not the service-role secret) so not catastrophic, committing .env is poor practice and the service-role key presumably lives only in Lovable Cloud's env, not verifiable in-repo",
+      "security_notes": "Auth middleware validates Bearer JWT structure and calls supabase.auth.getClaims; server functions add explicit role/ownership checks beyond RLS; RLS policies restrict anonymous inserts with length/enum constraints and no public SELECT, which is solid for protecting victim data. No rate limiting visible on public anonymous insert endpoints (support_requests, network_signups), which could be abused for spam.",
+      "scalability_notes": "Relies entirely on Supabase managed Postgres and Lovable Cloud hosting; no explicit caching/CDN config beyond the PWA service worker; fine for hackathon/early-deployment scale but unproven under load.",
+      "reasoning": "Real auth, RLS-backed data access, input validation, and a working offline PWA shell put this above a prototype, but absence of CI/tests/Dockerfile and a committed .env keep it short of a fully production-hardened release."
+    },
+    "maturity": {
+      "score": 3,
+      "has_readme": true,
+      "has_tests": false,
+      "has_ci": false,
+      "is_real_or_boilerplate": "real",
+      "reasoning": "128 commits, 12 incremental SQL migrations, substantial hand/AI-crafted PAP content across ~20 routes, and a functioning staff triage workflow indicate genuine iterative development, not empty scaffolding — but there are zero automated tests and no CI pipeline."
+    },
+    "viability": {
+      "score": 4,
+      "reasoning": "Already deployed live at zerena.lovable.app, addresses a real and underserved need (psychological first aid content + anonymous request routing to volunteers/professionals) with working offline PWA support and a functional staff backend; main gaps for real-world use are spam/abuse protection on public forms and lack of tests, not fundamental architecture problems."
+    },
+    "key_features": [
+      "Offline-first PWA with custom service worker caching app shell",
+      "Bilingual dual-track content: self-help ('para mí') and helper guidance ('para ayudar') for panic, grief, children, elderly, distance support",
+      "Anonymous public forms for requesting psychological support or joining as volunteer/professional/organization",
+      "Staff triage inbox (recepcion) with role-based access (coordinador/profesional/voluntario), case assignment, urgency/status tracking, and session notes",
+      "Supabase RLS-enforced data model with defense-in-depth server-side authorization checks",
+      "Personal diary/journaling feature (src/lib/diary.ts) and breathing exercise UI"
+    ],
+    "domain_tags": [
+      "mental-health",
+      "volunteer-coordination",
+      "aid-logistics"
+    ],
+    "merge_potential": "Could integrate with a shelter-mapping or people-finder platform as its mental-health support module, or share its volunteer/professional signup network with other aid-logistics projects; its RLS+defense-in-depth Supabase pattern is a good reference for other Supabase-based hackathon entries.",
+    "red_flags": [
+      ".env file committed to git (contains Supabase project URL and anon key; not catastrophic but poor hygiene and should be rotated/removed from history)",
+      "No automated tests or CI pipeline despite handling sensitive support-request data",
+      "No visible rate-limiting/anti-abuse controls on public anonymous insert endpoints (support_requests, network_signups), risking spam or abuse of a crisis-support form"
+    ]
+  },
+  "signals": {
+    "accessible": true,
+    "stars": 0,
+    "forks": 0,
+    "contributors": 2,
+    "commit_count": 128,
+    "code_loc": 12493,
+    "created_at": "2026-06-27T15:49:54Z",
+    "pushed_at": "2026-06-30T16:11:10Z",
+    "license": null,
+    "languages_bytes": {
+      "TypeScript": 455138,
+      "CSS": 3935,
+      "JavaScript": 3918,
+      "PLpgSQL": 2765
+    },
+    "archived": false
+  },
+  "evaluation": {
+    "solves_real_problem": "yes",
+    "real_problem_reasoning": "Post-earthquake psychological first aid is a documented priority gap: physical rescue/shelter get most attention, but panic, grief, insomnia, ambiguous loss (missing persons), and aftershock-triggered fear are widespread and under-resourced. Zerena directly targets this with an offline-capable, anonymous PWA offering evidence-informed (WHO/PFA, IFRC, NCTSN, Save the Children, Pauline Boss) self-help content plus a volunteer-training track and a triage/referral pipeline to professionals. It's not solving logistics/rescue but a real, distinct, and often-ignored need.",
+    "problem_severity": "high",
+    "impact_potential": 4,
+    "product_quality": 4,
+    "live_demo_status": "working",
+    "live_demo_notes": "https://zerena.help/ loads and is a real, navigable Spanish-language PWA (not just a static landing page): it has a homepage hub with four real pathways (self-help, help-others, professional connection form, volunteer/organization signup) plus deep content routes (e.g. /para-mi) delivering genuine, specific PFA content (breathing/grounding exercises, grief, missing-person/ambiguous-loss guidance, aftershock anxiety, doomscrolling, private journal) rather than placeholder copy. Backend has Supabase-backed anonymous forms and a staff triage inbox with RLS and role-based access per the code analysis.",
+    "diffusion": {
+      "score": 4,
+      "ready_to_promote": true,
+      "available_assets": [
+        "live-demo",
+        "demo-video",
+        "clear-value-prop",
+        "branding"
+      ],
+      "recommended_angle": "'La app que te acompaña cuando tiembla la tierra y no hay señal': an offline, anonymous psychological first-aid PWA for Venezuelan earthquake survivors — install it from the browser, no signup, works without internet, with real content for panic, grief, and supporting others (children, elderly, people waiting for missing loved ones).",
+      "gaps": [
+        "No confirmed real_users/usage evidence yet (0 GitHub stars, brand-new repo, no testimonials)",
+        "No rate-limiting/anti-abuse on public anonymous forms, a risk if promoted at scale",
+        "env file with Supabase keys committed to git history (hygiene issue, low severity since anon key only)",
+        "Screenshots not independently verified in this pass (only text-fetch of live site)"
+      ]
+    },
+    "overall_recommendation": "spotlight",
+    "one_line_pitch": "Zerena: primeros auxilios psicológicos offline y anónimos en tu bolsillo para cuando tiembla la tierra en Venezuela — sin señal, sin registro, sin juicio."
+  }
+}

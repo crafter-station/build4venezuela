@@ -11,71 +11,27 @@
   "db_description": "## ¿Qué construiste?\n\n**Reestructuramos** es una PWA **offline-first** para la **evaluación rápida de seguridad estructural de edificios después de un terremoto**, construida para los sismos **M7.2 + M7.5 del 24 de junio de 2026** en Venezuela.\n\nCada edificio se clasifica con el sistema universal de tres carteles — **VERDE** (habitable), **AMARILLO** (uso restringido) y **ROJO** (inseguro) — siguiendo la metodología **ATC-20** adaptada a la norma venezolana **COVENIN 1756**.\n\nLo que la hace distinta:\n\n- **100% sin conexión.** Tras un sismo la red celular colapsa: ese es el caso de uso central, no el borde. Todo se guarda primero en el teléfono (IndexedDB) y se sincroniza solo cuando vuelve la señal. Incluye caché de mapas offline.\n- **Evidencia ligada al hallazgo.** Cada foto se ata al daño concreto (esta columna, esta grieta) con GPS + fecha/hora embebidos. Nada de \"álbum suelto\".\n- **Nunca sobrescribe el historial.** Una re-inspección tras una réplica es un registro NUEVO; el QR del cartel muestra todo el historial del edificio en el tiempo.\n- **Sugiere, no decide.** La app propone el cartel según los daños observados, pero el inspector confirma o anula con su criterio (ambos quedan registrados).\n- **Mapa de daños en vivo** de la ciudad, con pines a color por cartel.\n- **PDF de inspección** + **cartel imprimible con QR**, generados en el dispositivo (funcionan offline).\n- **Guía de campo offline** (patrones de daño, árbol de decisión, glosario) + mini-inducción con quiz para habilitar inspectores.\n\n## ¿Para quién es?\n\nInspectores en campo: **voluntarios, ingenieros y arquitectos**. Acceso público y anónimo, sin barreras — cualquiera entra desde su teléfono y empieza de inmediato. También sirve como herramienta de formación.\n\n## ¿Cómo ayuda?\n\nLe da a Protección Civil, FUNVISIS, el colegio de ingenieros y a los voluntarios un **instrumento común** para triar miles de edificios rápido, con datos confiables (GPS + timestamp, trazabilidad antifraude) y un **mapa de daños que coordina la respuesta** — incluso con la red caída. Diseñado \"listo para aval\", alineado a COVENIN 1756.\n\n## ¿Qué debería probar la gente primero?\n\n1. Abre **https://app.reestructuramos.com** en el teléfono (instálala: \"Agregar a pantalla de inicio\").\n2. Haz la **inducción de 2 minutos** + el mini-quiz.\n3. Toca **\"Nueva inspección\"**: fija la ubicación (GPS o toca el mapa), marca los peligros con el selector de severidad, mira el **cartel sugerido**, confírmalo y **finaliza**.\n4. Genera el **PDF** y el **cartel imprimible con QR**.\n5. **Pon el teléfono en modo avión y recarga la app** — sigue funcionando. Ese es el corazón del proyecto.\n\n## Tecnología\n\nNext.js 16 + React 19 + TypeScript + Tailwind v4 · IndexedDB (Dexie) con cola de sincronización propia y reintentos · Supabase (PostgreSQL + PostGIS + Storage + Auth anónima + RLS) · Leaflet + OpenStreetMap con caché offline · service worker propio · PDF y QR en el cliente. Diseño \"instrumento de ingeniería\": tipografía IBM Plex, alto contraste para uso al sol.",
   "lifecycle_status": "ready_to_use",
   "analysis": {
-    "summary": "reestructuramos is an offline-first PWA for post-earthquake structural safety inspection in Venezuela, implementing the ATC-20 / COVENIN 1756 rapid assessment triage system with green/yellow/red placards. The app allows volunteer inspectors to work fully without internet connectivity, recording building assessments, findings, annotated photos, GPS stamps, and placard decisions into IndexedDB (Dexie), then syncing to Supabase when connectivity returns. It includes a collaborative damage map, AI-assisted crack classification via Gemini Vision (server-side), QR+PDF report generation, offline map tiles, an onboarding quiz, and a re-inspection history system. The codebase is unusually rigorous for a hackathon submission — domain-correct, security-conscious (comprehensive RLS), and genuinely engineered for the disaster-response offline-first use case.",
-    "project_type": "PWA — offline-first structural inspection mobile web app",
-    "stack": {
-      "frontend": [
-        "Next.js 16 (App Router)",
-        "React 19",
-        "TypeScript",
-        "Tailwind CSS v4",
-        "Leaflet + react-leaflet",
-        "Zustand",
-        "TanStack Query v5",
-        "jsPDF",
-        "qrcode",
-        "html5-qrcode"
-      ],
-      "backend": [
-        "Next.js API routes (serverless)",
-        "Supabase Auth (anonymous + OTP email)",
-        "Supabase Storage",
-        "Gemini Vision API (server-side proxy)"
-      ],
-      "database": [
-        "Supabase/PostgreSQL with PostGIS",
-        "IndexedDB via Dexie (local-first source of truth)"
-      ],
-      "infra_deploy": [
-        "Vercel (intended)",
-        "Supabase (BaaS)",
-        "Custom hand-written service worker (no Workbox)"
-      ],
-      "ai_ml": [
-        "Gemini 2.5 Flash (vision) — crack/damage classification, server-side only"
-      ],
-      "languages": [
-        "TypeScript",
-        "PLpgSQL",
-        "JavaScript",
-        "CSS",
-        "HTML"
-      ]
-    },
     "architecture": {
-      "pattern": "Local-first PWA with BaaS sync backend",
+      "pattern": "Next.js 16 App Router monolith (client-heavy PWA) with a thin server API route, backed by Supabase (Postgres+PostGIS) as BaaS and Dexie/IndexedDB as the true local-first data layer",
       "uses_orm": false,
-      "orm_or_db_layer": "Dexie (IndexedDB wrapper) for local storage; Supabase JS client with raw PostgREST queries for remote sync — no ORM",
-      "api_design": "Minimal: one Next.js API route (/api/analizar-grieta) proxies Gemini Vision server-side to keep API key off-client. All other data ops go client→Dexie→Supabase queue.",
-      "separation_of_concerns": "Excellent: lib/ holds pure domain logic (placard.ts is a pure function, db.ts is the data layer, sync.ts is the sync engine, types.ts and catalog.ts are shared contracts); components/ split by feature domain; app/ is routing only.",
-      "modularity": "High: sync engine, placard suggestion logic, offline map tiles, photo annotation, and inclinometer are all independently encapsulated modules.",
+      "orm_or_db_layer": "No ORM. Local: Dexie (IndexedDB) as source of truth in lib/db.ts. Remote: @supabase/supabase-js query builder (upsert/select) against Postgres tables defined via raw SQL migrations in supabase/migrations, with RLS policies and a SECURITY DEFINER helper (is_coordinator/owns_inspection).",
+      "api_design": "Minimal: a single Next.js Route Handler (app/api/analizar-grieta/route.ts) proxies to Gemini Vision server-side to keep the API key off the client; all other reads/writes go directly from the browser to Supabase via RLS-scoped queries, not through a custom REST/GraphQL API.",
+      "separation_of_concerns": "Clear separation: lib/db.ts (local persistence), lib/sync.ts (sync/queue engine), lib/supabase.ts (auth/client), lib/placard.ts (pure domain logic for ATC-20 triage), components/wizard/* (UI flow) — logic is not smeared into components.",
+      "modularity": "Good modularity via lib/* single-purpose modules and components grouped by domain (wizard, map, guide, onboarding, result, building); a wizard step model plus a Zustand store (lib/store.ts) for sync/UI state.",
       "notable_patterns": [
-        "Local-first: every write goes to Dexie first, Supabase is secondary",
-        "Custom sync queue with exponential backoff (no Background Sync API dependency — deliberate iOS Safari compatibility choice)",
-        "Atomic Dexie transactions for finalization and photo-to-finding linking",
-        "Idempotent upserts in both directions (client_uuid as idempotency key)",
-        "Zustand for online/sync status UI, Dexie useLiveQuery for reactive offline data",
-        "PostGIS triggers auto-populate geography column from lat/lng",
-        "SECURITY DEFINER helper functions in RLS to avoid recursion",
-        "AI classification stored as JSONB alongside photo metadata for audit trail"
+        "Local-first architecture: all writes go to IndexedDB first, background sync queue with exponential backoff, no dependency on Background Sync API (explicitly for iOS Safari compatibility)",
+        "Client-generated UUIDs (clientUuid) used as idempotency keys for upsert-based sync to Supabase",
+        "Postgres RLS with SECURITY DEFINER helper functions and a public 'safe columns' view (inspections_public) added specifically to fix a privacy leak (documented in migration 0002 as 'issue #1, Build4Venezuela')",
+        "Server-side AI proxy pattern to avoid leaking Gemini API key to the client, with graceful 503 when unconfigured",
+        "Custom offline service worker (public/sw.js) with NetworkFirst navigation / CacheFirst assets, plus custom offline map tile caching in IndexedDB"
       ]
     },
     "code_organization": {
       "score": 4,
-      "directory_structure": "Clean: app/ (Next.js routes), components/{ui,wizard,guide,map,result,onboarding,building}/, lib/ (domain utilities), supabase/migrations/, public/ (service worker + PWA assets), scripts/. No clutter.",
-      "naming_quality": "Excellent: English identifiers throughout, Spanish UI strings and PostgreSQL enum values (intentional — they match 1:1 between TypeScript and DB CHECK constraints). Functions are descriptive and consistently named.",
-      "documentation_quality": "Strong: CLAUDE.md is a detailed agent guide with architecture decisions, breaking changes, and golden rules. README covers setup, stack, and architecture. Inline comments explain non-obvious decisions (e.g. why Background Sync was avoided, why insert-or-ignore on buildings, why patchInspection vs saveInspection exist).",
-      "reasoning": "The codebase reads like it was designed by someone who thought deeply about the domain and the offline-first constraints. Separation is clean, contracts are well-defined, and the architecture decisions are explicitly documented."
+      "directory_structure": "Conventional and clean Next.js App Router layout (app/, components/ grouped by feature, lib/ for domain+infra, supabase/migrations/ for schema) with no stray clutter.",
+      "naming_quality": "Consistent, descriptive Spanish/English mixed naming that matches domain vocabulary (placardSuggested, syncStatus, ownsInspection) and is easy to follow.",
+      "documentation_quality": "Above average: README explains architecture and setup, CLAUDE.md/AGENTS.md give contributor conventions, inline comments explain non-obvious decisions (e.g. why patchInspection uses partial updates, why RLS was tightened), migration file has a written rationale for a security fix.",
+      "reasoning": "Well-organized single-domain app with intentional architectural comments and rationale, though there's no docs/ADRs beyond a pitch doc and CLAUDE.md, and some files (sync.ts) are dense multi-responsibility modules."
     },
     "production_readiness": {
       "score": 3,
@@ -83,84 +39,105 @@
       "has_error_handling": true,
       "has_logging": false,
       "has_env_config": true,
-      "has_deploy_config": false,
-      "secrets_handling": "GEMINI_API_KEY is server-side only (never exposed to client). Supabase anon key is NEXT_PUBLIC (intentional — Supabase RLS enforces access control). .env files are gitignored.",
-      "security_notes": "Comprehensive Supabase RLS with SECURITY DEFINER helpers. Inspection ownership enforced via owns_inspection(). Buildings: public read, coordinator-only updates. Photos bucket is public (structural evidence is intentionally shareable for aid coordination). Security headers in next.config.ts (X-Frame-Options DENY, nosniff, referrer policy). API route validates input before calling Gemini.",
-      "scalability_notes": "Supabase scales horizontally. pullMapData() caps at 5000 inspections — will need pagination at scale. Tile cache capped at 3000 entries. Sync engine is single-device; no conflict resolution for concurrent edits from same inspector on different devices.",
-      "reasoning": "Solid fundamentals for a hackathon: RLS is comprehensive and correct, offline-first prevents data loss, secrets are handled properly. Missing: no CI/CD, no tests, no structured logging, no rate limiting on the AI endpoint, and the Gemini proxy lacks input size validation (could be abused with large base64 payloads)."
+      "has_deploy_config": true,
+      "secrets_handling": "Server-only GEMINI_API_KEY read from process.env and never exposed to client; Supabase anon key is intentionally public (NEXT_PUBLIC_*) which is standard for Supabase RLS-protected apps. No .env.example file is committed despite README referencing one.",
+      "security_notes": "Real Postgres RLS with anonymous auth, a SECURITY DEFINER coordinator/ownership model, and a documented follow-up commit that fixed an actual data-exposure bug (public read of PII columns) — shows security awareness in practice, not just boilerplate. Storage bucket policies scope upload/update/delete to authenticated owner or coordinator. No rate limiting on the AI route (analizar-grieta) which could allow API-key cost abuse.",
+      "scalability_notes": "Client directly hits Supabase with RLS, which scales reasonably for a hackathon/relief use case; offline-first sync with backoff prevents server hammering. PostGIS/GIST indexes exist for geo queries. No caching/CDN strategy beyond Vercel/PWA SW; single Node route (analizar-grieta) has maxDuration=30 but no explicit concurrency/cost guard.",
+      "reasoning": "Deployment target (Vercel) and env var handling are addressed, auth (anonymous + optional email OTP) and RLS are implemented correctly with evidence of a real security fix, but there is no logging/observability, no automated tests, no CI, and no rate-limiting on the paid AI endpoint — leaving it a strong MVP rather than fully production-hardened."
     },
     "maturity": {
       "score": 3,
       "has_readme": true,
       "has_tests": false,
       "has_ci": false,
-      "is_real_or_boilerplate": "Real — substantial domain logic in placard.ts (ATC-20 decision tree), db.ts (Dexie schema with transactions), sync.ts (custom sync queue), and the full wizard step components. Not boilerplate.",
-      "reasoning": "6 commits, created and pushed on June 29 2026 (the day of the hackathon). Despite its youth, the implementation density is high: 8,512 LOC covering offline sync, PostGIS migrations, RLS, service worker, AI proxy, PDF/QR generation, photo annotation canvas, inclinometer, and onboarding quiz. Absence of any tests is the main maturity gap."
+      "is_real_or_boilerplate": "Real, substantive implementation — not boilerplate. Domain logic (ATC-20/COVENIN placard triage in lib/placard.ts), a genuine offline-first sync engine, PostGIS schema with RLS, and a documented security patch all indicate real engineering effort, not scaffolding.",
+      "reasoning": "Built in ~2-3 days by a single contributor (10 commits, repo created 2026-06-29) yet unusually complete for that timeframe: working wizard flow, offline storage, AI-assisted damage classification, geospatial map, and a real RLS security fix — but it has zero automated tests and no CI pipeline, which caps maturity despite feature depth."
     },
     "viability": {
-      "score": 5,
-      "reasoning": "This directly addresses the core disaster-response need: inspectors in the field after an earthquake need to work offline (connectivity is disrupted), record structural damage with evidence, and produce standard placards. The ATC-20/COVENIN 1756 methodology alignment gives it institutional legitimacy. The collaborative damage map enables command coordination. The anonymous-first design removes registration barriers in an emergency. It is deployable to Vercel today with a Supabase project and would be immediately useful."
+      "score": 4,
+      "reasoning": "Directly targets the stated disaster scenario (post-earthquake structural triage for Venezuela) with a coherent, testable domain model (ATC-20/COVENIN placard suggestion), works fully offline with sync-on-reconnect (critical for disaster conditions with poor connectivity), and has real deployment (app.reestructuramos.com) and a working Supabase backend with sane RLS. Missing tests/CI and no rate limiting on the paid AI feature are the main gaps before hardening for large-scale field use."
     },
     "key_features": [
-      "Offline-first PWA: 100% functional without internet using IndexedDB/Dexie as source of truth",
-      "ATC-20/COVENIN 1756 structural triage wizard with verde/amarillo/rojo placard system",
-      "Pure placard suggestion function (suggestPlacard) with ATC-20 logic — inspector can always override",
-      "Custom sync engine with exponential backoff, idempotent upserts, and iOS Safari compatibility",
-      "Custom service worker (no Workbox): NetworkFirst for navigation, CacheFirst for static assets and OSM tiles",
-      "PostGIS-backed collaborative damage map via Leaflet with offline tile caching",
-      "Photo capture with annotation canvas, GPS/timestamp embedding, and linking to specific findings",
-      "AI-assisted crack classification via Gemini Vision (server-side proxy, optional/gracefully disabled)",
-      "PDF report + QR code generation for printable building placards",
-      "Building history tracking: re-inspections create new records sharing building_id",
-      "Comprehensive Supabase RLS: public read, owner-only write, coordinator role for overrides",
-      "Anonymous auth by default + optional OTP email for multi-device identity",
-      "Onboarding quiz for inspector qualification",
-      "Device sensors: inclinometer (DeviceOrientation), compass, and speech-to-text (DictateButton)"
+      "Offline-first PWA (IndexedDB/Dexie) with automatic background sync and exponential backoff, usable with zero connectivity",
+      "ATC-20/COVENIN-1756 adapted placard triage engine (verde/amarillo/rojo) implemented as pure, reasoned domain logic",
+      "Structural inspection wizard: building info, hazards, damage findings, photo capture with annotation, crack width measurement, phone-sensor inclinometer/compass",
+      "AI-assisted crack/damage photo classification via a server-side Gemini Vision proxy that keeps the API key private",
+      "Collaborative damage map (Leaflet + PostGIS) with offline tile caching and a privacy-hardened public view (RLS) for crowd-sourced building status",
+      "Printable/QR-stamped placard generation (jsPDF) and Web Share for viral distribution/reporting",
+      "Anonymous-first auth with optional email OTP login for coordinators, tied to Postgres RLS ownership rules"
     ],
     "domain_tags": [
       "structural-inspection",
+      "seismic-data",
       "mapping-geo",
-      "volunteer-coordination",
-      "alerts-notifications"
+      "volunteer-coordination"
     ],
-    "merge_potential": "High — solves a distinct and critical problem (post-earthquake building triage) not covered by other likely submissions. Offline-first design, standards-based methodology, and collaborative map make it immediately deployable. The AI crack analysis adds a meaningful augmentation layer. Main gaps (no tests, no CI, no rate limiting on AI endpoint) are fixable in hours.",
+    "merge_potential": "Strong standalone product with a well-defined, narrow domain (structural post-quake triage) — could serve as the structural-inspection/data-collection module feeding shared alerts/mapping or shelter-coordination platforms from other hackathon entries via its Supabase/PostGIS schema (buildings, inspections, placards) as a common data source, rather than needing to merge its own architecture with others.",
     "red_flags": [
-      "Zero tests — no unit tests for placard logic (a pure function that directly affects life-safety decisions), no integration tests for sync engine",
-      "No CI/CD pipeline (no .github/workflows)",
-      "Gemini AI proxy has no input size validation — a large base64 payload could cause denial-of-service or unexpectedly high API costs",
-      "Photos storage bucket is fully public (by design for aid coordination, but structural photos may expose sensitive building vulnerabilities)",
-      "pullMapData() fetches up to 5000 rows with no pagination — will silently degrade at scale",
-      "Only 1 contributor, 6 commits — bus-factor risk and limited real-world testing",
-      "Silent error swallowing in pullMapData() catch block provides no observability into map data failures"
-    ]
+      "No automated tests despite non-trivial triage logic that determines building safety placards",
+      "No CI pipeline configured",
+      "No rate limiting on the Gemini AI proxy endpoint (cost/abuse risk)",
+      "Single contributor, ~2-3 day old repo — bus factor risk and limited real-world field validation",
+      "README references a .env.example file that is not actually committed to the repo"
+    ],
+    "stack": {
+      "frontend": [
+        "Next.js 16 (App Router)",
+        "React 19",
+        "TypeScript",
+        "Tailwind CSS v4",
+        "Zustand",
+        "Leaflet/react-leaflet",
+        "Dexie (IndexedDB)",
+        "TanStack Query"
+      ],
+      "backend": [
+        "Next.js Route Handlers (Node runtime)"
+      ],
+      "database": [
+        "PostgreSQL (Supabase)",
+        "PostGIS",
+        "IndexedDB (client-side, via Dexie)"
+      ],
+      "infra_deploy": [
+        "Vercel",
+        "Supabase (Auth/Storage/Postgres)",
+        "Custom Service Worker for PWA/offline"
+      ],
+      "ai_ml": [
+        "Google Gemini 2.5 Flash Vision (server-side proxy for damage/crack classification)"
+      ],
+      "languages": [
+        "TypeScript",
+        "PL/pgSQL",
+        "JavaScript",
+        "HTML",
+        "CSS"
+      ]
+    },
+    "summary": "reestructuramos-pwa is an offline-first Next.js/React PWA for rapid post-earthquake structural safety triage of buildings in Venezuela, implementing an ATC-20/COVENIN-1756-adapted green/yellow/red placard system. It combines a genuine local-first architecture (Dexie/IndexedDB as source of truth with a custom exponential-backoff sync queue) with a Supabase/PostGIS backend secured by real, iteratively-hardened Row Level Security, a server-side Gemini Vision proxy for AI-assisted damage photo classification, and a collaborative offline-capable damage map. Despite being built by a single contributor in about three days with no tests or CI, the code shows unusually mature engineering: documented domain logic, a real security-fix commit, and end-to-end offline resilience suited to disaster conditions.",
+    "project_type": "Progressive Web App (disaster-response structural inspection tool)"
   },
   "signals": {
     "accessible": true,
     "stars": 0,
     "forks": 0,
     "contributors": 1,
-    "commit_count": 6,
-    "code_loc": 8512,
+    "commit_count": 10,
+    "code_loc": 8929,
     "created_at": "2026-06-29T07:58:00Z",
-    "pushed_at": "2026-06-29T14:10:15Z",
+    "pushed_at": "2026-07-01T04:32:32Z",
     "license": "MIT",
     "languages_bytes": {
-      "TypeScript": 287717,
+      "TypeScript": 300937,
       "PLpgSQL": 12019,
       "JavaScript": 9921,
       "HTML": 8535,
-      "CSS": 2888
+      "CSS": 3286
     },
     "archived": false
   },
   "evaluation": {
-    "solves_real_problem": "yes",
-    "real_problem_reasoning": "The M7.2 + M7.5 earthquakes hit Venezuela on June 24, 2026 — five days before this submission. Post-earthquake structural triage is the most acute life-safety bottleneck in any major seismic event: thousands of buildings must be inspected fast, by volunteers with minimal training, often with no cell signal. The ATC-20 green/yellow/red placard system is the globally adopted standard for this exact task. This app directly operationalizes that standard for Venezuelan responders, offline-first by design because connectivity collapses after major earthquakes. The offline-first constraint is not a nice-to-have — it is the entire point, and the team built the entire sync engine around it. The COVENIN 1756 alignment gives it institutional legitimacy with Protección Civil and FUNVISIS.",
-    "problem_severity": "critical",
-    "impact_potential": 5,
-    "product_quality": 4,
-    "live_demo_status": "partial",
-    "live_demo_notes": "The app loads at https://app.reestructuramos.com and renders its full navigation shell (Mapa / Nueva / Mías / Guía), the three-placard legend (Habitable, Uso restringido, Inseguro), an onboarding tutorial link, and the \"Nueva inspección\" CTA button. The Leaflet map shows \"Cargando mapa...\" which reflects a JS-rendering limitation of the headless fetcher — not a broken deploy. The app is live, publicly accessible, and presents a coherent product UI immediately. The demo video at https://youtube.com/shorts/FO0MElqIggs provides the full walkthrough of the inspection flow.",
     "diffusion": {
       "score": 4,
       "ready_to_promote": true,
@@ -170,14 +147,21 @@
         "clear-value-prop",
         "branding"
       ],
-      "recommended_angle": "Lead with the offline-first angle tied directly to the June 24 Venezuela earthquakes: 'When the cell towers went down, inspectors needed to keep working — Reestructuramos triages earthquake-damaged buildings with zero internet, GPS-stamped evidence, and ATC-20 placards that Protección Civil and FUNVISIS can trust.' The QR placard printout and the live damage map are highly visual assets perfect for social content. The demo video should anchor the post.",
+      "recommended_angle": "Lead with the offline-first proof point: 'Funciona sin señal' — show phone in airplane mode still classifying a building VERDE/AMARILLO/ROJO and generating a printable QR placard, tied directly to the real June 24 2026 M7.2/M7.5 Venezuela earthquakes.",
       "gaps": [
-        "No real-user testimonials or adoption numbers yet (launched same day as hackathon)",
-        "Screenshots not explicitly catalogued — need screen captures of the wizard, the placard result, and the PDF output for social posts",
-        "Star/fork count is zero — no social proof signal yet"
+        "No evidence yet of real-world adoption by Protección Civil/FUNVISIS or actual field inspectors",
+        "Screenshots/GIFs of the wizard flow, damage map, and printed placard would strengthen a social post beyond the shorts video",
+        "No visible testimonials or usage numbers (0 stars, 1 contributor, brand new repo)"
       ]
     },
+    "impact_potential": 5,
+    "live_demo_notes": "WebFetch confirms app.reestructuramos.com loads a real working PWA: 'Mapa de daños' page with map component, navigation (Map/New inspection/My inspections/Guide), the VERDE/AMARILLO/ROJO (Habitable/Uso restringido/Inseguro) classification system visible, a 'Nueva inspección' button, and an offline-area-preparation feature — not a static landing page.",
+    "live_demo_status": "working",
+    "one_line_pitch": "Reestructuramos: la app offline-first que triaje edificios post-sismo en segundos — sin señal, sin excusas, con el cartel verde/amarillo/rojo que Protección Civil necesita YA.",
     "overall_recommendation": "spotlight",
-    "one_line_pitch": "Reestructuramos lets volunteer inspectors triage earthquake-damaged buildings 100% offline — ATC-20 placards, GPS-stamped evidence, and a live damage map that works even when cell towers don't."
+    "problem_severity": "critical",
+    "product_quality": 4,
+    "real_problem_reasoning": "Post-earthquake structural triage is a textbook critical disaster-response need: after Venezuela's stated M7.2/M7.5 quakes, thousands of buildings must be rapidly assessed for habitability before people re-enter, and cellular networks typically collapse right when this decision-making is most urgent. This project directly implements the internationally recognized ATC-20 methodology (adapted to Venezuela's own COVENIN 1756 building code) with a genuine offline-first architecture (IndexedDB source of truth, background sync with backoff) specifically because 'after an earthquake the cellular network collapses: that is the core use case, not the edge case.' This is not a generic app retrofitted to the disaster theme — it is purpose-built domain logic (placard suggestion engine), evidence capture (photo+GPS+timestamp tied to specific damage), historical record-keeping (re-inspections after aftershocks never overwrite prior records), and coordination tooling (live citywide damage map) aimed squarely at the responders (volunteers, engineers, Protección Civil) who need a shared triage instrument during chaos.",
+    "solves_real_problem": "yes"
   }
 }

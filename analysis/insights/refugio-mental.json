@@ -1,0 +1,148 @@
+{
+  "project_slug": "refugio-mental",
+  "name": "refugio-mental",
+  "repo_url": "https://github.com/Betzabesp94/refugio-mental",
+  "live_url": "https://github.com/Betzabesp94/refugio-mental",
+  "video_url": "",
+  "countries": [
+    "Venezuela",
+    "Argentina"
+  ],
+  "db_description": "## Refugio Mental\n\nPlataforma web orientada a facilitar el acceso a apoyo psicológico para personas afectadas por la emergencia humanitaria ocasionada por el doble terremoto ocurrido en Venezuela el 24 de junio de 2026.\n\nEl proyecto conecta a psicólogos voluntarios con personas que necesitan acompañamiento emocional mediante un directorio público de profesionales. Los psicólogos pueden crear un perfil con información básica y compartir su enlace de Calendly para que los pacientes agenden sesiones de forma sencilla y segura.\n\nEsta primera versión funciona completamente del lado del cliente (sin backend), demostrando un MVP rápido, accesible y fácilmente escalable hacia una plataforma comunitaria de apoyo psicológico.",
+  "lifecycle_status": "in_development",
+  "analysis": {
+    "architecture": {
+      "pattern": "Client-only Next.js App Router SPA (no backend/API routes)",
+      "uses_orm": false,
+      "orm_or_db_layer": "None. lib/storage.ts wraps window.localStorage; obtenerPerfiles() merges hardcoded seed data (data/seed.ts) with whatever the current browser has stored under a fixed key. No server, no database, no persistence across devices/users.",
+      "api_design": "None — zero fetch/axios/API route usage anywhere in the codebase; grep for fetch(/axios/api/ /process.env found nothing.",
+      "separation_of_concerns": "Reasonable folder split (app/ features/ components/ hooks/ lib/ types/) typical of a scaffolded Next.js project, but the abstraction is superficial since there is no real data layer behind it.",
+      "modularity": "Feature-folder structure (directory, registration, home) with shared ui/ (shadcn/radix) components; clean at the component level.",
+      "notable_patterns": [
+        "Comment in storage.ts literally states \"En una futura versión, esta función llamaría a una API REST\" — acknowledging the backend doesn't exist yet",
+        "Simulated network latency via setTimeout in usePerfiles to fake a loading skeleton",
+        "Directory listing merges static seed array with localStorage array client-side"
+      ]
+    },
+    "code_organization": {
+      "score": 3,
+      "directory_structure": "Clean, idiomatic Next.js App Router layout (app/, features/, components/ui vs shared, hooks/, lib/, types/, data/) suggesting AI-assisted scaffolding (AGENTS.md and CLAUDE.md present) but organized sensibly.",
+      "naming_quality": "Consistent Spanish domain naming (Psicologo, obtenerPerfiles, guardarPerfil) matching the target audience; TypeScript interfaces well defined in types/index.ts.",
+      "documentation_quality": "README is detailed with setup instructions, project structure diagram, and an important disclaimer about not replacing emergency services; inline comments in storage.ts explain intended future API replacement.",
+      "reasoning": "Code is legible and consistently organized for its size (~3.3k LOC), but the tidy structure wraps almost no real logic — it's essentially a styled directory/filter UI over a static array."
+    },
+    "production_readiness": {
+      "score": 1,
+      "has_auth": false,
+      "has_error_handling": false,
+      "has_logging": false,
+      "has_env_config": false,
+      "has_deploy_config": false,
+      "secrets_handling": "N/A — no secrets, no env vars, no server calls of any kind exist in the codebase.",
+      "security_notes": "No auth means anyone can 'register' as a psychologist with no verification; data is stored only in the submitting browser's localStorage so it isn't even visible to other visitors — the directory feature is effectively non-functional for its stated purpose (only the hardcoded seed profiles are visible to real users). No input sanitization beyond basic form validation; Calendly URLs and social links entered by users are rendered without any server-side vetting.",
+      "scalability_notes": "There is no shared backend to scale — the 'product' as shipped cannot actually connect real psychologists to real patients across different browsers/devices, which is fatal for the stated mission of matching earthquake victims with volunteer therapists.",
+      "reasoning": "Deployed to Vercel (refugio-mental.vercel.app) as a static/client site with zero backend, zero persistence beyond one browser's localStorage, no auth, no error monitoring, and no environment configuration — it is a UI demo, not a working service."
+    },
+    "maturity": {
+      "score": 1,
+      "has_readme": true,
+      "has_tests": false,
+      "has_ci": false,
+      "is_real_or_boilerplate": "boilerplate/prototype",
+      "reasoning": "Single commit, 1 contributor, no tests, no CI workflow, no Dockerfile, presence of both AGENTS.md and CLAUDE.md strongly suggests fully AI-generated scaffold produced in a short hackathon burst; core 'directory' feature is a UI illusion backed only by localStorage, not a working shared registry."
+    },
+    "viability": {
+      "score": 2,
+      "reasoning": "The idea (connect volunteer psychologists with earthquake victims) is directly relevant and the UI is polished, but as implemented there is no real backend, so registrations by real psychologists never become visible to real patients on other devices — the core value proposition does not function beyond a demo on a single browser. Needs a real database/API and moderation/auth layer before it could help anyone."
+    },
+    "key_features": [
+      "Directory (directorio) page listing psychologist profiles with search/filter by specialty, language, modality, country",
+      "Registration form (features/registration/ProfileForm.tsx, 628 lines) for psychologists to add themselves to the directory",
+      "Static seed dataset of 6 example psychologist profiles focused on trauma/crisis care related to the '24J' Venezuela earthquake",
+      "Guidance pages for patients and psychologists (Calendly integration guide, info pages)",
+      "Dark/light theme toggle and toast notifications (sonner) — purely UI polish"
+    ],
+    "domain_tags": [
+      "mental-health",
+      "volunteer-coordination"
+    ],
+    "merge_potential": "Could be salvaged as a frontend/UI reference (form, directory filter UX) for a proper mental-health directory project, but the entire data layer (storage.ts) must be replaced with a real backend (DB + API) and auth/moderation before it provides any real-world value; not mergeable as-is with any project needing actual shared data persistence.",
+    "red_flags": [
+      "No backend/API/database whatsoever — all 'registered' profiles live only in the submitting user's browser localStorage and are invisible to everyone else, making the directory non-functional for its core purpose",
+      "No tests, no CI, no error handling/logging, no auth — zero production infrastructure",
+      "Single commit / single contributor, AGENTS.md + CLAUDE.md present, indicating rapid AI-scaffolded output with no real backend work done",
+      "storage.ts comment explicitly admits the API layer doesn't exist yet ('En una futura versión, esta función llamaría a una API REST')"
+    ],
+    "summary": "Refugio Mental is a Next.js/TypeScript frontend prototype styled as a directory connecting volunteer psychologists with earthquake victims in Venezuela, but it has zero backend: all profile data is either a hardcoded seed array or saved to the submitting browser's localStorage, meaning registered psychologists never actually appear to other users. No API routes, no database, no auth, no tests, no CI — it is a polished UI shell/demo, not a working product.",
+    "project_type": "web app (frontend-only prototype)",
+    "stack": {
+      "frontend": [
+        "Next.js 16 (App Router)",
+        "React 19",
+        "TypeScript",
+        "Tailwind CSS v4",
+        "Radix UI primitives",
+        "shadcn/ui-style components",
+        "next-themes",
+        "sonner (toasts)"
+      ],
+      "backend": [],
+      "database": [
+        "browser localStorage (client-only, not shared/persistent across users)"
+      ],
+      "infra_deploy": [
+        "Vercel (static/client deployment, no CI config found)"
+      ],
+      "ai_ml": [],
+      "languages": [
+        "TypeScript",
+        "CSS",
+        "JavaScript"
+      ]
+    }
+  },
+  "signals": {
+    "accessible": true,
+    "stars": 1,
+    "forks": 0,
+    "contributors": 1,
+    "commit_count": 1,
+    "code_loc": 3277,
+    "created_at": "2026-07-01T02:36:58Z",
+    "pushed_at": "2026-07-01T02:52:56Z",
+    "license": null,
+    "languages_bytes": {
+      "TypeScript": 110879,
+      "CSS": 2871,
+      "JavaScript": 559
+    },
+    "archived": false
+  },
+  "evaluation": {
+    "diffusion": {
+      "score": 1,
+      "ready_to_promote": false,
+      "available_assets": [
+        "clear-value-prop"
+      ],
+      "recommended_angle": "Not ready. If promoted at all, it should be framed as 'volunteer-built concept/prototype' with a clear ask for backend/database contributors, not as a working service.",
+      "gaps": [
+        "No live public demo URL provided (only GitHub repo link)",
+        "No demo video",
+        "No working shared backend — registered psychologists are invisible to real patients on other devices, so there is nothing genuinely usable to show a victim or donor",
+        "No screenshots included in analysis",
+        "No real users/testimonials",
+        "Single commit, single contributor, no proof of stability or continued development"
+      ]
+    },
+    "impact_potential": 2,
+    "live_demo_notes": "No public live demo URL was provided (live_url points back to the GitHub repo itself). Even if the Vercel deployment mentioned in the analysis (refugio-mental.vercel.app) were checked, the analysis confirms the directory feature is client-only: profiles submitted by a psychologist save only to that browser's localStorage and are never visible to other users, so the core matching feature does not actually work across devices. No demo video exists to substitute for firsthand verification.",
+    "live_demo_status": "no-public-demo",
+    "one_line_pitch": "Refugio Mental imagina un directorio de psicólogos voluntarios para sobrevivientes del terremoto — pero hoy es solo una maqueta: sin backend, los perfiles nunca llegan a las víctimas.",
+    "overall_recommendation": "deprioritize",
+    "problem_severity": "high",
+    "product_quality": 1,
+    "real_problem_reasoning": "Mental health support for earthquake victims and matching volunteer psychologists with survivors is a genuinely important and severe need after a humanitarian crisis. However, the implementation completely fails to solve it: with zero backend and data stored only in the submitting user's own browser localStorage, a psychologist who registers is never actually discoverable by a real victim on a different device. The directory — the entire value proposition — is non-functional beyond the hardcoded seed data and single-browser demos. So while the problem is real and severe, this project does not solve it, even partially, for anyone beyond the person testing it locally.",
+    "solves_real_problem": "no"
+  }
+}

@@ -11,158 +11,152 @@
   "db_description": "# Red de Apoyo Psicológico Venezuela\n\nPlataforma de apoyo psicológico para respuesta a emergencias en Venezuela. Conecta a personas que necesitan contención emocional con psicólogos verificados, y permite a los profesionales registrarse, subir sus credenciales y gestionar su disponibilidad.\n\n**Producción:** [psicoayudaven.com](https://psicoayudaven.com)\n\n## Características\n\n- **Ruta de paciente** (`/ayuda`): acceso rápido a ayuda presencial o a distancia.\n- **Directorio de profesionales** (`/ayuda/profesionales`): psicólogos verificados con estado en línea y contacto directo por WhatsApp. Los disponibles aparecen primero. Grilla de 2 columnas en escritorio.\n- **Perfil profesional** (`/ayuda/profesionales/$id`): página pública por profesional con SEO (Open Graph, Twitter Cards, JSON-LD) y botón **Compartir** (Web Share API → portapapeles).\n- **Registro de profesionales** (`/profesional/registro`): formulario en dos pasos. La credencial es un único número de colegiación agnóstico de país (+ colegio certificador opcional). Soporta psicólogos dentro y fuera de Venezuela.\n- **Panel del profesional** (`/profesional/panel`): activar/desactivar disponibilidad (\"En línea\" / \"No conectado\").\n- **Panel de administración** (`/admin`): revisar y verificar o rechazar registros. Acceso basado en base de datos (columna `user.role`).\n- **Centro de cuenta** (`/cuenta`): hub según rol (login, panel, admin, cerrar sesión).\n- **SEO** en todas las páginas públicas (títulos, descripciones, Open Graph, canonical vía `src/lib/seo.ts`).\n- **Autenticación** con Better Auth (email + contraseña).\n- UI _mobile-first_ con estética _liquid glass_ sobre la paleta Medicall. Navegación: barra inferior en móvil, barra superior en escritorio.",
   "lifecycle_status": "ready_to_use",
   "analysis": {
-    "summary": "PsicoAyuda VE is a mental health professional directory platform for Venezuela earthquake response. It allows psychologists to register and list their credentials/availability, and connects earthquake victims with verified mental health professionals via WhatsApp. The stack is TanStack Start (SSR React) running on Cloudflare Workers with Cloudflare D1 (SQLite at edge) via Drizzle ORM and Better Auth for auth. The code is genuinely functional — real DB migrations, a working admin verification pipeline, role-based access, paginated filtered directory, and a Cloudflare deployment config pointing at a live domain (psicoayudaven.com) with a real D1 database ID. Quality is high for a 2-day-old hackathon project but has no tests and no CI.",
-    "project_type": "Full-stack SSR web application (TanStack Start / Cloudflare Workers)",
+    "summary": "psico-support (Red de Apoyo Psicológico Venezuela) is a real, actively-deployed TanStack Start + Cloudflare Workers/D1/R2 application connecting earthquake/crisis victims in Venezuela with verified volunteer psychologists via a public directory and WhatsApp contact, backed by a genuine admin-verification workflow, Drizzle-managed SQLite schema with 16 migrations, Better Auth authentication, and R2-based credential document storage — a working MVP bordering on polished, but missing automated tests and CI/CD, which matters given its intended use in live emergency response.",
+    "project_type": "web-app",
     "stack": {
       "frontend": [
         "React 19",
         "TanStack Router",
-        "TailwindCSS 4",
-        "TanStack React Query",
-        "TanStack React Form",
-        "Radix UI / shadcn components",
-        "PWA (vite-plugin-pwa)"
+        "TanStack Query",
+        "TanStack Form",
+        "Tailwind CSS v4",
+        "Radix UI",
+        "vite-plugin-pwa"
       ],
       "backend": [
-        "TanStack Start server functions",
-        "Cloudflare Workers",
-        "Better Auth (email/password)"
+        "TanStack Start server functions (RPC, Node/Workers runtime)",
+        "Better Auth"
       ],
       "database": [
-        "Cloudflare D1 (SQLite at edge)",
+        "Cloudflare D1 (SQLite)",
         "Drizzle ORM",
-        "better-sqlite3 (local dev)"
+        "drizzle-kit migrations"
       ],
       "infra_deploy": [
-        "Cloudflare Workers (wrangler)",
-        "Custom domain: psicoayudaven.com"
+        "Cloudflare Workers",
+        "Cloudflare R2 (object storage)",
+        "Wrangler CLI",
+        "Sentry (tanstackstart-react SDK)"
       ],
       "ai_ml": [],
       "languages": [
         "TypeScript",
-        "CSS"
+        "CSS",
+        "JavaScript"
       ]
     },
     "architecture": {
-      "pattern": "Full-stack SSR monorepo with file-based routing and RPC-style server functions",
+      "pattern": "Full-stack React meta-framework (TanStack Start) deployed as a single Cloudflare Worker, with file-based routes containing colocated server functions (RPC-style, not a separate REST/GraphQL API)",
       "uses_orm": true,
-      "orm_or_db_layer": "Drizzle ORM over Cloudflare D1 (SQLite); 7 committed migration files; indexed on verifiedStatus, estado, country, available",
-      "api_design": "TanStack Start createServerFn — typed RPC server functions colocated with the route tree; no separate REST layer. Auth handled by Better Auth at /api/auth/$.",
-      "separation_of_concerns": "Clear split: src/server/ holds all DB-touching server fns, src/routes/ holds file-based route components, src/db/ has schema + DB singleton, src/lib/ has auth/utils/notifications. Admin and public directories are gated at the route loader level.",
-      "modularity": "Single app without sub-packages; modular enough for its scope. Server fn colocating schemas and validators in professionals.ts is intentional and clean.",
+      "orm_or_db_layer": "Drizzle ORM against Cloudflare D1 (SQLite), with 16 versioned migrations in drizzle/",
+      "api_design": "No traditional REST/GraphQL API surface; uses TanStack Start createServerFn RPCs colocated in src/server/*.ts, called directly from route components via TanStack Query",
+      "separation_of_concerns": "Reasonable: src/server holds domain logic (professionals, follow-ups, audio-stories, locations), src/db holds schema/db access, src/lib holds auth/utils, src/routes holds UI+route-level server fns; some server files (professionals.ts at ~2000 lines) are large and mix multiple concerns (registration, docs, admin verification, availability)",
+      "modularity": "Domain-oriented modules per feature area (professionals, follow-ups, audio-stories, locations) rather than layered; auth centralized in src/lib/auth.ts as a lazily-built singleton to accommodate D1's per-request binding",
       "notable_patterns": [
-        "Singleton Db with per-request Cloudflare env injection via setCloudflareEnv",
-        "Admin role stored in DB (not env var list), promote-only design prevents admin lockout",
-        "Shared buildProfessionalWhere() ensures list and random-pick draw from identical filter pool",
-        "Orphan auth user cleanup on failed professional insert (transaction-like rollback)",
-        "URL-synced filters for SSR-friendly shareable search",
-        "getHeaders() reads global __TSS_REQUEST__ to forward cookies during SSR"
+        "Better Auth with Drizzle adapter and DB-column-based admin role (no env var admin list)",
+        "R2 object storage for certificates/support docs/audio, keyed by userId/professionalId with base64 transport for atomicity with DB inserts",
+        "PWA with offline shell/service worker only enabled in production builds",
+        "Sentry integration (optional via env)",
+        "Extensive inline 'ponytail' comments documenting non-obvious design tradeoffs"
       ]
     },
     "code_organization": {
       "score": 4,
-      "directory_structure": "Clean: src/server/, src/routes/, src/db/, src/lib/, src/components/ with sensible scoping. Drizzle migrations in /drizzle with meta snapshots. No test directory exists.",
-      "naming_quality": "Consistent Spanish naming for domain entities (profesionales, estado, ciudad) matching the product language; camelCase TS conventions followed throughout.",
-      "documentation_quality": "No JSDoc but heavy inline 'ponytail:' comments that explain non-obvious decisions (why a LIKE not an index, why getHeaders uses globals, why promote-only). README present. AGENTS.md for AI context. CHANGELOG maintained.",
-      "reasoning": "Code is well-structured with deliberate patterns and rationale comments. Score is 4 not 5 because there are no tests and some production deps that should be devDeps (faker)."
+      "directory_structure": "Clear, conventional TanStack Start layout (src/routes, src/server, src/db, src/lib, src/components, drizzle/ for migrations); feature areas map cleanly to files",
+      "naming_quality": "Consistent, descriptive Spanish-domain route names (ayuda, profesional/panel, admin) and clear TS identifiers; English code/comments mixed with Spanish UI content",
+      "documentation_quality": "Above-average: detailed README (in Spanish) covering setup/deploy/env, AGENTS.md and docs/ directory with design notes, plus abundant inline comments explaining rationale for non-obvious decisions",
+      "reasoning": "Well-organized for its size (16k LOC) with a coherent domain-driven structure and unusually thorough in-code rationale, though a few server files (professionals.ts ~2000 lines) have grown large and could be split."
     },
     "production_readiness": {
-      "score": 3,
       "has_auth": true,
       "has_error_handling": true,
       "has_logging": true,
       "has_env_config": true,
       "has_deploy_config": true,
-      "secrets_handling": "BETTER_AUTH_SECRET via .env.local locally; D1 binding injected by Cloudflare Workers runtime (no secret in code). .env.example documents all vars. t3-oss/env-core validates at startup.",
-      "security_notes": "No rate limiting on registration or auth endpoints — abuse risk for a public-facing emergency service. Sentry configured with sendDefaultPii=true and replaysSessionSampleRate=1.0 which captures full session replays including all user input; problematic for vulnerable earthquake victims. listVerified server fn is not admin-gated (any caller gets all verified pro IDs). LIKE '%query%' on name field is open to brute-force enumeration.",
-      "scalability_notes": "Cloudflare Workers + D1 handles global edge distribution well for this scale. ORDER BY RANDOM() noted as an issue only beyond ~1k rows. Paginated list with count query is correct. D1 SQLite is appropriate for a directory of hundreds of professionals.",
-      "reasoning": "Real deploy config with live DB ID and domain, Sentry integration, proper error handling with user-friendly messages — well above prototype. Loses points for missing rate limiting, overly permissive Sentry session recording, and no CI/CD pipeline."
+      "secrets_handling": "Uses wrangler secret put for BETTER_AUTH_SECRET/BETTER_AUTH_URL/Sentry DSN in production; .env.local for local dev with .env.example documented; t3-oss/env-core (Zod) validates client env vars",
+      "security_notes": "Auth is real (Better Auth + Drizzle adapter, email/password, DB-role-based admin, per-server-fn session checks with 'Debes iniciar sesión' guards seen throughout professionals.ts); however no visible rate limiting on public write endpoints (registration, follow-up creation) which is a risk for an emergency-response public app; no automated tests to catch regressions in access-control logic",
+      "scalability_notes": "Cloudflare Workers + D1 + R2 is a reasonable serverless-at-edge stack for a hackathon-scale support directory app; D1 (SQLite) has known write-concurrency/size limits but is adequate for a regional directory/booking use case, not for high-volume chat/comms",
+      "reasoning": "This is a genuinely deployed (custom domain psicoayudaven.com configured, live push today), functioning full-stack app with real auth, DB migrations, file storage, and Sentry, but lacks automated tests/CI and explicit rate limiting for a system meant to handle sensitive mental-health/crisis submissions from the public.",
+      "score": 4
     },
     "maturity": {
-      "score": 3,
       "has_readme": true,
       "has_tests": false,
       "has_ci": false,
-      "is_real_or_boilerplate": "Real application with genuine domain logic — not boilerplate. 7 DB migration files show iterative schema evolution over 2 days. Admin review workflow, multi-step registration, and professional filtering are all implemented with real business rules.",
-      "reasoning": "27 commits in 2 days with a real D1 database ID and custom domain registered shows this was built to ship, not just demo. However, zero test coverage and no CI pipeline are meaningful gaps for a platform serving vulnerable populations."
+      "is_real_or_boilerplate": "Real, actively developed application with substantial custom domain logic (professional verification workflow, availability, follow-ups, audio stories, credential uploads) — not generic boilerplate, though scaffolding remnants exist (unused en/de i18n messages files despite the app being Spanish-only)",
+      "reasoning": "16 migrations, ~2000-line professionals server module with real business rules, deployed to a custom domain, Sentry configured — clearly beyond prototype stage; however zero test files despite vitest being configured, and no CI/CD pipeline, are notable gaps for something meant to be deployed to help real earthquake victims.",
+      "score": 4
     },
     "viability": {
       "score": 4,
-      "reasoning": "The core MVP is functionally complete: professionals can register, admins can verify credentials, and victims can find and contact verified therapists via WhatsApp. Cloudflare Workers + D1 deployment is essentially free-tier and globally available — no server costs, no cold start issues. The custom domain psicoayudaven.com is already configured in wrangler.jsonc. It could go live today with a `npm run deploy` after setting the BETTER_AUTH_SECRET. The primary gap for real use is the Sentry privacy configuration and absence of email verification for professionals."
+      "reasoning": "A working, deployed MVP with a coherent product loop (patients find/contact verified psychologists via WhatsApp; professionals register, upload credentials, and are admin-verified) is a plausible and useful piece of emergency mental-health infrastructure, though it depends on volunteer psychologist supply/verification workflow being actively maintained and lacks tests/CI/rate-limiting that matter for reliability under real crisis load."
     },
     "key_features": [
-      "Searchable, paginated directory of verified psychologists filterable by modality (in-person/remote), Venezuelan state, city, and population served (children/adolescents/adults/elderly)",
-      "Professional self-registration with credential capture (certification number + certifying board + country)",
-      "Admin verification workflow: admins approve/reject pending registrations before they appear publicly",
-      "Role-based admin panel with DB-stored roles and promote-only escalation model",
-      "WhatsApp-based contact (no direct messaging — links to WhatsApp with professional's number)",
-      "'Random professional' feature — picks a verified pro from the current filter set for quick referral",
-      "Professional availability toggle (real-time, floats available pros to top of results)",
-      "Two registration paths: one-shot register+profile, or bare account then add profile later",
-      "Cloudflare D1 edge database with 7 applied migrations and proper index strategy",
-      "Sentry error monitoring with session replay",
-      "PWA manifest + service worker for offline-capable mobile use",
-      "i18n setup via Paraglide/Inlang (Spanish primary, German/English locale files present)"
+      "Public directory of verified psychologists with online-status indicator and direct WhatsApp contact",
+      "Two-step professional registration with credential (colegiación) number and optional certificate/document upload to R2",
+      "Admin panel (DB-role based) to verify/reject professional registrations",
+      "Professional availability toggle (online/offline) and follow-up scheduling",
+      "Audio 'stories'/resources and self-help content routes (breathing, grounding, first-aid, self-check)",
+      "PWA with offline shell and installable app support",
+      "Better Auth email/password authentication with session-gated server functions",
+      "SEO (OG/Twitter/JSON-LD) on public professional profile pages"
     ],
     "domain_tags": [
       "mental-health",
-      "volunteer-coordination"
+      "volunteer-coordination",
+      "people-finder"
     ],
-    "merge_potential": "Standalone — self-contained platform with its own domain, DB, and auth. No obvious integration points with shelter-mapping or people-finder projects. Could be linked from a central hub as an external resource. Not designed to be merged into another codebase.",
+    "merge_potential": "Could integrate as the mental-health support module of a broader disaster-response platform (e.g., linking from a shelter/aid-mapping app's resource directory), or its verified-professional-registry pattern (credential upload + admin review + R2 storage) could be reused for other volunteer-verification flows (medical, legal aid) in a combined Build4Venezuela platform.",
     "red_flags": [
-      "No tests written — vitest is configured but zero test files exist; critical for a platform serving vulnerable people",
-      "No CI/CD pipeline — no .github/workflows; deploys are manual",
-      "Sentry sendDefaultPii=true + replaysSessionSampleRate=1.0 records full session videos including form input from earthquake victims — serious privacy concern",
-      "All TanStack dependencies pinned to 'latest' rather than fixed versions — reproducibility risk",
-      "@faker-js/faker in production dependencies (not devDependencies) — ships dead code to Workers bundle",
-      "No rate limiting on /api/auth/$ or registration server fns — open to bot registration of fake professionals",
-      "No email verification for professional accounts — a bad actor could register with a fake email and credentials that then enter the admin queue",
-      "listVerified server fn is unauthenticated — any caller can enumerate all verified professional IDs and availability status"
+      "No automated tests despite vitest/testing-library being installed as dependencies (test script exists but zero test files found)",
+      "No CI/CD pipeline (no .github/workflows or equivalent) to catch regressions before deploy",
+      "No visible rate limiting/abuse protection on public write endpoints (registration, follow-ups) for a system likely to see spiky, sensitive public traffic during a crisis",
+      "Leftover unused i18n scaffolding (en/de messages) inconsistent with the app being Spanish-only, suggesting some boilerplate was never cleaned up",
+      "Single contributor and very young repo (created 2026-06-27, ~50 commits over a few days) — bus-factor risk for something intended for long-term crisis deployment"
     ]
   },
   "signals": {
     "accessible": true,
-    "stars": 0,
+    "stars": 1,
     "forks": 0,
     "contributors": 1,
-    "commit_count": 27,
-    "code_loc": 5474,
+    "commit_count": 69,
+    "code_loc": 16200,
     "created_at": "2026-06-27T21:35:12Z",
-    "pushed_at": "2026-06-29T17:21:54Z",
+    "pushed_at": "2026-07-01T19:49:40Z",
     "license": "MIT",
     "languages_bytes": {
-      "TypeScript": 187452,
+      "TypeScript": 590647,
       "CSS": 25360,
-      "JavaScript": 3296
+      "JavaScript": 7225
     },
     "archived": false
   },
   "evaluation": {
-    "solves_real_problem": "yes",
-    "real_problem_reasoning": "Earthquake trauma creates immediate and lasting mental health crises. Venezuela has a severely under-resourced mental health system even in normal times, and earthquake victims face acute stress, grief, and PTSD with nowhere to turn. This platform directly addresses that gap by creating a curated, admin-verified directory of psychologists who actively opt in to help — reachable via WhatsApp, which is the dominant communication channel in Venezuela even on low-bandwidth connections. The two-sided model (victims find help, professionals volunteer availability) is the right design for a crisis context.",
-    "problem_severity": "high",
-    "impact_potential": 4,
-    "product_quality": 4,
-    "live_demo_status": "working",
-    "live_demo_notes": "The site loads cleanly at psicoayudaven.com. The homepage presents a clear two-CTA structure (seek help / register as professional). The professionals directory at /ayuda/profesionales is populated with 4 verified psychologists (real names, real cities: Maracay, Los Teques, Caracas), each with a live WhatsApp contact button, availability status, and age-group tags. Filter controls (name, state, city, age) and the random-selection feature are visible. This is a functioning product with real data, not a mockup.",
     "diffusion": {
       "score": 4,
       "ready_to_promote": true,
       "available_assets": [
         "live-demo",
         "clear-value-prop",
-        "branding",
-        "real-users"
+        "branding"
       ],
-      "recommended_angle": "4 verified Venezuelan psychologists are already online and ready to help earthquake survivors — free, confidential, and reachable via WhatsApp in seconds. Share psicoayudaven.com so victims know help exists.",
+      "recommended_angle": "Mental-health-first disaster response: 'A real person answers you' — a free, verified directory connecting earthquake victims in Venezuela with volunteer psychologists via WhatsApp, live today at psicoayudaven.com.",
       "gaps": [
-        "no demo video to embed in social posts",
-        "no pre-made screenshots or visual assets",
-        "only 4 professionals listed — promoting widely before recruiting more psychologists risks demand-supply mismatch",
-        "no testimonials or trust signals visible on the landing page"
+        "No demo video to show the product flow",
+        "No confirmed screenshots of the live professional directory (JS-rendered content not independently verified)",
+        "No evidence yet of real professional signups/usage numbers to cite as social proof",
+        "Single contributor / very young repo (created 2026-06-27) is a risk to mention cautiously in diffusion copy"
       ]
     },
+    "impact_potential": 4,
+    "live_demo_notes": "WebFetch on https://psicoayudaven.com/ succeeded and shows a real operational platform: homepage advertises \"30+ verified professionals,\" a clear CTA (\"Necesito ayuda ahora\") linking to remote therapist matching, professional registration pathway, self-care content, and messaging emphasizing human (not AI/bot) responders. A follow-up fetch of /ayuda/profesionales returned only nav/header content, likely because the directory listing is client-side rendered and WebFetch does not execute JS — this is a tool limitation, not necessarily evidence the feature is broken, but it means the actual directory contents (real professional entries) could not be independently confirmed via fetch.",
+    "live_demo_status": "working",
+    "one_line_pitch": "Red de Apoyo Psicológico Venezuela: conecta gratis y en minutos con psicólogos verificados por WhatsApp — contención emocional real, sin bots, para las víctimas del terremoto.",
     "overall_recommendation": "promote",
-    "one_line_pitch": "Psicólogos venezolanos verificados listos para apoyarte emocionalmente tras el terremoto — gratis, confidencial y por WhatsApp: psicoayudaven.com"
+    "problem_severity": "high",
+    "product_quality": 4,
+    "real_problem_reasoning": "Psychological/emotional trauma is a well-documented, urgent-but-often-neglected consequence of earthquakes, and Venezuela's mental-health infrastructure is already strained pre-disaster. This project directly addresses that gap by connecting victims with verified volunteer psychologists for free contention emocional via a low-friction channel (WhatsApp), and separately builds real infrastructure (credential upload, admin verification, availability status) to scale and vet the professional supply side rather than just listing unverified contacts.",
+    "solves_real_problem": "yes"
   }
 }

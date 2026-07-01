@@ -10,28 +10,28 @@
   "db_description": "# CrisisMap\n\n**CrisisMap** es una aplicación colaborativa de respuesta a desastres diseñada para ayudar a ciudadanos, voluntarios, organizaciones humanitarias y equipos de emergencia a recopilar y compartir información crítica durante terremotos, inundaciones y otras situaciones de crisis.\n\nEl proyecto está construido bajo un enfoque **offline-first**, permitiendo que cualquier persona pueda reportar incidentes como edificios colapsados, carreteras bloqueadas, personas atrapadas, hospitales, refugios, puntos de distribución de alimentos, agua o medicamentos y cortes de servicios básicos, incluso cuando no existe conexión a Internet. Cada reporte se almacena localmente en el dispositivo y se sincroniza automáticamente cuando la conectividad regresa, permitiendo que cada teléfono funcione como un nodo temporal de recolección de información durante las horas más críticas de una emergencia.\n\nA diferencia de plataformas orientadas exclusivamente a organismos oficiales, **CrisisMap fue diseñado pensando primero en el ciudadano común**. La aplicación utiliza un lenguaje sencillo, categorías fáciles de entender y una interfaz intuitiva para que cualquier persona pueda colaborar sin necesidad de conocer protocolos técnicos o clasificaciones especializadas. La intención es reducir al máximo la barrera de participación para que la mayor cantidad posible de personas pueda aportar información útil. Posteriormente, esos reportes pueden ser revisados, validados, enriquecidos y utilizados por organizaciones humanitarias o autoridades mediante paneles de monitoreo y herramientas de análisis.\n\nLa aplicación fue desarrollada como una **Progressive Web App (PWA)** para facilitar su distribución y permitir una rápida adopción durante una emergencia. Basta con acceder a un enlace para instalarla, sin depender de Google Play o App Store, funcionando en Android, iPhone, Windows, Linux y cualquier dispositivo con un navegador moderno. Como parte de su funcionamiento, la aplicación descarga automáticamente la cartografía de la zona afectada para mantener el mapa disponible sin conexión, permitiendo consultar información, registrar nuevos incidentes y sincronizar los cambios cuando la conectividad se restablezca. Este enfoque busca minimizar las barreras de distribución y garantizar que la aplicación siga siendo útil incluso cuando la infraestructura de comunicaciones se encuentra degradada.\n\nLa visión del proyecto es construir una red distribuida de dispositivos capaces de recopilar información directamente desde el terreno y consolidarla progresivamente conforme la conectividad se restablece. En una etapa posterior, la información recopilada podrá alimentar paneles de monitoreo para autoridades y organizaciones humanitarias, donde los reportes ciudadanos se validen, se complementen con otras fuentes de información y apoyen la toma de decisiones, la priorización de recursos y la coordinación de la respuesta ante desastres.\n\nDesde el punto de vista de ingeniería, CrisisMap fue desarrollado priorizando la **entrega rápida de valor**. Las decisiones de arquitectura y organización del código buscaron mantener una **arquitectura mínima viable**, suficientemente robusta para soportar la evolución del proyecto, pero evitando niveles de abstracción, patrones o complejidad que ralentizaran el desarrollo inicial. Algunas decisiones representan compromisos conscientes entre velocidad de implementación y mantenibilidad a largo plazo, entendiendo que, en un contexto de emergencia, disponer rápidamente de una herramienta funcional genera un impacto mayor que perseguir una arquitectura perfecta desde el primer día. La evolución natural del proyecto contempla incorporar progresivamente procesos de refactorización, paneles de administración, capacidades analíticas y enriquecimiento de datos conforme aumente su adopción y madurez. Este enfoque es consistente con prácticas ágiles que promueven una **Minimum Viable Architecture (MVA)**: una base arquitectónica lo suficientemente sólida para evolucionar sin caer en la sobreingeniería durante las primeras etapas del producto.",
   "lifecycle_status": "ready_to_use",
   "analysis": {
-    "summary": "CrisisMap is a fully functional, offline-first collaborative disaster-response PWA built on Angular 21 + AWS Lambda + DynamoDB. Citizens can report incidents (collapsed buildings, trapped people, shelters, food/water/medical resources) on a Leaflet map, confirm or dispute existing reports, and attach photos — all without login. Reports are written to IndexedDB first and synced asynchronously when connectivity returns. The backend is deployed on AWS (API GW + Lambda + DynamoDB + S3 + CloudFront) and the frontend is live on Netlify at erqk-crisis-map.netlify.app. The architecture is genuinely production-quality for a hackathon: geohash-based spatial duplicate detection, atomic conditional puts for idempotency, exponential-backoff sync engine, DynamoDB TTL + point-in-time recovery, self-hosted OSM tiles for offline maps, and proper security headers on every response. The main gaps are zero meaningful test coverage and no CI pipeline.",
-    "project_type": "Collaborative disaster-response incident mapping PWA (Angular frontend + AWS serverless backend)",
+    "summary": "CrisisMap is a real, non-trivial offline-first PWA for crowdsourced disaster incident reporting (earthquakes/floods context, Spanish-first), with an Angular 21 SPA frontend using Leaflet + IndexedDB for offline sync, and a serverless AWS backend (API Gateway + Lambda + DynamoDB + S3/CloudFront) provisioned via CDK. It is deployed live to Netlify with a working production URL and has 71 commits of substantive, incremental feature/fix work rather than boilerplate.",
+    "project_type": "Offline-first crowdsourced crisis/incident reporting PWA with serverless AWS backend",
     "stack": {
       "frontend": [
-        "Angular 21 (standalone components, signals)",
-        "Leaflet 1.9 + leaflet.markercluster",
+        "Angular 21 (standalone components)",
+        "Leaflet + leaflet.markercluster",
         "IndexedDB (idb)",
         "Angular Service Worker (PWA)",
-        "Custom i18n (es/en/pt)"
+        "RxJS"
       ],
       "backend": [
-        "AWS Lambda (Node 20, ARM64)",
-        "AWS API Gateway v2 (HTTP API)",
-        "AWS CDK (TypeScript IaC)"
+        "AWS Lambda (Node/TypeScript handlers)",
+        "API Gateway HTTP API",
+        "nodemailer (Gmail SMTP) for contact form"
       ],
       "database": [
-        "DynamoDB (PAY_PER_REQUEST, TTL, PITR, 3 GSIs)"
+        "DynamoDB (Incidents, Confirmations, Devices tables with GSIs)"
       ],
       "infra_deploy": [
-        "Netlify (frontend)",
-        "AWS S3 + CloudFront (images CDN + self-hosted map tiles)",
-        "AWS CDK for all backend infra"
+        "AWS CDK (TypeScript)",
+        "S3 + CloudFront (images/tiles)",
+        "Netlify (static frontend hosting)"
       ],
       "ai_ml": [],
       "languages": [
@@ -44,81 +44,75 @@
       ]
     },
     "architecture": {
-      "pattern": "Serverless + offline-first PWA with outbox sync pattern",
+      "pattern": "Serverless microservice-per-route (Lambda) backend + offline-first SPA frontend with local-first sync engine",
       "uses_orm": false,
-      "orm_or_db_layer": "Raw AWS SDK v3 (@aws-sdk/lib-dynamodb DynamoDBDocumentClient) with thin helper wrappers (getItem/putItem/updateItem) in backend/shared/db.ts",
-      "api_design": "REST-style HTTP API via API Gateway v2; POST /sync batches outbox operations (up to 100/request, 10 concurrent) for offline-first drain; separate endpoints for incidents, confirmations, images, legend, resources, devices; no versioning prefix",
-      "separation_of_concerns": "Very clean: Angular app split into feature folders (map, report, incident, banner, core, filters); backend has one folder per Lambda route plus shared/ for types/geo/db/headers; CDK constructs per AWS resource type",
-      "modularity": "npm workspaces monorepo (apps/web + backend); shared types duplicated between frontend shared/constants.ts and backend shared/types.ts (minor duplication), but otherwise well-modularised",
+      "orm_or_db_layer": "Raw AWS SDK v3 (@aws-sdk/lib-dynamodb DynamoDBDocumentClient) via a small shared db.ts helper (getItem/putItem/updateItem), no ORM",
+      "api_design": "REST-ish JSON over API Gateway HTTP API, one Lambda handler per resource (incidents, confirmations, devices, images, sync, contact, seed, legend, resources, health), presigned S3 URLs for image upload",
+      "separation_of_concerns": "Clear separation: apps/web (frontend, organized by feature folders: core/map/report/incident/banner/etc.), backend/lambdas (route handlers), backend/shared (db, geo, types, headers, constants), backend/cdk (infra as code)",
+      "modularity": "Good modularity for an MVP scale; shared utilities (geohashing, validation, sanitize) are factored out and reused across lambdas",
       "notable_patterns": [
-        "Offline-first outbox pattern: every write goes to IndexedDB first, sync engine drains to server with exponential backoff (30s → 30m)",
-        "Geohash spatial indexing with haversine duplicate detection (30m radius) using DynamoDB GSI begins_with queries on neighbour cells",
-        "Deterministic UUID v4 from SHA-256(type:geohash6) for idempotent concurrent writes via conditional put",
-        "Demo mode with per-device lifetime quota enforced server-side via DynamoDB atomic ADD on device record",
-        "DynamoDB sharded geo-index (gsiPkV2 = first char of geohash, ~32 shards) to avoid hot partition on bbox queries",
-        "Client-side image compression to WebP/JPEG via Canvas API before S3 presigned URL upload"
+        "Offline-first outbox/sync engine with exponential backoff (30s-30m) in frontend",
+        "Geohash-based duplicate incident detection using haversine distance",
+        "Demo mode with per-device quota enforced server-side via DynamoDB atomic counter",
+        "Device-based pseudonymous identity (deviceId header) instead of user accounts/auth",
+        "Token-gated seed endpoint (X-Seed-Token) for admin/demo data loading",
+        "CORS locked to specific Netlify origin, API Gateway throttling (rateLimit 100/burst 200) configured in CDK"
       ]
     },
     "code_organization": {
       "score": 4,
-      "directory_structure": "Well-structured monorepo: apps/web (Angular), backend (lambdas + cdk + shared + scripts), specs/ (design docs). Lambda per route, CDK construct per AWS resource. Consistent file naming throughout.",
-      "naming_quality": "Excellent — filenames, function names, and variable names are descriptive and consistent (e.g., applyCreate, applyConfirm, drainTextOutbox, retryPendingImages, findDuplicate)",
-      "documentation_quality": "README is thorough and accurate (architecture diagram, offline model table, repo layout, tech stack table). Inline code comments explain non-obvious decisions (geohash sharding rationale, conditional-put idempotency, demo quota semantics). specs/ folder has full MVP spec, plan, data model, and API contract.",
-      "reasoning": "The only significant deduction is the single test file (app.spec.ts) which is unmodified Angular scaffold containing 'Hello, web' assertions that don't even match the actual app, indicating zero real test coverage. Everything else — structure, naming, comments, docs — is unusually polished for a hackathon."
+      "directory_structure": "Well-organized monorepo with npm workspaces (apps/web, backend, backend/cdk), feature-folder structure on frontend, resource-folder structure on backend lambdas, plus heavy but organized 'spec-driven' scaffolding (.specify/, specs/, .opencode/) from a spec-kit workflow tool",
+      "naming_quality": "Consistent, descriptive naming throughout (e.g., sync-engine.service.ts, incident-layer.service.ts, create-incident.ts)",
+      "documentation_quality": "README is unusually thorough (bilingual product narrative + architecture diagram + repo layout + offline-sync table); AGENTS.md and specs/ directory contain detailed spec/plan/task docs from spec-driven development",
+      "reasoning": "Clear, consistent structure and naming with genuine, detailed documentation beyond typical hackathon README fluff; loses a point only because a large fraction of repo size is meta-tooling scaffolding (.specify/.opencode) unrelated to the product itself."
     },
     "production_readiness": {
       "score": 3,
       "has_auth": false,
       "has_error_handling": true,
-      "has_logging": true,
+      "has_logging": false,
       "has_env_config": true,
       "has_deploy_config": true,
-      "secrets_handling": "SEED_TOKEN, CONTACT_EMAIL, CONTACT_APP_PASSWORD are required at CDK deploy time (environment variables on the CI/deploy machine, never committed). Public API/CDN URLs are correctly committed in environment.ts per the README's explicit guidance. No secrets in source.",
-      "security_notes": "Every Lambda response includes HSTS, X-Frame-Options DENY, and X-Content-Type-Options nosniff. Input is validated (type enums, coordinate bounds, UUID regex, length caps) and sanitized (control char stripping). No traditional auth by design — device UUID identity is explicitly documented as the threat model. No app-level rate limiting beyond the AWS account 100 req/s default; no WAF configured in CDK.",
-      "scalability_notes": "DynamoDB PAY_PER_REQUEST scales automatically. Geohash sharding (gsiPkV2) distributes bbox reads across ~32 partitions. Image delivery is CloudFront CDN. Angular Service Worker caches map tiles offline. Batch sync endpoint (up to 100 ops, 10 concurrent) prevents thundering herd on reconnect. Lambda cold starts on ARM64 Node 20 are minimal.",
-      "reasoning": "The app is already deployed and functioning in production with correct AWS infrastructure and a thoughtful offline model. Error handling and input validation are solid throughout. Score is capped at 3 because there are no tests, no CI, no WAF/rate limiting at the application layer, and no moderation/admin capability — which matters when the data is crowdsourced in a crisis context where bad actors or accidental spam could pollute the map."
+      "secrets_handling": "Secrets (SEED_TOKEN, CONTACT_EMAIL, CONTACT_APP_PASSWORD) are read from process.env and injected via CDK context/env vars, not hardcoded; no .env files committed to repo",
+      "security_notes": "No user authentication (by design, anonymous device-based reporting) which is reasonable for the use case; security headers (HSTS, X-Frame-Options, nosniff) set on responses; input validation and sanitization present in Lambda handlers (length caps, type/enum validation, control-char stripping); CORS restricted to a single known origin; seed/admin endpoint gated by a shared-secret token (weaker than proper auth but functional); no rate limiting beyond API Gateway's blanket throttle (no per-device abuse protection against spam incident creation besides duplicate-detection and demo quotas).",
+      "scalability_notes": "Serverless/DynamoDB architecture scales reasonably well for expected crisis-reporting load; geohash-based queries and GSIs suggest awareness of query patterns; single-table-ish design per entity is workable but not battle-tested at scale.",
+      "reasoning": "Deployed to production (Netlify + presumably live AWS backend), real error handling and input validation exist, but there is no structured logging/observability beyond console.log, no automated tests running in CI, and no CI/CD pipeline (.github workflows) found at all, which caps readiness for a life-critical deployment."
     },
     "maturity": {
       "score": 3,
       "has_readme": true,
       "has_tests": false,
       "has_ci": false,
-      "is_real_or_boilerplate": "Real, working application. The logic is custom and substantial: geohash spatial deduplication, sync outbox engine with backoff, IndexedDB schema migrations, DynamoDB conditional writes, image compression pipeline, self-hosted OSM tile delivery. Not boilerplate.",
-      "reasoning": "71 commits in approximately 1 day (created June 28, pushed June 29) indicates AI-assisted rapid development. The repo has a live deployment and real infra (CDK + Netlify), which is strong signal for maturity. However, zero meaningful tests and no CI pipeline are significant gaps. The one spec file is unmodified Angular scaffold."
+      "is_real_or_boilerplate": "Real, actively developed application with substantial custom business logic (offline sync, geohash duplicate detection, demo-mode quotas, image compression/upload pipeline) — not boilerplate or AI scaffolding",
+      "reasoning": "71 commits of genuine feature/bugfix work, live deployment, and detailed docs indicate real engineering effort; however, despite jest being configured for the backend and Angular's test tooling present, there are effectively zero real tests (only the untouched Angular CLI-generated app.spec.ts 'Hello world' test) and no CI workflow exists in the repo, so quality is unverified by automation."
     },
     "viability": {
       "score": 4,
-      "reasoning": "Strong fit for the Build4Venezuela earthquake use case: offline-first design is the right approach when infrastructure is degraded, Spanish is the primary language (also en/pt), incident types map directly to earthquake aftermath needs (trapped people, collapsed buildings, shelters, food/water/medicine, hospitals, road blocks). The app is already live and deployed — not a demo or mockup. The main limitation for real deployment is the absence of any content moderation or admin dashboard, which becomes critical when crowdsourced incident data might contain errors or deliberate misinformation during a high-stress event."
+      "reasoning": "This is one of the more production-grade entries: it solves a concrete, well-scoped problem (offline-capable citizen incident reporting during earthquakes) with a coherent, deployed, working architecture; main gaps before real-world reliance are lack of automated tests/CI, no abuse/spam protections beyond basic heuristics, and no admin/moderation dashboard for validating citizen reports (acknowledged as future work in the README itself)."
     },
     "key_features": [
-      "Offline-first incident reporting via IndexedDB outbox + async sync engine with exponential backoff",
-      "Crowdsourced confirmation/dispute voting on incidents (confirm / improved / worsened / no_longer_exists)",
-      "20 incident types across 5 categories: emergency, infrastructure, service interruption, resource, communications",
-      "Photo upload (up to 3 per report, client-side WebP/JPEG compression, S3 presigned URLs, CloudFront CDN)",
-      "Geohash-based spatial deduplication (30m radius) with haversine distance check",
-      "Self-hosted OSM raster map tiles via S3+CloudFront, cached offline by Angular Service Worker",
-      "Anonymous device-UUID identity — no registration or login required",
-      "Multi-language: Spanish, English, Portuguese",
-      "Demo mode with per-device quota (5 incidents) for testing without polluting live data",
-      "PWA installable from browser on Android, iOS, desktop — no app store required",
-      "DynamoDB TTL (72h expiry), point-in-time recovery, geohash-sharded GSI for scalable bbox queries"
+      "Offline-first incident reporting with local IndexedDB storage and background sync with exponential backoff",
+      "Interactive Leaflet map with marker clustering and distance-sorted incident list",
+      "Photo attachments (up to 3) compressed client-side and uploaded via S3 presigned URLs, served via CloudFront",
+      "Geohash-based duplicate incident detection within a configurable radius",
+      "Anonymous device-based identity with alias, no login/registration required",
+      "Demo mode with per-device server-enforced report quota",
+      "i18n support (Spanish, English, Portuguese)",
+      "PWA installable app with forced-update/version-check mechanism and offline/online status banners",
+      "Contact form wired to Gmail SMTP with CloudWatch logging fallback"
     ],
     "domain_tags": [
       "mapping-geo",
-      "shelter-mapping",
-      "structural-inspection",
-      "aid-logistics",
       "alerts-notifications",
-      "comms-chat"
+      "aid-logistics",
+      "structural-inspection"
     ],
-    "merge_potential": "High — the offline-first sync engine, geohash spatial indexing, and anonymous device identity are patterns that could benefit other projects in the hackathon. The Angular PWA shell and IndexedDB outbox service are well-abstracted and reusable.",
+    "merge_potential": "Strong standalone product; could integrate with a shelter-mapping or resource-coordination tool by exposing its incidents API/GSIs as a data feed, or by adding a validation/moderation dashboard for humanitarian orgs as described in its own roadmap.",
     "red_flags": [
-      "Test coverage is effectively zero — the only spec file (app.spec.ts) is unmodified Angular scaffold asserting 'Hello, web' which does not test any application logic",
-      "No CI/CD pipeline configured (no .github/workflows, no CircleCI, nothing)",
-      "No content moderation or admin interface — crowdsourced incident data has no removal or validation pathway beyond user voting",
-      "No WAF or application-level rate limiting; relies solely on AWS account default 100 req/s which is a shared limit",
-      "Single contributor, project created one day before submission deadline (June 28–29, 2026)",
-      "geo-index GSI (v1) explicitly marked TEMPORARY with a comment about a pending backfill migration — indicates schema is mid-migration"
+      "No CI/CD pipeline (.github/workflows) despite having test tooling configured",
+      "No real automated test coverage — jest configured but zero test files in backend; frontend has only the default unmodified Angular CLI scaffold test",
+      "Admin/seed endpoint protected only by a static shared-secret header token rather than proper authentication",
+      "No structured logging/monitoring/alerting beyond default CloudWatch Lambda logs and ad hoc console.log"
     ]
   },
   "signals": {
@@ -129,7 +123,7 @@
     "commit_count": 71,
     "code_loc": 8643,
     "created_at": "2026-06-28T00:45:48Z",
-    "pushed_at": "2026-06-29T17:33:02Z",
+    "pushed_at": "2026-06-30T15:38:26Z",
     "license": "MIT",
     "languages_bytes": {
       "TypeScript": 319173,
@@ -143,29 +137,29 @@
   },
   "evaluation": {
     "solves_real_problem": "yes",
-    "real_problem_reasoning": "Earthquake victims in Venezuela face degraded or absent internet infrastructure immediately after a disaster. CrisisMap directly addresses this with an offline-first PWA that lets anyone report collapsed buildings, trapped people, shelters, food/water/medicine distribution points, and road blockages — even without connectivity — and syncs data automatically when the connection returns. The incident taxonomy maps precisely to earthquake aftermath needs, the app is in Spanish (primary language), and it requires no app store install or user registration. This is exactly the tool a first responder or affected citizen needs in the first critical hours.",
+    "real_problem_reasoning": "Addresses a core, well-documented gap in disaster response: when infrastructure degrades after an earthquake, citizens and first responders lose the ability to report/see collapsed buildings, blocked roads, trapped people, and resource points (food/water/medicine/shelters). CrisisMap targets exactly that gap with an offline-first PWA that stores reports locally (IndexedDB) and syncs when connectivity returns, letting ordinary phones act as temporary data-collection nodes -- directly useful in the chaotic first hours of a Venezuelan earthquake when cell networks are spotty.",
     "problem_severity": "critical",
-    "impact_potential": 5,
+    "impact_potential": 4,
     "product_quality": 4,
-    "live_demo_status": "partial",
-    "live_demo_notes": "The Netlify URL resolves and the technical analysis confirms the deployment is live and accessible (signals.accessible: true, AWS backend deployed). WebFetch only returns the HTML shell with the title \"CrisisMap\" because the app is a client-side Angular SPA that requires JavaScript execution to render the map UI — this is expected behavior for Angular PWAs, not a failure. No demo video exists to supplement the live URL check.",
+    "live_demo_status": "working",
+    "live_demo_notes": "https://erqk-crisis-map.netlify.app returns HTTP 200 and serves a real Angular 21 SPA (not a placeholder) bundling Leaflet + marker-clustering, a PWA manifest/service-worker, and proper meta description ('Collaborative disaster incident map. Report and verify incidents offline.'). A backend health endpoint (/api/health) also returns 200, indicating the AWS Lambda/API Gateway/DynamoDB backend is live, not just a static frontend. WebFetch's text-only renderer could not execute the client-side JS so it reported an empty page ('CrisisMap' title only) -- this is a tooling limitation, not evidence the app is broken, since curl confirms the full JS bundle, map libraries, and PWA assets are served correctly. No demo video exists to independently confirm the UI flow visually, so some uncertainty remains about final UX polish.",
     "diffusion": {
-      "score": 4,
+      "score": 3,
       "ready_to_promote": true,
       "available_assets": [
         "live-demo",
         "clear-value-prop"
       ],
-      "recommended_angle": "Post a short screen-recording or screenshot of the interactive map showing an offline incident being reported and then syncing. Lead with the human hook: 'When the earthquake hit and the internet went down, CrisisMap kept working. No signal? No problem. Report collapsed buildings, find shelters, and coordinate relief — from your phone, offline.' Highlight the no-install, no-login, no-connectivity-required angle. Tag humanitarian tech communities (NetHope, OCHA Digital), Venezuelan diaspora networks, and open-source disaster-response groups.",
+      "recommended_angle": "\"CrisisMap: convierte cualquier teléfono en un nodo de reporte de emergencias, incluso sin internet\" -- lead with the offline-first angle (works when networks go down, syncs automatically once they return) since that's the most differentiated, victim-relevant claim; pair with a screen recording since no video/screenshots exist yet.",
       "gaps": [
-        "No demo video to show the offline-sync flow in action",
-        "No screenshots available beyond the live URL",
-        "Zero community stars/forks — no social proof yet",
-        "No real users or testimonials from field responders",
-        "Missing branding assets (logo, OG image) for polished social card"
+        "No demo video to show the map/reporting UI in action",
+        "No screenshots captured/available for social assets",
+        "No visible branding/press kit beyond the app's own theme color and icon",
+        "No evidence yet of real users or real incident reports on the live instance (likely empty/demo data)",
+        "Zero GitHub stars/forks and single contributor -- no community traction to cite"
       ]
     },
-    "overall_recommendation": "spotlight",
-    "one_line_pitch": "CrisisMap lets earthquake victims report collapsed buildings, trapped people, and shelter locations directly from their phone — even with no internet connection — so relief teams always have real-time situational awareness when it matters most."
+    "overall_recommendation": "promote",
+    "one_line_pitch": "CrisisMap: la app PWA offline-first que convierte cada teléfono en un nodo de reporte ciudadano durante terremotos -- reporta, mapea y sincroniza incidentes aunque se caiga la conexión."
   }
 }
