@@ -1,0 +1,164 @@
+{
+  "project_slug": "terrave",
+  "name": "TerraVE",
+  "repo_url": "https://github.com/rainvare/terraVE",
+  "live_url": "https://terra-ve.vercel.app/",
+  "video_url": "",
+  "countries": [
+    "Venezuela",
+    "Argentina"
+  ],
+  "db_description": "TerraVE es una plataforma web que combina memoria ciudadana con visión computacional para responder dos preguntas críticas post-desastre: ¿Qué existía aquí? → Levantamiento ciudadano de infraestructura perdida ¿Qué quedó en pie? → Clasificación automática de daño estructural por foto El resultado: un mapa vivo.",
+  "lifecycle_status": "ready_to_use",
+  "analysis": {
+    "summary": "TerraVE is a Next.js 14 (App Router) + Supabase web platform for post-earthquake territorial intelligence. It combines citizen crowdsourcing of lost infrastructure (schools, clinics, pharmacies, markets) with AI-powered structural damage classification via a HuggingFace ViT model. Users can report a location before/after a disaster, upload photos that get classified for damage severity (no-damage → destroyed), and view results on a Leaflet map with a traffic-light color system. The app is deployed at terra-ve.vercel.app. There is no authentication; all data is publicly writable. The AI classification uses a generic ViT model (google/vit-base-patch16-224) rather than a fine-tuned earthquake damage model, making classification outputs unreliable for real disaster response. Two additional API routes (satelital, poblacion) query database tables not defined in the included schema, suggesting features that were planned but not fully wired up. No tests or CI pipeline exist.",
+    "project_type": "Web app (Next.js full-stack)",
+    "stack": {
+      "frontend": [
+        "Next.js 14 (App Router)",
+        "React 18",
+        "Tailwind CSS",
+        "Leaflet / react-leaflet"
+      ],
+      "backend": [
+        "Next.js API Routes (Edge-compatible)",
+        "Supabase JS client"
+      ],
+      "database": [
+        "Supabase (PostgreSQL + PostGIS)",
+        "Supabase Storage (image buckets)"
+      ],
+      "infra_deploy": [
+        "Vercel (live deployment confirmed)"
+      ],
+      "ai_ml": [
+        "HuggingFace Inference API",
+        "google/vit-base-patch16-224 (generic ViT, not earthquake-specific)"
+      ],
+      "languages": [
+        "TypeScript",
+        "CSS"
+      ]
+    },
+    "architecture": {
+      "pattern": "Next.js App Router monolith with BaaS backend",
+      "uses_orm": false,
+      "orm_or_db_layer": "Supabase JS client (@supabase/supabase-js v2) — fluent query builder, no ORM; direct REST calls also used in some routes (satelital, poblacion, dashboard)",
+      "api_design": "REST via Next.js API Routes under /app/api/*; GeoJSON output for map consumption; CORS headers set on public endpoints",
+      "separation_of_concerns": "Clean split: lib/ for domain logic (classify, geo, supabase client), components/ for UI, app/api/ for server routes, types/index.ts for shared types",
+      "modularity": "Good modularity for a hackathon — classify logic isolated in lib/classify.ts, geo utilities in lib/geo.ts, Supabase client factory in lib/supabase.ts",
+      "notable_patterns": [
+        "Pagination loop in /api/lugares to bypass Supabase 1000-row limit",
+        "Graceful AI degradation: photo is always stored even if HuggingFace is unavailable",
+        "PostGIS spatial index on (lng, lat) for geo queries",
+        "Venezuela bounding-box validation utility in lib/geo.ts",
+        "Traffic-light damage classification system (verde/amarillo/naranja/rojo/gris)",
+        "Server client reuses anon key instead of service role key — no privilege elevation on server side",
+        "PATCH /api/report/[id] accepts arbitrary body.update() with no field allowlist — mass-assignment vulnerability"
+      ]
+    },
+    "code_organization": {
+      "score": 4,
+      "directory_structure": "Clean Next.js App Router layout: app/ (pages + API routes), components/, lib/, types/ — all files in the right places with no clutter",
+      "naming_quality": "Consistent Spanish naming that matches the domain (lugares, reportes_dano, color_semaforo, clase_dano); TypeScript types and Supabase table names align well",
+      "documentation_quality": "README covers setup in 5 steps with SQL schema and .env.example reference; TerraVE_API.md documents the public API; inline comments are present and useful",
+      "reasoning": "Code is well-structured for a hackathon with 93 commits from a single contributor. Typing is thorough, separation of concerns is real rather than cosmetic, and the paginated Supabase query pattern shows deliberate engineering."
+    },
+    "production_readiness": {
+      "score": 2,
+      "has_auth": false,
+      "has_error_handling": true,
+      "has_logging": true,
+      "has_env_config": true,
+      "has_deploy_config": false,
+      "secrets_handling": "HF_TOKEN and GOOGLE_MAPS_KEY are server-only env vars (correct). Supabase anon key is NEXT_PUBLIC (exposed to browser — expected for anon key, but the server client also uses it instead of a service role key, meaning no RLS bypass is possible server-side)",
+      "security_notes": "PATCH /api/report/[id] passes the raw request body directly to supabase.update() with no field allowlist — mass-assignment vulnerability. No auth on any write endpoint. RLS policies are open-insert for all tables. No rate limiting on image upload or AI classification endpoints.",
+      "scalability_notes": "Vercel + Supabase scales horizontally for read traffic. The classify route sends base64 images in JSON (no streaming) which will hit Vercel's 4.5 MB body limit under load. No caching on classification results.",
+      "reasoning": "Core error handling is present (try/catch on all routes, graceful AI degradation) and env config is clean, but there is zero authentication, a mass-assignment bug in the PATCH route, no rate limiting on AI/upload endpoints, and two additional API routes (satelital, poblacion) query Supabase tables not present in the committed schema."
+    },
+    "maturity": {
+      "score": 3,
+      "has_readme": true,
+      "has_tests": false,
+      "has_ci": false,
+      "is_real_or_boilerplate": "Real — 93 commits, functional multi-page app with real business logic, live Vercel deployment, actual Supabase schema with PostGIS indexes",
+      "reasoning": "The app is genuinely functional with real domain logic and a live deployment, not just a scaffolded skeleton. However, zero tests and no CI pipeline are significant gaps for a system intended for real disaster response where data integrity matters."
+    },
+    "viability": {
+      "score": 3,
+      "reasoning": "The citizen crowdsourcing and structural damage photo-upload flow is fully functional and genuinely useful for disaster response (collect pre/post infrastructure photos, classify damage, map results). The critical weakness is the AI classification: google/vit-base-patch16-224 is a general-purpose ImageNet classifier, not a structural damage model, so its outputs for earthquake damage will be unreliable. Switching to a fine-tuned model (e.g., from xView2 or RescueNet datasets) would make the AI feature trustworthy. The rest of the platform — citizen reporting, mapping, GeoJSON export — could work as-is."
+    },
+    "key_features": [
+      "Citizen crowdsourcing: report pre-disaster infrastructure (schools, clinics, pharmacies, markets) with before-photos and GPS coordinates",
+      "AI structural damage classification via HuggingFace ViT model — traffic-light severity (no damage → destroyed)",
+      "Graceful AI degradation: photos are saved even when HuggingFace is unavailable",
+      "Interactive Leaflet map with color-coded damage markers and filtering by type/status",
+      "PostGIS-indexed PostgreSQL via Supabase with paginated queries for large datasets",
+      "Satellite damage data endpoint (dano_satelital table) and exposed population data (poblacion_expuesta) for MMI-level impact assessment",
+      "GeoJSON API endpoint for map consumption",
+      "Venezuela bounding-box validation for submitted GPS coordinates",
+      "Supabase Storage for before/after photo persistence"
+    ],
+    "domain_tags": [
+      "structural-inspection",
+      "mapping-geo",
+      "shelter-mapping",
+      "seismic-data"
+    ],
+    "merge_potential": "The concept is unique and complementary — no other submitted project combines pre-disaster memory mapping with post-disaster AI damage classification on a single geo platform. Worth integrating the citizen reporting + damage mapping feature. The AI classification pipeline needs a fine-tuned model swap before it is trustworthy in production.",
+    "red_flags": [
+      "AI model (google/vit-base-patch16-224) is a generic ImageNet classifier, not fine-tuned for structural earthquake damage — classification results will be meaningless in real use",
+      "PATCH /api/report/[id] passes raw request body to supabase.update() with no field allowlist — mass-assignment vulnerability allows any authenticated-less caller to overwrite any column",
+      "No authentication on any write endpoint; Supabase RLS policies explicitly allow unrestricted public insert — database can be spammed with junk reports",
+      "No rate limiting on /api/classify (HuggingFace calls) or image upload — HF token can be exhausted by a single malicious user",
+      "satelital and poblacion API routes query tables (dano_satelital, poblacion_expuesta) that are NOT defined in the committed supabase-schema.sql — those features will 404 on a fresh deploy",
+      "Server Supabase client uses anon key (not service role key) so server-side code has the same permissions as an anonymous browser user — RLS bypass is impossible",
+      "No tests and no CI pipeline for a system meant to guide disaster relief decisions"
+    ]
+  },
+  "signals": {
+    "accessible": true,
+    "stars": 0,
+    "forks": 0,
+    "contributors": 1,
+    "commit_count": 93,
+    "code_loc": 3532,
+    "created_at": "2026-06-27T01:44:26Z",
+    "pushed_at": "2026-06-29T17:19:51Z",
+    "license": "MIT",
+    "languages_bytes": {
+      "TypeScript": 132241,
+      "CSS": 2812,
+      "JavaScript": 303
+    },
+    "archived": false
+  },
+  "evaluation": {
+    "solves_real_problem": "yes",
+    "real_problem_reasoning": "After an earthquake, two critical information gaps emerge: (1) what infrastructure existed before the disaster (schools, clinics, pharmacies, markets) so reconstruction can be planned, and (2) which structures are still standing versus destroyed so rescue and relief can be directed. TerraVE directly targets both gaps through citizen crowdsourcing of pre-disaster locations and AI-powered damage classification from uploaded photos. This is a real, documented problem in Venezuelan earthquake response where informal settlements have no official infrastructure records.",
+    "problem_severity": "high",
+    "impact_potential": 3,
+    "product_quality": 3,
+    "live_demo_status": "partial",
+    "live_demo_notes": "The site loads cleanly at terra-ve.vercel.app with a professional landing page in Spanish, navigation links to Map, Report, and Damage Classification sections, and a clear two-question value proposition. However, the three key metrics (registered locations, evaluated structures, critical zones) display as dashes, indicating an empty or disconnected database. The app is navigable and presentable, but there is no real data in the live demo to demonstrate the crowdsourcing or mapping features working end-to-end. The AI damage classification uses google/vit-base-patch16-224, a generic ImageNet model not fine-tuned for structural earthquake damage, meaning classification outputs shown to users will be unreliable.",
+    "diffusion": {
+      "score": 3,
+      "ready_to_promote": false,
+      "available_assets": [
+        "live-demo",
+        "clear-value-prop",
+        "branding"
+      ],
+      "recommended_angle": "Lead with the citizen memory-mapping concept — 'Venezuela no puede perder la memoria de su infraestructura' — and the interactive Leaflet map. Avoid highlighting the AI damage classification in promotional content until the model is swapped for a fine-tuned earthquake damage classifier. Show the reporting form and map UI rather than the metrics (which are empty). Best positioned as 'la plataforma que preserva la memoria territorial de Venezuela antes y después de cada sismo.'",
+      "gaps": [
+        "No real data in live demo — metrics show dashes, making the map feature invisible to a first visitor",
+        "No demo video showing the full flow (report a location, upload a photo, see the map update)",
+        "AI classification is a generic ImageNet model — promoting this feature would mislead users about reliability",
+        "No screenshots of the map with populated data points",
+        "Zero community traction (0 stars, 0 forks, 1 contributor)"
+      ]
+    },
+    "overall_recommendation": "improve-first",
+    "one_line_pitch": "TerraVE es un mapa vivo post-terremoto que combina memoria ciudadana e IA para documentar qué infraestructura existía y cuánto daño estructural quedó — para que Venezuela nunca pierda el registro de lo que fue."
+  }
+}

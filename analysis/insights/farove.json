@@ -1,0 +1,156 @@
+{
+  "project_slug": "farove",
+  "name": "FaroVE — Plataforma de Reunificación Familiar",
+  "repo_url": "https://github.com/luacantu/rescue-track",
+  "live_url": "https://faro-ve.vercel.app/",
+  "video_url": "",
+  "countries": [
+    "Miami",
+    "FL"
+  ],
+  "db_description": "## ¿Qué construí?\n\nFaroVE es un sistema offline-first de registro \ny seguimiento de niños/as rescatados tras el \nsismo en Venezuela, con protección contra \ntráfico infantil.\n\n## ¿Para quién es?\n\n- **Rescatistas y voluntarios** que encuentran \n  niños/as solos en zonas afectadas\n- **Familias** que buscan a sus hijos/as \n  desaparecidos\n- **Coordinadores** en refugios y hospitales \n  que gestionan casos y aprueban traslados\n\n## ¿Cómo ayuda?\n\n- Funciona **100% sin internet** — datos \n  guardados localmente, sincroniza cuando \n  vuelve la conexión\n- Genera un **ID único + ficha imprimible** \n  para brazalete en 60 segundos\n- **Feed público** donde familias y voluntarios \n  publican búsquedas y niños/as encontrados\n- Sistema de **detección de tráfico infantil** \n  — detecta señales de alerta automáticamente\n- Registro de **reclamantes con cédula** antes \n  de cualquier entrega\n- **Aprobación múltiple** de coordinadores \n  para aprobar traslados\n- Todos los datos **cifrados en el dispositivo** \n  — si roban el teléfono, los datos son ilegibles\n- Integración con datos de \n  **venezuelatebusca.com** (en progreso)\n\n## ¿Qué probar primero?\n\n1. Abre **faro-ve.vercel.app**\n2. Toca \"Ver publicaciones\" — feed público, \n   sin login\n3. Toca \"Busco a mi hijo/a\" — ingresa datos \n   y busca\n4. Toca \"Soy rescatista\" — registra un niño/a \n   de prueba con PIN: usa el PIN de rescatista\n\n## Stack técnico\n\n- Next.js 15 + Tailwind + TypeScript\n- PWA offline-first con service worker\n- IndexedDB (Dexie.js) para datos locales\n- Supabase para feed compartido\n- Cifrado AES en dispositivo\n- Vercel deploy\n\n## Construido en una noche para Build4Venezuela 🇻🇪\n\nCada niño/a merece ser encontrado/a.",
+  "lifecycle_status": "ready_to_use",
+  "analysis": {
+    "summary": "FaroVE is a Next.js 16 PWA targeting child reunification after the Venezuela earthquake, deployed live at faro-ve.vercel.app. It has two parallel data systems: an encrypted local-first IndexedDB registry (Dexie + crypto-js AES) for rescuers to register found children on-device, and a Supabase-backed public post feed for missing/found person announcements seeded from real venezulatebusca.com CSV data. 65 commits in 2 days indicate rapid, genuine development. The UX is thoughtful — role separation (family/rescuer/coordinator), trafficking red-flag detection, audit transfer logs, printable ID cards, and PIN-gated coordinator approval — but the architecture has serious production flaws: PINs stored as NEXT_PUBLIC_ env vars are baked into the client JS bundle (defeating all auth), and child records live only in the local device's IndexedDB with no cloud sync, meaning a multi-device rescue team cannot share data across shelters.",
+    "project_type": "Mobile-first PWA (Next.js) for child registration, tracking, and family reunification in disaster response",
+    "stack": {
+      "frontend": [
+        "Next.js 16 (App Router)",
+        "React 19",
+        "Tailwind CSS v4",
+        "next-pwa (Workbox)"
+      ],
+      "backend": [
+        "Next.js API Routes (single endpoint)"
+      ],
+      "database": [
+        "Supabase (PostgreSQL via JS client)",
+        "Dexie (IndexedDB wrapper for local storage)"
+      ],
+      "infra_deploy": [
+        "Vercel"
+      ],
+      "ai_ml": [],
+      "languages": [
+        "TypeScript"
+      ]
+    },
+    "architecture": {
+      "pattern": "Client-heavy local-first PWA with BaaS for shared data",
+      "uses_orm": false,
+      "orm_or_db_layer": "Supabase JS client (BaaS) for posts/coordinator_requests; Dexie as IndexedDB abstraction for local encrypted child records. No ORM or raw SQL in app code.",
+      "api_design": "Single Next.js API route (/api/coordinator-request) that fires Resend emails; all other persistence is direct Supabase client calls from the browser or Dexie IndexedDB reads.",
+      "separation_of_concerns": "Good separation: lib/ holds data access (supabase.ts, db.ts, posts.ts), auth logic (auth.ts, pinStore.ts), and encryption (encryption.ts). Components are lean presentational wrappers. Pages handle orchestration.",
+      "modularity": "Flat but logical: app/ for routes, components/ for shared UI, lib/ for business logic. No feature folders, but scale is small enough that this works.",
+      "notable_patterns": [
+        "Local-first encrypted registry: AES-encrypted children stored in IndexedDB, decrypted on demand with PIN",
+        "Role-gate via sessionStorage-persisted PIN with route-guard component",
+        "Dual data stores: Supabase for sharable posts feed, IndexedDB for sensitive child registry — but no sync bridge between them",
+        "Transfer/custody audit trail appended to child.transferHistory on each coordinator action",
+        "Client-side encryption key derived from NEXT_PUBLIC_PIN_COORDINATOR baked into the JS bundle, rendering encryption ineffective"
+      ]
+    },
+    "code_organization": {
+      "score": 4,
+      "directory_structure": "Clean: app/ (routes), components/ (shared UI), lib/ (data/auth/encryption), scripts/ (setup SQL, CSV import). Aligns with Next.js App Router conventions.",
+      "naming_quality": "Consistent and meaningful: camelCase for TS functions/vars, PascalCase components, kebab-case routes, Spanish for domain terms (niño, cedula, refugio). No ambiguous abbreviations.",
+      "documentation_quality": "README present but thin. AGENTS.md / CLAUDE.md contain AI scaffolding notes only. Code has helpful inline section comments (e.g., // ─── PIN-based role session). No JSDoc.",
+      "reasoning": "Well-structured for its size with clear module boundaries and consistent conventions. Loses a point for lack of any documentation on the data architecture and the dual-store model, which is non-obvious."
+    },
+    "production_readiness": {
+      "score": 2,
+      "has_auth": false,
+      "has_error_handling": true,
+      "has_logging": false,
+      "has_env_config": true,
+      "has_deploy_config": true,
+      "secrets_handling": "Critical failure: NEXT_PUBLIC_PIN_RESCUER and NEXT_PUBLIC_PIN_COORDINATOR are baked into the client bundle — anyone opening DevTools can read both PINs and bypass all role gates. The encryption key for location requests is also derived from the coordinator PIN at build time, making that AES encryption essentially theater.",
+      "security_notes": "Supabase RLS policies allow fully public read+write on posts and usuarios tables (no row-level ownership checks). Supabase project URL is hardcoded in source. No rate limiting on coordinator-request API route. No CSRF protection.",
+      "scalability_notes": "Supabase handles feed scaling adequately. The IndexedDB-based child registry is inherently un-shareable — data is siloed per device. A rescue coordinator on a different device or shelter cannot see children registered by a rescuer elsewhere. This is a fundamental architectural blocker for real disaster operations involving multiple sites.",
+      "reasoning": "The app is deployed and partially functional, but exposed PINs negate the auth model, public Supabase RLS removes data integrity guarantees, and the IndexedDB silo prevents cross-device coordination — the exact use case this is designed for."
+    },
+    "maturity": {
+      "score": 3,
+      "has_readme": true,
+      "has_tests": false,
+      "has_ci": false,
+      "is_real_or_boilerplate": "Real, purpose-built application with genuine domain logic (child trafficking red flags, coordinator approval workflow, custody audit trails, CSV import of real venezulatebusca.com data). Not boilerplate.",
+      "reasoning": "65 commits over 2 days, a live Vercel deployment, real external data seeded, and a complete multi-role UX indicate genuine effort. Maturity is capped at 3 by the total absence of tests or CI and the serious architectural flaws that would require significant rework before real deployment."
+    },
+    "viability": {
+      "score": 3,
+      "reasoning": "The project addresses a real, urgent need with a thoughtful UX and is already deployed. The Supabase-backed public feed for missing/found persons would work across devices for families searching. However, the core rescuer/coordinator workflow is device-local (IndexedDB silo) — in a multi-shelter earthquake response, rescuers at shelter A cannot share child records with coordinators at shelter B. Fixing this requires migrating child records to Supabase with server-side encryption and proper auth, which is a non-trivial redesign."
+    },
+    "key_features": [
+      "Child registration with encrypted local storage (photo, description, red flags)",
+      "Bracelet ID generation with printable ID card for field use",
+      "PIN-gated roles: rescuer (register), coordinator (admin panel), family (search only)",
+      "Coordinator approval workflow for custody/location requests with audit trail",
+      "Child trafficking red-flag detection checklist on registration",
+      "Public post feed backed by Supabase with filter/search (seeded from VenezuelaTeBusca CSV)",
+      "Location-request system: families request child's shelter location, coordinator approves/denies",
+      "Coordinator vetting pipeline with Resend email notification",
+      "PWA with Workbox service worker for offline capability",
+      "Venezuelan cedula-based family identity (no email/Google account required)"
+    ],
+    "domain_tags": [
+      "family-reunification",
+      "people-finder",
+      "volunteer-coordination",
+      "shelter-mapping"
+    ],
+    "merge_potential": "The concept and UX design are strong and highly relevant. Before merging or deploying in production, the IndexedDB child registry must be migrated to Supabase with server-side auth (service-role key in API routes), the PINs moved to server-only env vars validated server-side, and RLS policies tightened. These are substantial changes but the domain logic and UI are worth preserving.",
+    "red_flags": [
+      "NEXT_PUBLIC_PIN_RESCUER and NEXT_PUBLIC_PIN_COORDINATOR exposed in client JS bundle — auth is bypassable by any user with DevTools",
+      "Encryption key for location requests derived from NEXT_PUBLIC_PIN_COORDINATOR at build time — key is in the bundle, making AES encryption ineffective",
+      "Child records stored only in IndexedDB (device-local) — no sync to Supabase means multi-device/multi-shelter coordination is impossible",
+      "Supabase RLS allows fully public insert on posts and usuarios with no ownership check — data integrity is unguarded",
+      "Hardcoded Supabase project URL in source (rysgwsngosjlzrwvcszd.supabase.co)",
+      "Zero tests and no CI pipeline",
+      "No server-side logging or error monitoring"
+    ]
+  },
+  "signals": {
+    "accessible": true,
+    "stars": 0,
+    "forks": 0,
+    "contributors": 2,
+    "commit_count": 65,
+    "code_loc": 5750,
+    "created_at": "2026-06-27T17:47:54Z",
+    "pushed_at": "2026-06-29T14:33:39Z",
+    "license": null,
+    "languages_bytes": {
+      "TypeScript": 238128,
+      "JavaScript": 2979,
+      "CSS": 574
+    },
+    "archived": false
+  },
+  "evaluation": {
+    "solves_real_problem": "yes",
+    "real_problem_reasoning": "Child separation and trafficking during disaster response is one of the most acute humanitarian crises that follows an earthquake. FaroVE directly targets rescuers who find unaccompanied minors, families searching for missing children, and shelter coordinators managing custody transfers — three roles that exist in every major disaster. The integration of real venezulatebusca.com CSV data and the trafficking red-flag detection checklist show awareness of the actual operational context in Venezuela. The problem is unambiguously real and the concept maps correctly to it.",
+    "problem_severity": "critical",
+    "impact_potential": 4,
+    "product_quality": 3,
+    "live_demo_status": "partial",
+    "live_demo_notes": "The Vercel deployment is live and the domain resolves (signals.accessible: true, last pushed 2026-06-29). WebFetch returned near-empty content because this is a client-side-rendered Next.js 15 / React 19 PWA — the HTML shell loads but all UI is injected via JS, which WebFetch cannot execute. The public Supabase-backed missing-persons feed should work for any visitor without login. The rescuer/coordinator workflows require PIN entry. No demo video exists to compensate. Core architectural flaw: child records live only in the registering device's IndexedDB, making multi-device shelter coordination impossible in real disaster operations.",
+    "diffusion": {
+      "score": 3,
+      "ready_to_promote": false,
+      "available_assets": [
+        "live-demo",
+        "clear-value-prop"
+      ],
+      "recommended_angle": "Lead with the human story: a rescuer finds a child alone in rubble and in 60 seconds generates a printable bracelet ID — offline, encrypted, no internet required. That single image is emotionally powerful and technically credible. Highlight the public missing-persons feed seeded with real venezulatebusca.com data as proof of real-world grounding. Do NOT promote the security model (PINs are exposed in the JS bundle) until that is fixed.",
+      "gaps": [
+        "demo-video",
+        "screenshots",
+        "branding",
+        "real-users"
+      ]
+    },
+    "overall_recommendation": "improve-first",
+    "one_line_pitch": "FaroVE registra niños rescatados sin internet, genera un brazalete ID en 60 segundos y conecta familias venezolanas con sus hijos — con detección automática de tráfico infantil."
+  }
+}

@@ -2,6 +2,7 @@
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
+import type { ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { AuthorBadge } from "@/components/author-badge";
 import { ProjectVideoEmbed } from "@/components/project-video-embed";
@@ -20,6 +21,7 @@ import {
 
 type CategoryFilter = string;
 type StatusFilter = "all" | ProjectLifecycleStatus;
+type ViewMode = "grid" | "list";
 
 type RealtimeProjectsGridProps = {
   initialProjects: Project[];
@@ -43,6 +45,7 @@ export function RealtimeProjectsGrid({
   const queryClient = useQueryClient();
   const [activeCategory, setActiveCategory] = useState<CategoryFilter>("all");
   const [activeStatus, setActiveStatus] = useState<StatusFilter>("all");
+  const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const { data: projects = [], isFetching } = useQuery({
     initialData: initialProjects,
     queryFn: fetchProjects,
@@ -225,63 +228,182 @@ export function RealtimeProjectsGrid({
         </div>
       ) : null}
 
-      <div className="mb-3 flex justify-between gap-4">
+      <div className="mb-3 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
         <p className="font-mono text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground">
           {visible.length} {visible.length === 1 ? t("project") : t("projects")}
         </p>
-        <p className="font-mono text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground">
-          {isFetching ? t("syncing") : t("live")}
-        </p>
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="inline-flex border border-border bg-background">
+            <ViewModeButton
+              active={viewMode === "grid"}
+              label={t("views.grid")}
+              onClick={() => setViewMode("grid")}
+            />
+            <ViewModeButton
+              active={viewMode === "list"}
+              label={t("views.list")}
+              onClick={() => setViewMode("list")}
+            />
+          </div>
+          <p className="font-mono text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground">
+            {isFetching ? t("syncing") : t("live")}
+          </p>
+        </div>
       </div>
-      <div className="grid gap-px bg-border md:grid-cols-2 lg:grid-cols-3">
-        {visible.map(({ project, categoryId }) => (
-          <article
-            className="group bg-background p-6 transition hover:bg-card sm:p-7"
-            key={project.id}
-          >
-            <button
-              className="mb-4 inline-flex font-mono text-[0.6rem] font-bold uppercase tracking-[0.24em] text-accent transition hover:text-primary"
-              onClick={() => setActiveCategory(categoryId)}
-              type="button"
+      {viewMode === "grid" ? (
+        <div className="grid gap-px bg-border md:grid-cols-2 lg:grid-cols-3">
+          {visible.map(({ project, categoryId }) => (
+            <article
+              className="group bg-background p-6 transition hover:bg-card sm:p-7"
+              key={project.id}
             >
-              {clusterById.get(categoryId)?.label ??
-                clusterById.get("other")?.label}
-            </button>
-            <ProjectVideoEmbed
-              detailHref={`/${locale}/p/${project.slug}`}
-              title={project.name}
-              videoUrl={project.videoUrl}
-            />
-            <div className="mt-5 flex items-center justify-between gap-4">
-              <p className="font-mono text-xs uppercase tracking-[0.24em] text-muted-foreground">
-                {project.countries.join(" / ")}
-              </p>
-              <p className="border border-accent px-2 py-1 font-mono text-[0.6rem] font-bold uppercase tracking-[0.16em] text-accent">
-                {t(`statuses.${project.lifecycleStatus}`)}
-              </p>
-            </div>
-            <div className="mt-3 flex justify-end">
-              {/* ponytail: singular/plural needed — "1 votes" reads wrong and breaks trust */}
-              <p className="font-mono text-xs uppercase tracking-[0.18em] text-primary">
-                {project.votesCount}{" "}
-                {project.votesCount === 1 ? t("vote") : t("votes")}
-              </p>
-            </div>
-            <a className="block" href={`/${locale}/p/${project.slug}`}>
-              <h2 className="mt-8 font-mono text-3xl font-black uppercase leading-none tracking-[-0.04em] transition group-hover:text-primary">
-                {project.name}
-              </h2>
-            </a>
-            <AuthorBadge
-              className="mt-5"
-              imageUrl={project.ownerImageUrl}
-              meta={project.participantName}
-              name={project.ownerName || project.participantName}
-            />
-          </article>
-        ))}
-      </div>
+              <button
+                className="mb-4 inline-flex font-mono text-[0.6rem] font-bold uppercase tracking-[0.24em] text-accent transition hover:text-primary"
+                onClick={() => setActiveCategory(categoryId)}
+                type="button"
+              >
+                {clusterById.get(categoryId)?.label ??
+                  clusterById.get("other")?.label}
+              </button>
+              <ProjectVideoEmbed
+                detailHref={`/${locale}/p/${project.slug}`}
+                title={project.name}
+                videoUrl={project.videoUrl}
+              />
+              <div className="mt-5 flex items-center justify-between gap-4">
+                <p className="font-mono text-xs uppercase tracking-[0.24em] text-muted-foreground">
+                  {project.countries.join(" / ")}
+                </p>
+                <p className="border border-accent px-2 py-1 font-mono text-[0.6rem] font-bold uppercase tracking-[0.16em] text-accent">
+                  {t(`statuses.${project.lifecycleStatus}`)}
+                </p>
+              </div>
+              <div className="mt-3 flex justify-end">
+                {/* ponytail: singular/plural needed — "1 votes" reads wrong and breaks trust */}
+                <p className="font-mono text-xs uppercase tracking-[0.18em] text-primary">
+                  {project.votesCount}{" "}
+                  {project.votesCount === 1 ? t("vote") : t("votes")}
+                </p>
+              </div>
+              <a className="block" href={`/${locale}/p/${project.slug}`}>
+                <h2 className="mt-8 font-mono text-3xl font-black uppercase leading-none tracking-[-0.04em] transition group-hover:text-primary">
+                  {project.name}
+                </h2>
+              </a>
+              <AuthorBadge
+                className="mt-5"
+                imageUrl={project.ownerImageUrl}
+                meta={project.participantName}
+                name={project.ownerName || project.participantName}
+              />
+            </article>
+          ))}
+        </div>
+      ) : (
+        <div className="overflow-x-auto border border-border bg-background">
+          <table className="w-full min-w-[900px] border-collapse text-left">
+            <thead className="border-border border-b bg-card">
+              <tr>
+                <TableHeader>{t("table.project")}</TableHeader>
+                <TableHeader>{t("table.status")}</TableHeader>
+                <TableHeader>{t("table.category")}</TableHeader>
+                <TableHeader>{t("table.countries")}</TableHeader>
+                <TableHeader>{t("table.builder")}</TableHeader>
+                <TableHeader align="right">{t("table.votes")}</TableHeader>
+                <TableHeader align="right">{t("table.link")}</TableHeader>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {visible.map(({ project, categoryId }) => (
+                <tr className="group transition hover:bg-card" key={project.id}>
+                  <td className="max-w-[260px] px-4 py-3 align-middle">
+                    <a
+                      className="block truncate font-mono text-sm font-black uppercase tracking-[-0.03em] transition group-hover:text-primary"
+                      href={`/${locale}/p/${project.slug}`}
+                    >
+                      {project.name}
+                    </a>
+                  </td>
+                  <td className="px-4 py-3 align-middle">
+                    <span className="whitespace-nowrap border border-accent px-2 py-1 font-mono text-[0.58rem] font-bold uppercase tracking-[0.14em] text-accent">
+                      {t(`statuses.${project.lifecycleStatus}`)}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 align-middle">
+                    <button
+                      className="max-w-[150px] truncate font-mono text-[0.62rem] font-bold uppercase tracking-[0.18em] text-accent transition hover:text-primary"
+                      onClick={() => setActiveCategory(categoryId)}
+                      type="button"
+                    >
+                      {clusterById.get(categoryId)?.label ??
+                        clusterById.get("other")?.label}
+                    </button>
+                  </td>
+                  <td className="max-w-[180px] truncate px-4 py-3 align-middle font-mono text-[0.65rem] uppercase tracking-[0.16em] text-muted-foreground">
+                    {project.countries.join(" / ")}
+                  </td>
+                  <td className="max-w-[170px] truncate px-4 py-3 align-middle font-mono text-[0.65rem] uppercase tracking-[0.16em] text-muted-foreground">
+                    {project.ownerName || project.participantName}
+                  </td>
+                  <td className="px-4 py-3 text-right align-middle font-mono text-xs font-bold uppercase tracking-[0.16em] text-primary tabular-nums">
+                    {project.votesCount}
+                  </td>
+                  <td className="px-4 py-3 text-right align-middle">
+                    <a
+                      className="font-mono text-[0.62rem] font-bold uppercase tracking-[0.18em] text-muted-foreground transition hover:text-primary"
+                      href={`/${locale}/p/${project.slug}`}
+                    >
+                      {t("open")}
+                    </a>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
+  );
+}
+
+type ViewModeButtonProps = {
+  active: boolean;
+  label: string;
+  onClick: () => void;
+};
+
+function ViewModeButton({ active, label, onClick }: ViewModeButtonProps) {
+  return (
+    <button
+      aria-pressed={active}
+      className={`px-3 py-2 font-mono text-[0.65rem] font-bold uppercase tracking-[0.18em] transition ${
+        active
+          ? "bg-primary text-primary-foreground"
+          : "text-muted-foreground hover:text-foreground"
+      }`}
+      onClick={onClick}
+      type="button"
+    >
+      {label}
+    </button>
+  );
+}
+
+type TableHeaderProps = {
+  align?: "left" | "right";
+  children: ReactNode;
+};
+
+function TableHeader({ align = "left", children }: TableHeaderProps) {
+  return (
+    <th
+      className={`px-4 py-3 font-mono text-[0.58rem] font-bold uppercase tracking-[0.2em] text-muted-foreground ${
+        align === "right" ? "text-right" : "text-left"
+      }`}
+      scope="col"
+    >
+      {children}
+    </th>
   );
 }
 

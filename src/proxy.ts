@@ -34,6 +34,7 @@ function legacyLocalizedRedirect(request: Request) {
     "/builders",
     "/builder/register",
     "/builder/requests",
+    "/insights",
   ];
 
   if (legacyPaths.includes(pathname)) {

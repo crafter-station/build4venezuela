@@ -1,0 +1,155 @@
+{
+  "project_slug": "directorio-sismo",
+  "name": "Directorio sismo",
+  "repo_url": "https://github.com/jeannetteafuentesr/venezuela-solidaria",
+  "live_url": "https://directorio-sismo.netlify.app/",
+  "video_url": "https://vimeo.com/1205079199?share=copy&fl=sv&fe=ci",
+  "countries": [
+    "Venezuela"
+  ],
+  "db_description": "I built a repository of all resources that I've found, developed by citizens to accelerate search and rescue and provide help.\n\nTime is of the essence, so information needs to be centralized in one place. Venezuelans need access to a single platform to find whatever they need at the moment.",
+  "lifecycle_status": "ready_to_use",
+  "analysis": {
+    "summary": "Venezuela Solidaria (Directorio Sismo) is a manually curated static HTML directory that aggregates ~40+ external aid resources for Venezuela earthquake victims, organized into categories: health, emergencies, missing persons, pets, engineers, donations, and shelters. It is a single-page static site with no backend, no database, and no build system — content is hardcoded directly into index.html. The site is deployed on Netlify with Netlify Forms for community suggestions. The admin panel is a client-side HTML file with a plaintext hardcoded password visible in the source code (\"Venezuela2025!\"). Despite its technical simplicity, the site is actively maintained (31 commits, updated June 29 2026) and curated content appears genuinely useful and verified.",
+    "project_type": "Static HTML resource directory / curated link aggregator",
+    "stack": {
+      "frontend": [
+        "HTML5",
+        "CSS3",
+        "Vanilla JavaScript",
+        "Netlify Forms"
+      ],
+      "backend": [],
+      "database": [],
+      "infra_deploy": [
+        "Netlify (drag-and-drop deployment)"
+      ],
+      "ai_ml": [],
+      "languages": [
+        "HTML",
+        "CSS",
+        "JavaScript"
+      ]
+    },
+    "architecture": {
+      "pattern": "Static single-page site with no backend",
+      "uses_orm": false,
+      "orm_or_db_layer": "None — no database exists; all content is hardcoded HTML",
+      "api_design": "No API. External forms handled by Netlify Forms (serverless POST). No server-side logic.",
+      "separation_of_concerns": "Minimal — all HTML, CSS, and JS are co-located in index.html (1112 lines). admin.html and gracias.html are separate pages but all logic is inline.",
+      "modularity": "None — monolithic single HTML file per page. Content updates require manually editing HTML and redeploying.",
+      "notable_patterns": [
+        "Category filter implemented via vanilla JS data attributes",
+        "ES/EN language toggle with localStorage persistence",
+        "Client-side password auth with hardcoded plaintext secret in admin.html",
+        "Netlify Forms for contact/suggestion submissions",
+        "Admin panel is purely instructional — it shows how to re-deploy via Netlify drag-and-drop"
+      ]
+    },
+    "code_organization": {
+      "score": 2,
+      "directory_structure": "Flat root: index.html, admin.html, gracias.html, og-image.jpg, README.txt. No subdirectories, no assets folder, no build config.",
+      "naming_quality": "Spanish-language naming throughout (consistent with Venezuelan audience). HTML IDs and classes are descriptive and well-named.",
+      "documentation_quality": "README.txt is minimal (5 lines). No technical documentation. Admin panel contains manual deployment instructions inline.",
+      "reasoning": "All code is in monolithic HTML files with inline CSS and JS. There is no modularity or separation of concerns — acceptable for a pure static site but makes scaling or collaboration difficult. Content management is entirely manual."
+    },
+    "production_readiness": {
+      "score": 1,
+      "has_auth": false,
+      "has_error_handling": false,
+      "has_logging": false,
+      "has_env_config": false,
+      "has_deploy_config": false,
+      "secrets_handling": "Critical failure: admin password 'Venezuela2025!' is hardcoded in plaintext in the publicly accessible admin.html JavaScript. Any visitor can view source and obtain it.",
+      "security_notes": "Admin authentication is entirely client-side with a hardcoded password — bypassed trivially by viewing source. No real access control exists. The admin panel only shows instructions anyway, so the impact is limited, but it is a security antipattern.",
+      "scalability_notes": "Content updates require manual HTML edits and redeployment. No CMS, no dynamic data. Netlify free tier handles static hosting adequately for current scale.",
+      "reasoning": "The site is live and functional as a read-only directory, but content management is 100% manual. No environment variables, no deploy pipeline, no backend, no database. The hardcoded client-side password is a red flag even if its practical impact is low."
+    },
+    "maturity": {
+      "score": 2,
+      "has_readme": true,
+      "has_tests": false,
+      "has_ci": false,
+      "is_real_or_boilerplate": "Real and actively maintained — 31 commits over 3 days, content updated as of June 29 2026 (timestamped in HTML), links point to genuine third-party aid platforms deployed for the earthquake response.",
+      "reasoning": "The project is genuine and not boilerplate, but it has no tests, no CI/CD pipeline, and no automated content management. Maintenance depends entirely on one person manually editing HTML."
+    },
+    "viability": {
+      "score": 3,
+      "reasoning": "The site is already live at directorio-sismo.netlify.app and serves a real need as a curated, verified aggregator of ~40 aid resources. Its value is in curation and discoverability, not in novel technology. The bottleneck is manual content maintenance by a single contributor. Adding a headless CMS or Airtable/Notion backend would dramatically improve viability without a full rewrite."
+    },
+    "key_features": [
+      "Curated directory of ~40 verified external aid resources across 7 categories",
+      "Category filter buttons (Health, Emergencies, Persons, Pets, Engineers, Donations, Shelters)",
+      "Bilingual ES/EN toggle with localStorage persistence",
+      "Community suggestion form via Netlify Forms (moderated before publishing)",
+      "Contact/feedback form via Netlify Forms",
+      "GoFundMe donation banner for international donors",
+      "Venezuelan flag color scheme and branding",
+      "Responsive mobile-friendly design",
+      "Auto-display of domain URLs on resource cards",
+      "Manually curated admin panel with Netlify drag-and-drop deployment instructions"
+    ],
+    "domain_tags": [
+      "people-finder",
+      "donations-aid",
+      "shelter-mapping",
+      "medical-health",
+      "mental-health",
+      "structural-inspection",
+      "volunteer-coordination",
+      "mapping-geo"
+    ],
+    "merge_potential": "This project is a curated link directory that aggregates other projects — it is complementary to, not competitive with, functional apps. It could serve as an entry point or discovery layer that links to winning hackathon projects. Its main value-add for merging would be its curated external link database and bilingual UX, which could be embedded into a more capable platform.",
+    "red_flags": [
+      "Admin password hardcoded in plaintext in public client-side JavaScript: 'Venezuela2025!' visible to anyone who views page source",
+      "No backend — all content is hardcoded HTML requiring manual edits to update",
+      "Single contributor, no CI, no automated deployment pipeline",
+      "Admin panel provides no real administrative function — it only shows instructions for drag-and-drop Netlify deployment",
+      "Content staleness risk: last-updated timestamp is hardcoded in HTML and must be manually changed",
+      "No analytics, monitoring, or uptime alerting"
+    ]
+  },
+  "signals": {
+    "accessible": true,
+    "stars": 0,
+    "forks": 0,
+    "contributors": 1,
+    "commit_count": 31,
+    "code_loc": 0,
+    "created_at": "2026-06-26T16:53:19Z",
+    "pushed_at": "2026-06-29T17:34:33Z",
+    "license": null,
+    "languages_bytes": {
+      "HTML": 88033
+    },
+    "archived": false
+  },
+  "evaluation": {
+    "solves_real_problem": "yes",
+    "real_problem_reasoning": "Venezuela earthquake victims face a fragmented information landscape during a time-critical emergency. Directorio Sismo solves a genuine coordination gap by aggregating and verifying 40+ external aid resources across 8 categories (health, missing persons, shelters, donations, pets, engineers, emergencies) into one bilingual, mobile-friendly entry point. The curated, reviewed-before-publication model directly addresses the disinformation/unverified-links problem that typically plagues disaster response. It was updated as recently as June 29 2026, confirming active maintenance during the crisis.",
+    "problem_severity": "critical",
+    "impact_potential": 3,
+    "product_quality": 3,
+    "live_demo_status": "working",
+    "live_demo_notes": "The site loads and is fully functional. It displays a categorized, filterable directory of verified aid resources with a last-updated timestamp of June 29 2026. The bilingual ES/EN toggle works, category filter buttons are present and usable, and resource cards show domain URLs. The page explicitly states all links are reviewed before publication. It is a real, usable product — not a placeholder or landing page.",
+    "diffusion": {
+      "score": 4,
+      "ready_to_promote": true,
+      "available_assets": [
+        "live-demo",
+        "demo-video",
+        "clear-value-prop",
+        "branding"
+      ],
+      "recommended_angle": "Lead with the humanitarian urgency and the curation angle: 'Every link verified. One place. When seconds count.' Highlight the bilingual reach (EN/ES), the 8 categories covering every phase of earthquake response, and the fact that it is live and updated in real time today. Target both Venezuelan diaspora sharing with family and international donors looking for trusted entry points.",
+      "gaps": [
+        "No screenshots or visual preview assets beyond the OG image",
+        "No real-user testimonials or usage metrics",
+        "No social proof (0 stars, 0 forks on GitHub)",
+        "Single contributor creates a bus-factor risk that should not be highlighted in promotional content"
+      ]
+    },
+    "overall_recommendation": "promote",
+    "one_line_pitch": "Directorio Sismo centralizes 40+ verified aid resources for Venezuela earthquake victims — missing persons, shelters, health, and donations — in one bilingual directory updated in real time."
+  }
+}

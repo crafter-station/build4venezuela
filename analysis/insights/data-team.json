@@ -1,0 +1,155 @@
+{
+  "project_slug": "data-team",
+  "name": "VZLA_DEDUP",
+  "repo_url": "https://github.com/mathiasaiva/VZLA_DEDUP",
+  "live_url": "https://github.com/DataVenezuela/VZLA_DEDUP",
+  "video_url": "",
+  "countries": [
+    "Whole World"
+  ],
+  "db_description": "| Limpiemos los registros en esta crisis.\n\n## El Problema\n\nVenezuela vive una de las peores crisis humanitarias de su historia reciente. Tras los terremotos del 24 de junio, miles de familias buscan a sus seres queridos en decenas de páginas distintas, grupos de WhatsApp, publicaciones de hospitales y redes sociales. La misma persona aparece en cuatro lugares con cuatro nombres distintos. Nadie sabe cuál es la información correcta. Nadie sabe cuál está desactualizada.\n\nNosotros tampoco podemos ir al terreno. Pero sí podemos limpiar los datos.\n\n## Lo que hacemos\n\nRecolectamos automáticamente los registros dispersos en internet, personas desaparecidas, centros de acopio activos, zonas afectadas, necesidades urgentes, y los unificamos en una sola base de datos limpia, deduplicada y consultable.\n\nCuando cuatro fuentes reportan a la misma persona con nombres distintos, nuestro sistema las reconoce como el mismo registro y las colapsa en uno. Cuando un centro de acopio aparece en tres grupos distintos de WhatsApp, queda como una sola entrada verificada. Ningún duplicado. Ningún recurso desperdiciado.\n\n## Para quién?\n\nPara las familias que buscan a alguien y no saben dónde mirar. Para los equipos de rescate que necesitan saber dónde hay heridos y dónde falta agua. Para los desarrolladores que quieren construir algo útil y necesitan datos limpios de donde partir.\n\n## Cómo funciona\n\nNo reemplazamos ninguna plataforma existente. Leemos lo que ya existe, lo limpiamos, y lo compartimos a través de una API abierta. Cualquier aplicación puede conectarse y obtener los datos actualizados en tiempo real.\n\n## El equipo\n\nSomos voluntarios. Ingenieros, estudiantes y técnicos de Venezuela y la diáspora que decidieron que lo más útil que podían hacer era esto.\n\nSi quieres unirte, abre un Issue en Github.",
+  "lifecycle_status": "ready_to_use",
+  "analysis": {
+    "summary": "VZLA_DEDUP is a Python data pipeline that scrapes, deduplicates, and sanitizes person/event/aid-center records from multiple Venezuelan earthquake relief sources, then exports them to a Supabase staging API. The scraper/pipeline layer is genuinely well-built — multi-stage pipeline with HMAC PII tokenization, phonetic dedup, minor-protection redaction, trust-tier source ranking, and exponential-backoff retry. The `api/` serving module (auth.py, main.py, routes/records.py) is entirely empty (all 1-line stubs), and the `shared/config.py` and `shared/storage.py` modules are also empty. Only one concrete parser (Encuentralos) is live; the remaining 4+ planned sources (USGS, GDACS, ReliefWeb, Copernicus) are disabled with no registered parsers. The system runs via GitHub Actions cron every 10 minutes rather than a persistent server.",
+    "project_type": "Data ingestion pipeline / ETL scraper for missing-persons and aid records",
+    "stack": {
+      "frontend": [],
+      "backend": [
+        "Python 3.12",
+        "Click CLI",
+        "httpx",
+        "FastAPI (stubbed, not implemented)"
+      ],
+      "database": [
+        "SQLite (local dedup state)",
+        "Supabase (external staging API via HTTP)"
+      ],
+      "infra_deploy": [
+        "GitHub Actions (cron ingest every 10 min, consolidation every 20 min)"
+      ],
+      "ai_ml": [
+        "spaCy es_core_news_sm (NLP extraction)",
+        "Double Metaphone / NYSIIS phonetic hashing"
+      ],
+      "languages": [
+        "Python"
+      ]
+    },
+    "architecture": {
+      "pattern": "Linear pipeline with discrete stages: Adapter → Parser → PII tokenization → Enrichment → Confidence scoring → Minor protection → Staging export",
+      "uses_orm": false,
+      "orm_or_db_layer": "Raw sqlite3 for local dedup fingerprint state; external Supabase backend accessed via httpx REST calls (no ORM)",
+      "api_design": "API serving layer (api/main.py, api/auth.py, api/routes/records.py) is entirely unimplemented — all files are 1-line stubs. The only real external interface is the staging exporter POSTing to /api/aportes on a Supabase instance.",
+      "separation_of_concerns": "Excellent — adapters, parsers, models, normalizers, sanitizers, pipelines, exporters, dedup, sources, and validators are all discrete packages with clear responsibilities",
+      "modularity": "High — each processing stage is independently importable; adapters implement a shared protocol; parsers are registered by name; new sources can be added via YAML config",
+      "notable_patterns": [
+        "Trust-tier ranking (A/B/C/D) for source credibility — duplicates resolved by tier",
+        "Deterministic external_id (SHA256 of phonetic hash + location) for idempotent upserts",
+        "HMAC-based PII tokenization with distinct internal (prefixed) vs exportable (hex-only) formats",
+        "Fail-closed minor protection — reduces identifying fields when is_minor=True, redacts completely on ambiguous location format",
+        "Block keys (cedula HMAC + phonetic) propagated to backend for Stage 2 candidate matching",
+        "Watermark tracking per source — only advances on fully clean run",
+        "GitHub Actions matrix strategy for parallel per-source ingestion"
+      ]
+    },
+    "code_organization": {
+      "score": 4,
+      "directory_structure": "Cleanly partitioned into scrapers/ (pipeline), api/ (stub), shared/ (mostly empty stubs), docs/ (ADRs, schema, pipeline diagram, implementation plan), verification/ (stub). The scrapers/ package mirrors the pipeline stages 1:1.",
+      "naming_quality": "Excellent — Spanish-language naming is consistent and domain-appropriate (fuente, cedula_hmac, trust_tier, aportes). Internal vs exportable HMAC contract is clearly documented in module docstrings.",
+      "documentation_quality": "High — inline docstrings on every public function, separate docs/ folder with ADRs, schema.md, pipeline.md, base-standards.md, scrapper_contract.md, source_config.md, and CONTRIBUTING.MD with explicit security rules",
+      "reasoning": "The pipeline code is among the better-documented hackathon entries seen. The emptiness of api/, shared/config.py, and shared/storage.py is the main structural gap, but the core pipeline is coherent and well-named throughout."
+    },
+    "production_readiness": {
+      "score": 3,
+      "has_auth": false,
+      "has_error_handling": true,
+      "has_logging": true,
+      "has_env_config": true,
+      "has_deploy_config": false,
+      "secrets_handling": "PII_HMAC_SECRET and PII_SALT stored as GitHub Actions secrets, read via os.getenv. Pipeline enters dry-run when missing. STAGING_API_KEY also env-injected. No secrets visible in code.",
+      "security_notes": "Exceptional for a hackathon: gitleaks, bandit SAST, pip-audit, and a custom CI keyword scan all run on every PR. HMAC-SHA256 for PII fields. Minor-protection redaction. Blocks .csv/.db/.sqlite/.pdf files from being committed. Dependency review action blocks high-severity CVEs.",
+      "scalability_notes": "GitHub Actions cron-based ingestion has hard limits on concurrent jobs (max-parallel: 4) and monthly minutes. No horizontal scaling path. SQLite dedup state is local per runner — not shared across runs, which is a correctness gap if the ingest matrix runs in parallel.",
+      "reasoning": "The pipeline code quality and security posture are genuinely production-grade for the data layer. However, the API serving layer is entirely unimplemented, there is no Dockerfile, the SQLite dedup state is ephemeral per GH Actions runner (not shared), and only one of five planned data sources has a parser."
+    },
+    "maturity": {
+      "score": 3,
+      "has_readme": true,
+      "has_tests": true,
+      "has_ci": true,
+      "is_real_or_boilerplate": "Real — 15 contributors, 70 commits in 3 days, 5466 lines of tests across 25 test files, one live source (Encuentralos ~290 records) actively ingesting, documented ADRs, implementation plan, and issue dependency graph",
+      "reasoning": "The pipeline/scraper half of the project is working MVP quality with excellent test coverage and CI. The API serving layer is skeleton-only. The gap between the two halves is stark — one side is near-polished, the other is entirely unwritten."
+    },
+    "viability": {
+      "score": 3,
+      "reasoning": "The deduplication pipeline solves a genuine and urgent problem — aggregating missing/found person reports from multiple chaotic sources into a clean, PII-safe, deduplicated dataset. The core algorithmic work (phonetic hashing, HMAC tokenization, trust-tier resolution, minor protection) is real and sound. Viability is capped at 3 because the serving layer (API) is completely absent, making this useful only as a backend data supplier to another team's system, not as a standalone deployable tool."
+    },
+    "key_features": [
+      "Multi-source scraping with 6 adapter types (API/JSON, HTML, RSS, PDF, Playwright, local file)",
+      "SHA-256 fingerprint deduplication with trust-tier winner selection (A > B > C > D)",
+      "HMAC-SHA256 PII tokenization (cedulas, phone numbers) — raw values never reach staging",
+      "Phonetic dedup using Double Metaphone + custom Venezuelan Spanish fallback",
+      "Minor (children) protection: redacts foto, cedula_masked, and precise location when is_minor=True",
+      "Deterministic external_id for idempotent Supabase upserts via /api/aportes",
+      "Source watermark tracking — only advances on clean pipeline runs",
+      "GitHub Actions matrix-parallelised ingestion every 10 minutes with exponential-backoff retry",
+      "Comprehensive CI: pytest, ruff, mypy --strict, gitleaks, bandit, pip-audit, dependency-review, secret keyword scan",
+      "Encuentralos parser (only live source) fully tested with fixture-based unit tests"
+    ],
+    "domain_tags": [
+      "people-finder",
+      "family-reunification",
+      "aid-logistics"
+    ],
+    "merge_potential": "High — this project is explicitly designed as a data supply layer and would pair well with any people-finder or family-reunification front end. Its /api/aportes contract and deterministic external_id scheme are clean integration points. Any project needing deduplicated person/event/acopio records should consider consuming this pipeline's Supabase output rather than building their own scraper.",
+    "red_flags": [
+      "api/main.py, api/auth.py, and api/routes/records.py are all 1-line empty stubs — no serving layer exists",
+      "shared/config.py and shared/storage.py are empty — abstractions declared but not implemented",
+      "Only 1 of 5+ planned parsers (Encuentralos) is implemented and active; seismic sources (USGS, GDACS, ReliefWeb, Copernicus) are disabled with no registered parsers",
+      "SQLite dedup state (runtime_output/dedup_state.db) is ephemeral per GitHub Actions runner — parallel matrix jobs do not share dedup state, risking cross-run duplicates",
+      "No Dockerfile or deployment config — the system runs exclusively on GitHub Actions cron, which has monthly minutes limits and no persistent state between runs",
+      "verification/ package is an empty stub with only __init__.py"
+    ]
+  },
+  "signals": {
+    "accessible": true,
+    "stars": 17,
+    "forks": 17,
+    "contributors": 15,
+    "commit_count": 70,
+    "code_loc": 10744,
+    "created_at": "2026-06-26T21:51:43Z",
+    "pushed_at": "2026-06-29T17:46:20Z",
+    "license": "MIT",
+    "languages_bytes": {
+      "Python": 381080,
+      "Shell": 404
+    },
+    "archived": false
+  },
+  "evaluation": {
+    "solves_real_problem": "yes",
+    "real_problem_reasoning": "The chaos of fragmented missing-persons and aid-center records across dozens of WhatsApp groups, hospital posts, and social networks is a documented and acute problem in disaster response. Duplicate entries across sources waste rescuer time and cause families to get false hope or miss real leads. VZLA_DEDUP directly addresses this by building a deduplication pipeline with phonetic name matching, trust-tier source ranking, and HMAC PII tokenization. The problem statement is grounded in reality and the core algorithmic approach is sound.",
+    "problem_severity": "critical",
+    "impact_potential": 4,
+    "product_quality": 2,
+    "live_demo_status": "no-public-demo",
+    "live_demo_notes": "Repository-only project with no public web interface or accessible API endpoint. The scraping pipeline runs via GitHub Actions cron every 10 minutes but the API serving layer (api/main.py, api/auth.py, api/routes/records.py) is entirely unimplemented — all three files are 1-line stubs. Only one of five planned source parsers (Encuentralos, ~290 records) is live. No demo video exists. There is no way for a family member, rescue worker, or downstream developer to access the data today without direct Supabase credentials.",
+    "diffusion": {
+      "score": 2,
+      "ready_to_promote": false,
+      "available_assets": [
+        "clear-value-prop"
+      ],
+      "recommended_angle": "Technical infrastructure spotlight targeting other hackathon teams and developers: position VZLA_DEDUP as the clean-data backbone that any people-finder or rescue-logistics app should plug into. Emphasize the 15-volunteer team, 70 commits in 3 days, and the merge potential rather than a live product demo. Frame it as 'the data layer Venezuela was missing' and invite other teams to integrate against its Supabase staging endpoint.",
+      "gaps": [
+        "No public API endpoint or web interface — consumers cannot access the data",
+        "No demo video showing the deduplication pipeline in action",
+        "Only 1 of 5+ planned parsers is implemented — data coverage is very narrow",
+        "No screenshots or visualizations of deduplicated output",
+        "SQLite dedup state is ephemeral per GH Actions runner, meaning parallel ingestion jobs can produce cross-run duplicates — a correctness risk worth disclosing"
+      ]
+    },
+    "overall_recommendation": "merge-candidate",
+    "one_line_pitch": "VZLA_DEDUP unifies missing-persons and aid-center records from every fragmented source into one clean, deduplicated, PII-safe dataset — the data infrastructure backbone that every earthquake-relief app in Venezuela can build on."
+  }
+}

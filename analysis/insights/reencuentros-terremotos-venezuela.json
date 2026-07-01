@@ -1,0 +1,194 @@
+{
+  "project_slug": "reencuentros-terremotos-venezuela",
+  "name": "Reencuentros Terremotos Venezuela",
+  "repo_url": "https://github.com/iacastillo90/ReencuentroTerremotoVenezuela",
+  "live_url": "https://docs.google.com/document/d/1yMHR8gaIBqEYeovXp8bD5t1unz7eXPqF/edit",
+  "video_url": "",
+  "countries": [
+    "Latinoamérica",
+    "Estados Unidos y Europa"
+  ],
+  "db_description": "## **Nuestra propuesta de valor**\n\nPlataforma que centraliza reportes visuales (fotos y videos) recientes y georreferenciados de quienes necesitan ser encontrados —personas y animales—. Esta información es capturada en el terreno por medios de comunicación acreditados e instituciones de ayuda autorizadas. Ponemos la inteligencia artificial al servicio de esta causa para procesar grandes volúmenes de datos e identificar coincidencias que faciliten reencuentros seguros y oportunos, asegurando que sean las propias instituciones y medios autorizados quienes validen cada hallazgo dentro del sistema para una gestión segura y privada de la información.\n\n## **Nuestro norte**\n\nTener completamente ajustados los protocolos de ciberseguridad, protección de datos sensibles, bienestar animal y no revictimización. La seguridad de las personas y los animales siempre estará por encima de la velocidad de lanzamiento.\n\n[Reporte cierre de hackathon Build 4 Venezuela | 28-junio-2026\n](https://docs.google.com/document/d/1ROkUtXL9PnpGrWa12x4zw6e7_sWmyfjEA_1AJ4x44QE/edit?tab=t.0#heading=h.3o36mzss0moq)\n\n## **Reencuentros team**\n\n**Coordinación general:**\n\nAlejandra Castaño Alzate (contacto directo para ingresar al equipo) | [Linkedin](www.linkedin.com/in/alejandra-castano-alzate) \n\n**Equipo de Operaciones**\n\n**Equipo de Desarrollo**\n\n**Equipo de Integraciones**\n\n**Equipo de UX | UI | Contenido | Marketing**\n\n**Equipo de Políticas, Seguridad y Relaciones**",
+  "lifecycle_status": "in_development",
+  "analysis": {
+    "summary": "ReencuentroTerremotoVenezuela is a full-stack platform to centralize missing-persons searches, disaster alerts, and emergency data for Venezuela. Built in ~2 days (135 commits, 1 contributor), it is the most architecturally complete hackathon project in this cohort: Express 5 + TypeScript backend with Mongoose, BullMQ queues, multi-provider AI (Anthropic/OpenAI/Gemini), Pinecone vector search, fuzzy + semantic deduplication, MinIO object storage, Redis caching, and a React 19/Leaflet frontend. Multiple ingestion jobs pull from FUNVISIS, USGS, GDACS, VenezuelaReporta, and other sources. The main risks are hardcoded JWT/admin secret fallbacks, absence of CI, and many jobs falling back to mock data when real government APIs are unavailable.",
+    "project_type": "Full-stack web application — missing persons registry + disaster tracking platform",
+    "stack": {
+      "frontend": [
+        "React 19",
+        "Vite 8",
+        "Leaflet / react-leaflet",
+        "react-router-dom 7",
+        "lucide-react",
+        "Vercel"
+      ],
+      "backend": [
+        "Node.js",
+        "Express 5",
+        "TypeScript",
+        "BullMQ",
+        "ioredis",
+        "Mongoose",
+        "Multer",
+        "Zod",
+        "Helmet",
+        "express-rate-limit",
+        "Puppeteer",
+        "Cheerio"
+      ],
+      "database": [
+        "MongoDB (Mongoose ORM)",
+        "Redis (ioredis / BullMQ queues + caching)",
+        "MinIO (S3-compatible object storage)",
+        "Pinecone (vector search)"
+      ],
+      "infra_deploy": [
+        "Docker",
+        "docker-compose (5-service stack with health checks)",
+        "Vercel (frontend)"
+      ],
+      "ai_ml": [
+        "Anthropic Claude SDK",
+        "OpenAI SDK",
+        "Google Gemini SDK",
+        "Pinecone vector embeddings",
+        "Cosine similarity (local fallback)",
+        "MongoDB Atlas Vector Search (optional)"
+      ],
+      "languages": [
+        "TypeScript",
+        "JavaScript",
+        "CSS",
+        "HTML"
+      ]
+    },
+    "architecture": {
+      "pattern": "Monorepo with back/front split; backend uses layered architecture (routes → services → models) with BullMQ worker process decoupled from API process",
+      "uses_orm": true,
+      "orm_or_db_layer": "Mongoose ODM for MongoDB with typed schemas, indexes (2dsphere, compound, unique), and lean queries; Redis via ioredis for caching and queue transport",
+      "api_design": "REST with Express 5 Router; 10+ route namespaces (/api/persons, /api/disasters, /api/auth, /api/admin, /api/localizados, etc.); Zod request validation; paginated list endpoints; 202 Accepted pattern for async queue submissions",
+      "separation_of_concerns": "Clean separation: routes handle HTTP, services contain business logic (person.service, matcher.service, reconciliation.service), models own schema, adapters normalize external sources, jobs/workers handle async ingestion, queues bridge them",
+      "modularity": "High — adapter pattern for external sources, factory pattern for AI provider selection, separate BullMQ workers for AI processing and disaster sync, 11 ingestion jobs for distinct data sources",
+      "notable_patterns": [
+        "AI provider factory (Anthropic/OpenAI/Gemini switchable via env)",
+        "Idempotent upsert with SHA-256 idHash deduplication key",
+        "Fuzzy + vector embedding reconciliation pipeline (>95% auto-merge, 85–95% manual audit queue)",
+        "SyncState service for change-detection and skip logic on re-ingestion",
+        "Redis cache invalidation on write (counts, listing first page)",
+        "Audit log model for legal accountability (case close actions)",
+        "Docker Compose with depends_on health checks for all services"
+      ]
+    },
+    "code_organization": {
+      "score": 4,
+      "directory_structure": "back/ and front/ are cleanly separated; back/src has routes/, services/, models/, adapters/, jobs/, workers/, queues/, validators/, utils/, config/ — all properly named and purpose-driven; test files split between back/test/unit/ and back/src/__tests__/; extensive Doc/ folder with specs, data-model diagrams, and user docs",
+      "naming_quality": "Excellent — file names match their exports (person.service.ts, matcher.service.ts, ia-processor.worker.ts); Spanish used consistently for domain terms reflecting Venezuelan context",
+      "documentation_quality": "Unusually thorough for a hackathon: Readme.md, DEVELOPERS.md, TDD.md, Integraciones.md plus 8+ Word/PDF spec documents in Doc/; inline comments explain security decisions and algorithm thresholds",
+      "reasoning": "Structure is production-pattern quality with clear layers and consistent conventions. Minor issues: some `any` casts in worker and reconciliation code, gender enum mismatch ('U' written in one job vs 'unknown' in schema), and a development fallback in auth.route that bypasses Google token verification."
+    },
+    "production_readiness": {
+      "score": 3,
+      "has_auth": true,
+      "has_error_handling": true,
+      "has_logging": true,
+      "has_env_config": true,
+      "has_deploy_config": true,
+      "secrets_handling": "JWT_SECRET and ADMIN_API_KEY both have hardcoded fallback strings in source code ('super-secret-key-reencuentro-2024', 'super-secret-admin-key-2026'); env vars documented in .env.example but no secrets manager or validation on startup",
+      "security_notes": "Strong positives: Helmet headers, global rate limiter (100 req/15 min), HPP protection, Zod input validation, RBAC middleware, safe projection on all person list endpoints excluding PII. Critical gap: JWT_SECRET fallback means any deployment without env var set is insecure; dev fallback in /auth/google skips Google token verification when GOOGLE_CLIENT_ID is 'dummy-client-id'",
+      "scalability_notes": "Well-designed for scale: API and worker are separate Docker containers that can scale independently; Redis-backed BullMQ queues buffer load spikes; Redis caching on hot list endpoints; bulk MongoDB writes chunked at 200 ops; 2dsphere geo index enables efficient proximity queries. Local cosine similarity fallback does full-DB scan and would collapse under load",
+      "reasoning": "Docker Compose with health checks, health endpoint, security middleware, and queue architecture indicate real production thinking. Held back from 4 by: no CI/CD, console.log-only logging (no structured/centralized), hardcoded secret fallbacks, and multiple ingestion jobs that silently fall back to mock data when government APIs are unreachable."
+    },
+    "maturity": {
+      "score": 3,
+      "has_readme": true,
+      "has_tests": true,
+      "has_ci": false,
+      "is_real_or_boilerplate": "Real, substantive implementation — logic-heavy services (reconciliation pipeline, vector matching, multi-source adapters), real data (Doc/personas-localizadas-venezuelareporta.csv), actual Mongoose schemas with indexes, and 11 working ingestion jobs. Not boilerplate.",
+      "reasoning": "135 commits in ~2 days with 11 test files (Jest + mongodb-memory-server on backend, Vitest on frontend) and extensive documentation signal serious engineering effort. The absence of CI, presence of mock fallbacks in job runners, and single contributor prevent a higher score."
+    },
+    "viability": {
+      "score": 4,
+      "reasoning": "This is the strongest technical submission reviewed: working end-to-end architecture with AI deduplication, vector search, multi-source ingestion, queue isolation, and a live Vercel deployment. The core missing-persons reunification use case is directly relevant to earthquake victims. To reach production it needs: real government API endpoints (several currently mock), JWT secret enforcement, CI pipeline, and structured logging. The foundation is solid enough for a rapid production hardening sprint."
+    },
+    "key_features": [
+      "Missing persons registry with AI-powered deduplication (fuzzy + vector embedding, auto-merge at >95% similarity, manual audit queue at 85–95%)",
+      "Multi-source ingestion from VenezuelaReporta, DTV, Cruz Roja, Protección Civil, and a Reencuentro API",
+      "Disaster event tracking from FUNVISIS (Venezuelan seismology), USGS, GDACS, FIRMS with geo-proximity linking to missing persons",
+      "Interactive Leaflet map with clustering for persons and disaster events",
+      "BullMQ async processing — AI enrichment and deduplication happen off the request path",
+      "Multi-provider AI factory: Anthropic Claude, OpenAI, Google Gemini switchable via env var",
+      "Pinecone + MongoDB Atlas Vector Search + local cosine similarity (three-tier vector search strategy)",
+      "Google OAuth login with JWT, RBAC roles (admin/verifier/user), profile completion gate",
+      "MinIO S3-compatible photo storage with Multer upload",
+      "Audit log model for legal chain-of-custody on case closures",
+      "Redis caching on list/count endpoints with 30s/5min TTL",
+      "CNE (electoral registry) validator for cedula verification"
+    ],
+    "domain_tags": [
+      "people-finder",
+      "family-reunification",
+      "seismic-data",
+      "mapping-geo",
+      "alerts-notifications",
+      "aid-logistics"
+    ],
+    "merge_potential": "High — the reconciliation pipeline, multi-source adapters, and disaster-to-person geo-linking are production-grade components that could be extracted and reused. The BullMQ + worker pattern, vector matching service, and SyncState deduplication service are particularly valuable as standalone modules.",
+    "red_flags": [
+      "JWT_SECRET has hardcoded fallback 'super-secret-key-reencuentro-2024' in both auth.middleware.ts and auth.route.ts — any deployment without the env var is insecure",
+      "ADMIN_API_KEY fallback 'super-secret-admin-key-2026' in .env.example (treated as default)",
+      "Google OAuth /auth/google endpoint skips token verification when GOOGLE_CLIENT_ID === 'dummy-client-id' — this dev backdoor must be removed before production",
+      "Multiple ingestion jobs (FUNVISIS, Reencuentro API) silently fall back to hardcoded mock/generated data when real government APIs are unreachable — this means the DB may be populated with fake records in a real deployment",
+      "No CI/CD pipeline (no GitHub Actions or equivalent)",
+      "Local cosine similarity fallback loads all Person embeddings into Node.js memory — would OOM under non-trivial load",
+      "Gender enum inconsistency: reencuentro.job.ts writes 'U' but Mongoose schema only accepts 'M', 'F', 'other', 'unknown'",
+      "backend.log file committed to repository (may contain sensitive runtime data)"
+    ]
+  },
+  "signals": {
+    "accessible": true,
+    "stars": 4,
+    "forks": 0,
+    "contributors": 1,
+    "commit_count": 135,
+    "code_loc": 9362,
+    "created_at": "2026-06-27T23:58:29Z",
+    "pushed_at": "2026-06-29T08:09:09Z",
+    "license": null,
+    "languages_bytes": {
+      "TypeScript": 327438,
+      "CSS": 55245,
+      "HTML": 26810,
+      "JavaScript": 10978,
+      "Dockerfile": 1660
+    },
+    "archived": false
+  },
+  "evaluation": {
+    "solves_real_problem": "yes",
+    "real_problem_reasoning": "Family separation during earthquakes is a documented, acute humanitarian crisis. Venezuela's seismic risk is real (FUNVISIS tracks dozens of events). The project directly targets the hardest part of disaster response — cross-referencing fragmented reports of missing and found persons at scale, including animals. The multi-source ingestion (Cruz Roja, Protección Civil, VenezuelaReporta, USGS, GDACS) reflects genuine operational understanding of how disaster information flows in Venezuela. The reconciliation pipeline with AI deduplication solves a real bottleneck: volunteer organizations manually comparing lists across dozens of channels.",
+    "problem_severity": "critical",
+    "impact_potential": 5,
+    "product_quality": 2,
+    "live_demo_status": "broken",
+    "live_demo_notes": "The submitted live_url points to a Google Docs file titled \"TDD_Reencuentro VE\" — an internal technical design document, not a working product. The page is partially inaccessible (Google renders a browser-compatibility warning). There is no public-facing demo a victim, donor, or journalist could interact with. The technical analysis references a Vercel frontend deployment, but that URL was not submitted and could not be verified. No demo video exists either.",
+    "diffusion": {
+      "score": 2,
+      "ready_to_promote": false,
+      "available_assets": [
+        "clear-value-prop",
+        "branding"
+      ],
+      "recommended_angle": "If a working Vercel URL is shared and a 60-second screen recording is recorded showing the map + a missing-person report being matched, this project becomes immediately promotable. The angle should be: 'AI que conecta familias separadas por el terremoto — en segundos, no días.' Focus on the deduplication pipeline and the geo-map as visual proof-points.",
+      "gaps": [
+        "No accessible live demo URL (submitted URL is an internal Google Doc)",
+        "No demo video",
+        "No screenshots in repo or submission",
+        "Security vulnerabilities (hardcoded JWT secrets, OAuth bypass) must be fixed before public exposure",
+        "Multiple ingestion jobs fall back to mock data — a live demo could show fake records",
+        "No CI/CD means there is no stable deployed state to point to"
+      ]
+    },
+    "overall_recommendation": "improve-first",
+    "one_line_pitch": "AI-powered platform that matches reports of missing persons and found survivors across multiple Venezuelan disaster-response channels — reuniting families in minutes instead of days."
+  }
+}

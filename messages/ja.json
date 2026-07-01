@@ -143,6 +143,9 @@
       },
       "whatsapp": "WhatsApp",
       "discord": "Discord",
+      "watch": {
+        "label": "クロージングイベントをライブで視聴"
+      },
       "description": "公式イベントは閉じますが、活動は続きます。自分のプロジェクトを改善し、既存のものに貢献し、ベネズエラにまだ必要なものを提案してください。",
       "poweredBy": "提供"
     },
@@ -155,10 +158,22 @@
       "latestInfoQuery": "ベネズエラの地震に関する最新情報は？"
     },
     "impactStats": [
-      { "value": "01", "label": "自分のプロジェクトを続ける" },
-      { "value": "02", "label": "既存チームと協力する" },
-      { "value": "03", "label": "新しい解決課題を提案する" },
-      { "value": "04", "label": "対応だけでなく復旧のために設計する" }
+      {
+        "value": "01",
+        "label": "自分のプロジェクトを続ける"
+      },
+      {
+        "value": "02",
+        "label": "既存チームと協力する"
+      },
+      {
+        "value": "03",
+        "label": "新しい解決課題を提案する"
+      },
+      {
+        "value": "04",
+        "label": "対応だけでなく復旧のために設計する"
+      }
     ],
     "principles": {
       "eyebrow": "共同アクションの原則",
@@ -265,7 +280,9 @@
   "Projects": {
     "eyebrow": "Project list",
     "title": "Shipped work",
-    "submitCta": { "label": "Submit yours" },
+    "submitCta": {
+      "label": "Submit yours"
+    },
     "grid": {
       "empty": "No projects yet. Be the first one to add a build.",
       "syncing": "Syncing live feed...",
@@ -273,8 +290,22 @@
       "all": "All",
       "project": "project",
       "projects": "projects",
+      "open": "Open",
       "vote": "vote",
       "votes": "votes",
+      "views": {
+        "grid": "Grid",
+        "list": "List"
+      },
+      "table": {
+        "project": "Project",
+        "status": "Status",
+        "category": "Category",
+        "countries": "Countries",
+        "builder": "Builder",
+        "votes": "Votes",
+        "link": "Link"
+      },
       "statuses": {
         "all": "All statuses",
         "ready_to_use": "Ready to use",
@@ -357,7 +388,13 @@
     "contributeInUrlPlaceholder": "https://github.com/... or https://linkedin.com/...",
     "descriptionMarkdownLabel": "Markdown description",
     "descriptionMarkdownPlaceholder": "## What did you build?\n\nWho is it for? How does it help? What should people try first?",
-    "pending": "Checking..."
+    "pending": "Checking...",
+    "deleteDescription": "Need to remove this submission? Deleting it also removes its votes and comments.",
+    "deleteConfirm": "This cannot be undone. Click delete again to permanently remove this submission.",
+    "deleteButton": "Delete submission",
+    "deleteConfirmButton": "Delete permanently",
+    "deleteCancel": "Cancel",
+    "deletePending": "Deleting..."
   },
   "ProjectDetail": {
     "metadata": {
@@ -576,6 +613,210 @@
           "accepted": "承認済み",
           "rejected": "拒否済み"
         }
+      }
+    }
+  },
+  "Insights": {
+    "metadata": {
+      "title": "Project Insights — Build4Venezuela",
+      "description": "Internal triage: tech stack, maturity, viability, overlap, and diffusion readiness across project repositories."
+    },
+    "shared": {
+      "tiers": {
+        "spotlight": "Spotlight",
+        "promote": "Promote",
+        "merge-candidate": "Merge candidate",
+        "improve-first": "Improve first",
+        "deprioritize": "Deprioritize"
+      }
+    },
+    "dashboard": {
+      "eyebrow": "Internal triage",
+      "title": "Project Insights",
+      "description": "{count} repositories analyzed for stack, architecture, maturity, viability, and diffusion readiness — built to spot overlap, merge candidates, and what's ready to spotlight.",
+      "stats": {
+        "analyzed": "Analyzed",
+        "promoReady": "Promo-ready",
+        "totalLoc": "Total LOC",
+        "locValue": "{count}k"
+      },
+      "filters": {
+        "domain": "Domain",
+        "all": "All",
+        "clear": "clear filters"
+      },
+      "panels": {
+        "triage": {
+          "title": "Triage quadrant",
+          "subtitle": "impact × production-readiness · bubble = stars · color = tier"
+        },
+        "overlap": {
+          "title": "Overlap network",
+          "subtitle": "edges = shared domain tags (≥3) · clusters = duplicate solutions"
+        },
+        "leaderboard": {
+          "title": "Leaderboard",
+          "subtitle": "{count, plural, one {# project} other {# projects}} · click a row for detail"
+        },
+        "tech": {
+          "title": "Tech landscape",
+          "subtitle": "across all analyzed repos"
+        }
+      }
+    },
+    "leaderboard": {
+      "columns": {
+        "project": {
+          "label": "Project",
+          "description": "The project name and its repository type (web app, PWA, bot, etc.). Click a row to open full detail."
+        },
+        "tier": {
+          "label": "Tier",
+          "description": "Overall recommendation: Spotlight (back heavily) › Promote › Merge candidate › Improve first › Deprioritize."
+        },
+        "viability": {
+          "label": "Viab",
+          "description": "Viability (1–5): how realistically this can be deployed and maintained to actually help victims — weighs maturity, production-readiness, and how complete the core function is."
+        },
+        "production": {
+          "label": "Prod",
+          "description": "Production-readiness (1–5): auth, error handling, logging, secret handling, security, scalability, and deploy config in the code."
+        },
+        "product": {
+          "label": "Prod-Q",
+          "description": "Product quality (1–5): how complete and usable the actual product is (not the code) — judged from the live demo where one exists."
+        },
+        "diffusion": {
+          "label": "Diff",
+          "description": "Diffusion readiness (1–5): how ready it is to create promo/social content right now — working demo, video, screenshots, clear value prop."
+        },
+        "maturity": {
+          "label": "Mat",
+          "description": "Maturity (1–5): real working software vs. boilerplate — real logic, tests, CI, commit history, README."
+        },
+        "severity": {
+          "label": "Sev",
+          "description": "Problem severity: how urgent the victim-facing problem it addresses is (critical › high › medium › low)."
+        },
+        "stars": {
+          "label": "★",
+          "description": "GitHub stars on the repository — a rough popularity / social-proof signal."
+        },
+        "loc": {
+          "label": "LOC",
+          "description": "Lines of code in real source files (excludes dependencies and build output) — a rough size/effort signal."
+        },
+        "security": {
+          "label": "セキュ",
+          "description": "自動監査によるセキュリティ露出リスク（公開PIIエンドポイント、漏洩した秘密情報、認証の欠如）。クリックで並べ替え。"
+        }
+      },
+      "risk": {
+        "critical": "重大",
+        "high": "高",
+        "medium": "中",
+        "low": "低",
+        "none": "クリーン"
+      }
+    },
+    "triageQuadrant": {
+      "hint": "← ship-ready · high impact ↑",
+      "productionReadiness": "Production-readiness",
+      "productionReadinessAxis": "PRODUCTION-READINESS →",
+      "impact": "Impact",
+      "impactAxis": "IMPACT",
+      "tooltip": {
+        "impact": "impact {score}",
+        "production": "prod {score}",
+        "viability": "viab {score}"
+      }
+    },
+    "overlapNetwork": {
+      "instructions": "scroll to zoom · drag to pan",
+      "ariaLabel": "Project overlap network"
+    },
+    "drawer": {
+      "links": {
+        "repo": "repo ↗",
+        "live": "live ↗",
+        "video": "video ↗"
+      },
+      "scores": {
+        "viability": "Viability",
+        "production": "Prod-ready",
+        "maturity": "Maturity",
+        "organization": "Code org",
+        "product": "Product",
+        "diffusion": "Diffusion"
+      },
+      "signals": {
+        "stars": "Stars",
+        "commits": "Commits",
+        "loc": "LOC",
+        "contributors": "Contributors",
+        "license": "License",
+        "realProblem": "Real problem",
+        "liveDemo": "Live demo",
+        "orm": "ORM"
+      },
+      "none": "none",
+      "yes": "yes",
+      "rawSql": "raw SQL",
+      "sections": {
+        "summary": "Summary",
+        "stack": "Stack",
+        "domainTags": "Domain tags",
+        "overlaps": "Overlaps with ({count})",
+        "redFlags": "Red flags",
+        "diffusionReadiness": "Diffusion readiness",
+        "mergePotential": "Merge potential",
+        "security": "セキュリティ監査"
+      },
+      "stack": {
+        "frontend": "Frontend",
+        "backend": "Backend",
+        "database": "Database",
+        "aiMl": "AI/ML"
+      },
+      "sharedCount": "{count} shared",
+      "readyToPromote": "Ready to promote",
+      "notYet": "Not yet",
+      "assets": "assets: {assets}",
+      "angle": "Angle:",
+      "security": {
+        "badge": "{risk}リスク",
+        "risk": {
+          "critical": "重大",
+          "high": "高",
+          "medium": "中",
+          "low": "低",
+          "none": "クリーン"
+        },
+        "auditedAt": "監査日 {date}",
+        "notAudited": "未監査 — リポジトリをクローンできませんでした。",
+        "clean": "この監査で露出の問題は見つかりませんでした。",
+        "issueLink": "開示Issueを見る →"
+      }
+    },
+    "stackCharts": {
+      "titles": {
+        "tech": "Most-used tech",
+        "types": "Project types",
+        "databases": "Databases",
+        "dataLayer": "Data layer"
+      },
+      "types": {
+        "telegramBot": "Telegram bot",
+        "whatsappBot": "WhatsApp bot",
+        "mobileApp": "Mobile app",
+        "pwa": "PWA",
+        "staticSite": "Static site",
+        "apiPipeline": "API / pipeline",
+        "webApp": "Web app"
+      },
+      "dataLayer": {
+        "rawSql": "Raw SQL / BaaS client",
+        "orm": "Uses an ORM"
       }
     }
   },

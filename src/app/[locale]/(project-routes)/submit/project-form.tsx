@@ -9,6 +9,7 @@ import { MarkdownEditor } from "@/components/markdown-editor";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
+  deleteProject,
   ProjectFormError,
   projectQueryKeys,
   saveProject,
@@ -75,6 +76,7 @@ export function ProjectForm({
     projectFormValuesFromState(initialState.values),
   );
   const [errors, setErrors] = useState(initialState.errors);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const projectMutation = useMutation({
     mutationFn: saveProject,
     onError: (error: Error) => {
@@ -89,6 +91,17 @@ export function ProjectForm({
     onSuccess: (project) => {
       queryClient.invalidateQueries({ queryKey: projectQueryKeys.list() });
       router.push(`/${locale}/p/${project.slug}`);
+    },
+  });
+  const deleteMutation = useMutation({
+    mutationFn: deleteProject,
+    onError: (error: Error) => {
+      setErrors({ form: error.message });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: projectQueryKeys.list() });
+      router.push(`/${locale}/projects`);
+      router.refresh();
     },
   });
 
@@ -132,6 +145,21 @@ export function ProjectForm({
     event.preventDefault();
     setErrors({});
     projectMutation.mutate({ projectId, values });
+  }
+
+  function requestDelete() {
+    setErrors({});
+
+    if (!projectId) {
+      return;
+    }
+
+    if (!confirmDelete) {
+      setConfirmDelete(true);
+      return;
+    }
+
+    deleteMutation.mutate(projectId);
   }
 
   return (
@@ -293,11 +321,45 @@ export function ProjectForm({
 
       <Button
         className="h-12 text-sm uppercase tracking-[0.18em]"
-        disabled={projectMutation.isPending}
+        disabled={projectMutation.isPending || deleteMutation.isPending}
         type="submit"
       >
         {projectMutation.isPending ? t("pending") : submitLabel}
       </Button>
+
+      {projectId ? (
+        <div className="border border-destructive/40 bg-destructive/10 p-4">
+          <p className="font-mono text-destructive text-xs uppercase tracking-[0.16em]">
+            {confirmDelete ? t("deleteConfirm") : t("deleteDescription")}
+          </p>
+          <div className="mt-4 flex flex-wrap gap-3">
+            <Button
+              className="h-10 uppercase tracking-[0.18em]"
+              disabled={projectMutation.isPending || deleteMutation.isPending}
+              onClick={requestDelete}
+              type="button"
+              variant="destructive"
+            >
+              {deleteMutation.isPending
+                ? t("deletePending")
+                : confirmDelete
+                  ? t("deleteConfirmButton")
+                  : t("deleteButton")}
+            </Button>
+            {confirmDelete ? (
+              <Button
+                className="h-10 uppercase tracking-[0.18em]"
+                disabled={deleteMutation.isPending}
+                onClick={() => setConfirmDelete(false)}
+                type="button"
+                variant="outline"
+              >
+                {t("deleteCancel")}
+              </Button>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
     </form>
   );
 }

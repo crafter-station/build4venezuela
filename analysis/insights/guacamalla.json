@@ -1,0 +1,167 @@
+{
+  "project_slug": "guacamalla",
+  "name": "GuacaMalla - Mesh sync entre dispositivos",
+  "repo_url": "https://github.com/vmlcode/guacamaya-net",
+  "live_url": "https://guacamalla.org",
+  "video_url": "https://www.youtube.com/watch?v=d21xoFurccc",
+  "countries": [
+    "Venezuela - España - Mexico - Colombia"
+  ],
+  "db_description": "GuacaMalla es una red de comunicación de emergencia descentralizada y Offline-First, diseñada para situaciones de catástrofe (terremotos, cortes masivos, colapso de infraestructura) donde internet y las torres celulares dejan de funcionar.\n\n## ¿Cuál es la meta?\n\nNuestra meta es salvar vidas asegurando que ninguna persona herida o aislada se quede incomunicada en momentos críticos.\n\n## ¿Cómo funciona?\n\nLa app convierte teléfonos Android en balizas de radio independientes que emiten frames de 119 bytes firmados con Ed25519 vía Bluetooth (BLE 5). Los mensajes SOS y coordenadas GPS saltan de dispositivo en dispositivo formando una malla descentralizada sin necesidad de servidores ni internet. Cuando un teléfono alcanza una zona con señal actúa como \"mula de datos\" y sube los frames acumulados al backend opcional, que los re-verifica criptográficamente antes de persistirlos.\n\nEl enlace es intencionalmente abierto — un SOS es público, cualquiera en alcance debe recibirlo y retransmitirlo. La confianza vive en el payload: cada frame va firmado con Ed25519 y cualquier manipulación rompe la firma, de modo que el siguiente salto lo descarta silenciosamente.\n\n**El backend es opcional.** La malla funciona 100% offline y sin infraestructura.\n\n## Equipo\n\n- Rodrigo Rivas — Product + UI/UX + Frontend · [LinkedIn](https://www.linkedin.com/in/rodrigorivasco)\n- Victor Maldonado — Fullstack + Mobile Native · [LinkedIn](https://www.linkedin.com/in/vmlcode/)\n- David Gonzalez — Backend + Mobile Native + QA · [LinkedIn](https://www.linkedin.com/in/david-gonzalez-dev2012/)\n- Jaime Stalislav — Backend + Mobile Native + QA\n- Carlos Ramirez — PM + Plataforma · [LinkedIn](https://www.linkedin.com/in/carlosjramirez/)\n- Cristopher Avila — Frontend · [LinkedIn](https://www.linkedin.com/in/cristopher-adrián-ávila-lópez-937994402)\n\n## Arquitectura\n\n| Plano | Radio | Payload | Estándar |\n|---|---|---|---|\n| Control / SOS | BLE GAP Broadcaster/Observer | 22 B payload + 32 B pubkey + 64 B firma | BLE 5 Extended Advertising |\n| Datos (ligero) | Wi-Fi Aware (NAN) | ≤ 255 B | NAN Service Discovery |\n| Datos (pesado) | Wi-Fi Aware (NAN) | > 255 B | NAN Data Path (NDP), efímero |\n\nEl frame de 22 bytes incluye lat/lon (int32 E7), timestamp Unix y tipo de mensaje. La autenticidad se verifica con Ed25519 en cada salto — el nodo receptor nunca confía en el remitente.",
+  "lifecycle_status": "in_development",
+  "analysis": {
+    "summary": "GuacaMalla Net is a BLE/Wi-Fi-Aware mesh network for broadcasting Ed25519-signed SOS distress signals when cell infrastructure is down. It is a two-part system: a native Android app (Kotlin + Jetpack Compose) that acts as a radio beacon requiring no pairing or infrastructure, and an optional Bun/Fastify TypeScript backend (Supabase + WebSocket) that serves as a data-mule ingestion point, official alert broadcaster, and geo-tracking dashboard. The core idea is that phones flood-relay 119-byte signed frames over BLE; when any phone later regains connectivity it can batch-upload its mesh log to the backend. A sophisticated \"resolve\" flow lets bystander witnesses co-sign (M-of-N quorum, geo-radius gated, Ed25519 verified) that a victim has been rescued. The codebase is genuinely well-engineered with real crypto, layered anti-troll security, and 13 Android + 4 backend test files across 96 commits in under 48 hours by 5 contributors.",
+    "project_type": "Android BLE mesh SOS network + optional TypeScript cloud backend",
+    "stack": {
+      "frontend": [
+        "Android (Kotlin)",
+        "Jetpack Compose"
+      ],
+      "backend": [
+        "Bun runtime",
+        "Fastify",
+        "TypeScript",
+        "WebSocket (ws library)"
+      ],
+      "database": [
+        "Supabase (PostgreSQL)",
+        "In-memory fallback (Map-based store)",
+        "Room (Android local DB)"
+      ],
+      "infra_deploy": [
+        "Docker",
+        "Railway",
+        "Firebase App Distribution",
+        "GitHub Actions"
+      ],
+      "ai_ml": [],
+      "languages": [
+        "Kotlin",
+        "TypeScript",
+        "Shell",
+        "Python"
+      ]
+    },
+    "architecture": {
+      "pattern": "Connectionless BLE mesh (no server required) + optional cloud backend; backend uses route-plugin → repo (Supabase/in-memory) → store three-layer pattern",
+      "uses_orm": false,
+      "orm_or_db_layer": "Supabase JS client used as a BaaS layer with raw table queries (upsert, select, eq filters); in-memory Map stores as fallback; Room DAO on Android",
+      "api_design": "REST (Fastify) for channels, locations, resolve, and ingest; WebSocket at /ws with channel-subscription fan-out; no GraphQL",
+      "separation_of_concerns": "Excellent: mesh/, crypto/, ble/, aware/, service/ on Android; channels/, locations/, resolve/, mesh/, crypto/, security/, ws/, db/ on backend; shared wire constants in packages/shared",
+      "modularity": "Monorepo with android/ (standalone Gradle project), backend/ (Bun workspace), packages/shared/ (framework-agnostic wire constants and crypto). Android is explicitly serverless-capable; backend never a hard dependency.",
+      "notable_patterns": [
+        "Zero-trust frame verification cascade (CRC16 → pubkey SHA-256 binding → Ed25519) mirrored byte-for-byte in both TypeScript and Kotlin",
+        "Deterministic SHA-256 IDs for idempotent deduplication across all storage layers (mirrors mesh gossip log)",
+        "Data-mule upload pattern: frames collected offline and batch-uploaded when connectivity returns",
+        "Custom leaky-bucket rate limiter keyed on witness deviceId (not IP) to resist pubkey-cycling trolls",
+        "Quorum-based M-of-N witness resolve flow with haversine geo-radius gate and Ed25519 re-verification",
+        "In-memory store fallback so bun run dev works with zero config; production refuses to start without GUACAMAYA_ADMIN_KEY"
+      ]
+    },
+    "code_organization": {
+      "score": 4,
+      "directory_structure": "Clean domain-driven layout: android/app/src/main/kotlin/net/guacamaya/{proto,crypto,ble,aware,mesh,service,ui} and backend/src/{channels,locations,resolve,mesh,crypto,security,ws,db}. Shared TypeScript package under packages/shared/.",
+      "naming_quality": "Identifiers are English and precise (FloodRouter, DedupeCache, LeakyBucket, resolvesRepo, decodeAndVerifyFrame). Docs and comments intentionally bilingual (Spanish/English) which reflects team composition.",
+      "documentation_quality": "Exceptional for a hackathon: three CLAUDE.md files (root, backend/, android/), six Android docs (protocol-flows, payload-binary-layout, crypto, demo-runbook), six backend docs, a full .env.example with every variable explained, and a Postman collection.",
+      "reasoning": "The codebase exhibits unusually disciplined documentation and structure for 48 hours of development. The only mild detractions are the SMS module left as a .gitkeep stub and a minor code-smell in resolve/routes.ts (line 278: a ternary whose both branches return 'pending')."
+    },
+    "production_readiness": {
+      "score": 4,
+      "has_auth": true,
+      "has_error_handling": true,
+      "has_logging": true,
+      "has_env_config": true,
+      "has_deploy_config": true,
+      "secrets_handling": "API keys sourced from environment variables; timing-safe comparison via Node crypto.timingSafeEqual; ephemeral dev fallback keys generated and logged but never hardcoded; production throws at startup if GUACAMAYA_ADMIN_KEY is absent; Supabase service-role key correctly kept server-side only.",
+      "security_notes": "Strong: Ed25519 frame verification as zero-trust gate, per-device leaky-bucket rate limiter, helmet + CORS + global rate limit. BLE Service UUID in BleConfig.kt is explicitly flagged as a placeholder that must be replaced before production. RESOLVE_EVIDENCE_REQUIRE_AUTH defaults false — should be set true in prod.",
+      "scalability_notes": "Single Bun process; in-memory stores do not scale horizontally without Supabase. Supabase path with upsert dedup is horizontally safe. WebSocket server is in-process; would need sticky sessions or pub/sub layer for multi-instance. Android side has a 2048-frame queue and a 25,000-message SQLite cap to bound memory.",
+      "reasoning": "Backend is genuinely production-capable with auth, rate limiting, graceful shutdown, health check, and Railway/Docker config. The BLE UUID placeholder and the SMS .gitkeep stub are the primary gaps before a live rollout."
+    },
+    "maturity": {
+      "score": 3,
+      "has_readme": true,
+      "has_tests": true,
+      "has_ci": true,
+      "is_real_or_boilerplate": "Real, purpose-built code. The BLE advertising parameters, CRC16 implementation, Ed25519 frame layout, and quorum witness flow are all custom-written domain logic — not scaffolding or copy-paste boilerplate.",
+      "reasoning": "96 commits by 5 contributors in under 48 hours (created 2026-06-27). Thirteen Android unit test files and four backend test files covering crypto, mesh decode, geo math, and merge logic. One CI workflow (Firebase App Distribution on push to main for android/). No backend integration tests yet and no test coverage report."
+    },
+    "viability": {
+      "score": 4,
+      "reasoning": "The BLE-first, infrastructure-free design is exactly right for earthquake scenarios where cell towers are down. The data-mule pattern handles intermittent connectivity gracefully. The resolve/witness quorum flow directly addresses false-positive SOS management. The main risk is that BLE range is short (~100m), hop TTL of 15 limits propagation distance, and the BLE UUID placeholder must be registered before production; otherwise this is a deployable system."
+    },
+    "key_features": [
+      "Connectionless BLE flood-mesh: phones relay Ed25519-signed 119-byte SOS frames without pairing, accounts, or infrastructure",
+      "Zero-trust frame verification: CRC16-CCITT → SHA-256 pubkey binding → Ed25519 — implemented identically in Kotlin and TypeScript",
+      "Data-mule upload: any phone with connectivity batch-uploads its local mesh log to the backend; dedup by SHA-256 id is idempotent",
+      "Official signed alert channels (alertas, refugios, ayuda-medica) pushed to subscribers over WebSocket",
+      "Moving-map GPS trajectory dashboard: device positions extracted from verified frames, never client-trusted",
+      "Quorum-based rescue confirmation (resolve flow): M-of-N bystander witnesses co-sign with geo-radius and rate-limit anti-troll gates",
+      "Wi-Fi Aware (NAN) transport module alongside BLE for higher-bandwidth device-to-device paths",
+      "Foreground service with battery-bucket signaling and MIUI/legacy-stack BLE compatibility tuning"
+    ],
+    "domain_tags": [
+      "alerts-notifications",
+      "people-finder",
+      "mapping-geo",
+      "comms-chat",
+      "family-reunification"
+    ],
+    "merge_potential": "Medium-high. The two components (Android mesh app and cloud backend) are architecturally decoupled and well-specified; integration surface is the documented 118-byte ingest frame layout plus the REST/WS API. The BLE UUID placeholder and missing SMS module are open issues but do not block a backend-only or Android-only deployment path.",
+    "red_flags": [
+      "BLE Service UUID (8d3d0001-...) is explicitly flagged in BleConfig.kt as a placeholder — must be registered/replaced before production deployment to avoid collisions with other BLE devices",
+      "SMS integration is a .gitkeep stub with no implementation — referenced in planning docs but absent from code",
+      "backend/src/resolve/routes.ts line 278 has a dead ternary (both branches return 'pending') suggesting incomplete dispute-path logic",
+      "RESOLVE_EVIDENCE_REQUIRE_AUTH defaults to false in production unless explicitly set — evidence images can be uploaded without authentication",
+      "google-services.json committed to repo exposes the Firebase project ID and sender ID (low severity but non-ideal)",
+      "In-memory fallback is silent — if Supabase env vars are misconfigured in production, data is accepted and silently lost on restart"
+    ]
+  },
+  "signals": {
+    "accessible": true,
+    "stars": 3,
+    "forks": 0,
+    "contributors": 5,
+    "commit_count": 96,
+    "code_loc": 9278,
+    "created_at": "2026-06-27T02:28:49Z",
+    "pushed_at": "2026-06-29T16:43:15Z",
+    "license": "MIT",
+    "languages_bytes": {
+      "Kotlin": 242144,
+      "TypeScript": 100660,
+      "Shell": 23453,
+      "Python": 7132,
+      "Dockerfile": 1490
+    },
+    "archived": false
+  },
+  "evaluation": {
+    "solves_real_problem": "yes",
+    "real_problem_reasoning": "Earthquakes and infrastructure collapse leave survivors unable to communicate because cell towers and internet go down simultaneously. GuacaMalla directly solves this: it turns Android phones into BLE radio beacons that relay signed SOS frames and GPS coordinates device-to-device without any server, pairing, or connectivity required. The data-mule pattern (any phone that later reaches connectivity batch-uploads offline frames) handles intermittent network scenarios realistically. The quorum-based witness rescue-confirmation flow addresses false-positive SOS management — a real operational problem in disaster coordination. This is a genuine fit for the Venezuela earthquake scenario.",
+    "problem_severity": "critical",
+    "impact_potential": 5,
+    "product_quality": 4,
+    "live_demo_status": "partial",
+    "live_demo_notes": "The site at guacamalla.org resolves and loads (not 404/broken), but it is a JavaScript-bundled single-page app that WebFetch cannot fully render — visible text is \"SOS G / Unpacking...\" (a JS loading state). The actual product is a native Android APK distributed via Firebase App Distribution; the web presence is likely a landing page or backend dashboard, not the core deliverable. A demo video exists at youtube.com/watch?v=d21xoFurccc. Cannot confirm the full web UI is functional without a JS-capable browser.",
+    "diffusion": {
+      "score": 4,
+      "ready_to_promote": true,
+      "available_assets": [
+        "live-demo",
+        "demo-video",
+        "clear-value-prop",
+        "branding"
+      ],
+      "recommended_angle": "La red de emergencia que funciona cuando todo lo demás falla: GuacaMalla convierte cada teléfono Android en un nodo de comunicación independiente que transmite SOS y coordenadas GPS sin internet, sin torres celulares y sin servidores — usando la misma tecnología de radio de los hospitales, firmada criptográficamente para que nadie pueda falsificar una señal de auxilio.",
+      "gaps": [
+        "No iOS support — coverage is Android-only, limiting reach in mixed-device disaster zones",
+        "BLE Service UUID is an acknowledged placeholder, not registered for production — a collision risk that must be resolved before real deployment",
+        "SMS fallback module is a stub with no implementation",
+        "Web landing page appears JS-only and may not be accessible to users on slow connections",
+        "No confirmed real-world user testing or field validation documented"
+      ]
+    },
+    "overall_recommendation": "spotlight",
+    "one_line_pitch": "GuacaMalla turns Android phones into cryptographically-signed SOS beacons that form a rescue mesh network with zero internet, zero cell towers, and zero servers — built for the moment earthquakes take everything else down."
+  }
+}

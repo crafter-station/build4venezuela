@@ -1,0 +1,153 @@
+{
+  "project_slug": "proto-bloom-sismo",
+  "name": "Bloom-Sismo",
+  "repo_url": "https://github.com/DevAndrew64/Bloom-Sismo",
+  "live_url": "https://github.com/DevAndrew64/Bloom-Sismo",
+  "video_url": "",
+  "countries": [
+    "Colombia"
+  ],
+  "db_description": "La idea consiste en crear una Progressive Web App (PWA) de una sola página HTML que pesa menos de 150 KB en total y que contiene un Filtro de Bloom de todas las personas reportadas como Localizadas o A salvo en las distintas plataformas unificadas.",
+  "lifecycle_status": "ready_to_use",
+  "analysis": {
+    "summary": "Bloom-Sismo is a single-file PWA (~90KB HTML) that embeds a Bloom filter (FNV-1a, m≈718K bits, k=10, p=0.1%) to enable instant offline lookup of earthquake victims by Venezuelan ID (cédula). The filter is compiled by a build script (build-filter.js) that reads CSV/JSON data files and injects Base64-encoded filter bits directly into index.html. The app also includes a Supabase-backed offline report queue (IndexedDB + Background Sync via service worker). Technically clever and well-coded, but the ONG data pipeline is entirely a placeholder and the CI filter rebuild step is commented out, meaning the currently deployed version carries only 20-record demo data.",
+    "project_type": "Static PWA / offline people-finder tool (single HTML file + Node.js build tooling)",
+    "stack": {
+      "frontend": [
+        "Vanilla HTML/CSS/JS",
+        "Service Worker (PWA)",
+        "IndexedDB"
+      ],
+      "backend": [],
+      "database": [
+        "Supabase REST (reports)",
+        "IndexedDB (offline queue)",
+        "Bloom filter embedded in HTML"
+      ],
+      "infra_deploy": [
+        "Vercel (primary)",
+        "GitHub Pages (CI workflow)"
+      ],
+      "ai_ml": [],
+      "languages": [
+        "JavaScript",
+        "HTML"
+      ]
+    },
+    "architecture": {
+      "pattern": "Static single-page app with build-time filter compilation",
+      "uses_orm": false,
+      "orm_or_db_layer": "Direct Supabase REST fetch calls (no client library); IndexedDB via raw idb-like API for offline queue",
+      "api_design": "No server — Supabase anon REST endpoint for report writes; all reads are local (Bloom filter in memory)",
+      "separation_of_concerns": "Clean split: build-filter.js (compiler), fetch-ong-api.js (data ingestion), index.html (runtime), sw.js (caching/sync). Each file has a single responsibility.",
+      "modularity": "Low modularity by design — intentional monolithic HTML to stay under 150KB and be shareable via WhatsApp",
+      "notable_patterns": [
+        "Bloom filter (FNV-1a double-hashing) embedded as Base64 in HTML at build time",
+        "Stale-While-Revalidate service worker strategy for app shell",
+        "Background Sync for offline report queue",
+        "Build-time data injection via regex replacement into index.html",
+        "Auto-discovery of data sources from ./datos/ directory"
+      ]
+    },
+    "code_organization": {
+      "score": 4,
+      "directory_structure": "Minimal and purposeful: root contains the full app (index.html, sw.js), build tooling (build-filter.js, fetch-ong-api.js, verify.js), and a datos/ folder for data sources. Nothing extraneous.",
+      "naming_quality": "Consistent Spanish naming throughout (cédula, fuente, limpiarCedula, etc.) matching the domain. Function and variable names are descriptive.",
+      "documentation_quality": "Excellent inline documentation — every file has a header block explaining purpose, usage, workflow, and warnings. Critical FNV-1a hash consistency warning is prominently documented.",
+      "reasoning": "For a single-file project, the code quality is high: well-commented, consistently structured, with a working verification script (verify.js) acting as a test harness. The only weakness is zero external test framework and some logic duplication (BloomFilter class copied across build-filter.js, verify.js, and index.html)."
+    },
+    "production_readiness": {
+      "score": 2,
+      "has_auth": false,
+      "has_error_handling": true,
+      "has_logging": false,
+      "has_env_config": false,
+      "has_deploy_config": true,
+      "secrets_handling": "Supabase anon key is hardcoded in index.html (line 223: sb_publishable_ppQGnNTrsUl03xm4tpSuyA_qKg7Jv-l). This is a publishable/anon key so exposure is acceptable per Supabase's model, but it's still committed to git with no env-var abstraction.",
+      "security_notes": "vercel.json sets strong security headers (X-Frame-Options: DENY, X-XSS-Protection, X-Content-Type-Options, COEP, COOP, Referrer-Policy). Permissions-Policy restricts camera/mic/geolocation. Good baseline.",
+      "scalability_notes": "The lookup itself scales infinitely — it's a pure client-side Bloom filter. Supabase handles the write load for reports. Service worker ensures no CDN hammering. The fundamental bottleneck is the data pipeline: updating the filter requires running a Node script, committing index.html, and pushing — a manual multi-step process.",
+      "reasoning": "Deploy config is solid (Vercel with correct headers), the offline architecture is genuinely appropriate for disaster zones, and error handling in build scripts is good. However: the ONG API endpoint is a hardcoded placeholder ('https://API-DE-LA-ONG.org/v1/localizados'), the CI build step is commented out, and the live site currently contains only 20 demo records — making it non-functional for real use."
+    },
+    "maturity": {
+      "score": 2,
+      "has_readme": true,
+      "has_tests": true,
+      "has_ci": true,
+      "is_real_or_boilerplate": "Real, original implementation — the Bloom filter math, FNV-1a implementation, build tooling, and service worker are all hand-crafted and domain-specific. Not boilerplate.",
+      "reasoning": "11 commits over 2 days, live Vercel deployment, and a working verify.js test harness show genuine effort. However, the CI filter rebuild is commented out, the ONG data integration is entirely pending, and the deployed filter contains only demo data — it cannot serve real earthquake victims today."
+    },
+    "viability": {
+      "score": 3,
+      "reasoning": "The concept is technically sound and brilliantly suited to the disaster-zone constraint (low-bandwidth phones, offline use, fast lookup). The implementation is correct. What blocks deployment for real use is entirely a data/coordination problem: no NGO has committed to providing a machine-readable API, so the filter must be populated manually. If even one Venezuelan NGO provides a CSV export of found persons, this tool could be live and useful within hours — making it high-potential but currently incomplete."
+    },
+    "key_features": [
+      "Instant offline person lookup via Bloom filter (0ms, no network)",
+      "Bloom filter parameters: 50K capacity, 0.1% false positive rate, ~90KB filter size",
+      "Build pipeline: auto-discovers CSV/JSON sources in datos/, compiles filter, injects into index.html",
+      "PWA installable with service worker (Cache-First + Stale-While-Revalidate)",
+      "Offline report submission queue (IndexedDB) with Background Sync on reconnection",
+      "Supabase REST integration for report persistence",
+      "Designed to fit in a WhatsApp message (<150KB total)",
+      "verify.js test harness for filter integrity validation",
+      "Venezuelan ID (cédula) normalization (strips V-, E- prefixes, whitespace)",
+      "fetch-ong-api.js adapter framework for future NGO API integration"
+    ],
+    "domain_tags": [
+      "people-finder",
+      "family-reunification",
+      "alerts-notifications"
+    ],
+    "merge_potential": "High concept value for a hackathon jury — uniquely clever and technically correct for the disaster-zone constraint. Low immediate utility because the data pipeline is entirely placeholder. Would pair well with a project that aggregates localized-persons data (e.g., a shelter-mapping or aid-logistics tool that already has a database of found persons). Needs: one NGO data feed, uncommenting the CI build step, and automating daily filter rebuilds.",
+    "red_flags": [
+      "ONG API endpoint is a hardcoded placeholder URL — no real data source connected",
+      "CI filter rebuild step is commented out — deployed version has only 20 demo records",
+      "Bloom filter data in current index.html is mostly zero-bytes (sample data only, not useful for real queries)",
+      "No automated data refresh pipeline — updating the filter requires manual Node.js invocation + git push",
+      "BloomFilter class duplicated verbatim across three files (build-filter.js, verify.js, index.html) — hash consistency is critical and any future change requires updating all three",
+      "No input rate limiting on Supabase report endpoint (open to spam writes with the public anon key)"
+    ]
+  },
+  "signals": {
+    "accessible": true,
+    "stars": 0,
+    "forks": 0,
+    "contributors": 2,
+    "commit_count": 11,
+    "code_loc": 871,
+    "created_at": "2026-06-27T21:07:11Z",
+    "pushed_at": "2026-06-28T17:50:38Z",
+    "license": null,
+    "languages_bytes": {
+      "HTML": 166491,
+      "JavaScript": 37358
+    },
+    "archived": false
+  },
+  "evaluation": {
+    "solves_real_problem": "partial",
+    "real_problem_reasoning": "The concept directly addresses a critical real-world need: family members searching for earthquake survivors in Venezuela, where connectivity is unreliable or absent. The Bloom filter offline lookup architecture is genuinely well-suited to disaster-zone constraints (low-bandwidth phones, sharable via WhatsApp at under 150KB). However, the implementation is currently non-functional for real victims — the deployed version contains only 20 demo records, the NGO data ingestion endpoint is a hardcoded placeholder URL, and the CI filter-rebuild step is commented out. No real person would be found using this app today.",
+    "problem_severity": "critical",
+    "impact_potential": 3,
+    "product_quality": 2,
+    "live_demo_status": "no-public-demo",
+    "live_demo_notes": "The live_url resolves to the GitHub repo page, not a deployed app. A Vercel deployment is referenced in the config but no accessible URL was provided. No demo video exists. The deployed index.html has a Bloom filter containing only 20 demo records — searching any real Venezuelan ID would return \"not found,\" making the demo non-illustrative of real value.",
+    "diffusion": {
+      "score": 2,
+      "ready_to_promote": false,
+      "available_assets": [
+        "clear-value-prop"
+      ],
+      "recommended_angle": "Tech-forward appeal to NGOs and developers: pitch the architecture (offline, WhatsApp-shareable, 0ms lookup) and issue a public call for any Venezuelan NGO or volunteer network to contribute a CSV of located persons to activate the tool. Frame it as 'infrastructure waiting for data' rather than a finished product.",
+      "gaps": [
+        "No working public demo URL",
+        "No demo video",
+        "No screenshots of the UI",
+        "No real victim data in the filter — tool is non-functional for actual use",
+        "No NGO partnership announced",
+        "Data pipeline entirely placeholder — CI rebuild commented out"
+      ]
+    },
+    "overall_recommendation": "improve-first",
+    "one_line_pitch": "Una app de 150KB que permite buscar sobrevivientes del terremoto sin internet — pero necesita datos reales de ONGs para activarse."
+  }
+}

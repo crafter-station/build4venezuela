@@ -1,0 +1,172 @@
+{
+  "project_slug": "busca-chat",
+  "name": "BuscaChat",
+  "repo_url": "https://github.com/DiegoMucha/buscachat",
+  "live_url": "https://ayudandoavenezuela.netlify.app/#",
+  "video_url": "",
+  "countries": [
+    "Perú",
+    "Colombia",
+    "Ecuador",
+    "Bolivia",
+    "Venezuela",
+    "El Salvador"
+  ],
+  "db_description": "# BuscaChat\n\n# Objetivo del Proyecto\n\n# ¿Como Funciona?\n\n# Equipo\n\n# Arquitectura",
+  "lifecycle_status": "ready_to_use",
+  "analysis": {
+    "summary": "BuscaChat is a production-deployed WhatsApp (and web) chatbot for family reunification after the Venezuela earthquake. It syncs missing-persons data from the sosvenezuela2026.com API into PostgreSQL+pgvector, exposes a REST API, and drives a multi-step conversational flow across WhatsApp Evolution API, WhatsApp Green API, Meta WhatsApp Cloud API, and a web chat widget. The codebase is genuinely functional with real integrations, 4 versioned Alembic migrations, CI/CD via GitHub Actions + SSH + Cloudflare tunnel, a systemd service file, unit and e2e tests using testcontainers, optional InsightFace facial recognition with pgvector HNSW index, and Redis-backed conversation state for horizontal scaling. This is one of the strongest hackathon submissions in the cohort.",
+    "project_type": "WhatsApp / web chatbot for missing-persons search and family reunification",
+    "stack": {
+      "frontend": [
+        "HTML/CSS/JS landing page",
+        "web chat widget (FastAPI-served)"
+      ],
+      "backend": [
+        "Python 3.12",
+        "FastAPI",
+        "SQLModel",
+        "APScheduler",
+        "httpx"
+      ],
+      "database": [
+        "PostgreSQL 18 + pgvector (HNSW index for face embeddings)",
+        "Redis (conversation state)"
+      ],
+      "infra_deploy": [
+        "GitHub Actions CI/CD",
+        "SSH + Cloudflare Access tunnel",
+        "systemd service",
+        "Docker Compose (dev)"
+      ],
+      "ai_ml": [
+        "InsightFace (buffalo_l ONNX model, face embedding + cosine similarity)",
+        "pgvector ANN search"
+      ],
+      "languages": [
+        "Python"
+      ]
+    },
+    "architecture": {
+      "pattern": "Layered FastAPI service with adapter pattern for multi-channel messaging and external data sources",
+      "uses_orm": true,
+      "orm_or_db_layer": "SQLModel (SQLAlchemy ORM) for models and queries; raw PostgreSQL dialect INSERT ON CONFLICT for upserts; Alembic for schema migrations (4 versions); pgvector extension managed via migration",
+      "api_design": "REST API (FastAPI) with routers per channel (Evolution API, Green API, Meta, web chat); webhook endpoints per WhatsApp provider; private-token auth for admin endpoints; health + DB health check endpoints",
+      "separation_of_concerns": "Clean separation: adapters/ (external data sources), messaging/adapters/ (per-channel webhook parsing), messaging/conversation.py (state machine), messaging/pipeline.py (action dispatch), services/ (business logic), routers/ (HTTP layer), models.py (DB schema), scheduler.py (background jobs)",
+      "modularity": "Highly modular: FaceMatcher is a Protocol with InsightFace and Stub implementations; ConversationStateStore Protocol with InMemory and Redis backends; Notifier abstraction for WhatsApp sending; all injectable via FastAPI Depends",
+      "notable_patterns": [
+        "Adapter pattern for each WhatsApp API provider",
+        "Protocol-based dependency injection for FaceMatcher and ConversationStateStore",
+        "APScheduler background sync job with configurable retry + exponential backoff",
+        "pgvector HNSW index for face embedding nearest-neighbor search",
+        "Alembic auto-migration on startup (run_migrations() in lifespan)",
+        "Webhook event logging to DB for debugging",
+        "Rate-limited paginated sync from external SOS Venezuela API"
+      ]
+    },
+    "code_organization": {
+      "score": 4,
+      "directory_structure": "buscachat-python/app/ split into routers/, services/, messaging/, adapters/, face/, utils/; tests/ at sibling level; deploy/ has systemd unit and env sample; scripts/ has smoke test and deploy shell scripts",
+      "naming_quality": "Excellent: Spanish domain names (paso, buscar, registrar) in the conversation state machine are coherent; Python module and class names follow conventions; field names are descriptive",
+      "documentation_quality": "AGENTS.md at repo root for AI context; Bot_salva_vidas.md describes the use case; .env.sample is complete with comments; README exists; inline code comments are sparse but the code is readable",
+      "reasoning": "The directory layout is clean and purpose-driven with no dead code or boilerplate. The adapter and protocol patterns make the architecture self-documenting. Minor documentation gaps in the source files themselves."
+    },
+    "production_readiness": {
+      "score": 4,
+      "has_auth": true,
+      "has_error_handling": true,
+      "has_logging": true,
+      "has_env_config": true,
+      "has_deploy_config": true,
+      "secrets_handling": "All secrets (DB URL, API tokens, Green API credentials, Meta access token, Evolution API key) are environment variables read via pydantic-settings from .env file; sample files provided; no secrets committed to git",
+      "security_notes": "Private API token auth protects admin endpoints; webhook auth via Evolution API apikey header; no rate limiting on public /missing_people or search endpoints (SQL injection risk is mitigated by ORM, but abuse/DoS is unguarded)",
+      "scalability_notes": "Redis-backed conversation state supports horizontal scaling; APScheduler runs in a single-process background thread so multi-instance deployment would require disabling the scheduler on all but one node; pgvector HNSW index enables fast face search at scale",
+      "reasoning": "Deployed to a real server (ssh.sumak.space) with Cloudflare tunnel, systemd restart policy, health check endpoints, and a CI/CD pipeline. The main gaps are missing rate limiting on public endpoints and the in-memory scheduler would need coordination in a multi-instance setup."
+    },
+    "maturity": {
+      "score": 4,
+      "has_readme": true,
+      "has_tests": true,
+      "has_ci": true,
+      "is_real_or_boilerplate": "Real, functional application with genuine business logic, working integrations, and active deployment",
+      "reasoning": "36 commits from 7 contributors in 3 days; 4 Alembic migration versions showing iterative schema evolution; unit tests and testcontainers-based e2e tests for core flows (register, search by photo, mark found); GitHub Actions CI/CD pipeline actually deploys to production server via SSH."
+    },
+    "viability": {
+      "score": 5,
+      "reasoning": "WhatsApp penetration in Venezuela is near-universal making this channel optimal for disaster response. The system integrates with sosvenezuela2026.com (a real active crisis platform), supports facial recognition for photo-based searches, and is already deployed. The multi-step conversational flow handles the full missing-person lifecycle: report intake, name/cedula/photo search, and marking as found with reporter notification."
+    },
+    "key_features": [
+      "Multi-step WhatsApp conversational bot (search by name, cedula, or photo; register missing person; mark as found)",
+      "Automated sync from SOS Venezuela 2026 API with upsert and retry logic",
+      "Facial recognition via InsightFace buffalo_l model + pgvector HNSW cosine similarity search",
+      "Multi-provider WhatsApp support (Evolution API, Green API, Meta Cloud API)",
+      "Web chat widget as fallback channel",
+      "Redis-backed conversation state for horizontal scaling",
+      "Reporter notification via Green API when a photo match is found",
+      "Background scheduler with configurable interval, retry, and backoff",
+      "REST API for missing persons list/search with pagination and filtering",
+      "4-version Alembic migration chain including pgvector extension and HNSW index"
+    ],
+    "domain_tags": [
+      "family-reunification",
+      "people-finder",
+      "comms-chat"
+    ],
+    "merge_potential": "High — this project occupies a unique niche (WhatsApp chatbot for family reunification with facial recognition) that complements shelter-mapping or aid-logistics tools. The REST API (/missing_people) could be consumed by other projects in the hackathon. The adapter pattern makes adding Telegram or SMS channels straightforward.",
+    "red_flags": [
+      "No rate limiting on public search and listing endpoints — could be abused or DoSed",
+      "Default private_api_token is 'dev-hackathon-token' in config.py (must be overridden in production .env, but easy to forget)",
+      "InsightFace runs on CPU (ctx_id=-1) — face embedding is slow without GPU; may bottleneck under load",
+      "APScheduler runs in-process: multi-instance deployment would double-sync the external API without coordination",
+      "In-memory conversation state is the default; a restarted server loses all active conversations"
+    ]
+  },
+  "signals": {
+    "accessible": true,
+    "stars": 2,
+    "forks": 2,
+    "contributors": 7,
+    "commit_count": 36,
+    "code_loc": 7379,
+    "created_at": "2026-06-26T20:46:10Z",
+    "pushed_at": "2026-06-29T16:04:13Z",
+    "license": null,
+    "languages_bytes": {
+      "Python": 245223,
+      "CSS": 20973,
+      "HTML": 16590,
+      "JavaScript": 4326,
+      "Shell": 1870,
+      "Mako": 613
+    },
+    "archived": false
+  },
+  "evaluation": {
+    "solves_real_problem": "yes",
+    "real_problem_reasoning": "After a major earthquake, family separation is immediate and critical. Venezuela's near-universal WhatsApp adoption means a WhatsApp chatbot is the most accessible possible channel for victims who may have no internet browser but do have WhatsApp. BuscaChat covers the full missing-person lifecycle: reporting, searching by name/cedula/photo, and marking as found with automated notification to the original reporter. It also syncs in real time with sosvenezuela2026.com, an active crisis coordination platform, making the data actually relevant to the disaster. This is not a theoretical solution — the backend is deployed with a real CI/CD pipeline and systemd service.",
+    "problem_severity": "critical",
+    "impact_potential": 5,
+    "product_quality": 4,
+    "live_demo_status": "partial",
+    "live_demo_notes": "The Netlify landing page (ayudandoavenezuela.netlify.app) loads and presents a clean, branded value proposition with a three-step user flow. However, both the \"Iniciar en WhatsApp\" and \"Iniciar en Telegram\" buttons are empty anchor placeholders (#) — they do not connect to a real WhatsApp number or Telegram bot. The backend API and WhatsApp webhook server are reportedly deployed at ssh.sumak.space via Cloudflare tunnel and systemd, but this cannot be verified from the public demo URL. The web chat widget mentioned in the codebase is also not accessible from the landing page. Effective demo status is a working landing page with non-functional CTAs.",
+    "diffusion": {
+      "score": 4,
+      "ready_to_promote": true,
+      "available_assets": [
+        "live-demo",
+        "clear-value-prop",
+        "branding"
+      ],
+      "recommended_angle": "Lead with the WhatsApp angle — 'busca a tu familiar perdido directo desde WhatsApp' — and the facial recognition capability. Emphasize that it connects to the real sosvenezuela2026.com database already being used in the crisis. Target Venezuelan diaspora communities (Peru, Colombia, Ecuador) who are trying to locate relatives. The multi-country coverage in the project metadata makes it directly relevant to the diaspora audience.",
+      "gaps": [
+        "No working WhatsApp number or QR code exposed on the landing page — users cannot actually try the bot",
+        "No demo video showing the chatbot conversation flow end-to-end",
+        "No screenshots of actual WhatsApp interactions in the chatbot",
+        "Telegram links are placeholders — unclear if Telegram channel exists",
+        "Real-users signal is missing — no testimonials or usage metrics shown"
+      ]
+    },
+    "overall_recommendation": "promote",
+    "one_line_pitch": "BuscaChat lets Venezuelan earthquake victims search for missing relatives via WhatsApp — by name, cedula, or photo — using facial recognition connected to the live sosvenezuela2026.com crisis database."
+  }
+}

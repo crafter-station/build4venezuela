@@ -143,6 +143,9 @@
       },
       "whatsapp": "WhatsApp",
       "discord": "Discord",
+      "watch": {
+        "label": "Mira el evento de cierre en vivo"
+      },
       "description": "El evento formal se clausura, pero el trabajo continúa: sigue mejorando tu proyecto, colabora con uno existente o propone lo que Venezuela todavía necesita.",
       "poweredBy": "Impulsado por"
     },
@@ -155,10 +158,22 @@
       "latestInfoQuery": "¿Qué es lo último sobre los terremotos en Venezuela?"
     },
     "impactStats": [
-      { "value": "01", "label": "sigue trabajando en tu proyecto" },
-      { "value": "02", "label": "colabora con un equipo existente" },
-      { "value": "03", "label": "propón un nuevo problema a resolver" },
-      { "value": "04", "label": "diseña para recuperación, no solo respuesta" }
+      {
+        "value": "01",
+        "label": "sigue trabajando en tu proyecto"
+      },
+      {
+        "value": "02",
+        "label": "colabora con un equipo existente"
+      },
+      {
+        "value": "03",
+        "label": "propón un nuevo problema a resolver"
+      },
+      {
+        "value": "04",
+        "label": "diseña para recuperación, no solo respuesta"
+      }
     ],
     "principles": {
       "eyebrow": "Principios de acción colectiva",
@@ -265,7 +280,9 @@
   "Projects": {
     "eyebrow": "Lista de proyectos",
     "title": "Trabajo publicado",
-    "submitCta": { "label": "Envía el tuyo" },
+    "submitCta": {
+      "label": "Envía el tuyo"
+    },
     "grid": {
       "empty": "Todavía no hay proyectos. Sé la primera persona en agregar uno.",
       "syncing": "Sincronizando feed en vivo...",
@@ -273,8 +290,22 @@
       "all": "Todos",
       "project": "proyecto",
       "projects": "proyectos",
+      "open": "Abrir",
       "vote": "voto",
       "votes": "votos",
+      "views": {
+        "grid": "Cuadrícula",
+        "list": "Lista"
+      },
+      "table": {
+        "project": "Proyecto",
+        "status": "Estado",
+        "category": "Categoría",
+        "countries": "Países",
+        "builder": "Autor",
+        "votes": "Votos",
+        "link": "Enlace"
+      },
       "statuses": {
         "all": "Todos los estados",
         "ready_to_use": "Listo para usar",
@@ -357,7 +388,13 @@
     "contributeInUrlPlaceholder": "https://github.com/... o https://linkedin.com/...",
     "descriptionMarkdownLabel": "Descripción en Markdown",
     "descriptionMarkdownPlaceholder": "## ¿Qué construiste?\n\n¿Para quién es? ¿Cómo ayuda? ¿Qué debería probar la gente primero?",
-    "pending": "Revisando..."
+    "pending": "Revisando...",
+    "deleteDescription": "¿Necesitas quitar esta postulación? Al eliminarla también se borran sus votos y comentarios.",
+    "deleteConfirm": "Esto no se puede deshacer. Haz clic en eliminar otra vez para quitar esta postulación permanentemente.",
+    "deleteButton": "Eliminar postulación",
+    "deleteConfirmButton": "Eliminar permanentemente",
+    "deleteCancel": "Cancelar",
+    "deletePending": "Eliminando..."
   },
   "ProjectDetail": {
     "metadata": {
@@ -576,6 +613,210 @@
           "accepted": "Aceptada",
           "rejected": "Rechazada"
         }
+      }
+    }
+  },
+  "Insights": {
+    "metadata": {
+      "title": "Project Insights — Build4Venezuela",
+      "description": "Internal triage: tech stack, maturity, viability, overlap, and diffusion readiness across project repositories."
+    },
+    "shared": {
+      "tiers": {
+        "spotlight": "Spotlight",
+        "promote": "Promote",
+        "merge-candidate": "Merge candidate",
+        "improve-first": "Improve first",
+        "deprioritize": "Deprioritize"
+      }
+    },
+    "dashboard": {
+      "eyebrow": "Internal triage",
+      "title": "Project Insights",
+      "description": "{count} repositories analyzed for stack, architecture, maturity, viability, and diffusion readiness — built to spot overlap, merge candidates, and what's ready to spotlight.",
+      "stats": {
+        "analyzed": "Analyzed",
+        "promoReady": "Promo-ready",
+        "totalLoc": "Total LOC",
+        "locValue": "{count}k"
+      },
+      "filters": {
+        "domain": "Domain",
+        "all": "All",
+        "clear": "clear filters"
+      },
+      "panels": {
+        "triage": {
+          "title": "Triage quadrant",
+          "subtitle": "impact × production-readiness · bubble = stars · color = tier"
+        },
+        "overlap": {
+          "title": "Overlap network",
+          "subtitle": "edges = shared domain tags (≥3) · clusters = duplicate solutions"
+        },
+        "leaderboard": {
+          "title": "Leaderboard",
+          "subtitle": "{count, plural, one {# project} other {# projects}} · click a row for detail"
+        },
+        "tech": {
+          "title": "Tech landscape",
+          "subtitle": "across all analyzed repos"
+        }
+      }
+    },
+    "leaderboard": {
+      "columns": {
+        "project": {
+          "label": "Project",
+          "description": "The project name and its repository type (web app, PWA, bot, etc.). Click a row to open full detail."
+        },
+        "tier": {
+          "label": "Tier",
+          "description": "Overall recommendation: Spotlight (back heavily) › Promote › Merge candidate › Improve first › Deprioritize."
+        },
+        "viability": {
+          "label": "Viab",
+          "description": "Viability (1–5): how realistically this can be deployed and maintained to actually help victims — weighs maturity, production-readiness, and how complete the core function is."
+        },
+        "production": {
+          "label": "Prod",
+          "description": "Production-readiness (1–5): auth, error handling, logging, secret handling, security, scalability, and deploy config in the code."
+        },
+        "product": {
+          "label": "Prod-Q",
+          "description": "Product quality (1–5): how complete and usable the actual product is (not the code) — judged from the live demo where one exists."
+        },
+        "diffusion": {
+          "label": "Diff",
+          "description": "Diffusion readiness (1–5): how ready it is to create promo/social content right now — working demo, video, screenshots, clear value prop."
+        },
+        "maturity": {
+          "label": "Mat",
+          "description": "Maturity (1–5): real working software vs. boilerplate — real logic, tests, CI, commit history, README."
+        },
+        "severity": {
+          "label": "Sev",
+          "description": "Problem severity: how urgent the victim-facing problem it addresses is (critical › high › medium › low)."
+        },
+        "stars": {
+          "label": "★",
+          "description": "GitHub stars on the repository — a rough popularity / social-proof signal."
+        },
+        "loc": {
+          "label": "LOC",
+          "description": "Lines of code in real source files (excludes dependencies and build output) — a rough size/effort signal."
+        },
+        "security": {
+          "label": "Seg",
+          "description": "Riesgo de exposición de seguridad según la auditoría automática (endpoints de PII abiertos, secretos filtrados, falta de autenticación). Clic para ordenar."
+        }
+      },
+      "risk": {
+        "critical": "Crítico",
+        "high": "Alto",
+        "medium": "Medio",
+        "low": "Bajo",
+        "none": "Limpio"
+      }
+    },
+    "triageQuadrant": {
+      "hint": "← ship-ready · high impact ↑",
+      "productionReadiness": "Production-readiness",
+      "productionReadinessAxis": "PRODUCTION-READINESS →",
+      "impact": "Impact",
+      "impactAxis": "IMPACT",
+      "tooltip": {
+        "impact": "impact {score}",
+        "production": "prod {score}",
+        "viability": "viab {score}"
+      }
+    },
+    "overlapNetwork": {
+      "instructions": "scroll to zoom · drag to pan",
+      "ariaLabel": "Project overlap network"
+    },
+    "drawer": {
+      "links": {
+        "repo": "repo ↗",
+        "live": "live ↗",
+        "video": "video ↗"
+      },
+      "scores": {
+        "viability": "Viability",
+        "production": "Prod-ready",
+        "maturity": "Maturity",
+        "organization": "Code org",
+        "product": "Product",
+        "diffusion": "Diffusion"
+      },
+      "signals": {
+        "stars": "Stars",
+        "commits": "Commits",
+        "loc": "LOC",
+        "contributors": "Contributors",
+        "license": "License",
+        "realProblem": "Real problem",
+        "liveDemo": "Live demo",
+        "orm": "ORM"
+      },
+      "none": "none",
+      "yes": "yes",
+      "rawSql": "raw SQL",
+      "sections": {
+        "summary": "Summary",
+        "stack": "Stack",
+        "domainTags": "Domain tags",
+        "overlaps": "Overlaps with ({count})",
+        "redFlags": "Red flags",
+        "diffusionReadiness": "Diffusion readiness",
+        "mergePotential": "Merge potential",
+        "security": "Auditoría de seguridad"
+      },
+      "stack": {
+        "frontend": "Frontend",
+        "backend": "Backend",
+        "database": "Database",
+        "aiMl": "AI/ML"
+      },
+      "sharedCount": "{count} shared",
+      "readyToPromote": "Ready to promote",
+      "notYet": "Not yet",
+      "assets": "assets: {assets}",
+      "angle": "Angle:",
+      "security": {
+        "badge": "Riesgo {risk}",
+        "risk": {
+          "critical": "Crítico",
+          "high": "Alto",
+          "medium": "Medio",
+          "low": "Bajo",
+          "none": "Limpio"
+        },
+        "auditedAt": "Auditado {date}",
+        "notAudited": "Sin auditar — no se pudo clonar el repositorio.",
+        "clean": "No se encontraron problemas de exposición en esta auditoría.",
+        "issueLink": "Ver issue de divulgación →"
+      }
+    },
+    "stackCharts": {
+      "titles": {
+        "tech": "Most-used tech",
+        "types": "Project types",
+        "databases": "Databases",
+        "dataLayer": "Data layer"
+      },
+      "types": {
+        "telegramBot": "Telegram bot",
+        "whatsappBot": "WhatsApp bot",
+        "mobileApp": "Mobile app",
+        "pwa": "PWA",
+        "staticSite": "Static site",
+        "apiPipeline": "API / pipeline",
+        "webApp": "Web app"
+      },
+      "dataLayer": {
+        "rawSql": "Raw SQL / BaaS client",
+        "orm": "Uses an ORM"
       }
     }
   },
