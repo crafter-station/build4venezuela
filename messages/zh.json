@@ -653,9 +653,18 @@
           "none": "无风险"
         },
         "auditedAt": "审计于 {date}",
+        "reauditedAt": "重新审计于 {date}",
+        "previously": "此前为{risk}",
         "notAudited": "未审计 — 无法克隆该仓库。",
         "clean": "本次审计未发现暴露问题。",
-        "issueLink": "查看披露 issue →"
+        "allResolved": "此前报告的所有问题均已修复。",
+        "issueLink": "查看披露 issue →",
+        "status": {
+          "open": "未修复",
+          "partial": "部分修复",
+          "resolved": "已修复",
+          "new": "新增"
+        }
       }
     },
     "stackCharts": {

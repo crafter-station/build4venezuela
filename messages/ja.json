@@ -653,9 +653,18 @@
           "none": "クリーン"
         },
         "auditedAt": "監査日 {date}",
+        "reauditedAt": "再監査日 {date}",
+        "previously": "以前は{risk}",
         "notAudited": "未監査 — リポジトリをクローンできませんでした。",
         "clean": "この監査で露出の問題は見つかりませんでした。",
-        "issueLink": "開示Issueを見る →"
+        "allResolved": "以前に報告されたすべての問題が修正されました。",
+        "issueLink": "開示Issueを見る →",
+        "status": {
+          "open": "未解決",
+          "partial": "一部対応",
+          "resolved": "修正済み",
+          "new": "新規"
+        }
       }
     },
     "stackCharts": {

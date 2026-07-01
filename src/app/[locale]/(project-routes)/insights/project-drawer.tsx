@@ -18,6 +18,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import {
+  FINDING_STATUS_COLOR,
   SCORE_KEYS,
   SECURITY_RISK_COLOR,
   TIER_COLOR,
@@ -307,6 +308,14 @@ function SecurityBlock({ security }: { security: InsightNode["security"] }) {
   if (!security) return null;
   const color = SECURITY_RISK_COLOR[security.risk];
 
+  const reaudited = Boolean(security.reauditedAt);
+  const improved =
+    security.previousRisk != null && security.previousRisk !== security.risk;
+  const allResolved =
+    reaudited &&
+    security.findings.length > 0 &&
+    security.findings.every((f) => f.status === "resolved");
+
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-2">
@@ -316,8 +325,15 @@ function SecurityBlock({ security }: { security: InsightNode["security"] }) {
         >
           {t("badge", { risk: t(`risk.${security.risk}`) })}
         </span>
+        {improved && security.previousRisk && (
+          <span className="font-mono text-[10px] text-muted-foreground line-through">
+            {t("previously", { risk: t(`risk.${security.previousRisk}`) })}
+          </span>
+        )}
         <span className="font-mono text-[10px] text-muted-foreground">
-          {t("auditedAt", { date: security.auditedAt })}
+          {reaudited && security.reauditedAt
+            ? t("reauditedAt", { date: security.reauditedAt })
+            : t("auditedAt", { date: security.auditedAt })}
         </span>
       </div>
 
@@ -326,25 +342,60 @@ function SecurityBlock({ security }: { security: InsightNode["security"] }) {
           {t("notAudited")}
         </p>
       ) : security.findings.length > 0 ? (
-        <ul className="space-y-1">
-          {security.findings.map((f) => (
-            <li
-              key={f.title}
-              className="flex gap-2 font-mono text-[11px] text-foreground"
+        <>
+          {allResolved && (
+            <p
+              className="font-mono text-[11px]"
+              style={{ color: FINDING_STATUS_COLOR.resolved }}
             >
-              <span
-                className="shrink-0 font-bold uppercase"
-                style={{ color: SECURITY_RISK_COLOR[f.severity] }}
+              {t("allResolved")}
+            </p>
+          )}
+          <ul className="space-y-1">
+            {security.findings.map((f) => (
+              <li
+                key={f.title}
+                className="flex gap-2 font-mono text-[11px] text-foreground"
               >
-                {f.severity}
-              </span>
-              <span className="text-muted-foreground">{f.title}</span>
-            </li>
-          ))}
-        </ul>
+                <span
+                  className="shrink-0 font-bold uppercase"
+                  style={{ color: SECURITY_RISK_COLOR[f.severity] }}
+                >
+                  {f.severity}
+                </span>
+                <span
+                  className={
+                    f.status === "resolved"
+                      ? "text-muted-foreground line-through"
+                      : "text-muted-foreground"
+                  }
+                >
+                  {f.title}
+                </span>
+                {f.status && (
+                  <span
+                    className="ml-auto shrink-0 self-start border px-1 font-bold text-[9px] uppercase"
+                    style={{
+                      color: FINDING_STATUS_COLOR[f.status],
+                      borderColor: FINDING_STATUS_COLOR[f.status],
+                    }}
+                  >
+                    {t(`status.${f.status}`)}
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </>
       ) : (
         <p className="font-mono text-[11px]" style={{ color }}>
           {t("clean")}
+        </p>
+      )}
+
+      {reaudited && security.reauditNote && (
+        <p className="font-mono text-[11px] text-muted-foreground italic">
+          {security.reauditNote}
         </p>
       )}
 

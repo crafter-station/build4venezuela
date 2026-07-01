@@ -653,9 +653,18 @@
           "none": "Limpo"
         },
         "auditedAt": "Auditado {date}",
+        "reauditedAt": "Reauditado {date}",
+        "previously": "era {risk}",
         "notAudited": "Não auditado — não foi possível clonar o repositório.",
         "clean": "Nenhum problema de exposição encontrado nesta auditoria.",
-        "issueLink": "Ver issue de divulgação →"
+        "allResolved": "Todos os problemas relatados já foram corrigidos.",
+        "issueLink": "Ver issue de divulgação →",
+        "status": {
+          "open": "aberto",
+          "partial": "parcial",
+          "resolved": "corrigido",
+          "new": "novo"
+        }
       }
     },
     "stackCharts": {
