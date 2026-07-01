@@ -221,6 +221,7 @@ export function BuilderForm({ initialBuilder, locale }: BuilderFormProps) {
       ...current,
       availability: { ...current.availability, [day]: nextHours },
     }));
+    return nextHours;
   }
 
   function submit(event: FormEvent<HTMLFormElement>) {
@@ -483,7 +484,16 @@ export function BuilderForm({ initialBuilder, locale }: BuilderFormProps) {
                     id={`availability-${day}`}
                     max={12}
                     min={0}
-                    onChange={(event) => setDayHours(day, event.target.value)}
+                    onChange={(event) => {
+                      const nextHours = setDayHours(day, event.target.value);
+                      // React skips re-syncing number inputs whose DOM value is
+                      // numerically equal to state (e.g. "02" vs 2), so leading
+                      // zeros stick around unless we normalize the DOM directly.
+                      if (event.target.value !== String(nextHours)) {
+                        event.target.value = String(nextHours);
+                      }
+                    }}
+                    onFocus={(event) => event.target.select()}
                     type="number"
                     value={values.availability[day]}
                   />
