@@ -12,6 +12,10 @@ import {
   hasVoted,
   listComments,
 } from "@/lib/projects/store";
+import {
+  buildProjectJsonLd,
+  markdownExcerpt,
+} from "@/lib/projects/structured-data";
 import { withTimeout } from "@/lib/timeout";
 import { ProjectShell } from "../../project-shell";
 import { CommentsSection } from "./comments-section";
@@ -38,9 +42,24 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return { title: t("metadata.notFoundTitle") };
   }
 
+  const title = `${project.name} | Build4Venezuela`;
+  const description =
+    markdownExcerpt(project.descriptionMarkdown, 160) ||
+    t("metadata.description", { name: project.participantName });
+  const pageUrl = `/${locale}/p/${project.slug}`;
+
   return {
-    title: `${project.name} | Build4Venezuela`,
-    description: t("metadata.description", { name: project.participantName }),
+    title,
+    description,
+    alternates: { canonical: pageUrl },
+    openGraph: {
+      type: "website",
+      url: pageUrl,
+      siteName: "Build4Venezuela",
+      title,
+      description,
+    },
+    twitter: { card: "summary_large_image", title, description },
   };
 }
 
@@ -77,8 +96,20 @@ export default async function ProjectPage({ params }: Props) {
       ),
   );
 
+  const jsonLd = buildProjectJsonLd(
+    project,
+    `https://build4venezuela.com/${locale}/p/${project.slug}`,
+  );
+
   return (
     <ProjectShell>
+      <script
+        type="application/ld+json"
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD serialized with < escaped to block </script> breakout
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
+        }}
+      />
       <article className="px-5 py-16 sm:px-8 sm:py-20 lg:px-10">
         <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
           <aside className="lg:sticky lg:top-8 lg:self-start">
