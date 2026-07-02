@@ -36,8 +36,10 @@ const PROJECT_PROFILES: Record<string, ProjectProfile> = {
         "https://deamap.es",
       ],
     },
-    // sameAs: ["https://x.com/..."],   // ResponseGrid's own profiles, when it has them
-    // endorsedBy: [{ name: "…", url: "…", sameAs: ["…"] }],  // official bodies / sponsors
+    // ResponseGrid has no own social accounts by design — it reuses Global
+    // Emergency's identity and legal pages. Its authoritative link is the repo.
+    sameAs: ["https://github.com/GlobalEmergency/ResponseGrid"],
+    // endorsedBy: [{ name: "…", url: "…", sameAs: ["…"] }],  // official bodies / sponsors, when confirmed
   },
 };
 
