@@ -40,6 +40,10 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-line: var(--line);
+  --color-ink-muted: var(--ink-muted);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -120,7 +124,11 @@
 :root {
   --background: #000000;
   --foreground: #ffffff;
-  --card: #080808;
+  --surface: #050505;
+  --surface-raised: #0b0b0b;
+  --line: #292929;
+  --ink-muted: #9a9a9a;
+  --card: var(--surface-raised);
   --card-foreground: #ffffff;
   --popover: #080808;
   --popover-foreground: #ffffff;
@@ -134,7 +142,7 @@
   --accent-foreground: #000000;
   --destructive: #ff4a63;
   --destructive-foreground: #ffffff;
-  --border: #3a3a3a;
+  --border: var(--line);
   --input: #3a3a3a;
   --ring: #ffd83d;
   --chart-1: #ffd83d;
@@ -151,6 +159,10 @@
   --sidebar-accent-foreground: #ededed;
   --sidebar-border: #3a3a3a;
   --sidebar-ring: #ffd83d;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --motion-fast: 140ms;
+  --motion-base: 200ms;
 }
 
 .dark {
@@ -197,5 +209,164 @@
   }
   html {
     @apply font-mono;
+  }
+}
+
+.ui-eyebrow {
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+
+@utility type-display {
+  font-size: clamp(3.25rem, 5.5vw, 6rem);
+  font-weight: 900;
+  line-height: 0.84;
+  letter-spacing: -0.06em;
+  text-transform: uppercase;
+}
+
+@utility type-section {
+  font-size: clamp(2.25rem, 3.8vw, 4.25rem);
+  font-weight: 900;
+  line-height: 0.88;
+  letter-spacing: -0.055em;
+  text-transform: uppercase;
+}
+
+@utility type-title {
+  font-size: clamp(1.625rem, 2vw, 2.125rem);
+  font-weight: 900;
+  line-height: 0.96;
+  letter-spacing: -0.035em;
+  text-transform: uppercase;
+}
+
+@utility type-body-lg {
+  font-size: clamp(1rem, 1.2vw, 1.125rem);
+  line-height: 1.65;
+  letter-spacing: 0.035em;
+}
+
+.ui-focus {
+  outline: 2px solid transparent;
+  outline-offset: 4px;
+}
+
+.ui-focus:focus-visible {
+  outline-color: var(--ring);
+}
+
+.country-card {
+  position: relative;
+  isolation: isolate;
+  transition:
+    border-color var(--motion-base) var(--ease-out),
+    transform var(--motion-fast) var(--ease-out);
+}
+
+.country-card__fill {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity var(--motion-base) var(--ease-out);
+}
+
+.country-card[data-country="ve"] .country-card__fill {
+  background: var(--primary);
+}
+
+.country-card[data-country="co"] .country-card__fill {
+  background: var(--accent);
+}
+
+.country-card__content,
+.country-card__meta,
+.country-card__action {
+  transition: color var(--motion-base) ease;
+}
+
+.country-card__arrow {
+  transition: transform var(--motion-fast) var(--ease-out);
+}
+
+.country-card:active {
+  transform: scale(0.995);
+}
+
+.project-card {
+  background: var(--background);
+  transition:
+    background-color var(--motion-base) ease,
+    transform var(--motion-fast) var(--ease-out);
+}
+
+.project-card__title,
+.project-card__action {
+  transition: color var(--motion-base) ease;
+}
+
+.project-card__arrow {
+  transition: transform var(--motion-fast) var(--ease-out);
+}
+
+.project-card:active {
+  transform: scale(0.995);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .country-card:hover .country-card__fill {
+    opacity: 1;
+  }
+
+  .country-card:hover .country-card__content,
+  .country-card:hover .country-card__action {
+    color: #000000;
+  }
+
+  .country-card:hover .country-card__meta {
+    color: rgb(0 0 0 / 62%);
+  }
+
+  .country-card:hover .country-card__arrow {
+    transform: translateX(0.3rem);
+  }
+
+  .project-card:hover {
+    background: var(--surface-raised);
+  }
+
+  .project-card:hover .project-card__title {
+    color: var(--primary);
+  }
+
+  .project-card:hover .project-card__arrow {
+    transform: translateX(0.25rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .country-card,
+  .country-card__fill,
+  .country-card__content,
+  .country-card__meta,
+  .country-card__action,
+  .country-card__arrow,
+  .project-card,
+  .project-card__title,
+  .project-card__action,
+  .project-card__arrow {
+    transition-duration: 0ms;
+  }
+
+  .country-card:active {
+    transform: none;
+  }
+
+  .project-card:active {
+    transform: none;
   }
 }

@@ -4,8 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
-import { AuthorBadge } from "@/components/author-badge";
-import { ProjectVideoEmbed } from "@/components/project-video-embed";
+import { ProjectCard } from "@/components/project-card";
 import {
   categorizeProject,
   type ResolvedCluster,
@@ -183,57 +182,18 @@ export function ProjectsGrid({
         </div>
       </div>
       {viewMode === "grid" ? (
-        <div className="grid gap-px bg-border md:grid-cols-2 lg:grid-cols-3">
-          {visible.map(({ project, categoryId }) => (
-            <article
-              className="group bg-background p-6 transition hover:bg-card sm:p-7"
+        <div className="grid gap-px bg-line md:grid-cols-2 lg:grid-cols-3">
+          {visible.map(({ project }, index) => (
+            <ProjectCard
+              applicabilityLabel={t(`applicabilities.${project.applicability}`)}
+              href={`/${locale}/p/${project.slug}`}
+              index={index + 1}
               key={project.id}
-            >
-              <button
-                className="mb-4 inline-flex font-mono text-[0.6rem] font-bold uppercase tracking-[0.24em] text-accent transition hover:text-primary"
-                onClick={() => setActiveCategory(categoryId)}
-                type="button"
-              >
-                {clusterById.get(categoryId)?.label ??
-                  clusterById.get("other")?.label}
-              </button>
-              <ProjectVideoEmbed
-                detailHref={`/${locale}/p/${project.slug}`}
-                title={project.name}
-                videoUrl={project.videoUrl}
-              />
-              <div className="mt-5 flex items-center justify-between gap-4">
-                <div className="flex flex-wrap gap-2">
-                  <p className="font-mono text-xs uppercase tracking-[0.24em] text-muted-foreground">
-                    {project.countries.join(" / ")}
-                  </p>
-                  <p className="border border-primary px-2 py-1 font-mono text-[0.6rem] font-bold uppercase tracking-[0.16em] text-primary">
-                    {t(`applicabilities.${project.applicability}`)}
-                  </p>
-                </div>
-                <p className="border border-accent px-2 py-1 font-mono text-[0.6rem] font-bold uppercase tracking-[0.16em] text-accent">
-                  {t(`statuses.${project.lifecycleStatus}`)}
-                </p>
-              </div>
-              <div className="mt-3 flex justify-end">
-                {/* ponytail: singular/plural needed — "1 votes" reads wrong and breaks trust */}
-                <p className="font-mono text-xs uppercase tracking-[0.18em] text-primary">
-                  {project.votesCount}{" "}
-                  {project.votesCount === 1 ? t("vote") : t("votes")}
-                </p>
-              </div>
-              <a className="block" href={`/${locale}/p/${project.slug}`}>
-                <h2 className="mt-8 font-mono text-3xl font-black uppercase leading-none tracking-[-0.04em] transition group-hover:text-primary">
-                  {project.name}
-                </h2>
-              </a>
-              <AuthorBadge
-                className="mt-5"
-                imageUrl={project.ownerImageUrl}
-                meta={project.participantName}
-                name={project.ownerName || project.participantName}
-              />
-            </article>
+              lifecycleLabel={t(`statuses.${project.lifecycleStatus}`)}
+              openLabel={t("open")}
+              project={project}
+              voteLabel={project.votesCount === 1 ? t("vote") : t("votes")}
+            />
           ))}
         </div>
       ) : (

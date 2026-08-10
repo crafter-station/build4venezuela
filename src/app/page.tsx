@@ -10,6 +10,7 @@ export const metadata: Metadata = {
 const countries = [
   {
     code: "VE",
+    index: "01",
     href: "/ve",
     name: "Venezuela",
     description: "Herramientas creadas tras los terremotos en Venezuela.",
@@ -17,6 +18,7 @@ const countries = [
   },
   {
     code: "CO",
+    index: "02",
     href: "/co",
     name: "Colombia",
     description:
@@ -27,67 +29,102 @@ const countries = [
 
 export default function LatamHome() {
   return (
-    <main className="relative flex min-h-screen items-center overflow-hidden bg-background px-5 py-10 text-foreground sm:px-8 lg:px-10">
-      <div className="bg-grid absolute inset-0 opacity-[0.06]" />
-      <section className="relative mx-auto w-full max-w-6xl border border-border bg-background/95">
-        <header className="border-border border-b px-6 py-5 sm:px-8">
-          <p className="font-mono text-xs font-bold uppercase tracking-[0.3em] text-primary">
-            {"Build4Latam // tecnología en solidaridad"}
+    <main className="relative flex min-h-svh items-center overflow-hidden bg-background px-4 py-4 text-foreground sm:px-6 sm:py-6 lg:px-10 lg:py-10">
+      <div
+        aria-hidden="true"
+        className="bg-grid absolute inset-0 opacity-[0.055]"
+      />
+      <div
+        aria-hidden="true"
+        className="absolute inset-y-0 left-[8vw] hidden w-px bg-line/40 lg:block"
+      />
+      <div
+        aria-hidden="true"
+        className="absolute inset-y-0 right-[8vw] hidden w-px bg-line/40 lg:block"
+      />
+
+      <section className="relative mx-auto w-full max-w-7xl border border-line bg-background/96 shadow-[0_24px_80px_rgba(0,0,0,0.65)]">
+        <header className="flex items-center justify-between gap-6 border-line border-b px-5 py-4 sm:px-7 sm:py-5 lg:px-9">
+          <p className="ui-eyebrow text-primary">
+            Build4Latam <span aria-hidden="true">{"//"}</span>{" "}
+            <span className="hidden sm:inline">tecnología en solidaridad</span>
+          </p>
+          <p className="ui-eyebrow flex shrink-0 items-center gap-2 text-ink-muted">
+            <span
+              aria-hidden="true"
+              className="size-1.5 bg-accent shadow-[0_0_12px_var(--accent)]"
+            />
+            Red activa
           </p>
         </header>
 
-        <div className="grid lg:grid-cols-[0.9fr_1.1fr]">
-          <div className="flex flex-col justify-between border-border border-b p-6 sm:p-8 lg:border-r lg:border-b-0 lg:p-10">
+        <div className="grid lg:min-h-[36rem] lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+          <div className="flex flex-col justify-between border-line border-b p-6 sm:p-9 lg:border-r lg:border-b-0 lg:p-12">
             <div>
-              <p className="font-mono text-sm uppercase tracking-[0.28em] text-accent">
-                Elige dónde ayudar
-              </p>
-              <h1 className="mt-6 text-balance font-mono text-[clamp(3.8rem,10vw,8rem)] font-black uppercase leading-[0.72] tracking-[-0.08em]">
+              <p className="ui-eyebrow text-accent">Elige dónde ayudar</p>
+              <h1 className="type-display mt-8 max-w-xl text-balance font-mono">
                 Build4
                 <span className="block text-primary">Latam</span>
               </h1>
             </div>
-            <p className="mt-12 max-w-lg font-mono text-base uppercase leading-7 tracking-[0.1em] text-foreground/70">
-              Una red abierta de herramientas, builders y recursos para
-              responder a emergencias en América Latina. Lo que funciona en un
-              país puede ayudar al siguiente.
-            </p>
+
+            <div className="mt-16 border-line border-t pt-6 lg:mt-12">
+              <p className="max-w-xl font-mono text-sm uppercase leading-6 tracking-[0.095em] text-ink-muted sm:text-base sm:leading-7">
+                Una red abierta de herramientas, builders y recursos para
+                responder a emergencias en América Latina.
+              </p>
+              <p className="ui-eyebrow mt-5 text-foreground">
+                Lo que funciona en un país puede ayudar al siguiente.
+              </p>
+            </div>
           </div>
 
-          <div className="grid sm:grid-cols-2">
-            {countries.map((country, index) => (
+          <div className="grid grid-rows-2">
+            {countries.map((country) => (
               <Link
-                className={`group flex min-h-[22rem] flex-col justify-between p-6 transition hover:bg-foreground hover:text-background sm:p-8 ${
-                  index === 0
-                    ? "border-border border-b sm:border-r sm:border-b-0"
-                    : ""
-                }`}
+                aria-label={`Entrar a Build4${country.name}`}
+                className="country-card ui-focus group grid min-h-[17rem] gap-8 overflow-hidden border-line border-b p-6 last:border-b-0 sm:grid-cols-[minmax(0,1fr)_minmax(13rem,0.75fr)] sm:items-end sm:p-9 lg:min-h-0 lg:p-10"
+                data-country={country.code.toLowerCase()}
                 href={country.href}
                 key={country.code}
               >
-                <div>
-                  <div className="flex gap-1" aria-hidden="true">
-                    {country.colors.map((color) => (
-                      <span
-                        className="h-2 flex-1"
-                        key={color}
-                        style={{ backgroundColor: color }}
-                      />
-                    ))}
+                <span aria-hidden="true" className="country-card__fill" />
+
+                <div className="country-card__content self-start sm:self-auto">
+                  <div
+                    className="mb-8 flex items-center gap-4"
+                    aria-hidden="true"
+                  >
+                    <span className="ui-eyebrow text-current/55">
+                      {country.index}
+                    </span>
+                    <div className="flex w-full max-w-56 gap-1">
+                      {country.colors.map((color) => (
+                        <span
+                          className="h-1.5 flex-1"
+                          key={color}
+                          style={{ backgroundColor: color }}
+                        />
+                      ))}
+                    </div>
                   </div>
-                  <p className="mt-7 font-mono text-xs font-bold uppercase tracking-[0.3em] text-muted-foreground transition group-hover:text-background/55">
+                  <p className="country-card__meta ui-eyebrow text-ink-muted">
                     /{country.code.toLowerCase()}
                   </p>
-                  <h2 className="mt-3 font-mono text-[clamp(2.5rem,5vw,4.5rem)] font-black uppercase leading-none tracking-[-0.06em]">
+                  <h2 className="type-section mt-2 font-mono">
                     {country.name}
                   </h2>
                 </div>
-                <div>
-                  <p className="font-mono text-sm uppercase leading-6 tracking-[0.1em] text-foreground/65 transition group-hover:text-background/70">
+
+                <div className="country-card__content sm:border-current/20 sm:border-l sm:pl-7">
+                  <p className="country-card__meta font-mono text-sm uppercase leading-6 tracking-[0.09em] text-ink-muted">
                     {country.description}
                   </p>
-                  <p className="mt-6 font-mono text-sm font-black uppercase tracking-[0.22em] text-primary group-hover:text-background">
-                    Entrar →
+                  <p className="country-card__action ui-eyebrow mt-8 flex items-center gap-3 text-primary">
+                    Entrar
+                    <span aria-hidden="true" className="country-card__arrow">
+                      →
+                    </span>
                   </p>
                 </div>
               </Link>
