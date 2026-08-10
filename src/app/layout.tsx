@@ -80,7 +80,14 @@ export const metadata: Metadata = {
     siteName: SITE_TITLE,
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
-    images: [{ url: "/og.png", width: 1200, height: 630, alt: SITE_TITLE }],
+    images: [
+      {
+        url: "/assets/og-latam.jpg",
+        width: 1200,
+        height: 630,
+        alt: SITE_TITLE,
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
