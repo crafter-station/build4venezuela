@@ -1,12 +1,11 @@
 "use client";
 
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
 import type { ReactNode } from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { AuthorBadge } from "@/components/author-badge";
 import { ProjectVideoEmbed } from "@/components/project-video-embed";
-import { createBrowserSupabase } from "@/lib/projects/browser-supabase";
 import {
   categorizeProject,
   type ResolvedCluster,
@@ -16,14 +15,13 @@ import {
   type Project,
   type ProjectLifecycleStatus,
   projectLifecycleStatuses,
-  sortProjectsByVotes,
 } from "@/lib/projects/schema";
 
 type CategoryFilter = string;
 type StatusFilter = "all" | ProjectLifecycleStatus;
 type ViewMode = "grid" | "list";
 
-type RealtimeProjectsGridProps = {
+type ProjectsGridProps = {
   initialProjects: Project[];
   /** Filterable clusters: built-ins plus any graduated proposals. */
   clusters: ResolvedCluster[];
@@ -31,18 +29,13 @@ type RealtimeProjectsGridProps = {
   assignments: Record<string, string>;
 };
 
-type ProjectVotePayload = {
-  new: { event_type?: "insert" | "delete"; project_id?: string } | null;
-};
-
-export function RealtimeProjectsGrid({
+export function ProjectsGrid({
   initialProjects,
   clusters,
   assignments,
-}: RealtimeProjectsGridProps) {
+}: ProjectsGridProps) {
   const locale = useLocale();
   const t = useTranslations("Projects.grid");
-  const queryClient = useQueryClient();
   const [activeCategory, setActiveCategory] = useState<CategoryFilter>("all");
   const [activeStatus, setActiveStatus] = useState<StatusFilter>("all");
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
@@ -50,6 +43,8 @@ export function RealtimeProjectsGrid({
     initialData: initialProjects,
     queryFn: fetchProjects,
     queryKey: projectQueryKeys.list(),
+    refetchInterval: 30_000,
+    refetchIntervalInBackground: false,
   });
 
   const clusterById = useMemo(
@@ -61,7 +56,7 @@ export function RealtimeProjectsGrid({
       projects.map((project) => ({
         project,
         // Persisted assignment when present; keyword heuristic covers projects
-        // that arrive via the realtime feed before the page refetches.
+        // that arrive through polling before the page is rendered again.
         categoryId: assignments[project.slug] ?? categorizeProject(project),
       })),
     [projects, assignments],
@@ -105,69 +100,6 @@ export function RealtimeProjectsGrid({
   );
   const activeMeta =
     activeCategory === "all" ? null : clusterById.get(activeCategory);
-
-  useEffect(() => {
-    const supabase = createBrowserSupabase();
-
-    if (!supabase) {
-      return;
-    }
-
-    function updateVoteCount(payload: ProjectVotePayload) {
-      const projectId = payload.new?.project_id ?? null;
-
-      if (!projectId || !payload.new?.event_type) {
-        return;
-      }
-
-      const delta = payload.new.event_type === "insert" ? 1 : -1;
-
-      queryClient.setQueryData<Project[]>(projectQueryKeys.list(), (current) =>
-        sortProjectsByVotes(
-          current?.map((project) =>
-            project.id === projectId
-              ? {
-                  ...project,
-                  votesCount: Math.max(0, project.votesCount + delta),
-                }
-              : project,
-          ) ?? [],
-        ),
-      );
-    }
-
-    const publicationsChannel = supabase
-      .channel("project-publications")
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "project_publication_events",
-        },
-        () =>
-          queryClient.invalidateQueries({ queryKey: projectQueryKeys.list() }),
-      )
-      .subscribe();
-
-    const votesChannel = supabase
-      .channel("project-list-votes")
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "project_vote_events",
-        },
-        (payload) => updateVoteCount(payload as ProjectVotePayload),
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(publicationsChannel);
-      supabase.removeChannel(votesChannel);
-    };
-  }, [queryClient]);
 
   if (projects.length === 0) {
     return (
@@ -271,9 +203,14 @@ export function RealtimeProjectsGrid({
                 videoUrl={project.videoUrl}
               />
               <div className="mt-5 flex items-center justify-between gap-4">
-                <p className="font-mono text-xs uppercase tracking-[0.24em] text-muted-foreground">
-                  {project.countries.join(" / ")}
-                </p>
+                <div className="flex flex-wrap gap-2">
+                  <p className="font-mono text-xs uppercase tracking-[0.24em] text-muted-foreground">
+                    {project.countries.join(" / ")}
+                  </p>
+                  <p className="border border-primary px-2 py-1 font-mono text-[0.6rem] font-bold uppercase tracking-[0.16em] text-primary">
+                    {t(`applicabilities.${project.applicability}`)}
+                  </p>
+                </div>
                 <p className="border border-accent px-2 py-1 font-mono text-[0.6rem] font-bold uppercase tracking-[0.16em] text-accent">
                   {t(`statuses.${project.lifecycleStatus}`)}
                 </p>
@@ -308,6 +245,7 @@ export function RealtimeProjectsGrid({
                 <TableHeader>{t("table.status")}</TableHeader>
                 <TableHeader>{t("table.category")}</TableHeader>
                 <TableHeader>{t("table.countries")}</TableHeader>
+                <TableHeader>{t("table.applicability")}</TableHeader>
                 <TableHeader>{t("table.builder")}</TableHeader>
                 <TableHeader align="right">{t("table.votes")}</TableHeader>
                 <TableHeader align="right">{t("table.link")}</TableHeader>
@@ -341,6 +279,11 @@ export function RealtimeProjectsGrid({
                   </td>
                   <td className="max-w-[180px] truncate px-4 py-3 align-middle font-mono text-[0.65rem] uppercase tracking-[0.16em] text-muted-foreground">
                     {project.countries.join(" / ")}
+                  </td>
+                  <td className="px-4 py-3 align-middle">
+                    <span className="whitespace-nowrap border border-primary px-2 py-1 font-mono text-[0.58rem] font-bold uppercase tracking-[0.14em] text-primary">
+                      {t(`applicabilities.${project.applicability}`)}
+                    </span>
                   </td>
                   <td className="max-w-[170px] truncate px-4 py-3 align-middle font-mono text-[0.65rem] uppercase tracking-[0.16em] text-muted-foreground">
                     {project.ownerName || project.participantName}

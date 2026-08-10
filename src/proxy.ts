@@ -52,6 +52,11 @@ function legacyLocalizedRedirect(request: Request) {
 
 function skipsIntl(pathname: string) {
   return (
+    pathname === "/" ||
+    pathname === "/ve" ||
+    pathname.startsWith("/ve/") ||
+    pathname === "/co" ||
+    pathname.startsWith("/co/") ||
     pathname.startsWith("/api") ||
     pathname.startsWith("/trpc") ||
     pathname.startsWith("/_next") ||
@@ -67,6 +72,16 @@ function skipsIntl(pathname: string) {
 
 export default clerkMiddleware(async (auth, request) => {
   const { pathname } = request.nextUrl;
+
+  if (
+    ["build4venezuela.com", "www.build4venezuela.com"].includes(
+      request.nextUrl.hostname,
+    )
+  ) {
+    const destination = new URL("https://build4latam.com/ve");
+    destination.search = request.nextUrl.search;
+    return NextResponse.redirect(destination, 308);
+  }
 
   const legacyRedirect = legacyLocalizedRedirect(request);
 

@@ -2,7 +2,6 @@
 
 import { Show, UserButton } from "@clerk/nextjs";
 import { CaretDownIcon, ListIcon, UsersThreeIcon } from "@phosphor-icons/react";
-import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import { LanguageSelector } from "@/components/language-selector";
 import { Button } from "@/components/ui/button";
@@ -38,18 +37,11 @@ export function SiteHeader() {
     <header className="fixed inset-x-0 top-0 isolate z-40 border-border border-b bg-background/95 px-4 py-3 shadow-xl backdrop-blur sm:px-8 lg:px-10">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-3">
         <a
-          aria-label="Build4Venezuela home"
-          className="inline-flex items-center transition hover:opacity-75 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-4 focus-visible:ring-offset-background"
-          href={`/${locale}`}
+          aria-label="Build4Latam home"
+          className="inline-flex items-center font-mono text-lg font-black uppercase tracking-[-0.04em] transition hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-4 focus-visible:ring-offset-background sm:text-xl"
+          href="/"
         >
-          <Image
-            alt="Build4Venezuela"
-            className="h-8 w-auto sm:h-9"
-            height={285}
-            priority
-            src="/BFV/assets/B4V.svg"
-            width={731}
-          />
+          Build4<span className="text-primary">Latam</span>
         </a>
 
         <div className="flex items-center gap-2 sm:gap-3">
@@ -114,7 +106,7 @@ export function SiteHeader() {
             <DropdownMenuTrigger
               render={
                 <Button
-                  aria-label="Open Build4Venezuela menu"
+                  aria-label="Open Build4Latam menu"
                   className="h-10 border-border bg-background px-3 text-foreground hover:bg-foreground hover:text-background aria-expanded:bg-foreground aria-expanded:text-background md:hidden"
                   size="sm"
                   variant="outline"

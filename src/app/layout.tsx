@@ -65,9 +65,10 @@ const inputMonoNarrow = localFont({
   variable: "--font-input-mono-narrow",
 });
 
-const SITE_URL = "https://build4venezuela.com";
-const SITE_TITLE = "Build4Venezuela";
-const SITE_DESCRIPTION = "Build projects for Venezuelans.";
+const SITE_URL = "https://build4latam.com";
+const SITE_TITLE = "Build4Latam";
+const SITE_DESCRIPTION =
+  "Open tools and builder communities responding to urgent needs across Latin America.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

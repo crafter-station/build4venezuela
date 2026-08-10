@@ -6,6 +6,7 @@ export type Project = {
   name: string;
   status: ProjectStatus;
   lifecycleStatus: ProjectLifecycleStatus;
+  applicability: ProjectApplicability;
   projectUrl: string;
   countries: string[];
   participantName: string;
@@ -41,6 +42,21 @@ export const projectLifecycleStatuses = [
 ] as const;
 
 export type ProjectLifecycleStatus = (typeof projectLifecycleStatuses)[number];
+
+export const projectApplicabilities = [
+  "latam",
+  "venezuela",
+  "colombia",
+] as const;
+
+export type ProjectApplicability = (typeof projectApplicabilities)[number];
+
+export function isProjectApplicableTo(
+  project: Pick<Project, "applicability">,
+  country: "venezuela" | "colombia",
+) {
+  return project.applicability === "latam" || project.applicability === country;
+}
 
 export function sortProjectsByVotes(projects: Project[]) {
   return [...projects].sort(
@@ -107,6 +123,7 @@ export const projectFormSchema = z.object({
   slug: slugSchema,
   name: z.string().trim().min(2, "Name is required.").max(120),
   lifecycleStatus: z.enum(projectLifecycleStatuses).default("ready_to_use"),
+  applicability: z.enum(projectApplicabilities).default("latam"),
   projectUrl: urlSchema,
   countries: z.string().trim().min(2, "Add at least one participant country."),
   participantName: z
@@ -170,6 +187,7 @@ export function projectToFormValues(project: Project) {
     slug: project.slug,
     name: project.name,
     lifecycleStatus: project.lifecycleStatus,
+    applicability: project.applicability,
     projectUrl: project.projectUrl,
     countries: project.countries.join(", "),
     participantName: project.participantName,
@@ -184,6 +202,7 @@ export function formDataToValues(formData: FormData) {
     slug: String(formData.get("slug") ?? ""),
     name: String(formData.get("name") ?? ""),
     lifecycleStatus: String(formData.get("lifecycleStatus") ?? "ready_to_use"),
+    applicability: String(formData.get("applicability") ?? "latam"),
     projectUrl: String(formData.get("projectUrl") ?? ""),
     countries: String(formData.get("countries") ?? ""),
     participantName: String(formData.get("participantName") ?? ""),

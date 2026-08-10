@@ -1,5 +1,10 @@
 import { expect, test } from "bun:test";
-import { type Project, projectFormSchema, sortProjectsByVotes } from "./schema";
+import {
+  isProjectApplicableTo,
+  type Project,
+  projectFormSchema,
+  sortProjectsByVotes,
+} from "./schema";
 
 function project(overrides: Partial<Project>): Project {
   return {
@@ -8,6 +13,7 @@ function project(overrides: Partial<Project>): Project {
     name: "Project",
     status: "published",
     lifecycleStatus: "ready_to_use",
+    applicability: "latam",
     projectUrl: "https://example.com",
     countries: ["Venezuela"],
     participantName: "Team",
@@ -44,6 +50,15 @@ test("sortProjectsByVotes prioritizes video when vote counts tie", () => {
     "older-with-video",
     "newer-no-video",
   ]);
+});
+
+test("regional projects are visible in both country hubs", () => {
+  const regionalProject = project({ applicability: "latam" });
+  const venezuelaProject = project({ applicability: "venezuela" });
+
+  expect(isProjectApplicableTo(regionalProject, "venezuela")).toBe(true);
+  expect(isProjectApplicableTo(regionalProject, "colombia")).toBe(true);
+  expect(isProjectApplicableTo(venezuelaProject, "colombia")).toBe(false);
 });
 
 test("projectFormSchema accepts common demo video hosts", () => {

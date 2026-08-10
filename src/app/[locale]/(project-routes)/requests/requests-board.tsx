@@ -9,7 +9,6 @@ import { ProjectMarkdown } from "@/components/project-markdown";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { createBrowserSupabase } from "@/lib/projects/browser-supabase";
 import {
   createSolutionRequest,
   createSolutionRequestComment,
@@ -48,6 +47,8 @@ export function RequestsBoard({
     initialData: initialRequests,
     queryFn: fetchSolutionRequests,
     queryKey: requestQueryKeys.list(),
+    refetchInterval: 60_000,
+    refetchIntervalInBackground: false,
   });
   const [name, setName] = useState("");
   const [descriptionMarkdown, setDescriptionMarkdown] = useState("");
@@ -250,54 +251,6 @@ export function RequestsBoard({
       );
     },
   });
-
-  useEffect(() => {
-    const supabase = createBrowserSupabase();
-
-    if (!supabase) {
-      return;
-    }
-
-    const requestChannel = supabase
-      .channel("solution-request-board")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "solution_request_events" },
-        () =>
-          queryClient.invalidateQueries({ queryKey: requestQueryKeys.list() }),
-      )
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "solution_request_vote_events" },
-        () =>
-          queryClient.invalidateQueries({ queryKey: requestQueryKeys.list() }),
-      )
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "solution_request_comment_events",
-        },
-        () =>
-          queryClient.invalidateQueries({ queryKey: requestQueryKeys.list() }),
-      )
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "solution_request_comment_vote_events",
-        },
-        () =>
-          queryClient.invalidateQueries({ queryKey: requestQueryKeys.list() }),
-      )
-      .subscribe();
-
-    return () => {
-      void supabase.removeChannel(requestChannel);
-    };
-  }, [queryClient]);
 
   useEffect(() => {
     if (!notice) {

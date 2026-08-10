@@ -130,6 +130,8 @@ export async function POST(request: Request) {
   for (const locale of routing.locales) {
     revalidatePath(`/${locale}/projects`);
   }
+  revalidatePath("/ve");
+  revalidatePath("/co");
 
   logEvent("project.submit.ok", { userId, projectId: project.id });
   return NextResponse.json({ project }, { status: 201 });

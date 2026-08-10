@@ -3,11 +3,10 @@
 import { SignInButton, useUser } from "@clerk/nextjs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { type FormEvent, useEffect, useState } from "react";
+import { type FormEvent, useState } from "react";
 import { AuthorBadge } from "@/components/author-badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { createBrowserSupabase } from "@/lib/projects/browser-supabase";
 import {
   createProjectComment,
   fetchProjectComments,
@@ -26,7 +25,6 @@ type CommentsSectionProps = {
 };
 
 const maxCommentLength = 1200;
-const REALTIME_INACTIVE_TIMEOUT_MS = 60_000;
 
 export function CommentsSection({
   projectId,
@@ -42,6 +40,8 @@ export function CommentsSection({
     initialData: initialComments,
     queryFn: () => fetchProjectComments(projectId),
     queryKey: commentsQueryKey,
+    refetchInterval: 30_000,
+    refetchIntervalInBackground: false,
   });
   const [body, setBody] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -131,138 +131,6 @@ export function CommentsSection({
       );
     },
   });
-
-  useEffect(() => {
-    const supabase = createBrowserSupabase();
-
-    if (!supabase) {
-      return;
-    }
-
-    const realtime = supabase;
-    let commentsChannel: ReturnType<typeof realtime.channel> | null = null;
-    let commentVotesChannel: ReturnType<typeof realtime.channel> | null = null;
-    let inactiveTimer: number | null = null;
-    let hasConnected = false;
-
-    function disconnect() {
-      if (inactiveTimer) {
-        window.clearTimeout(inactiveTimer);
-        inactiveTimer = null;
-      }
-
-      if (commentsChannel) {
-        const currentChannel = commentsChannel;
-        commentsChannel = null;
-        void realtime.removeChannel(currentChannel);
-      }
-
-      if (commentVotesChannel) {
-        const currentChannel = commentVotesChannel;
-        commentVotesChannel = null;
-        void realtime.removeChannel(currentChannel);
-      }
-    }
-
-    function scheduleDisconnect() {
-      if (inactiveTimer) {
-        window.clearTimeout(inactiveTimer);
-      }
-
-      inactiveTimer = window.setTimeout(
-        disconnect,
-        REALTIME_INACTIVE_TIMEOUT_MS,
-      );
-    }
-
-    function connect() {
-      if (document.hidden) {
-        return;
-      }
-
-      if (commentsChannel && commentVotesChannel) {
-        scheduleDisconnect();
-        return;
-      }
-
-      disconnect();
-      const shouldReconcile = hasConnected;
-      hasConnected = true;
-
-      commentsChannel = realtime
-        .channel(`project-comments-${projectId}`)
-        .on(
-          "postgres_changes",
-          {
-            event: "*",
-            schema: "public",
-            table: "project_comment_events",
-            filter: `project_id=eq.${projectId}`,
-          },
-          () =>
-            queryClient.invalidateQueries({
-              queryKey: projectQueryKeys.comments(projectId),
-            }),
-        )
-        .subscribe();
-
-      commentVotesChannel = realtime
-        .channel(`project-comment-votes-${projectId}`)
-        .on(
-          "postgres_changes",
-          {
-            event: "*",
-            schema: "public",
-            table: "project_comment_vote_events",
-            filter: `project_id=eq.${projectId}`,
-          },
-          () =>
-            queryClient.invalidateQueries({
-              queryKey: projectQueryKeys.comments(projectId),
-            }),
-        )
-        .subscribe();
-
-      if (shouldReconcile) {
-        void queryClient.invalidateQueries({
-          queryKey: projectQueryKeys.comments(projectId),
-        });
-      }
-
-      scheduleDisconnect();
-    }
-
-    function syncActivity() {
-      connect();
-    }
-
-    function syncVisibility() {
-      if (document.hidden) {
-        disconnect();
-        return;
-      }
-
-      connect();
-    }
-
-    connect();
-    window.addEventListener("pointermove", syncActivity, { passive: true });
-    window.addEventListener("pointerdown", syncActivity, { passive: true });
-    window.addEventListener("scroll", syncActivity, { passive: true });
-    window.addEventListener("keydown", syncActivity);
-    window.addEventListener("focus", syncActivity);
-    document.addEventListener("visibilitychange", syncVisibility);
-
-    return () => {
-      window.removeEventListener("pointermove", syncActivity);
-      window.removeEventListener("pointerdown", syncActivity);
-      window.removeEventListener("scroll", syncActivity);
-      window.removeEventListener("keydown", syncActivity);
-      window.removeEventListener("focus", syncActivity);
-      document.removeEventListener("visibilitychange", syncVisibility);
-      disconnect();
-    };
-  }, [projectId, queryClient]);
 
   function submitComment(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();

@@ -3,9 +3,7 @@
 import { SignInButton, useUser } from "@clerk/nextjs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { createBrowserSupabase } from "@/lib/projects/browser-supabase";
 import {
   fetchProjectVote,
   projectQueryKeys,
@@ -25,8 +23,6 @@ type VoteState = {
   voted: boolean;
 };
 
-const REALTIME_INACTIVE_TIMEOUT_MS = 60_000;
-
 export function VoteButton({
   projectId,
   initialCount,
@@ -42,6 +38,8 @@ export function VoteButton({
       initialData: { count: initialCount, voted: initialVoted },
       queryFn: () => fetchProjectVote(projectId),
       queryKey: voteQueryKey,
+      refetchInterval: 30_000,
+      refetchIntervalInBackground: false,
     });
 
   const voteMutation = useMutation({
@@ -111,114 +109,6 @@ export function VoteButton({
     },
   });
   const signedIn = isSignedIn ?? initialSignedIn;
-
-  useEffect(() => {
-    const supabase = createBrowserSupabase();
-
-    if (!supabase) {
-      return;
-    }
-
-    const realtime = supabase;
-    let channel: ReturnType<typeof realtime.channel> | null = null;
-    let inactiveTimer: number | null = null;
-    let hasConnected = false;
-
-    function disconnect() {
-      if (inactiveTimer) {
-        window.clearTimeout(inactiveTimer);
-        inactiveTimer = null;
-      }
-
-      if (!channel) {
-        return;
-      }
-
-      const currentChannel = channel;
-      channel = null;
-      void realtime.removeChannel(currentChannel);
-    }
-
-    function scheduleDisconnect() {
-      if (inactiveTimer) {
-        window.clearTimeout(inactiveTimer);
-      }
-
-      inactiveTimer = window.setTimeout(
-        disconnect,
-        REALTIME_INACTIVE_TIMEOUT_MS,
-      );
-    }
-
-    function connect() {
-      if (document.hidden) {
-        return;
-      }
-
-      if (channel) {
-        scheduleDisconnect();
-        return;
-      }
-
-      const shouldReconcile = hasConnected;
-      hasConnected = true;
-      channel = realtime
-        .channel(`project-votes-${projectId}`)
-        .on(
-          "postgres_changes",
-          {
-            event: "*",
-            schema: "public",
-            table: "project_vote_events",
-            filter: `project_id=eq.${projectId}`,
-          },
-          () =>
-            queryClient.invalidateQueries({
-              queryKey: projectQueryKeys.votes(projectId),
-            }),
-        )
-        .subscribe();
-
-      if (shouldReconcile) {
-        void queryClient.invalidateQueries({
-          queryKey: projectQueryKeys.votes(projectId),
-        });
-      }
-
-      scheduleDisconnect();
-    }
-
-    function syncActivity() {
-      connect();
-    }
-
-    function syncVisibility() {
-      if (document.hidden) {
-        disconnect();
-        return;
-      }
-
-      connect();
-    }
-
-    connect();
-    window.addEventListener("pointermove", syncActivity, { passive: true });
-    window.addEventListener("pointerdown", syncActivity, { passive: true });
-    window.addEventListener("scroll", syncActivity, { passive: true });
-    window.addEventListener("keydown", syncActivity);
-    window.addEventListener("focus", syncActivity);
-    document.addEventListener("visibilitychange", syncVisibility);
-
-    return () => {
-      window.removeEventListener("pointermove", syncActivity);
-      window.removeEventListener("pointerdown", syncActivity);
-      window.removeEventListener("scroll", syncActivity);
-      window.removeEventListener("keydown", syncActivity);
-      window.removeEventListener("focus", syncActivity);
-      document.removeEventListener("visibilitychange", syncVisibility);
-      disconnect();
-    };
-  }, [projectId, queryClient]);
 
   function vote() {
     if (voteMutation.isPending) {

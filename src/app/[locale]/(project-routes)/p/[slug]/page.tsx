@@ -118,6 +118,14 @@ export default async function ProjectPage({ params }: Props) {
                   {t(`statuses.${project.lifecycleStatus}`)}
                 </p>
               </div>
+              <div className="bg-background p-4">
+                <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">
+                  {t("applicability")}
+                </p>
+                <p className="mt-2 font-mono text-lg uppercase tracking-[0.08em] text-primary">
+                  {t(`applicabilities.${project.applicability}`)}
+                </p>
+              </div>
             </div>
             <div className="mt-6 flex flex-wrap gap-3">
               {project.projectUrl ? (

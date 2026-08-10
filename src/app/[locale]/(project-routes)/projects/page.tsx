@@ -13,11 +13,10 @@ import { localizeClusters } from "@/lib/projects/localize-clusters";
 import { getCachedProjects } from "@/lib/projects/store";
 import { withTimeout } from "@/lib/timeout";
 import { ProjectShell } from "../project-shell";
-import { RealtimeProjectsGrid } from "./realtime-projects-grid";
+import { ProjectsGrid } from "./projects-grid";
 import { SubmitProjectCta } from "./submit-project-cta";
 
-// Live data (votes/clusters update in realtime) read via a persistent Drizzle
-// connection — render per request instead of prerendering at build.
+// Votes and clusters change between requests, so render from Neon per request.
 export const dynamic = "force-dynamic";
 
 // Hard bound on the per-request data load. If the DB pool stalls, fail fast
@@ -81,7 +80,7 @@ export default async function ProjectsPage({ params }: Props) {
             <SubmitProjectCta />
           </div>
 
-          <RealtimeProjectsGrid
+          <ProjectsGrid
             assignments={assignments}
             clusters={clusters}
             initialProjects={projects}

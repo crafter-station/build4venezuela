@@ -305,8 +305,8 @@
     },
     "grid": {
       "empty": "Todavía no hay proyectos. Sé la primera persona en agregar uno.",
-      "syncing": "Sincronizando feed en vivo...",
-      "live": "Feed en vivo activo",
+      "syncing": "Buscando actualizaciones...",
+      "live": "Actualización automática",
       "all": "Todos",
       "project": "proyecto",
       "projects": "proyectos",
@@ -322,6 +322,7 @@
         "status": "Estado",
         "category": "Categoría",
         "countries": "Países",
+        "applicability": "Aplicabilidad",
         "builder": "Autor",
         "votes": "Votos",
         "link": "Enlace"
@@ -331,6 +332,11 @@
         "ready_to_use": "Listo para usar",
         "in_development": "En desarrollo",
         "idea": "Idea"
+      },
+      "applicabilities": {
+        "latam": "Reusable en LATAM",
+        "venezuela": "Específico para Venezuela",
+        "colombia": "Específico para Colombia"
       }
     },
     "categories": {
@@ -398,6 +404,13 @@
       "in_development": "En desarrollo",
       "idea": "Idea"
     },
+    "applicabilityLabel": "¿Dónde se puede usar este proyecto?",
+    "applicabilityHint": "Elige LATAM si la herramienta puede adaptarse a más de un país.",
+    "applicabilities": {
+      "latam": "Reusable en LATAM",
+      "venezuela": "Solo Venezuela",
+      "colombia": "Solo Colombia"
+    },
     "projectUrlLabel": "Enlace del proyecto",
     "countriesLabel": "Países participantes",
     "countriesPlaceholder": "Venezuela, Colombia, Estados Unidos",
@@ -423,6 +436,12 @@
     },
     "builtBy": "Construido por",
     "countries": "Países",
+    "applicability": "Dónde funciona",
+    "applicabilities": {
+      "latam": "Reusable en LATAM",
+      "venezuela": "Específico para Venezuela",
+      "colombia": "Específico para Colombia"
+    },
     "status": "Estado",
     "statuses": {
       "ready_to_use": "Listo para usar",
@@ -478,8 +497,8 @@
       "signIn": "Iniciar sesión",
       "request": "solicitud",
       "requests": "solicitudes",
-      "syncing": "Sincronizando tablero en vivo...",
-      "live": "Tablero en vivo activo",
+      "syncing": "Buscando actualizaciones...",
+      "live": "Actualización automática",
       "vote": "Votar ({count})",
       "voted": "Votado ({count})",
       "expand": "Expandir detalles",

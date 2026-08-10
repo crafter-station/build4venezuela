@@ -79,6 +79,8 @@ export async function PATCH(request: Request, { params }: Props) {
     revalidatePath(`/${locale}/projects`);
     revalidatePath(`/${locale}/p/${project.slug}`);
   }
+  revalidatePath("/ve");
+  revalidatePath("/co");
 
   return NextResponse.json({ project });
 }
@@ -117,6 +119,8 @@ export async function DELETE(_request: Request, { params }: Props) {
     revalidatePath(`/${locale}/projects`);
     revalidatePath(`/${locale}/p/${project.slug}`);
   }
+  revalidatePath("/ve");
+  revalidatePath("/co");
 
   return NextResponse.json({ ok: true });
 }

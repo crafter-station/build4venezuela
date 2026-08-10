@@ -4,7 +4,6 @@ import path from "node:path";
 import { and, desc, eq, ne, or } from "drizzle-orm";
 import { db, isDbConfigured } from "@/db";
 import { builderContactRequests, builderProfiles } from "@/db/schema";
-import { logError } from "@/lib/log";
 import {
   type BuilderContactRequest,
   type BuilderContactRequestInput,
@@ -76,19 +75,6 @@ type LocalData = {
 
 const localStorePath = path.join(process.cwd(), ".data", "builders.json");
 
-function normalizeStoreError(error: unknown) {
-  if (!(error instanceof Error) && typeof error !== "object") {
-    return { message: String(error) };
-  }
-
-  const details = error as Record<string, unknown>;
-  return {
-    code: details.code,
-    message: details.message,
-    name: details.name,
-  };
-}
-
 async function withLocalFallback<T>(
   operation: () => Promise<T>,
   fallback: () => Promise<T>,
@@ -97,14 +83,7 @@ async function withLocalFallback<T>(
     return fallback();
   }
 
-  try {
-    return await operation();
-  } catch (error) {
-    logError("builder.store.fallback", error, {
-      detail: normalizeStoreError(error),
-    });
-    return fallback();
-  }
+  return operation();
 }
 
 async function readLocalData(): Promise<LocalData> {

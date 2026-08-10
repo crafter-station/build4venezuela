@@ -16,6 +16,7 @@ import {
 } from "@/lib/projects/queries";
 import {
   type ProjectFormState,
+  projectApplicabilities,
   projectLifecycleStatuses,
 } from "@/lib/projects/schema";
 
@@ -29,6 +30,7 @@ const projectFormFields = [
   "slug",
   "name",
   "lifecycleStatus",
+  "applicability",
   "projectUrl",
   "countries",
   "participantName",
@@ -46,7 +48,12 @@ function projectFormValuesFromState(
   return Object.fromEntries(
     projectFormFields.map((field) => [
       field,
-      values[field] ?? (field === "lifecycleStatus" ? "ready_to_use" : ""),
+      values[field] ??
+        (field === "lifecycleStatus"
+          ? "ready_to_use"
+          : field === "applicability"
+            ? "latam"
+            : ""),
     ]),
   ) as ProjectFormValues;
 }
@@ -218,6 +225,30 @@ export function ProjectForm({
           ))}
         </select>
         <FieldError message={errors.lifecycleStatus} />
+      </label>
+
+      <label className="grid gap-2" htmlFor="project-applicability">
+        <span className="font-mono text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground">
+          {t("applicabilityLabel")}
+        </span>
+        <select
+          className="flex h-10 w-full border border-input bg-background px-3 py-2 font-mono text-sm uppercase tracking-[0.12em] text-foreground ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          id="project-applicability"
+          name="applicability"
+          onChange={handleValueChange("applicability")}
+          required
+          value={values.applicability}
+        >
+          {projectApplicabilities.map((applicability) => (
+            <option key={applicability} value={applicability}>
+              {t(`applicabilities.${applicability}`)}
+            </option>
+          ))}
+        </select>
+        <p className="font-mono text-xs leading-5 tracking-[0.08em] text-muted-foreground">
+          {t("applicabilityHint")}
+        </p>
+        <FieldError message={errors.applicability} />
       </label>
 
       <label className="grid gap-2" htmlFor="project-url">

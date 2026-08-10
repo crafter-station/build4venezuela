@@ -15,12 +15,8 @@ import {
 /**
  * Drizzle schema for the tables the app reads/writes directly.
  *
- * Source of truth for the database remains the raw SQL in `supabase/migrations`
- * — triggers, functions, RLS policies, the realtime event-queue tables, and
- * `gen_random_uuid()` defaults live there and are NOT modeled here. Treat this
- * file as the typed query surface; keep it in sync by hand (or `drizzle-kit
- * pull`) when migrations change. Do NOT `drizzle-kit push` against this DB — it
- * would not see the trigger/RLS objects and could drift destructively.
+ * This typed schema is the source of truth for Neon. Generate and review a
+ * versioned Drizzle migration for every schema change; never use `push`.
  */
 
 export const projects = pgTable(
@@ -31,6 +27,7 @@ export const projects = pgTable(
     name: text("name").notNull(),
     status: text("status").notNull().default("published"),
     lifecycleStatus: text("lifecycle_status").notNull().default("ready_to_use"),
+    applicability: text("applicability").notNull().default("latam"),
     projectUrl: text("project_url").notNull(),
     countries: text("countries").array().notNull().default(sql`'{}'`),
     participantName: text("participant_name").notNull(),
@@ -95,6 +92,66 @@ export const projectCommentVotes = pgTable(
     commentId: uuid("comment_id")
       .notNull()
       .references(() => projectComments.id, { onDelete: "cascade" }),
+    voterId: text("voter_id").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .default(sql`now()`),
+  },
+  (table) => [primaryKey({ columns: [table.commentId, table.voterId] })],
+);
+
+export const solutionRequests = pgTable("solution_requests", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  descriptionMarkdown: text("description_markdown").notNull().default(""),
+  authorUserId: text("author_user_id").notNull(),
+  authorName: text("author_name").notNull(),
+  authorImageUrl: text("author_image_url").notNull().default(""),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .default(sql`now()`),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .default(sql`now()`),
+});
+
+export const solutionRequestVotes = pgTable(
+  "solution_request_votes",
+  {
+    requestId: uuid("request_id")
+      .notNull()
+      .references(() => solutionRequests.id, { onDelete: "cascade" }),
+    voterId: text("voter_id").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .default(sql`now()`),
+  },
+  (table) => [primaryKey({ columns: [table.requestId, table.voterId] })],
+);
+
+export const solutionRequestComments = pgTable("solution_request_comments", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  requestId: uuid("request_id")
+    .notNull()
+    .references(() => solutionRequests.id, { onDelete: "cascade" }),
+  authorUserId: text("author_user_id").notNull(),
+  authorName: text("author_name").notNull(),
+  authorImageUrl: text("author_image_url").notNull().default(""),
+  body: text("body").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .default(sql`now()`),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .default(sql`now()`),
+});
+
+export const solutionRequestCommentVotes = pgTable(
+  "solution_request_comment_votes",
+  {
+    commentId: uuid("comment_id")
+      .notNull()
+      .references(() => solutionRequestComments.id, { onDelete: "cascade" }),
     voterId: text("voter_id").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()

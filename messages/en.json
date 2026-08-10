@@ -305,8 +305,8 @@
     },
     "grid": {
       "empty": "No projects yet. Be the first one to add a build.",
-      "syncing": "Syncing live feed...",
-      "live": "Live feed enabled",
+      "syncing": "Checking for updates...",
+      "live": "Updated automatically",
       "all": "All",
       "project": "project",
       "projects": "projects",
@@ -322,6 +322,7 @@
         "status": "Status",
         "category": "Category",
         "countries": "Countries",
+        "applicability": "Applicability",
         "builder": "Builder",
         "votes": "Votes",
         "link": "Link"
@@ -331,6 +332,11 @@
         "ready_to_use": "Ready to use",
         "in_development": "In development",
         "idea": "Idea"
+      },
+      "applicabilities": {
+        "latam": "Reusable across LATAM",
+        "venezuela": "Venezuela-specific",
+        "colombia": "Colombia-specific"
       }
     },
     "categories": {
@@ -398,6 +404,13 @@
       "in_development": "In development",
       "idea": "Idea"
     },
+    "applicabilityLabel": "Where can this project be used?",
+    "applicabilityHint": "Choose LATAM when the tool can be adapted beyond one country.",
+    "applicabilities": {
+      "latam": "Reusable across LATAM",
+      "venezuela": "Venezuela only",
+      "colombia": "Colombia only"
+    },
     "projectUrlLabel": "Project link",
     "countriesLabel": "Participant countries",
     "countriesPlaceholder": "Venezuela, Colombia, United States",
@@ -423,6 +436,12 @@
     },
     "builtBy": "Built by",
     "countries": "Countries",
+    "applicability": "Where it works",
+    "applicabilities": {
+      "latam": "Reusable across LATAM",
+      "venezuela": "Venezuela-specific",
+      "colombia": "Colombia-specific"
+    },
     "status": "Status",
     "statuses": {
       "ready_to_use": "Ready to use",
@@ -478,8 +497,8 @@
       "signIn": "Sign in",
       "request": "request",
       "requests": "requests",
-      "syncing": "Syncing live board...",
-      "live": "Live board enabled",
+      "syncing": "Checking for updates...",
+      "live": "Updated automatically",
       "vote": "Vote ({count})",
       "voted": "Voted ({count})",
       "expand": "Expand details",
