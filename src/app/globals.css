@@ -259,6 +259,14 @@
   outline-color: var(--ring);
 }
 
+.ui-pressable {
+  transition: transform var(--motion-fast) var(--ease-out);
+}
+
+.ui-pressable:active {
+  transform: scale(0.97);
+}
+
 .country-card {
   position: relative;
   isolation: isolate;
@@ -299,9 +307,7 @@
 
 .project-card {
   background: var(--background);
-  transition:
-    background-color var(--motion-base) ease,
-    transform var(--motion-fast) var(--ease-out);
+  transition: background-color var(--motion-base) ease;
 }
 
 .project-card__title,
@@ -311,10 +317,6 @@
 
 .project-card__arrow {
   transition: transform var(--motion-fast) var(--ease-out);
-}
-
-.project-card:active {
-  transform: scale(0.995);
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -358,7 +360,8 @@
   .project-card,
   .project-card__title,
   .project-card__action,
-  .project-card__arrow {
+  .project-card__arrow,
+  .ui-pressable {
     transition-duration: 0ms;
   }
 
@@ -366,7 +369,7 @@
     transform: none;
   }
 
-  .project-card:active {
+  .ui-pressable:active {
     transform: none;
   }
 }
