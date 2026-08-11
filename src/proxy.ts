@@ -1,5 +1,5 @@
 import { clerkMiddleware } from "@clerk/nextjs/server";
-import { type NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import createMiddleware from "next-intl/middleware";
 import { routing } from "./i18n/routing";
 
@@ -20,36 +20,6 @@ function isProtectedRoute(pathname: string) {
     pathname === "/builder/register" ||
     pathname === "/builder/requests"
   );
-}
-
-function legacyLocalizedRedirect(request: NextRequest) {
-  const url = new URL(request.url);
-  const { pathname } = url;
-
-  const legacyPaths = [
-    "/projects",
-    "/submit",
-    "/requests",
-    "/recursos",
-    "/builders",
-    "/builder/register",
-    "/builder/requests",
-    "/insights",
-  ];
-
-  if (
-    legacyPaths.includes(pathname) ||
-    pathname === "/p" ||
-    pathname.startsWith("/p/")
-  ) {
-    const response = intlMiddleware(request);
-    return new NextResponse(null, {
-      headers: response.headers,
-      status: 308,
-    });
-  }
-
-  return null;
 }
 
 function skipsIntl(pathname: string) {
@@ -79,12 +49,6 @@ export default clerkMiddleware(async (auth, request) => {
     const destination = new URL("https://build4latam.com/ve");
     destination.search = request.nextUrl.search;
     return NextResponse.redirect(destination, 308);
-  }
-
-  const legacyRedirect = legacyLocalizedRedirect(request);
-
-  if (legacyRedirect) {
-    return legacyRedirect;
   }
 
   if (isProtectedRoute(pathname)) {
