@@ -1,0 +1,166 @@
+{
+  "project_slug": "resqlink",
+  "name": "ResQLink",
+  "repo_url": "https://github.com/otobonh/resqlink-ai",
+  "live_url": "https://resqlink-ai.netlify.app/",
+  "video_url": "https://www.youtube.com/watch?v=6kjdjAPa208",
+  "countries": [
+    "Colombia",
+    "Venezuela"
+  ],
+  "db_description": "ResQLink AI es una plataforma gratuita de respuesta humanitaria diseñada para situaciones de emergencia sísmica. Permite conectar en tiempo real a personas que necesitan ayuda con voluntarios, organizaciones y recursos disponibles.\n\nLa plataforma utiliza inteligencia artificial para priorizar incidentes, detectar reportes duplicados y recomendar recursos automáticamente. Todo funciona desde el navegador, sin necesidad de instalar nada.\n\n### ¿Qué puedes hacer con ResQLink AI?\n\n- Reportar emergencias con ubicación GPS automática\n- Ofrecer recursos como alimentos, agua, medicinas o transporte\n- Visualizar un mapa en tiempo real con todos los incidentes y recursos\n- Coordinar voluntarios y asignar tareas desde el centro de operaciones\n- Consultar estadísticas actualizadas en el dashboard\n\n> **Consejo:** ResQLink AI funciona como PWA (Progressive Web App). Puedes instalarla en tu celular desde el navegador para usarla como una app nativa, incluso sin conexión a internet.",
+  "lifecycle_status": "ready_to_use",
+  "analysis": {
+    "architecture": {
+      "pattern": "Layered/clean-architecture Next.js app (domain/infrastructure/presentation split) with App Router, Supabase BaaS backend, Netlify scheduled function",
+      "uses_orm": false,
+      "orm_or_db_layer": "Supabase JS client (postgREST) with hand-written query modules per entity (incidents.ts, resources.ts, locations.ts, social-feed.ts); raw SQL migration files define schema with PostGIS geography columns and RLS policies",
+      "api_design": "Next.js API routes under src/app/api for AI classification/recommendation/duplicate-detection and social feed sync; most CRUD goes directly through Supabase client from client/server components rather than dedicated REST endpoints",
+      "separation_of_concerns": "Reasonably clean: domain entities/enums, infrastructure (supabase clients, queries, AI, storage), presentation (components/hooks/providers), shared (config/types/utils) are separated into distinct directories",
+      "modularity": "Good modularity for a hackathon project; queries are split by entity, AI logic isolated in infrastructure/ai/openai, UI built from shadcn primitives",
+      "notable_patterns": [
+        "Server/browser/middleware Supabase client separation (@supabase/ssr)",
+        "Row Level Security policies defined in SQL migrations for public read / auth-scoped write",
+        "Netlify scheduled function pulls USGS earthquake feed and Google News RSS to auto-populate incidents/social feed",
+        "AI features (priority classification, duplicate detection, resource recommendation, summarization) implemented as discrete OpenAI wrapper functions"
+      ]
+    },
+    "code_organization": {
+      "score": 4,
+      "directory_structure": "Clear domain/infrastructure/presentation/shared split typical of clean architecture, plus Next.js app router route groups (app)/(auth)",
+      "naming_quality": "Consistent, descriptive naming (getIncidents, classifyPriority, updateSession, etc.)",
+      "documentation_quality": "Has AGENTS.md/CLAUDE.md (AI-assistant instructions), MANUAL.md and generated PDF manual/QA report/deck, but the actual README.md is unedited create-next-app boilerplate with no setup/env instructions for this project",
+      "reasoning": "Well-organized layered structure for a ~7.5k LOC hackathon app, but public-facing README is generic boilerplate rather than real project documentation, which hurts a first-time deployer's onboarding."
+    },
+    "production_readiness": {
+      "score": 2,
+      "has_auth": true,
+      "has_error_handling": true,
+      "has_logging": false,
+      "has_env_config": true,
+      "has_deploy_config": true,
+      "secrets_handling": "No committed .env.example or secrets; .gitignore excludes .env*; env vars centralized in src/shared/config/env.ts using non-null assertions (will throw at runtime if missing rather than failing fast at build), OPENAI_API_KEY only used server-side",
+      "security_notes": "Supabase auth + RLS policies exist (public read on incidents/resources/hospitals/shelters, auth.uid()-scoped writes for users/notifications), but middleware.ts only protects /dashboard, /operations, /settings routes — pages like /map, /incidents, /notifications, /resources under the same (app) route group are NOT gated by the auth check, and several RLS insert policies allow anonymous writes ('Anyone can report', service-level unrestricted update/delete on social_feed_items), which is a real exposure for a public safety app",
+      "scalability_notes": "Supabase/Postgres+PostGIS with geography columns is a reasonable scalable base; no caching, rate limiting, or queueing evident; Netlify scheduled function for external sync (USGS/RSS) is a lightweight but workable ingestion pattern",
+      "reasoning": "Real auth, DB schema and AI integration exist and basic error handling wraps API routes, but there is no test suite, no CI, no structured logging/observability, an incomplete route-protection matrix, and the README is unmodified boilerplate — this is short of what should be trusted for a live disaster-response deployment without further hardening."
+    },
+    "maturity": {
+      "score": 3,
+      "has_readme": true,
+      "has_tests": false,
+      "has_ci": false,
+      "is_real_or_boilerplate": "real",
+      "reasoning": "15 commits over ~2 days show genuine iterative bug-fixing ('resolve all QA audit bugs', 'fix hydration errors', RLS policy fixes), a full Supabase schema with PostGIS/RLS, working OpenAI-backed triage/dedup/recommendation logic, and a live USGS+RSS data sync function — clearly a working MVP, not empty scaffolding — but it has zero automated tests and no CI pipeline."
+    },
+    "viability": {
+      "score": 3,
+      "reasoning": "A single contributor built a functioning full-stack MVP (auth, real-time-capable Supabase backend, geospatial incident/resource tracking, AI triage, live earthquake feed) in days, which is impressive for a hackathon, but the lack of tests/CI, incomplete route protection, and generic README indicate it needs meaningful hardening before being trusted to coordinate real earthquake response for victims."
+    },
+    "key_features": [
+      "Incident reporting with geolocation, photo upload, and category/priority classification",
+      "AI-powered triage: OpenAI-based priority classification, duplicate incident detection, resource recommendation, and Spanish-language incident summarization",
+      "Interactive Leaflet map with filters for incidents/resources/shelters/hospitals",
+      "Dashboard with live stats (active incidents, affected people, resources, volunteers, shelters, hospitals)",
+      "Automated data ingestion: Netlify scheduled function pulls USGS earthquake feed (magnitude>=4, Venezuela bounding box) and Google News RSS into the incidents/social-feed tables hourly",
+      "Supabase auth (email/password) with row-level security policies and role model (admin/organization/volunteer/citizen)",
+      "Resource and volunteer coordination entities (assignments table linking incidents, volunteers, organizations, resources)"
+    ],
+    "domain_tags": [
+      "alerts-notifications",
+      "seismic-data",
+      "aid-logistics",
+      "volunteer-coordination",
+      "mapping-geo"
+    ],
+    "merge_potential": "Strong candidate to merge with/absorb a dedicated shelter-mapping or people-finder tool: it already has a solid incident/resource/volunteer schema and geospatial map, so a project focused purely on family reunification or medical triage detail could plug into this platform's Supabase schema and map UI rather than rebuilding infrastructure.",
+    "red_flags": [
+      "No automated tests (unit/integration/e2e) anywhere in the repo",
+      "No CI pipeline (no .github/workflows)",
+      "README.md is unedited create-next-app boilerplate, not real project documentation",
+      "Auth middleware only protects /dashboard, /operations, /settings — other authenticated-looking routes (/map, /incidents, /notifications, /resources) under the same route group appear unprotected",
+      "RLS policies allow fully anonymous inserts on incidents/resources ('Anyone can report'/'Anyone can offer resources') with no validation/moderation layer visible, creating spam/abuse risk for a life-safety system",
+      "No structured logging/observability/error-tracking (only console.log/console.error)",
+      "Single contributor, 0 stars/forks, 15 commits over 2 days — very early-stage, unvetted by others"
+    ],
+    "summary": "ResQLink AI is a Next.js 16 + Supabase humanitarian-response platform for Venezuela earthquake relief, providing incident reporting, an AI-powered triage layer (OpenAI classification/dedup/recommendation), a Leaflet map of incidents/resources/shelters/hospitals, and an automated USGS earthquake + Google News RSS ingestion pipeline via a Netlify scheduled function. The codebase shows a genuine, actively-iterated MVP with a real PostGIS-backed Postgres schema, row-level security, and clean layered architecture, but it ships with zero tests, no CI, an unedited boilerplate README, and gaps in route-level auth protection and anonymous-write abuse controls that would need fixing before trusting it in a live emergency-response deployment.",
+    "project_type": "web-app (full-stack humanitarian incident-response platform)",
+    "stack": {
+      "frontend": [
+        "Next.js 16 (App Router)",
+        "React 19",
+        "Tailwind CSS 4",
+        "shadcn/ui + Radix (@base-ui/react)",
+        "Leaflet / react-leaflet",
+        "Framer Motion",
+        "Zustand",
+        "next-themes",
+        "Serwist (PWA/service worker)"
+      ],
+      "backend": [
+        "Next.js API routes",
+        "Netlify Functions (scheduled)"
+      ],
+      "database": [
+        "Supabase (Postgres)",
+        "PostGIS (geography columns)"
+      ],
+      "infra_deploy": [
+        "Netlify (netlify.toml, @netlify/plugin-nextjs)",
+        "Netlify scheduled functions"
+      ],
+      "ai_ml": [
+        "OpenAI API (gpt-4o-mini) for triage classification, duplicate detection, summarization, resource recommendation"
+      ],
+      "languages": [
+        "TypeScript",
+        "SQL",
+        "CSS",
+        "Python (docs generation scripts only)"
+      ]
+    }
+  },
+  "signals": {
+    "accessible": true,
+    "stars": 0,
+    "forks": 0,
+    "contributors": 1,
+    "commit_count": 15,
+    "code_loc": 7451,
+    "created_at": "2026-06-26T19:18:08Z",
+    "pushed_at": "2026-06-28T17:00:08Z",
+    "license": null,
+    "languages_bytes": {
+      "TypeScript": 202133,
+      "CSS": 4794,
+      "JavaScript": 559
+    },
+    "archived": false
+  },
+  "evaluation": {
+    "diffusion": {
+      "score": 3,
+      "ready_to_promote": true,
+      "available_assets": [
+        "live-demo",
+        "demo-video",
+        "clear-value-prop"
+      ],
+      "recommended_angle": "Lead with the AI-powered triage + live USGS earthquake feed angle: 'An MVP built in 2 days that automatically ingests real earthquake data and uses AI to triage who needs help first' — position as a promising, technically serious hackathon MVP rather than a finished product ready for victims to rely on today.",
+      "gaps": [
+        "No screenshots of populated map/dashboard with real data provided or verifiable via static fetch",
+        "No evidence of real users/testers",
+        "Public README is unedited boilerplate, hurting credibility for open-source diffusion",
+        "Anonymous-write RLS policies pose an abuse risk that should be mentioned/fixed before heavy public promotion"
+      ]
+    },
+    "impact_potential": 4,
+    "live_demo_notes": "Live URL loads and is not broken/404 — it has real routing (/, /map, /dashboard) with a Spanish landing page ('Conectamos necesidades con recursos en tiempo real'), a proper login-gated dashboard, and a map route with its own nav shell. WebFetch only retrieves static/initial HTML (no JS execution), so it could not confirm the Leaflet map actually renders populated incident markers or that the dashboard shows live stats once authenticated — that part remains unverified from outside. Combined with the code analysis (real Supabase/PostGIS schema, working OpenAI triage functions, and a Netlify scheduled function that pulls the real USGS earthquake feed + Google News RSS hourly), this reads as a genuine working MVP rather than a pure mockup, but the public-facing entry page itself shows no live data to an anonymous visitor.",
+    "live_demo_status": "partial",
+    "one_line_pitch": "ResQLink AI: la plataforma que cruza datos sísmicos en vivo (USGS) con IA para priorizar auxilios y conectar víctimas con voluntarios y recursos en tiempo real — un MVP funcional, no una maqueta.",
+    "overall_recommendation": "improve-first",
+    "problem_severity": "critical",
+    "product_quality": 3,
+    "real_problem_reasoning": "Coordinating incident reports, volunteers, and resources (food, water, medicine, transport, shelters, hospitals) during and after earthquakes is a genuine, life-critical coordination failure point in disasters — informal WhatsApp/social-media coordination is slow, duplicated, and hard to prioritize. ResQLink directly targets this with structured incident reporting, geolocation, an AI triage/dedup layer, and automated ingestion of real USGS earthquake data plus a resource/volunteer assignment schema, showing the team understood the actual operational bottlenecks of emergency response rather than building a generic app.",
+    "solves_real_problem": "yes"
+  }
+}

@@ -1,0 +1,152 @@
+{
+  "project_slug": "proto-bloom-sismo",
+  "name": "Bloom-Sismo",
+  "repo_url": "https://github.com/DevAndrew64/Bloom-Sismo",
+  "live_url": "https://github.com/DevAndrew64/Bloom-Sismo",
+  "video_url": "",
+  "countries": [
+    "Colombia"
+  ],
+  "db_description": "La idea consiste en crear una Progressive Web App (PWA) de una sola página HTML que pesa menos de 150 KB en total y que contiene un Filtro de Bloom de todas las personas reportadas como Localizadas o A salvo en las distintas plataformas unificadas.",
+  "lifecycle_status": "ready_to_use",
+  "analysis": {
+    "architecture": {
+      "pattern": "Client-only static PWA (single self-contained HTML file) using Supabase as a BaaS backend for write-only report ingestion; no custom server/API layer",
+      "uses_orm": false,
+      "orm_or_db_layer": "Raw PostgREST REST calls to Supabase (fetch to /rest/v1/reports) with RLS policies enforcing insert-only-anonymous / select-only-authenticated; no ORM, no custom backend",
+      "api_design": "No custom API — client talks directly to Supabase's auto-generated REST endpoint with header-based auth (anon key) and 'Prefer: resolution=ignore-duplicates' for idempotent inserts",
+      "separation_of_concerns": "Reasonable for a single-file constraint: build-filter.js (compiler), fetch-ong-api.js (ingestion stub), verify.js (test harness) are separated from index.html (UI+client logic+SW registration); inside index.html, CSS/state/Bloom filter/IndexedDB/Supabase/QR code are logically sectioned but all in one <script> block",
+      "modularity": "Deliberately monolithic (single HTML under 150KB is the core product requirement so it can be shared via WhatsApp/offline) — low code modularity but justified by the design goal; Node-side tooling is modular",
+      "notable_patterns": [
+        "Bloom filter data structure for compact offline probabilistic lookup (FNV-1a double hashing)",
+        "Service Worker with differentiated caching strategy (stale-while-revalidate for app shell, cache-first for fonts/CDN, network-only bypass for Supabase)",
+        "IndexedDB offline queue + Background Sync API for deferred report submission",
+        "Build-time data injection: Node script reads CSV/JSON sources and injects base64-encoded filter bits directly into index.html as a static build artifact"
+      ]
+    },
+    "code_organization": {
+      "score": 3,
+      "directory_structure": "Flat, minimal, and matches its own README diagram exactly (index.html, sw.js, build-filter.js, fetch-ong-api.js, verify.js, datos/, vercel.json, .github/workflows/deploy.yml)",
+      "naming_quality": "Clear Spanish-language naming throughout, consistent conventions in both Node scripts and client code",
+      "documentation_quality": "Very thorough bilingual (mostly Spanish) README with math derivation, data flow diagrams, CSV/JSON schema docs, and step-by-step deployment instructions; inline code comments are extensive and explain rationale (e.g., why no polling, why fire-and-forget)",
+      "reasoning": "Well-documented and consistently named for a hackathon project, but the single-file-by-design constraint keeps true modularity/separation low, and there are no unit tests in the conventional sense (only a manual verification script)."
+    },
+    "production_readiness": {
+      "score": 2,
+      "has_auth": false,
+      "has_error_handling": true,
+      "has_logging": false,
+      "has_env_config": false,
+      "has_deploy_config": true,
+      "secrets_handling": "Supabase URL and anon/publishable key are hardcoded directly in the public index.html source (acceptable under Supabase's anon-key model given RLS, but there is no env-based secret management, and the anon key with open INSERT policy is exposed to anyone who reads the page source)",
+      "security_notes": "The Supabase 'insert_anon' RLS policy allows ANYONE to insert into `reports` with no auth, rate limiting, or CAPTCHA — trivially spammable/DoS-able during a real crisis when the app is most visible; the 'select_auth' policy restricts reads but there is no admin/coordinator UI in this repo to consume those reports, so operational read access is undefined by the codebase itself; two conflicting deploy targets exist (vercel.json for Vercel + GitHub Actions workflow for GitHub Pages) which is a minor deployment-hygiene issue",
+      "scalability_notes": "Client-side search is O(1)/offline by design, which scales well; but Supabase writes are unbounded/unauthenticated so write-path scalability is really a liability under abuse rather than legitimate load; the core 'real localized-persons data' pipeline is entirely manual (run two Node scripts, then git commit+push, redeploy) — not real-time and not automated in CI (the CI workflow's compile step is commented out)",
+      "reasoning": "The offline search UX is solid engineering, but there is no authentication, no automated data-refresh pipeline, no structured logging/monitoring beyond Vercel Analytics, and the report-submission endpoint is wide open — none of which is acceptable for handling real missing-person data at earthquake-response scale without further hardening."
+    },
+    "maturity": {
+      "score": 3,
+      "has_readme": true,
+      "has_tests": true,
+      "has_ci": true,
+      "is_real_or_boilerplate": "Real, working logic — not generic AI boilerplate. The Bloom filter, IndexedDB queue, and Service Worker caching are correctly implemented and self-consistently tested via verify.js. However, all shipped data (80 records in the compiled filter, CSV/JSON samples) is clearly fabricated demo data, and the actual NGO/ally API integration (fetch-ong-api.js) is an explicit unfinished stub ('PENDIENTE') that exits early if not configured.",
+      "reasoning": "11 commits, 2 contributors, functioning core mechanic verified by a real (if manual) test script, live Vercel demo — this is a genuine working MVP, but the critical real-world data pipeline that would make it operationally useful during an actual earthquake response is not yet built."
+    },
+    "viability": {
+      "score": 3,
+      "reasoning": "Technically clever and genuinely functional (a real Bloom filter compiled into a sub-150KB offline-first PWA is a smart response to 2G/low-bandwidth conditions), but it is not yet deployable for real earthquake relief: the NGO data source is unconnected (placeholder endpoint), updates require a manual local build+git-push+redeploy cycle rather than any automated/real-time sync, and the public report-intake endpoint has no abuse protection — all of which need to be resolved before it could safely and usefully serve real search-and-rescue coordination."
+    },
+    "key_features": [
+      "Client-side Bloom filter (FNV-1a, k=10, ~90KB) for instant offline lookup of whether a person has been reported located, with mathematically guaranteed zero false negatives",
+      "Offline-first PWA via Service Worker: stale-while-revalidate app shell caching, cache-first font/CDN caching, network-only bypass for Supabase calls",
+      "Citizen report submission to Supabase (fire-and-forget REST POST with 8s timeout and idempotent UUID-keyed inserts) with automatic IndexedDB offline queue + Background Sync retry when connectivity returns",
+      "QR code generation (lazy-loaded) to share the compiled filter/version between devices without data connectivity",
+      "Node.js build pipeline (build-filter.js) that auto-discovers CSV/JSON data sources, builds/injects the Bloom filter into index.html as a static deployable artifact, plus a verify.js integrity/test-bank script",
+      "Stub ONG (NGO) API fetcher (fetch-ong-api.js) designed to be configured once a partner organization provides a real endpoint — currently a no-op placeholder"
+    ],
+    "domain_tags": [
+      "people-finder",
+      "family-reunification",
+      "alerts-notifications"
+    ],
+    "merge_potential": "Standalone, narrowly-scoped utility (offline missing-person lookup) that could plug into a broader Build4Venezuela platform as a lightweight 'check if found' widget or PWA module, provided its Supabase report table is unified with a shared people-registry backend/API rather than each project maintaining its own siloed reports table.",
+    "red_flags": [
+      "Real NGO/ally data integration is unimplemented — fetch-ong-api.js is a placeholder that exits immediately if the endpoint isn't manually configured; all shipped data is fabricated demo data",
+      "Data update workflow is entirely manual (edit files, run two Node scripts locally, git commit, git push) with no automated/scheduled sync in CI (the relevant GitHub Actions step is commented out) — unsuitable for keeping located-persons data current during an active crisis",
+      "Public Supabase 'reports' table allows unauthenticated inserts from anyone with no rate limiting or CAPTCHA, making the report-intake endpoint trivially spammable at exactly the moment traffic/attention would be highest",
+      "No admin/coordinator interface exists anywhere in the repo to read or triage the reports that get submitted, despite RLS being configured for 'authenticated' read access",
+      "Conflicting/duplicated deployment configs (vercel.json for Vercel vs. GitHub Actions workflow for GitHub Pages) suggest deployment target ambiguity",
+      "No automated tests run in CI — verify.js is a real and useful test harness but must be run manually"
+    ],
+    "summary": "Bloom-Sismo is a single self-contained HTML PWA (~90KB) that lets Venezuelans check offline, in 0ms, whether a family member has been reported 'located' after an earthquake, using a client-side Bloom filter compiled at build time from CSV/JSON sources. It pairs this with an IndexedDB-backed offline report queue that syncs to Supabase when connectivity returns, a Service Worker for full offline installability, and QR-based filter sharing. The core offline-search mechanic is genuinely well-engineered and tested, but the real-world data pipeline (NGO/ally API integration) is an unfinished stub, all bundled data is demo/fabricated, updates require a fully manual git-push redeploy cycle, and the public report-submission endpoint lacks any abuse protection.",
+    "project_type": "Client-side Progressive Web App (offline-first missing-person lookup tool) with a thin Node.js build-tooling layer and a Supabase BaaS backend for report intake",
+    "stack": {
+      "frontend": [
+        "Vanilla JavaScript (no framework)",
+        "HTML5/CSS3 single-file PWA",
+        "Service Worker API",
+        "IndexedDB",
+        "QRCode.js (lazy-loaded from CDN)"
+      ],
+      "backend": [
+        "None (no custom server) — Supabase used directly as BaaS from the client"
+      ],
+      "database": [
+        "Supabase (PostgreSQL via PostgREST) for the 'reports' table"
+      ],
+      "infra_deploy": [
+        "Vercel (vercel.json)",
+        "GitHub Pages via GitHub Actions (.github/workflows/deploy.yml)",
+        "Vercel Analytics + Speed Insights"
+      ],
+      "ai_ml": [],
+      "languages": [
+        "JavaScript",
+        "HTML",
+        "CSS"
+      ]
+    }
+  },
+  "signals": {
+    "accessible": true,
+    "stars": 0,
+    "forks": 0,
+    "contributors": 2,
+    "commit_count": 11,
+    "code_loc": 871,
+    "created_at": "2026-06-27T21:07:11Z",
+    "pushed_at": "2026-06-28T17:50:38Z",
+    "license": null,
+    "languages_bytes": {
+      "HTML": 166491,
+      "JavaScript": 37358
+    },
+    "archived": false
+  },
+  "evaluation": {
+    "diffusion": {
+      "score": 2,
+      "ready_to_promote": false,
+      "available_assets": [
+        "clear-value-prop"
+      ],
+      "gaps": [
+        "No live demo URL (only GitHub repo, no deployed link confirmed working)",
+        "No demo video",
+        "No screenshots",
+        "Real NGO/ally data is entirely fabricated/demo data, not real located-persons data",
+        "Report intake endpoint is open to spam/abuse — risky to publicize as-is",
+        "No admin/coordinator interface to consume submitted reports"
+      ],
+      "recommended_angle": "Frame as a clever technical prototype (offline Bloom-filter lookup for 2G/no-connectivity zones) aimed at developers/NGOs to adopt and connect real data, not as a ready-to-use victim-facing tool yet."
+    },
+    "impact_potential": 4,
+    "live_demo_notes": "No public web demo URL was provided beyond the GitHub repo itself; live_url points to the repo, not a deployed app. Vercel/GitHub Pages deploy configs exist in the repo (vercel.json and a GitHub Actions workflow) suggesting a demo could be live, but this could not be confirmed as accessible, and no demo video exists either.",
+    "live_demo_status": "no-public-demo",
+    "one_line_pitch": "Bloom-Sismo: revisa en 0ms y sin internet si un familiar fue localizado tras el sismo — un PWA de menos de 150KB que cabe hasta en la peor señal 2G.",
+    "overall_recommendation": "improve-first",
+    "problem_severity": "critical",
+    "product_quality": 3,
+    "real_problem_reasoning": "Checking whether a missing family member has been found is one of the most acute needs during earthquake response, and connectivity is often severely degraded — an offline-first, sub-150KB lookup tool addresses a real and severe pain point elegantly (Bloom filter for instant client-side search, IndexedDB queue + background sync for offline report submission, QR sharing of the filter for zero-connectivity device-to-device transfer). However, the project only partially solves the problem today: the real NGO/ally data feed that would populate the filter with actual located-persons records is an unimplemented stub, so right now the tool only demonstrates the mechanism on fabricated demo data, not real victims' status.",
+    "solves_real_problem": "partial"
+  }
+}

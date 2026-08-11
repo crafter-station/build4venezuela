@@ -3,14 +3,87 @@
     "title": "BUILD4VENEZUELA | 全球黑客松",
     "description": "一场全球 72 小时黑客松，为 6 月 24 日地震后的委内瑞拉构建实用工具。"
   },
+  "CountryHub": {
+    "metadata": {
+      "venezuela": {
+        "title": "委内瑞拉 | Build4Latam",
+        "description": "为帮助委内瑞拉而构建的开放工具、项目和资源。"
+      },
+      "colombia": {
+        "title": "哥伦比亚 | Build4Latam",
+        "description": "能够帮助哥伦比亚的开放工具、项目和资源。"
+      }
+    },
+    "heroTitle": "我们为此而构建",
+    "selector": {
+      "choose": "选择援助地区",
+      "description": "一个由工具、Builder 和资源组成的开放网络，响应拉丁美洲各地的紧急情况。",
+      "enter": "进入",
+      "networkActive": "网络运行中",
+      "solidarity": "团结互助的技术",
+      "statement": "在一个国家有效的方案，也能帮助下一个国家。"
+    },
+    "addProject": "添加项目",
+    "goToCountry": "前往{country}",
+    "availableTools": "可用工具",
+    "toolsTitle": "使用、改造、分享。",
+    "projectsTitle": "面向{country}的项目",
+    "viewAllProjects": "查看所有项目",
+    "empty": "目前还没有标记为适用于{country}的项目。",
+    "countries": {
+      "venezuela": {
+        "name": "委内瑞拉",
+        "eyebrow": "这个网络的起点",
+        "description": "Build4Latam 始于 Build4Venezuela：地震后连接援助、信息与技术的开放行动。这项工作仍在继续。"
+      },
+      "colombia": {
+        "name": "哥伦比亚",
+        "eyebrow": "网络跨越国界",
+        "description": "紧急状况如今也影响着哥伦比亚。我们汇集新的行动，以及来自委内瑞拉黑客松、可在这里调整使用的工具。"
+      }
+    }
+  },
   "Header": {
     "brand": "Build4Venezuela",
     "mobileBrand": "B4B",
     "navigationLabel": "主导航",
     "brandPageLink": "品牌",
-    "openMenuLabel": "打开 Build4Venezuela 菜单",
-    "homeLink": "首页",
-    "projectsLink": "项目",
+    "homeLabel": "Build4Latam 社区首页",
+    "search": "搜索项目",
+    "searchDialog": {
+      "description": "搜索项目、Builder 和社区需求。",
+      "placeholder": "搜索社区...",
+      "loading": "正在加载社区索引...",
+      "empty": "没有匹配的项目、Builder 或需求。",
+      "error": "搜索暂时不可用，请稍后重试。",
+      "recent": "最近搜索"
+    },
+    "themeToggle": "切换颜色主题",
+    "menu": "打开菜单",
+    "menuDescription": "探索社区并找到参与贡献的方式。",
+    "signIn": "登录",
+    "productLabel": "探索",
+    "communityLabel": "社区",
+    "partnersLabel": "与合作伙伴共同建设",
+    "create": {
+      "label": "创建",
+      "project": "添加项目",
+      "need": "发布需求",
+      "resource": "分享资源",
+      "profile": "Builder 资料"
+    },
+    "links": {
+      "home": "首页",
+      "brand": "品牌",
+      "socials": "社交",
+      "whatsapp": "WhatsApp",
+      "discord": "Discord",
+      "projects": "项目",
+      "builders": "Builders",
+      "requests": "需求",
+      "resources": "资源",
+      "impact": "影响力"
+    },
     "languageSelector": {
       "label": "语言",
       "locales": {
@@ -30,6 +103,38 @@
     "cta": "下载社交媒体图片",
     "download": "下载 {fileName}",
     "downloadFormat": "下载 {format}",
+    "brief": {
+      "eyebrow": "传播简报",
+      "title": "让工具真正抵达委内瑞拉。",
+      "description": "目标不是展示技术有多酷，而是让每一位受灾者、家属或志愿者知道有可用工具，并知道在哪里找到它们。",
+      "message": "地震后，数百人正在构建工具。只有这些工具抵达需要它们的人，才真正有用。请分享、标记相关账号，帮助信息进入委内瑞拉。",
+      "checklistEyebrow": "发布前检查",
+      "checklist": [
+        "使用 #Build4Venezuela。",
+        "提到一个具体工具以及它能解决什么问题。",
+        "在 build4venezuela.com/projects 验证项目链接和状态。",
+        "标记可以帮助扩散的委内瑞拉创作者或社区账号。",
+        "保持尊重的语气：传递希望，而不是消费苦难。"
+      ],
+      "linksEyebrow": "核心链接",
+      "links": [
+        {
+          "label": "项目",
+          "href": "/zh/projects",
+          "text": "分享已经上线或正在推进的工具目录。"
+        },
+        {
+          "label": "品牌素材",
+          "href": "/zh/brand#social",
+          "text": "使用可直接发布的视觉素材和官方资源。"
+        },
+        {
+          "label": "WhatsApp",
+          "href": "https://build4venezuela.com/whatsapp",
+          "text": "把有用工具带到非正式社区群组中。"
+        }
+      ]
+    },
     "assets": {
       "eyebrow": "素材",
       "title": "Logo 和标志",
@@ -82,45 +187,117 @@
       }
     }
   },
-  "ProjectsPage": {
-    "noProjects": "暂无项目。成为第一个添加项目的人吧。",
-    "syncingFeed": "正在同步实时信息...",
-    "liveFeedEnabled": "实时信息已启用"
-  },
-  "CommentsSection": {
-    "noComments": "暂无评论。用一个尖锐的问题或有用的建议开始对话吧。",
-    "voted": "已投票",
-    "vote": "投票"
-  },
   "HomePage": {
     "hero": {
       "logoAlt": "为委内瑞拉而建",
       "mapAlt": "委内瑞拉地图",
       "eyebrow": "一场人道主义黑客松，旨在",
       "title": "为委内瑞拉构建技术解决方案。",
-      "eventLink": "6 月 26、27、28 日 // 在线 // luma.com",
+      "closure": {
+        "label": "闭幕活动",
+        "date": "7 月 1 日，星期三 // 18:00 UTC-5 // 在线"
+      },
+      "showcase": {
+        "title": "今天：Build Showcase 成果展示",
+        "description": "我们将展示黑客松期间为应对紧急情况打造的解决方案：寻人、避难所、捐赠、经核实的信息和公民报告。",
+        "times": [
+          "18:00 哥伦比亚 / 秘鲁",
+          "19:00 委内瑞拉 / 智利",
+          "20:00 阿根廷"
+        ],
+        "share": "分享直播。为委内瑞拉而建。"
+      },
+      "stats": [
+        {
+          "value": "+1000",
+          "label": "位建设者"
+        },
+        {
+          "value": "+80",
+          "label": "个项目"
+        }
+      ],
+      "countdown": {
+        "labels": {
+          "days": "天",
+          "hours": "小时",
+          "minutes": "分钟",
+          "seconds": "秒",
+          "complete": "闭幕活动已开始。请继续构建。"
+        }
+      },
       "whatsapp": "WhatsApp",
       "discord": "Discord",
-      "description": "因为在危机时刻，技术也可以成为一种团结互助的形式。"
+      "watch": {
+        "label": "观看闭幕活动直播"
+      },
+      "description": "正式活动即将闭幕，但工作还会继续：继续改进你的项目，参与现有项目，或提出委内瑞拉仍然需要解决的问题。",
+      "poweredBy": "技术支持"
     },
     "context": {
       "eyebrow": "背景",
-      "title": "带着紧迫感构建，而不是制造噪音。",
-      "firstParagraph": "6 月 24 日两次强震后，委内瑞拉正面临重大紧急情况。最新报告称，至少 188 人遇难，超过 1,500 人受伤。",
-      "secondParagraph": "救援队仍在搜寻幸存者。国际援助航班和支援团队已经开始抵达，而医院、建筑物和受影响社区正面临持续发展的人道主义危机。",
+      "title": "构建不止一周。",
+      "firstParagraph": "地震留下的问题需要现在就得到帮助，也不会在一周内解决。家庭、志愿者、组织和社区仍然需要可靠信息、协调、援助入口，以及能在低连接环境下工作的工具。",
+      "secondParagraph": "Build4Venezuela 正从一次冲刺转向更长期的集体行动：既支持眼前的紧急需求，也建设能帮助委内瑞拉恢复、协作并变得更强的长期解决方案。",
       "latestInfo": "查看最新信息",
       "latestInfoQuery": "委内瑞拉地震的最新情况是什么？"
     },
     "impactStats": [
-      { "value": "188+", "label": "遇难人数" },
-      { "value": "1,500+", "label": "受伤人数" },
-      { "value": "346+", "label": "受损建筑" },
-      { "value": "200+", "label": "可能被困人员" }
+      {
+        "value": "01",
+        "label": "继续完善你的项目"
+      },
+      {
+        "value": "02",
+        "label": "与现有团队协作"
+      },
+      {
+        "value": "03",
+        "label": "提出新的待解决问题"
+      },
+      {
+        "value": "04",
+        "label": "为恢复而设计，而不只是应急"
+      }
     ],
+    "principles": {
+      "eyebrow": "集体行动原则",
+      "title": "信任就是操作系统。",
+      "description": "这些原则指导代码、沟通、协调、设计决策、群组消息和媒体互动。如果一个决定违背这些原则，就应先重新审视。",
+      "items": [
+        {
+          "title": "以人为中心",
+          "text": "不是为了演示而构建，而是为了在委内瑞拉信号弱、电量少、需求紧急的人。"
+        },
+        {
+          "title": "避免重复",
+          "text": "在构建新东西之前，先询问是否已经存在，以及如何与它衔接。"
+        },
+        {
+          "title": "长期信任",
+          "text": "透明说明什么有效、什么无效，以及每个工具现实中能做到什么。"
+        },
+        {
+          "title": "不造成伤害",
+          "text": "尊重救援队和专业机构。不要传播未经验证的救援信息，也不要挤占紧急渠道。"
+        }
+      ],
+      "filter": {
+        "eyebrow": "决策过滤器",
+        "title": "发布或构建之前",
+        "items": [
+          "这是否服务于现在委内瑞拉的真实个人，还是只让我们感觉自己有用？",
+          "我们是否在重复已有东西，还是可以协调合作？",
+          "这会建立信任，还是制造混乱？",
+          "这是否可能干扰救援工作或专业应急团队？"
+        ]
+      }
+    },
     "projects": {
       "eyebrow": "项目想法",
       "title": "你可以构建什么",
-      "description": "选择一个具体问题。缩小范围。留下一个别人到周一就能使用的东西。"
+      "description": "选择一个具体问题。连接已有工作。留下一个既能服务紧急情况、又足够支持恢复阶段的成果。",
+      "viewAll": "查看委内瑞拉项目"
     },
     "projectIdeas": [
       "经过验证的避难所、物资收集点和医疗服务目录。",
@@ -132,13 +309,13 @@
     ],
     "join": {
       "eyebrow": "加入",
-      "title": "带着一项技能而来，带着一个项目离开。"
+      "title": "闭幕后也继续构建。"
     },
     "channels": [
       {
         "label": "Luma",
         "href": "https://build4venezuela.com/luma",
-        "text": "报名参加活动并接收官方更新。"
+        "text": "参加闭幕活动并接收官方更新。"
       },
       {
         "label": "WhatsApp",
@@ -148,7 +325,7 @@
       {
         "label": "Discord",
         "href": "https://build4venezuela.com/discord",
-        "text": "寻找团队、项目频道、导师和技术支持。"
+        "text": "寻找团队，继续项目，提出新项目，并协调支持。"
       },
       {
         "label": "GitHub",
@@ -162,7 +339,7 @@
     "partners": [
       {
         "name": "Moraleja Studio",
-        "href": "https://moraleja.co",
+        "href": "https://moraleja.co?utm_source=build4venezuela&utm_medium=referral&utm_campaign=partners",
         "image": "moraleja-studio.svg",
         "width": 65,
         "height": 52,
@@ -170,7 +347,7 @@
       },
       {
         "name": "Crafter Station",
-        "href": "https://crafterstation.com",
+        "href": "https://crafterstation.com?utm_source=build4venezuela&utm_medium=referral&utm_campaign=partners",
         "image": "CS.svg",
         "width": 140,
         "height": 34,
@@ -178,12 +355,627 @@
       },
       {
         "name": "The Hackathon Company",
-        "href": "https://hackathon.lat",
+        "href": "https://hackathon.lat?utm_source=build4venezuela&utm_medium=referral&utm_campaign=partners",
         "image": "THC.svg",
         "width": 92,
         "height": 52,
         "className": "mx-auto h-auto w-full max-w-[104px] select-none sm:max-w-[130px]"
       }
     ]
+  },
+  "Projects": {
+    "eyebrow": "Project list",
+    "title": "Shipped work",
+    "submitCta": {
+      "label": "Submit yours"
+    },
+    "grid": {
+      "empty": "暂无项目。成为第一个添加项目的人吧。",
+      "syncing": "Checking for updates...",
+      "live": "Updated automatically",
+      "searchPlaceholder": "搜索项目、团队或地点...",
+      "all": "All",
+      "project": "project",
+      "projects": "projects",
+      "open": "Open",
+      "vote": "vote",
+      "votes": "votes",
+      "views": {
+        "grid": "Grid",
+        "list": "List"
+      },
+      "table": {
+        "project": "Project",
+        "status": "Status",
+        "category": "Category",
+        "countries": "Countries",
+        "applicability": "Applicability",
+        "builder": "Builder",
+        "votes": "Votes",
+        "link": "Link"
+      },
+      "statuses": {
+        "all": "All statuses",
+        "ready_to_use": "Ready to use",
+        "in_development": "In development",
+        "idea": "Idea"
+      },
+      "applicabilities": {
+        "latam": "Reusable across LATAM",
+        "venezuela": "可在委内瑞拉使用",
+        "colombia": "可在哥伦比亚使用"
+      }
+    },
+    "categories": {
+      "personas": {
+        "label": "Find People",
+        "title": "Missing & Found People",
+        "description": "Report, search, and reunite missing people and pets — WhatsApp/Telegram bots, facial recognition, and rescue maps. Join here if you want to help families find each other."
+      },
+      "recursos": {
+        "label": "Aid Coordination",
+        "title": "Aid & Resource Coordination",
+        "description": "Live maps and directories of shelters, collection centers, hospitals, volunteers, and needs by zone. Join here to help route help to where it's needed."
+      },
+      "data": {
+        "label": "Data & APIs",
+        "title": "Data, Dedup & Shared APIs",
+        "description": "The shared data layer — scraping, normalization, deduplication, and open APIs other tools build on. Join here to make every other tool speak the same truth."
+      },
+      "damage": {
+        "label": "Damage Assessment",
+        "title": "Structural Damage Assessment",
+        "description": "Crowdsourced and AI-assisted assessment of building damage, habitability, and structural risk. Join here if you work with engineering, CV, or satellite data."
+      },
+      "donations": {
+        "label": "Donations",
+        "title": "Donations & Funding",
+        "description": "Crowdfunding, donor matching, and transparent aid payments. Join here to move money and supplies to people who need them."
+      },
+      "infra": {
+        "label": "Connectivity & Infra",
+        "title": "Connectivity & Infrastructure",
+        "description": "Offline mesh networking, edge inference, sensing, and alerts that keep tools running when the grid is down. Join here for the hardest, highest-leverage bets."
+      },
+      "info": {
+        "label": "Verified Info",
+        "title": "Verified Info & Anti-misinformation",
+        "description": "Fighting rumors with verified, real-time information. Join here to keep the public informed and the noise down."
+      },
+      "other": {
+        "label": "Other",
+        "title": "Community & Other",
+        "description": "Community, meta, and builds that don't fit a single cluster yet."
+      }
+    }
+  },
+  "SubmitProject": {
+    "eyebrow": "Submit",
+    "title": "Add your project",
+    "description": "Every accepted project gets a permanent page at /p/your-slug. You can edit the slug later from this browser.",
+    "submitLabel": "Submit project"
+  },
+  "EditProject": {
+    "eyebrow": "Edit",
+    "title": "Update your project",
+    "description": "Change any field, including the slug. The page URL updates after saving.",
+    "submitLabel": "Save changes"
+  },
+  "ProjectForm": {
+    "slugLabel": "Project slug",
+    "slugPlaceholder": "cool-slug",
+    "nameLabel": "Project name",
+    "lifecycleStatusLabel": "Project status",
+    "lifecycleStatuses": {
+      "ready_to_use": "Ready to use",
+      "in_development": "In development",
+      "idea": "Idea"
+    },
+    "applicabilityLabel": "Where can this project be used?",
+    "applicabilityHint": "Choose LATAM when the tool can be adapted beyond one country.",
+    "applicabilities": {
+      "latam": "Reusable across LATAM",
+      "venezuela": "可在委内瑞拉使用",
+      "colombia": "可在哥伦比亚使用"
+    },
+    "projectUrlLabel": "Project link",
+    "countriesLabel": "Participant countries",
+    "countriesPlaceholder": "Venezuela, Colombia, United States",
+    "participantNameLabel": "Team or participant name",
+    "videoUrlLabel": "Demo video link (optional)",
+    "videoUrlPlaceholder": "https://youtu.be/...",
+    "contributeInUrlLabel": "Contribution link (optional)",
+    "contributeInUrlPlaceholder": "https://github.com/... or https://linkedin.com/...",
+    "descriptionMarkdownLabel": "Markdown description",
+    "descriptionMarkdownPlaceholder": "## What did you build?\n\nWho is it for? How does it help? What should people try first?",
+    "pending": "Checking...",
+    "deleteDescription": "Need to remove this submission? Deleting it also removes its votes and comments.",
+    "deleteConfirm": "This cannot be undone. Click delete again to permanently remove this submission.",
+    "deleteButton": "Delete submission",
+    "deleteConfirmButton": "Delete permanently",
+    "deleteCancel": "Cancel",
+    "deletePending": "Deleting...",
+    "imageLabel": "Project image (optional)",
+    "imageHint": "JPG, PNG, or WebP up to 8 MB. The video is shown first when both are provided.",
+    "imagePreviewAlt": "Current project image",
+    "imageRemove": "Remove image",
+    "imageUploading": "Uploading image...",
+    "imageUploadError": "Could not upload the project image."
+  },
+  "ProjectDetail": {
+    "metadata": {
+      "notFoundTitle": "Project not found | Build4Venezuela",
+      "description": "A Build4Venezuela project by {name}."
+    },
+    "builtBy": "Built by",
+    "countries": "Countries",
+    "applicability": "Where it works",
+    "applicabilities": {
+      "latam": "Reusable across LATAM",
+      "venezuela": "可在委内瑞拉使用",
+      "colombia": "可在哥伦比亚使用"
+    },
+    "status": "Status",
+    "statuses": {
+      "ready_to_use": "Ready to use",
+      "in_development": "In development",
+      "idea": "Idea"
+    },
+    "openProject": "Open project",
+    "watchDemo": "Watch demo",
+    "contribute": "Contribute",
+    "edit": "Edit project and slug"
+  },
+  "Votes": {
+    "signIn": "Sign in to vote ({count})",
+    "vote": "Vote ({count})",
+    "voted": "Voted ({count})"
+  },
+  "Comments": {
+    "eyebrow": "Comments",
+    "title": "Build feedback",
+    "comment": "comment",
+    "comments": "comments",
+    "placeholder": "Add a useful question, note, or suggestion...",
+    "posting": "Posting...",
+    "post": "Post comment",
+    "signedOutDescription": "Sign in to leave feedback and vote on comments.",
+    "signIn": "Sign in to comment",
+    "vote": "投票 ({count})",
+    "voted": "已投票 ({count})",
+    "empty": "暂无评论。用一个尖锐的问题或有用的建议开始对话吧。",
+    "errors": {
+      "tooShort": "Add at least 3 characters.",
+      "tooLong": "Keep comments under 1,200 characters."
+    }
+  },
+  "Requests": {
+    "metadata": {
+      "title": "Requests for solutions | Build4Venezuela",
+      "description": "A live board where people in Venezuela can request useful solutions, vote, and discuss what builders should make next."
+    },
+    "eyebrow": "Requests for solutions",
+    "title": "Tell builders what matters.",
+    "description": "If you are in Venezuela, leave concrete problems that technology, coordination, logistics, or information tools could help solve. The community votes and comments in real time.",
+    "board": {
+      "formEyebrow": "Leave an idea",
+      "formTitle": "Request a solution",
+      "formDescription": "Name the problem. Add context only if it helps builders understand who is affected, what fails today, and what a good outcome looks like.",
+      "namePlaceholder": "Example: reliable medicine availability map",
+      "descriptionPlaceholder": "Optional markdown: who needs this, what is hard today, links, constraints...",
+      "posting": "Posting...",
+      "postRequest": "Post request",
+      "requestSent": "请求已发送。现在已显示在看板上。",
+      "signedOutDescription": "Sign in to leave ideas, vote, and comment.",
+      "signIn": "Sign in",
+      "request": "request",
+      "requests": "requests",
+      "syncing": "Checking for updates...",
+      "live": "Updated automatically",
+      "vote": "Vote ({count})",
+      "voted": "Voted ({count})",
+      "expand": "Expand details",
+      "collapse": "Collapse details",
+      "noDescription": "No extra description yet. Use the comments to ask for missing context.",
+      "comments": "Comments ({count})",
+      "commentPlaceholder": "Ask a question, confirm the need, or add context...",
+      "comment": "Comment",
+      "noComments": "No comments yet.",
+      "empty": "No requests yet. Start with one concrete problem builders should solve.",
+      "errors": {
+        "nameTooShort": "Add a clear request name.",
+        "descriptionTooLong": "Keep the description under 8,000 characters.",
+        "commentTooShort": "Add at least 3 characters.",
+        "commentTooLong": "Keep comments under 1,200 characters."
+      }
+    }
+  },
+  "Builders": {
+    "eyebrow": "Builder 网络",
+    "title": "寻找 builders.",
+    "description": "搜索工程师、设计师和 AI builders。联系请求会保持私密，直到 builder 接受。",
+    "register": "注册",
+    "profile": "我的个人资料",
+    "inbox": "收件箱",
+    "unansweredRequests": "{count} 个未回复请求",
+    "directory": {
+      "searchLabel": "搜索 builders",
+      "searchPlaceholder": "按姓名、角色或描述搜索",
+      "roleFilterLabel": "按角色筛选",
+      "hoursFilterLabel": "按每周小时数筛选",
+      "allRoles": "全部角色",
+      "anyHours": "任意时间",
+      "minimumHours": "{hours}+ 小时/周",
+      "builderCount": "{count} 位 builder",
+      "paginationLabel": "Builder 分页",
+      "pageStatus": "第 {page} 页，共 {total} 页",
+      "previousPage": "上一页",
+      "nextPage": "下一页",
+      "refreshing": "正在刷新...",
+      "liveDirectory": "实时目录",
+      "empty": "还没有符合这些筛选条件的 builders。",
+      "availabilityHidden": "可用时间已隐藏",
+      "hoursPerWeek": "{hours} 小时/周",
+      "unavailable": "不可用",
+      "portfolio": "作品集",
+      "contact": "联系",
+      "signIn": "登录",
+      "projectName": "项目名称",
+      "coverLetter": "简短自荐信",
+      "coverLetterPlaceholder": "你在构建什么，为什么选择这位 builder，你需要什么支持？",
+      "coverLetterHint": "附上与项目相关的所有链接或公开资源（代码库、演示文稿、演示、文档）。",
+      "attachProject": "此请求针对我注册的一个项目。",
+      "attachProjectNamed": "正在附加：{name}",
+      "contactEmail": "联系邮箱（可选）",
+      "contactPhone": "联系电话（可选）",
+      "checking": "正在检查...",
+      "sendRequest": "发送请求",
+      "requestSent": "请求已发送。Builder 可以在收件箱中接受或拒绝。",
+      "requestSpamError": "此请求看起来像垃圾信息。请修改后再试。",
+      "roles": {
+        "frontend_engineer": "前端工程师",
+        "backend_engineer": "后端工程师",
+        "fullstack_engineer": "全栈工程师",
+        "ai_engineer": "AI 工程师",
+        "designer": "设计师",
+        "product_manager": "产品经理",
+        "devops_engineer": "DevOps 工程师",
+        "data_engineer": "数据工程师",
+        "other": "其他"
+      },
+      "days": {
+        "monday": "周一",
+        "tuesday": "周二",
+        "wednesday": "周三",
+        "thursday": "周四",
+        "friday": "周五",
+        "saturday": "周六",
+        "sunday": "周日"
+      }
+    },
+    "registerPage": {
+      "eyebrow": "Builder 网络",
+      "titleNew": "注册成为 builder.",
+      "titleExisting": "Builder 资料.",
+      "descriptionNew": "创建注重隐私的资料，让项目负责人可以请求帮助，而无需在公开目录中暴露你的直接联系方式。",
+      "descriptionExisting": "管理你的 builder 资料，在忙碌时隐藏它，或更新项目负责人联系你之前会看到的字段。",
+      "backToBuilders": "返回 builders",
+      "viewBuilders": "查看 builders",
+      "requestInbox": "收件箱",
+      "form": {
+        "savedNotice": "Builder 资料已保存。",
+        "visibleNotice": "Builder 资料已在目录中显示。",
+        "frozenNotice": "Builder 资料已从目录中隐藏。",
+        "profileStatusTitle": "Builder 资料",
+        "frozenDescription": "隐藏的资料仍可编辑，但不会出现在 builder 列表中。",
+        "visibleDescription": "你的资料已显示在 builder 目录中。",
+        "frozenStatus": "已隐藏",
+        "visibleStatus": "可见",
+        "showProfile": "显示资料",
+        "hideProfile": "隐藏资料",
+        "deleteProfile": "删除资料",
+        "deleteDialogTitle": "删除资料？",
+        "deleteDialogDescription": "这会从目录中移除你的 builder 资料，并清除其联系请求。你之后仍可重新注册。",
+        "cancel": "取消",
+        "deleting": "正在删除...",
+        "name": "姓名",
+        "role": "角色",
+        "customRole": "描述角色",
+        "customRolePlaceholder": "社区组织者、无障碍专家...",
+        "description": "描述",
+        "descriptionPlaceholder": "你擅长构建什么，可以支持哪类项目？",
+        "linkedin": "LinkedIn（可选）",
+        "portfolio": "作品集（可选）",
+        "setAvailability": "设置可用时间",
+        "availabilityHelp": "可选。隐藏的可用时间不会显示，也不会用于公开的小时筛选。",
+        "weekdaysPreset": "工作日 2 小时",
+        "weekendsPreset": "周末 4 小时",
+        "clearAvailability": "清除",
+        "hoursPerWeek": "{hours} 小时/周",
+        "saving": "正在保存...",
+        "saveProfile": "保存 builder 资料",
+        "publishProfile": "发布 builder 资料"
+      }
+    },
+    "requests": {
+      "eyebrow": "Builder 收件箱",
+      "title": "请求.",
+      "description": "查看项目负责人的联系请求。接受后，你可以在参与项目期间隐藏自己的 builder 资料。",
+      "backToBuilders": "返回 builders",
+      "viewBuilders": "查看 builders",
+      "inbox": {
+        "requestCount": "{count} 个请求",
+        "refreshing": "正在刷新...",
+        "privateInbox": "私密收件箱",
+        "empty": "还没有人联系你的 builder 资料。",
+        "fromRequester": "来自 {requester}",
+        "toBuilder": "发送给 {builder}",
+        "contactEmail": "联系邮箱",
+        "contactPhone": "联系电话",
+        "notProvided": "未提供",
+        "hideProfileOnAccept": "如果我接受，则隐藏我的 builder 资料",
+        "accept": "接受",
+        "reject": "拒绝",
+        "directions": {
+          "inbound": "收到",
+          "outbound": "发出"
+        },
+        "statuses": {
+          "pending": "待处理",
+          "accepted": "已接受",
+          "rejected": "已拒绝"
+        }
+      }
+    }
+  },
+  "Insights": {
+    "metadata": {
+      "title": "Project Insights — Build4Venezuela",
+      "description": "Internal triage: tech stack, maturity, viability, overlap, and diffusion readiness across project repositories."
+    },
+    "shared": {
+      "tiers": {
+        "spotlight": "Spotlight",
+        "promote": "Promote",
+        "merge-candidate": "Merge candidate",
+        "improve-first": "Improve first",
+        "deprioritize": "Deprioritize"
+      }
+    },
+    "dashboard": {
+      "eyebrow": "Internal triage",
+      "title": "Project Insights",
+      "description": "{count} repositories analyzed for stack, architecture, maturity, viability, and diffusion readiness — built to spot overlap, merge candidates, and what's ready to spotlight.",
+      "stats": {
+        "analyzed": "Analyzed",
+        "promoReady": "Promo-ready",
+        "totalLoc": "Total LOC",
+        "locValue": "{count}k"
+      },
+      "filters": {
+        "domain": "Domain",
+        "all": "All",
+        "clear": "clear filters"
+      },
+      "panels": {
+        "triage": {
+          "title": "Triage quadrant",
+          "subtitle": "impact × production-readiness · bubble = stars · color = tier"
+        },
+        "overlap": {
+          "title": "Overlap network",
+          "subtitle": "edges = shared domain tags (≥3) · clusters = duplicate solutions"
+        },
+        "leaderboard": {
+          "title": "Leaderboard",
+          "subtitle": "{count, plural, one {# project} other {# projects}} · click a row for detail"
+        },
+        "tech": {
+          "title": "Tech landscape",
+          "subtitle": "across all analyzed repos"
+        }
+      }
+    },
+    "leaderboard": {
+      "columns": {
+        "project": {
+          "label": "Project",
+          "description": "The project name and its repository type (web app, PWA, bot, etc.). Click a row to open full detail."
+        },
+        "tier": {
+          "label": "Tier",
+          "description": "Overall recommendation: Spotlight (back heavily) › Promote › Merge candidate › Improve first › Deprioritize."
+        },
+        "viability": {
+          "label": "Viab",
+          "description": "Viability (1–5): how realistically this can be deployed and maintained to actually help victims — weighs maturity, production-readiness, and how complete the core function is."
+        },
+        "production": {
+          "label": "Prod",
+          "description": "Production-readiness (1–5): auth, error handling, logging, secret handling, security, scalability, and deploy config in the code."
+        },
+        "product": {
+          "label": "Prod-Q",
+          "description": "Product quality (1–5): how complete and usable the actual product is (not the code) — judged from the live demo where one exists."
+        },
+        "diffusion": {
+          "label": "Diff",
+          "description": "Diffusion readiness (1–5): how ready it is to create promo/social content right now — working demo, video, screenshots, clear value prop."
+        },
+        "maturity": {
+          "label": "Mat",
+          "description": "Maturity (1–5): real working software vs. boilerplate — real logic, tests, CI, commit history, README."
+        },
+        "severity": {
+          "label": "Sev",
+          "description": "Problem severity: how urgent the victim-facing problem it addresses is (critical › high › medium › low)."
+        },
+        "stars": {
+          "label": "★",
+          "description": "GitHub stars on the repository — a rough popularity / social-proof signal."
+        },
+        "loc": {
+          "label": "LOC",
+          "description": "Lines of code in real source files (excludes dependencies and build output) — a rough size/effort signal."
+        },
+        "security": {
+          "label": "安全",
+          "description": "来自自动审计的安全暴露风险（开放的PII端点、泄露的密钥、缺少身份验证）。点击排序。"
+        }
+      },
+      "risk": {
+        "critical": "严重",
+        "high": "高",
+        "medium": "中",
+        "low": "低",
+        "none": "无风险"
+      }
+    },
+    "triageQuadrant": {
+      "hint": "← ship-ready · high impact ↑",
+      "productionReadiness": "Production-readiness",
+      "productionReadinessAxis": "PRODUCTION-READINESS →",
+      "impact": "Impact",
+      "impactAxis": "IMPACT",
+      "tooltip": {
+        "impact": "impact {score}",
+        "production": "prod {score}",
+        "viability": "viab {score}"
+      }
+    },
+    "overlapNetwork": {
+      "instructions": "scroll to zoom · drag to pan",
+      "ariaLabel": "Project overlap network"
+    },
+    "drawer": {
+      "links": {
+        "repo": "repo ↗",
+        "live": "live ↗",
+        "video": "video ↗"
+      },
+      "scores": {
+        "viability": "Viability",
+        "production": "Prod-ready",
+        "maturity": "Maturity",
+        "organization": "Code org",
+        "product": "Product",
+        "diffusion": "Diffusion"
+      },
+      "signals": {
+        "stars": "Stars",
+        "commits": "Commits",
+        "loc": "LOC",
+        "contributors": "Contributors",
+        "license": "License",
+        "realProblem": "Real problem",
+        "liveDemo": "Live demo",
+        "orm": "ORM"
+      },
+      "none": "none",
+      "yes": "yes",
+      "rawSql": "raw SQL",
+      "sections": {
+        "summary": "Summary",
+        "stack": "Stack",
+        "domainTags": "Domain tags",
+        "overlaps": "Overlaps with ({count})",
+        "redFlags": "Red flags",
+        "diffusionReadiness": "Diffusion readiness",
+        "mergePotential": "Merge potential",
+        "security": "安全审计"
+      },
+      "stack": {
+        "frontend": "Frontend",
+        "backend": "Backend",
+        "database": "Database",
+        "aiMl": "AI/ML"
+      },
+      "sharedCount": "{count} shared",
+      "readyToPromote": "Ready to promote",
+      "notYet": "Not yet",
+      "assets": "assets: {assets}",
+      "angle": "Angle:",
+      "security": {
+        "badge": "{risk}风险",
+        "risk": {
+          "critical": "严重",
+          "high": "高",
+          "medium": "中",
+          "low": "低",
+          "none": "无风险"
+        },
+        "auditedAt": "审计于 {date}",
+        "reauditedAt": "重新审计于 {date}",
+        "previously": "此前为{risk}",
+        "notAudited": "未审计 — 无法克隆该仓库。",
+        "clean": "本次审计未发现暴露问题。",
+        "allResolved": "此前报告的所有问题均已修复。",
+        "issueLink": "查看披露 issue →",
+        "status": {
+          "open": "未修复",
+          "partial": "部分修复",
+          "resolved": "已修复",
+          "new": "新增"
+        }
+      }
+    },
+    "stackCharts": {
+      "titles": {
+        "tech": "Most-used tech",
+        "types": "Project types",
+        "databases": "Databases",
+        "dataLayer": "Data layer"
+      },
+      "types": {
+        "telegramBot": "Telegram bot",
+        "whatsappBot": "WhatsApp bot",
+        "mobileApp": "Mobile app",
+        "pwa": "PWA",
+        "staticSite": "Static site",
+        "apiPipeline": "API / pipeline",
+        "webApp": "Web app"
+      },
+      "dataLayer": {
+        "rawSql": "Raw SQL / BaaS client",
+        "orm": "Uses an ORM"
+      }
+    }
+  },
+  "Resources": {
+    "eyebrow": "Resources",
+    "title": "Materials",
+    "open": "Open",
+    "items": {
+      "deck": {
+        "title": "Build4Venezuela Deck",
+        "description": "Build4Venezuela project presentation in Google Slides.",
+        "kind": "Slides"
+      },
+      "projects": {
+        "title": "Projects",
+        "description": "Project list in Google Sheets.",
+        "kind": "Sheets"
+      },
+      "excel": {
+        "title": "Excel",
+        "description": "Build4Venezuela 的完整电子表格（Google Sheets）。",
+        "kind": "Sheets"
+      },
+      "brand": {
+        "title": "品牌与传播简报",
+        "description": "官方素材、发布指南和帮助工具抵达委内瑞拉的链接。",
+        "kind": "传播"
+      },
+      "github": {
+        "title": "GitHub",
+        "description": "Build4Venezuela repository on GitHub.",
+        "kind": "Code"
+      },
+      "discord": {
+        "title": "Discord",
+        "description": "Join the community on Discord.",
+        "kind": "Community"
+      }
+    }
   }
 }

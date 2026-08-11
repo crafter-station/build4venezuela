@@ -1,0 +1,128 @@
+{
+  "project_slug": "awesome-venezuela-relief",
+  "name": "awesome-venezuela-relief Public",
+  "repo_url": "https://github.com/Betzabesp94/awesome-venezuela-relief",
+  "live_url": "https://github.com/Betzabesp94/awesome-venezuela-relief",
+  "video_url": "",
+  "countries": [
+    "Venezuela"
+  ],
+  "db_description": "## Awesome Venezuela Relief\n\nUna lista curada de proyectos, herramientas, datasets y recursos tecnológicos creados para apoyar la respuesta humanitaria tras el doble terremoto ocurrido en Venezuela el 24 de junio de 2026.\n\nEl objetivo de este repositorio es centralizar iniciativas open source que faciliten la coordinación de voluntarios, la difusión de información confiable, las donaciones, la búsqueda de personas, el apoyo psicológico y otras soluciones desarrolladas por la comunidad tecnológica para responder a la emergencia.",
+  "lifecycle_status": "ready_to_use",
+  "analysis": {
+    "summary": "A bilingual (ES/EN) awesome-list README curating links to other GitHub repos related to the fictional 2026 Venezuela earthquake relief response. The repository itself contains only a single README.md file — no application code, no package manager files, no LICENSE (despite being referenced), no CONTRIBUTING.md (also referenced but absent), and no functionality of its own.",
+    "project_type": "curated link directory / awesome-list (documentation only, no application)",
+    "stack": {
+      "frontend": [],
+      "backend": [],
+      "database": [],
+      "infra_deploy": [],
+      "ai_ml": [],
+      "languages": [
+        "Markdown"
+      ]
+    },
+    "architecture": {
+      "pattern": "None — single static README file, no code architecture of any kind",
+      "uses_orm": false,
+      "orm_or_db_layer": "None",
+      "api_design": "None",
+      "separation_of_concerns": "Not applicable; there is no code to separate.",
+      "modularity": "Not applicable; single markdown file only.",
+      "notable_patterns": []
+    },
+    "code_organization": {
+      "score": 1,
+      "directory_structure": "Repo root contains only README.md and .git; no src, no config, no other directories.",
+      "naming_quality": "Not applicable — no code files exist to evaluate naming.",
+      "documentation_quality": "The README itself is thorough, well-structured, and bilingual, but it is the entirety of the repo's content; it links to files (LICENSE, CONTRIBUTING.md) that do not actually exist in the tree.",
+      "reasoning": "There is no code organization to assess since the repository consists of exactly one markdown file with no source code, configuration, or supporting files."
+    },
+    "production_readiness": {
+      "score": 1,
+      "has_auth": false,
+      "has_error_handling": false,
+      "has_logging": false,
+      "has_env_config": false,
+      "has_deploy_config": false,
+      "secrets_handling": "N/A — no code or secrets exist in this repo",
+      "security_notes": "No attack surface exists since there is no application; however the README itself is an unmoderated pointer list and could propagate links to broken, fake, or malicious 'relief' sites without any verification mechanism beyond volunteer review.",
+      "scalability_notes": "N/A — this is a static markdown document, not a deployable service.",
+      "reasoning": "There is zero deployable code; this cannot be 'production-ready' in any technical sense because there is no production system, only a list of links to other people's projects."
+    },
+    "maturity": {
+      "score": 1,
+      "has_readme": true,
+      "has_tests": false,
+      "has_ci": false,
+      "is_real_or_boilerplate": "Not boilerplate scaffolding either — it's a pure documentation/index repo (an 'awesome-list'). It contains real, substantive written content (bilingual, detailed categories, contribution guidelines) but zero functional code.",
+      "reasoning": "Single commit, single file (README.md), no tests, no CI, no LICENSE file despite being linked, no package/dependency files of any kind — this is a content-only directory repo, not a software project."
+    },
+    "viability": {
+      "score": 1,
+      "reasoning": "As a hackathon submission this delivers no working software, no deployable artifact, and no functionality beyond a hand-curated list of other teams' repos; it cannot itself be deployed to help earthquake victims and offers zero unique technical value beyond what a wiki page or gist could provide."
+    },
+    "key_features": [
+      "Bilingual (Spanish/English) categorized directory of external relief-related GitHub projects",
+      "Inclusion criteria and contribution guidelines for adding new projects via PR",
+      "Status badges (Active/In development/Inactive) for listed external projects",
+      "FAQ and important-disclaimer sections clarifying the repo is unofficial and volunteer-run"
+    ],
+    "domain_tags": [
+      "people-finder",
+      "shelter-mapping",
+      "donations-aid",
+      "seismic-data",
+      "mental-health",
+      "family-reunification",
+      "volunteer-coordination",
+      "mapping-geo",
+      "comms-chat",
+      "alerts-notifications"
+    ],
+    "merge_potential": "None as a code contribution; at most it could serve as an index/README section within a broader build4venezuela meta-repo, but has no code to merge and duplicates the kind of catalog that a central hub project would already need to maintain itself.",
+    "red_flags": [
+      "Repository contains zero source code — literally only README.md exists in the working tree",
+      "References LICENSE and CONTRIBUTING.md files in links that do not actually exist in the repository",
+      "No verification mechanism for the legitimacy/safety of the many third-party links it aggregates, despite claiming 'verified resources' in some category descriptions",
+      "Single commit, single contributor, created and pushed within about 90 minutes on the same day, suggesting AI-generated boilerplate content rather than an organically curated community list"
+    ]
+  },
+  "signals": {
+    "accessible": true,
+    "stars": 1,
+    "forks": 0,
+    "contributors": 1,
+    "commit_count": 1,
+    "code_loc": 0,
+    "created_at": "2026-07-01T01:53:13Z",
+    "pushed_at": "2026-07-01T03:11:27Z",
+    "license": null,
+    "languages_bytes": {},
+    "archived": false
+  },
+  "evaluation": {
+    "diffusion": {
+      "score": 1,
+      "ready_to_promote": false,
+      "available_assets": [],
+      "recommended_angle": "Not suitable for standalone promotion; at most a single line in a broader 'community resources' roundup, and even then only after LICENSE/CONTRIBUTING files are actually added.",
+      "gaps": [
+        "No working product or code of any kind (0 LOC)",
+        "No live demo or video",
+        "References LICENSE/CONTRIBUTING files that don't exist, undermining credibility",
+        "No verification mechanism for the third-party links it claims are 'verified'",
+        "Single commit/contributor, built in ~90 minutes, reads as AI-generated boilerplate rather than genuine curation"
+      ]
+    },
+    "impact_potential": 1,
+    "live_demo_notes": "No public web demo, no video, and no application to demo in the first place — the repo contains a single README.md file with zero source code, zero deployable artifacts, and broken references to LICENSE/CONTRIBUTING files that don't exist.",
+    "live_demo_status": "no-public-demo",
+    "one_line_pitch": "A one-file link list that points to other people's relief projects, not a relief tool itself — nothing here for victims or donors to actually use.",
+    "overall_recommendation": "deprioritize",
+    "problem_severity": "low",
+    "product_quality": 1,
+    "real_problem_reasoning": "While a curated directory of relief resources could theoretically have some navigational value, this repo does not deliver that value: it has no verification of the links it aggregates (despite claiming some are 'verified'), broken references to its own governance files, and was assembled in a single ~90-minute commit that reads as generated filler rather than an actual community-vetted index. It does not itself help find people, coordinate volunteers, distribute aid, or provide any service to earthquake victims — it only links to other teams' (unverified) work.",
+    "solves_real_problem": "no"
+  }
+}

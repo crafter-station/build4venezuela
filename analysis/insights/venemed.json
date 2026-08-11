@@ -1,0 +1,155 @@
+{
+  "project_slug": "venemed",
+  "name": "Venemed",
+  "repo_url": "https://github.com/raulandreroman/venemed",
+  "live_url": "https://venemed.vercel.app/",
+  "video_url": "",
+  "countries": [
+    "Argentina",
+    "Venezuela"
+  ],
+  "db_description": "VeneMed — Coordinación de donaciones para centros de salud, con orden y a tiempo.\n\nHospitales, refugios y centros de acopio reciben donaciones de forma descoordinada. Muchos insumos se desperdician porque nadie tiene visibilidad real de qué se necesita. El resultado es doble: recursos comunitarios desperdiciados y centros colapsados que ya no pueden procesar más ayuda.\n\nCómo funciona: Los centros publican solicitudes con ventanas cortas de tiempo (12, 24 o 48 horas) indicando exactamente lo que necesitan. Los donantes navegan la lista sin login: ven en tiempo real lo que cada centro está pidiendo y por cuánto tiempo. Esa información es compartible en redes, para que más gente sepa dónde llevar ayuda antes de que la ventana cierre. Si un centro entra en saturación, puede publicar un aviso de exceso para frenar donaciones de un ítem específico.\n\nPara quién. El centro de salud (acceso por WhatsApp, panel propio para crear y gestionar solicitudes) y el donante (acceso público, sin registro). Pensado mobile-first y para funcionar con conexión inestable.\n\nObjetivo. Que la ayuda llegue donde y cuando hace falta — y que ningún recurso comunitario se pierda en el camino.",
+  "lifecycle_status": "in_development",
+  "analysis": {
+    "architecture": {
+      "pattern": "Next.js App Router monolith with route groups ((public)/(center)/(admin)), server actions for mutations, route handlers for cron/API",
+      "uses_orm": true,
+      "orm_or_db_layer": "Drizzle ORM over Postgres (Supabase), raw `postgres` driver; migrations checked in with drizzle-kit; Supabase client used only for auth, not data access",
+      "api_design": "Mostly server actions ('use server') per feature (registro, publicar, gestionar, aviso, recepcion, editar) plus one secured GET route handler for cron; no generic REST/GraphQL API",
+      "separation_of_concerns": "Clear layering: src/lib/auth (authz guards), src/lib/<domain>/validation.ts (zod-less but explicit validation), src/db (schema/queries/jobs), src/app/(group)/actions (mutations) — good separation between UI, business logic, and data access",
+      "modularity": "Feature-based route groups with colocated _components, shared UI kit in src/components/ui, domain libs under src/lib",
+      "notable_patterns": [
+        "Partial unique index enforcing 'one active surplus per center' at DB layer",
+        "Constant-time bearer comparison for cron auth (timingSafeEqual)",
+        "Middleware only checks session presence; real authorization (is_platform_admin) enforced server-side per request via requireAdmin()",
+        "Feature flags via NEXT_PUBLIC_ env vars",
+        "Sentry configured with PII scrubbing and no session replay"
+      ]
+    },
+    "code_organization": {
+      "score": 5,
+      "directory_structure": "Well-organized App Router route groups by actor ((public)/(center)/(admin)), colocated components, dedicated src/db and src/lib/<domain> folders",
+      "naming_quality": "Consistent, descriptive English identifiers with Spanish UI copy separated into labels maps",
+      "documentation_quality": "Extensive, high-signal inline comments explaining non-obvious tradeoffs (e.g. enum append-only strategy, TOCTOU race prevention, timing-safe auth), plus docs/specs/*.md design docs and AGENTS.md/CLAUDE.md for AI-assisted dev context",
+      "reasoning": "Directory layout, naming, and comments are all above typical hackathon quality — reads like a maintained production repo with deliberate architectural decisions documented inline."
+    },
+    "production_readiness": {
+      "score": 4,
+      "has_auth": true,
+      "has_error_handling": true,
+      "has_logging": true,
+      "has_env_config": true,
+      "has_deploy_config": true,
+      "secrets_handling": "Uses .env.example with clear separation of local vs prod values; secrets (SUPABASE_SERVICE_ROLE_KEY, CRON_SECRET, SENTRY_AUTH_TOKEN) never committed; CRON_SECRET compared with constant-time timingSafeEqual; local Supabase demo keys explicitly noted as public/non-secret",
+      "security_notes": "Supabase email OTP auth with Cloudflare Turnstile captcha, RLS-bypass-aware admin authz gate that never trusts client-supplied actor id, DB-level unique constraints preventing race conditions, middleware avoids open-redirect by stripping ?next=, fail-closed cron auth",
+      "scalability_notes": "Single Postgres via Supabase pooler for runtime and direct connection for migrations; cron-based expiry via GitHub Actions (Vercel Hobby tier limitation) rather than native scheduling — a reasonable but noted workaround; no obvious caching/queue layer, but scale target (regional medical-aid matching) doesn't require heavy throughput",
+      "reasoning": "Has real auth, Sentry error monitoring with hardened PII config, CI (lint/typecheck) and separate e2e workflow against ephemeral local Supabase, DB migrations, and a scheduled cron job with authenticated endpoint — this goes well beyond typical hackathon scaffolding into a genuinely deployable app (already live at venemed.vercel.app)."
+    },
+    "maturity": {
+      "score": 5,
+      "has_readme": true,
+      "has_tests": true,
+      "has_ci": true,
+      "is_real_or_boilerplate": "real, actively developed application",
+      "reasoning": "31 commits, 14.4k LOC, live deployment, 9 DB migrations with schema evolution notes, Playwright e2e suite (~590 lines across 3 spec files) run in CI against a real local Supabase stack, plus design docs/specs for each feature slice — clearly real, iteratively built software, not generated boilerplate."
+    },
+    "viability": {
+      "score": 4,
+      "reasoning": "VeneMed solves a concrete, narrow, high-value problem (matching Venezuelan health centers' time-windowed medical supply needs with donors) with a working moderation/approval pipeline, expiring requests, and center/donor/admin flows already implemented and deployed; main risk is dependence on centers actually adopting and maintaining it and on donor traffic, not code quality."
+    },
+    "key_features": [
+      "Center registration with admin moderation/approval queue",
+      "Time-windowed supply need/surplus requests with automatic expiry via cron",
+      "Public donor-facing browse/search/filter of active requests with share tracking",
+      "Email OTP auth for centers and admins via Supabase",
+      "Reception pause toggle and 'aviso de exceso' (surplus) banner with one-active-per-center DB constraint",
+      "Sentry error monitoring with PII scrubbing"
+    ],
+    "domain_tags": [
+      "donations-aid",
+      "medical-health",
+      "aid-logistics"
+    ],
+    "merge_potential": "Could serve as a strong standalone medical-aid matching platform for hospitals/clinics post-disaster; could also integrate with a broader Build4Venezuela aid-logistics or shelter-mapping platform by exposing its center/request data via an API for cross-project donor routing.",
+    "red_flags": [
+      "Single named contributor (bus factor of 1) despite otherwise high engineering quality",
+      "Cron-based expiry relies on external GitHub Actions schedule hitting prod — a missed/disabled workflow silently stops expiry",
+      "No visible rate limiting beyond Turnstile captcha on OTP send; other mutation endpoints not obviously rate-limited"
+    ],
+    "summary": "VeneMed is a genuinely production-grade Next.js + Supabase/Drizzle application connecting Venezuelan health centers with donors via time-windowed medical supply requests, featuring real auth (OTP + captcha), an admin moderation queue, Sentry monitoring, DB migrations, and a Playwright e2e suite run in CI against an ephemeral local Supabase — one of the most mature and deployable repos in this hackathon set.",
+    "project_type": "Full-stack web application (Next.js) for medical-aid donation matching",
+    "stack": {
+      "frontend": [
+        "Next.js 16 (App Router)",
+        "React 19",
+        "Tailwind CSS v4"
+      ],
+      "backend": [
+        "Next.js server actions",
+        "Next.js route handlers (cron API)"
+      ],
+      "database": [
+        "Postgres (Supabase)",
+        "Drizzle ORM",
+        "drizzle-kit migrations"
+      ],
+      "infra_deploy": [
+        "Vercel",
+        "Supabase (auth + Postgres)",
+        "GitHub Actions (CI, e2e, scheduled cron trigger)",
+        "Sentry"
+      ],
+      "ai_ml": [],
+      "languages": [
+        "TypeScript",
+        "SQL",
+        "JavaScript"
+      ]
+    }
+  },
+  "signals": {
+    "accessible": true,
+    "stars": 1,
+    "forks": 0,
+    "contributors": 1,
+    "commit_count": 31,
+    "code_loc": 14432,
+    "created_at": "2026-06-28T20:00:50Z",
+    "pushed_at": "2026-07-01T21:31:40Z",
+    "license": "MIT",
+    "languages_bytes": {
+      "TypeScript": 475826,
+      "CSS": 2015,
+      "JavaScript": 1634,
+      "HTML": 320
+    },
+    "archived": false
+  },
+  "evaluation": {
+    "solves_real_problem": "yes",
+    "real_problem_reasoning": "VeneMed addresses a well-documented pain point in disaster/aid response: donation coordination chaos. Hospitals, shelters, and collection centers receive donations with no visibility into what's actually needed, causing waste (excess of some items) while other critical needs go unmet and centers become saturated/overwhelmed. VeneMed lets health centers post time-windowed (12/24/48h) specific supply requests that donors can browse without login and share on social media, plus a 'surplus' flag to stop over-donation of a specific item. This directly targets earthquake/disaster medical-aid logistics, a core Build4Venezuela problem area.",
+    "problem_severity": "high",
+    "impact_potential": 4,
+    "product_quality": 4,
+    "live_demo_status": "working",
+    "live_demo_notes": "WebFetch on https://venemed.vercel.app/ confirms the site loads and shows live functional content, not just a static landing page: an active request from 'Centro Medico Maracay' listing specific supplies needed (isopropyl alcohol, sterile gauze, surgical gloves, syringes), stats ('1 solicitudes, 3 centros'), a live countdown timer ('Vence en 3 min'), and navigation to a donor-facing requests portal and a separate center login/panel. This matches the codebase analysis (Next.js + Supabase/Drizzle, real auth via OTP+Turnstile, admin moderation queue, Playwright e2e tests in CI, Sentry monitoring, DB migrations) — a genuinely deployed, working app rather than boilerplate. Caveat: given the project is only 3 days old with 1 contributor and 1 GitHub star, the visible request/center data is very likely seed/demo data rather than confirmed real adopted health centers, so real-world usage/adoption is unverified.",
+    "diffusion": {
+      "score": 4,
+      "ready_to_promote": true,
+      "available_assets": [
+        "live-demo",
+        "clear-value-prop",
+        "branding"
+      ],
+      "recommended_angle": "'Ninguna donación se pierde en el camino' — show the live countdown-timer request board where a health center in Venezuela asks for exactly what it needs (with a deadline), and donors can find and share it in seconds without creating an account.",
+      "gaps": [
+        "No demo video to show the flow end-to-end for social content",
+        "No dedicated screenshots/press kit assets prepared",
+        "Real-user adoption unverified — visible data (3 centros, 1 solicitud) looks like seed/demo content rather than confirmed real health centers using it live",
+        "Single contributor / bus factor of 1 is a risk to flag before heavy promotion commitments"
+      ]
+    },
+    "overall_recommendation": "promote",
+    "one_line_pitch": "VeneMed conecta centros de salud venezolanos con donantes en tiempo real: piden exactamente lo que necesitan, con fecha límite, y ningún insumo se desperdicia."
+  }
+}

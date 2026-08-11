@@ -1,0 +1,168 @@
+{
+  "project_slug": "georesponde",
+  "name": "GeoResponde",
+  "repo_url": "https://github.com/GeoResponde/georesponde",
+  "live_url": "https://georesponde.app",
+  "video_url": "",
+  "countries": [
+    "Venezuela",
+    "Chile",
+    "Colombia",
+    "España",
+    "Alemania",
+    "Bahrain",
+    "Italia",
+    "Argentina"
+  ],
+  "db_description": "## **GeoResponde**\n\nGeoResponde es una plataforma humanitaria de interoperabilidad de código abierto diseñada para conectar iniciativas existentes de respuesta a emergencias, en lugar de reemplazarlas.\n\nTras el terremoto de Venezuela de 2026, surgieron decenas de plataformas independientes para reportar personas desaparecidas, refugios, centros de acopio, daños en infraestructura y necesidades humanitarias. Aunque cada iniciativa aporta información valiosa, los datos permanecen fragmentados entre múltiples sitios web y organizaciones.\n\nGeoResponde busca resolver este desafío mediante una arquitectura federada que permite a las personas buscar, visualizar y enviar información a través de múltiples proveedores desde una interfaz unificada.\n\n## Capacidades actuales\n- Búsqueda federada entre múltiples proveedores humanitarios.\n- Arquitectura basada en un Provider Gateway.\n- Capas de Inteligencia Científica.\n- Mapa de la Sala de Situación.\n- SDK abierto para proveedores (en desarrollo).\n\n## Visión\n\nGeoResponde evoluciona en cuatro etapas:\n\n- Federación — Conectar plataformas existentes sin duplicar la información.\n- Interoperabilidad — Definir una interfaz abierta que las organizaciones puedan implementar.\n- Protocolo de Intercambio para Emergencias — Permitir el intercambio estandarizado de información entre sistemas independientes.\n- Ecosistema Abierto — Impulsar una comunidad de proveedores, SDKs, capas científicas y herramientas humanitarias.\n\nÚnete a GeoREsponde\n\nDamos la bienvenida a:\n\n- Organizaciones humanitarias.\n- Desarrolladores.\n- Especialistas en SIG (GIS).\n- Diseñadores UX.\n- Expertos en gestión de emergencias.\n- Proveedores de datos.\n\n**GitHub:**\nhttps://github.com/GeoResponde/georesponde",
+  "lifecycle_status": "in_development",
+  "analysis": {
+    "summary": "GeoResponde is a real, well-architected open-source geospatial disaster response platform for Venezuela: a React/MapLibre map visualizing earthquakes, faults, Copernicus/NASA damage layers, hospitals and citizen reports, plus a Fastify backend gateway with pluggable 'provider adapters' that scrape/federate real third-party sites (venezuelatebusca.com missing-persons search, terremotovenezuela.com building-damage reports) via a Remix single-fetch/turbo-stream deserializer with actual unit tests and fixtures. It is a monorepo (pnpm workspaces) with a catalog validation package, CI (build/typecheck/lint), and live Vercel deployment, but the backend has no auth/rate-limiting, at least one hardcoded localhost URL bug, no persistence layer, and heavy reliance on scraping fragile third-party endpoints.",
+    "project_type": "web app (disaster-response geospatial situation room: map dashboard + people-finder search + damage-report submission gateway)",
+    "stack": {
+      "frontend": [
+        "React 18",
+        "React Router 7",
+        "Vite",
+        "MapLibre GL / react-map-gl",
+        "i18next (en/es)",
+        "TypeScript"
+      ],
+      "backend": [
+        "Fastify 5",
+        "Node.js/TypeScript",
+        "custom Remix turbo-stream deserializer for scraping"
+      ],
+      "database": [
+        "none (no persistent DB; reads static GeoJSON/JSON catalog files, proxies live third-party APIs)"
+      ],
+      "infra_deploy": [
+        "Vercel (frontend, vercel.json rewrites)",
+        "GitHub Actions CI (build/typecheck/lint)",
+        "pnpm workspaces monorepo"
+      ],
+      "ai_ml": [],
+      "languages": [
+        "TypeScript",
+        "JavaScript",
+        "Python (small connector script)",
+        "CSS",
+        "HTML"
+      ]
+    },
+    "architecture": {
+      "pattern": "monorepo with adapter/gateway pattern: frontend SPA + Fastify backend 'Provider Gateway' that routes search/submit requests to per-source adapter classes implementing a common BaseAdapter interface",
+      "uses_orm": false,
+      "orm_or_db_layer": "none — no database; backend proxies third-party HTTP APIs/scrapes HTML/turbo-stream responses and serves static GeoJSON files from public/data",
+      "api_design": "small REST-ish Fastify API (/api/providers, /api/search, /api/submit, /api/providers/:id/geojson, /health) plus a debug/inspect endpoint left in production code (/api/dev/inspect/venezuelatebusca)",
+      "separation_of_concerns": "reasonably clean: frontend/backend/packages split, adapters isolate per-provider scraping/parsing logic, shared types package (@georesponde/shared) used across frontend/backend",
+      "modularity": "workspace packages (catalog, client, shared, config, types) show deliberate modular design, though several packages (config, types) are still empty .gitkeep stubs",
+      "notable_patterns": [
+        "Adapter pattern federating heterogeneous humanitarian data sources (BaseAdapter + ProviderGateway)",
+        "Custom Remix single-fetch / turbo-stream response deserializer to scrape a JS framework's server data instead of parsing HTML",
+        "Static catalog-driven layer system (data/catalog YAML + JSON schema validation package) governing which map layers/datasets exist"
+      ]
+    },
+    "code_organization": {
+      "score": 4,
+      "directory_structure": "Clear top-level split (frontend, backend, packages/*, data/catalog, knowledge/, docs/, scripts/connectors) with consistent naming and a documented catalog data model",
+      "naming_quality": "Consistent, descriptive naming (ProviderGateway, BaseAdapter, VenezuelaTeBuscaAdapter) though some leftover artifacts like old_Find.tsx, scratch/, test_search.json, raw_api.json sitting in repo root are messy debug leftovers",
+      "documentation_quality": "Extensive docs (architecture.md, api.md, providers.md, ADRs, knowledge base of datasets/organizations/layers) far beyond typical hackathon repos, though docs/deployment.md is an empty stub",
+      "reasoning": "Well-organized monorepo with real separation of concerns and unusually thorough internal documentation/knowledge base, docked slightly for stray debug/scratch files left in the root and an incomplete deployment doc"
+    },
+    "production_readiness": {
+      "score": 2,
+      "has_auth": false,
+      "has_error_handling": true,
+      "has_logging": true,
+      "has_env_config": true,
+      "has_deploy_config": true,
+      "secrets_handling": "No secrets appear to be required or committed; backend has no API keys configured (calls public third-party endpoints directly), .env.development only sets a public API URL",
+      "security_notes": "No authentication/authorization on any backend route, no rate limiting despite exposing a public scraping/search proxy (abuse and third-party ToS risk), a leftover debug endpoint (/api/dev/inspect/venezuelatebusca) is registered unconditionally in production server code, and the BuildingDamageForm submits to a hardcoded http://127.0.0.1:3001 URL instead of an environment-configurable API base (will silently fail in the deployed build)",
+      "scalability_notes": "No database means no persistence of user-submitted reports beyond forwarding to a third-party API; scraping-based adapters (turbo-stream parsing of a third-party site's internal Remix payload) are brittle and will break silently on upstream site changes; no caching layer for repeated searches",
+      "reasoning": "Deployed to Vercel with working CI, but the backend gateway (the operationally critical piece for report submission and people search) is unauthenticated, has a hardcoded localhost URL bug in a core user-facing form, lacks rate limiting, and depends entirely on scraping/APIs of third-party sites it does not control"
+    },
+    "maturity": {
+      "score": 3,
+      "has_readme": true,
+      "has_tests": true,
+      "has_ci": true,
+      "is_real_or_boilerplate": "real, actively iterated project with genuine domain-specific logic (not generic AI scaffolding)",
+      "reasoning": "19 commits by a single contributor over a few days, real unit tests with fixtures for the trickiest parsing logic (turbo-stream deserializer), working CI pipeline, and a live deployed demo — early-stage but clearly a working, hand-built MVP rather than boilerplate"
+    },
+    "viability": {
+      "score": 3,
+      "reasoning": "Solves a real, well-scoped problem (aggregating fragmented earthquake/disaster data and missing-person searches for Venezuela) with working map visualization and a functioning search/report federation gateway; main risks to real-world deployment are the unauthenticated/open backend, fragile scraping dependencies on third-party sites' internal APIs, single contributor, and no persistence layer for submitted reports."
+    },
+    "key_features": [
+      "Interactive MapLibre map with real disaster layers: USGS/FUNVISIS earthquakes, active faults, geologic units, Copernicus EMS damage/ground-movement, NASA ARIA/Sentinel damage feed (live ArcGIS FeatureServer), hospitals",
+      "Federated 'Find' people/resource search across third-party providers (venezuelatebusca.com missing persons, terremotovenezuela.com verified buildings) via adapter pattern",
+      "Building damage report submission form that routes through the backend gateway to a real third-party API (terremotovenezuela.com)",
+      "Catalog engine: YAML-defined organizations/sources/datasets/layers validated by JSON Schema + a CLI build/validate package with tests",
+      "i18n (English/Spanish) support throughout the frontend"
+    ],
+    "domain_tags": [
+      "seismic-data",
+      "people-finder",
+      "mapping-geo",
+      "structural-inspection",
+      "alerts-notifications"
+    ],
+    "merge_potential": "High potential to merge with people-finder/shelter-mapping or aid-logistics projects since it already implements a generic adapter/gateway pattern for federating third-party humanitarian data sources — other teams' datasets could be plugged in as new adapters or catalog entries with relatively low integration cost.",
+    "red_flags": [
+      "Backend has no authentication or rate limiting on public search/submit endpoints",
+      "Debug/inspect endpoint (/api/dev/inspect/venezuelatebusca) exposed unconditionally in production server code",
+      "BuildingDamageForm hardcodes http://127.0.0.1:3001 instead of using VITE_API_URL, likely broken in the deployed environment",
+      "Core functionality depends on scraping undocumented third-party internal APIs (Remix turbo-stream payloads, unofficial terremotovenezuela.com API) that can break without notice",
+      "No database/persistence layer — user-submitted reports are only forwarded to a third-party API with no local record or retry/audit trail",
+      "Single contributor, project only 2-3 days old at time of review (created 2026-06-29, pushed 2026-07-01)"
+    ]
+  },
+  "signals": {
+    "accessible": true,
+    "stars": 2,
+    "forks": 2,
+    "contributors": 1,
+    "commit_count": 19,
+    "code_loc": 4230,
+    "created_at": "2026-06-29T17:48:28Z",
+    "pushed_at": "2026-07-01T08:17:00Z",
+    "license": "MIT",
+    "languages_bytes": {
+      "TypeScript": 161904,
+      "CSS": 10760,
+      "JavaScript": 3134,
+      "HTML": 1441,
+      "Python": 669
+    },
+    "archived": false
+  },
+  "evaluation": {
+    "solves_real_problem": "yes",
+    "real_problem_reasoning": "After the 2026 Venezuela earthquake, dozens of independent sites sprang up for missing persons, shelters, and damage reports, but the data is fragmented across them. GeoResponde tackles this directly with a federated 'Provider Gateway' architecture that searches/aggregates real third-party sources (venezuelatebusca.com for missing persons, terremotovenezuela.com for verified building damage) plus a map layering real seismic/damage data (USGS/FUNVISIS earthquakes, Copernicus EMS, NASA ARIA/Sentinel, hospitals). This is exactly the kind of interoperability problem that matters most in the first weeks of a disaster response, when victims and volunteers are the ones searching multiple sites manually.",
+    "problem_severity": "critical",
+    "impact_potential": 4,
+    "product_quality": 3,
+    "live_demo_status": "unknown",
+    "live_demo_notes": "The apex domain georesponde.app 308-redirects to https://www.georesponde.app/, which serves a real Vite/React SPA bundle (index-*.js/css) with correct OpenGraph/Twitter metadata and a real title 'GeoResponde - Open Geospatial Situation Room' plus a description about connecting scientific and humanitarian data. WebFetch cannot execute the JS bundle, so it only sees the empty #root shell and title — it could not confirm the MapLibre map, search, or submission form actually render/work in the browser. The code-level analysis (real unit tests with fixtures for the third-party scraping/deserializer logic, working CI, live Vercel deploy) strongly suggests a genuine functioning map app exists behind this shell, but this could not be independently confirmed visually, and a known code-level bug (BuildingDamageForm hardcodes http://127.0.0.1:3001 instead of using VITE_API_URL) means the damage-report submission flow is likely broken in the live deployment even if the map/search UI works.",
+    "diffusion": {
+      "score": 3,
+      "ready_to_promote": false,
+      "available_assets": [
+        "live-demo",
+        "clear-value-prop",
+        "branding"
+      ],
+      "recommended_angle": "Position it as open infrastructure/interoperability play: 'one map to search across every missing-persons and damage-report site created after the Venezuela earthquake' — appeals to both civic-tech developers (adapter/SDK story) and NGOs/donors (unified situation room) rather than as a finished consumer product.",
+      "gaps": [
+        "No demo video and no screenshots exist to show the actual map/search UI working, so there is nothing visual to post — WebFetch could not even render the JS app to confirm the UI looks good",
+        "Core building-damage submission form is hardcoded to a localhost URL and likely fails silently in production, which would embarrass the project if promoted right now and a viewer tries to submit a report",
+        "Backend has no auth/rate-limiting and depends on scraping undocumented third-party internal APIs (Remix turbo-stream payloads) that can break without notice, making the demo fragile for a live audience",
+        "Single contributor, project is only 2-3 days old — no evidence yet of real users, adoption by any humanitarian org, or other providers plugging into the federation SDK",
+        "No persistence layer, so any user-submitted report during a demo has no audit trail if the third-party forward fails"
+      ]
+    },
+    "overall_recommendation": "improve-first",
+    "one_line_pitch": "GeoResponde federa en un solo mapa las decenas de plataformas de personas desaparecidas y daños del terremoto de Venezuela, para que nadie tenga que buscar sitio por sitio."
+  }
+}

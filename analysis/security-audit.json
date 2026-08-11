@@ -1,0 +1,950 @@
+{
+  "acopiovzla": {
+    "risk": "critical",
+    "auditedAt": "2026-06-29",
+    "issueUrl": "https://github.com/nobelaar/saman/issues/6",
+    "findings": [
+      {
+        "severity": "critical",
+        "title": "Live Supabase service_role JWT hardcoded in committed seed script (full RLS bypass + auth admin)",
+        "status": "open"
+      },
+      {
+        "severity": "medium",
+        "title": "Commenter email addresses (PII) publicly readable via anon key and rendered in UI",
+        "status": "open"
+      }
+    ],
+    "reauditedAt": "2026-07-01",
+    "previousRisk": "critical",
+    "reauditNote": "No remediation has occurred since the 2026-06-29 audit: the tracking issue (#6, filed against the renamed repo nobelaar/saman) is still open with zero comments, and both reported findings are present byte-for-byte at current HEAD. The live Supabase service_role JWT is still hardcoded in supabase/seed-users.sh (last touched 2026-06-28, before the audit) and commenter emails are still selected via select('*'), exposed by the public using(true) RLS policy, and rendered in ComentarioItem.tsx."
+  },
+  "aidtrace": {
+    "risk": "high",
+    "auditedAt": "2026-06-29",
+    "issueUrl": "https://github.com/LuisAlejandroCR/AidTrace-RastroAyuda/issues/1",
+    "findings": [
+      {
+        "severity": "high",
+        "title": "Unauthenticated relay/webhook endpoint triggers gas-paid on-chain writes with the relayer private key",
+        "status": "open"
+      },
+      {
+        "severity": "low",
+        "title": "center-webhook receiver fails open when its shared secret is unset",
+        "status": "new"
+      }
+    ],
+    "reauditedAt": "2026-07-01",
+    "previousRisk": "medium",
+    "reauditNote": "Since the last audit the team added sender-registration/allowlisting for the Telegram/WhatsApp inbound channel (message.inbound path) and an opt-in idempotency/rate-limit guard for the browser-relay path (supabase/aidtrace_relay_guard.sql), but neither adds real authentication to the browser-relay code path (schema 'aidtrace.relay.v1' in api/zavu.mjs) that signs and submits gas-paid Celo transactions with the relayer's private key. That path is still gated only by a spoofable/omittable Origin header, so the original finding is unresolved and I'm raising it to high given how trivial it is to exploit (a curl request with no Origin header bypasses the only check) and that it can directly drain the funded relayer wallet and inject false aid-delivery records on-chain. I also found a secondary, lower-severity fail-open auth bug in the newer api/center-webhook.mjs receiver."
+  },
+  "apoyo-venezuela-org": {
+    "risk": "medium",
+    "auditedAt": "2026-06-29",
+    "issueUrl": null,
+    "findings": [
+      {
+        "severity": "low",
+        "title": "Trust-based place-hiding can be abused to censor legitimate aid locations",
+        "status": "open"
+      },
+      {
+        "severity": "medium",
+        "title": "Anti-abuse rate limiting relies on a client-spoofable fingerprint (X-Forwarded-For + User-Agent), defeating the mitigation for the place-hiding/spam findings",
+        "status": "new"
+      }
+    ],
+    "reauditedAt": "2026-07-01",
+    "previousRisk": "low",
+    "reauditNote": "No commits landed after the prior 2026-06-29 audit (HEAD is still 450d2f4 from 2026-06-28), so the trust-based place-hiding finding is unchanged: 3 anonymous `place_claims` still auto-hide a place from `active_places`. Deeper review of the anti-abuse rate limiter added in commit 6950e81 shows its per-fingerprint key is built from client-supplied `X-Forwarded-For` and `User-Agent` headers, both fully attacker-controlled, so the '3 distinct fingerprints' barrier that was supposed to make hiding a place non-trivial can be defeated with a few scripted requests that vary a header value — no VPN, no waiting, no CAPTCHA anywhere in the app."
+  },
+  "apoyo-venezuela": {
+    "risk": "high",
+    "auditedAt": "2026-06-29",
+    "issueUrl": "https://github.com/javierdejesusda/apoyo-venezuela/issues/54",
+    "findings": [
+      {
+        "severity": "high",
+        "title": "Public Supabase anon key still grants direct bulk read of locations table PII/full-precision GPS",
+        "status": "open"
+      },
+      {
+        "severity": "medium",
+        "title": "Unauthenticated INSERT into locations/needs via the anon key still bypasses the report throttle",
+        "status": "open"
+      },
+      {
+        "severity": "low",
+        "title": "Public 'fotos' storage bucket still allows unauthenticated uploads",
+        "status": "open"
+      },
+      {
+        "severity": "high",
+        "title": "New public v1 API + MCP server serve reporter PII per-zone with no auth, no rate limit, and wide-open CORS, enabling at-scale scraping without needing the Supabase key",
+        "status": "new"
+      }
+    ],
+    "reauditedAt": "2026-07-01",
+    "previousRisk": "high",
+    "reauditNote": "No RLS/policy changes were made to address the tracking issue: locations_select_public and locations_insert_public/needs_insert_public in supabase/migrations/20260625000000_init.sql are byte-for-byte unchanged, so the anon key still grants bulk read of full-precision coordinates + reporter PII and unauthenticated INSERT that bypasses the new report_throttle (which is only enforced app-side via a server action, not as a DB trigger/constraint on the insert). The fotos storage bucket insert policy is also unchanged (still public), though MIME types were hardened to drop image/svg+xml (stored-XSS mitigation) and the size cap was raised to 10MB. Since the last audit the team also shipped a public v1 REST API and an MCP server that, by explicit design, serve a reporter's full name+phone via a per-zone detail endpoint/tool with zero auth and zero rate limiting, while the paired bulk-list endpoint hands out every zone UUID — together this makes scripted, at-scale PII harvesting easier than before because it needs no Supabase credentials at all, just the documented public API."
+  },
+  "awesome-venezuela-relief": {
+    "risk": "none",
+    "auditedAt": "2026-07-01",
+    "issueUrl": null,
+    "findings": [],
+    "reauditNote": "First-time audit: this repo is a documentation-only \"awesome list\" (single README.md, one commit) curating links to third-party Venezuela earthquake relief projects. It contains no application code — no servers, API routes, database, auth, or secrets — so none of the in-scope vulnerability classes (auth on state-changing routes, mass-assignment, PII exposure, RLS/CORS, injection/SSRF/upload, committed secrets) apply. No GitHub tracking issues exist for this repo."
+  },
+  "ayuda-venezuela-bot": {
+    "risk": "none",
+    "auditedAt": "2026-06-29",
+    "issueUrl": null,
+    "findings": [],
+    "reauditedAt": "2026-07-01",
+    "previousRisk": "none",
+    "reauditNote": "No previous findings were on record for this repo (audited 2026-06-29, risk 'none', no tracking issue), so there is nothing to carry forward. A fresh scan confirms the app is a static Next.js landing page (no app/api routes, no DB, no auth) plus a Telegram bot whose only external writes go to the LLM/Telegram APIs; the bot's surfcall tool layer hard-allow-lists 5 GET-only, no-auth public read endpoints (bot/surfcall_tools.py PUBLIC_READS = getReports/searchPersons/getPersonStats/getRecentDamage/getNews, all mapped to GET /api/... in bot/spec/sosvenezuela_openapi.json) and relies on the upstream SOS Venezuela API to already mask cedulas/coordinates before the bot ever sees them. No secrets are committed (.env is gitignored, bot/config.py reads only from env and never logs values; confirmed via `git log --all -- .env` and a repo-wide secret-pattern grep including the checked-in .next/ build output, which returned only a false-positive regex hit inside binary chunk data, not a real credential). There is no state-changing endpoint, mass-assignment path, or PII-exposing surface to audit in this repo."
+  },
+  "ayudave": {
+    "risk": "high",
+    "auditedAt": "2026-06-29",
+    "issueUrl": "https://github.com/gaboclus/ayudave/issues/4",
+    "findings": [
+      {
+        "severity": "high",
+        "title": "Public /api/persons PII listing (previous finding) is resolved — the entire personal-data feature was removed, not just gated",
+        "status": "resolved"
+      },
+      {
+        "severity": "high",
+        "title": "PATCH /api/centers/:id mass-assigns the request body, letting a center owner self-set status to 'verificado' and bypass admin verification",
+        "status": "new"
+      }
+    ],
+    "reauditedAt": "2026-07-01",
+    "previousRisk": "high",
+    "reauditNote": "The reported PII leak is fully resolved, and beyond the proposed PR #3 fix (which only added an allowlist projection), the team went further in commit e903ac6 (PR #7) and deleted the entire missing-persons/hospitals/volunteers/help-requests/pets feature set: /api/persons* now 404s, the `persons` table (plus sightings/volunteers/applications/help_requests/pets) is purged once on every server startup, and there is no remaining code path that inserts into those tables, so no PII can reappear. A fresh scan found a new, unrelated high-impact authorization bug: `PATCH /api/centers/:id` lets a logged-in center owner set arbitrary body fields (including `status`) on their own center via `Object.assign`, so anyone can self-promote a freshly-submitted 'pendiente' collection center to 'verificado' without admin review, letting them appear as a trusted donation center (with attacker-controlled Pago Móvil/bank-transfer details) on the public donate page."
+  },
+  "beacon-rescate": {
+    "risk": "none",
+    "auditedAt": "2026-06-29",
+    "issueUrl": null,
+    "findings": [],
+    "reauditedAt": "2026-07-01",
+    "previousRisk": "none",
+    "reauditNote": "Since the 2026-06-29 audit (risk: none, no findings, no tracking issue), the repo has only one new commit ('Limpieza de datos') that removes a code comment and fixes a missing trailing newline in main.py — no functional or security-relevant change. Beacon-rescate is a fully offline Kivy/Python mobile app (no server, no API routes, no Supabase/DB backend, no committed secrets); it locally scans nearby BLE/Wi-Fi devices and stores their MAC/IP + estimated distance in a local, gitignored SQLite file (local_rescate_unificado.db) that never leaves the device, so none of the audit's web/API-focused risk categories (auth-less endpoints, mass assignment, RLS, public PII exposure, SSRF, injection) apply. The subprocess ping call uses shell=True but only with a locally-derived IP segment (from the device's own hostname), not attacker-controlled input, so it is not an injection vector."
+  },
+  "busca-chat": {
+    "risk": "high",
+    "auditedAt": "2026-06-29",
+    "issueUrl": "https://github.com/DiegoMucha/buscachat/issues/6",
+    "findings": [
+      {
+        "severity": "high",
+        "title": "Unauthenticated bulk endpoint exposes missing-person PII with pagination/enumeration",
+        "status": "resolved"
+      },
+      {
+        "severity": "high",
+        "title": "Unauthenticated single-record lookup and name search enable targeted PII enumeration (IDOR)",
+        "status": "partial"
+      },
+      {
+        "severity": "high",
+        "title": "Unauthenticated bot endpoints allow data injection, SSRF, and PII lookup",
+        "status": "open"
+      },
+      {
+        "severity": "medium",
+        "title": "Shared in-memory web-chat store readable, poisonable, and clearable by any anonymous client",
+        "status": "open"
+      },
+      {
+        "severity": "high",
+        "title": "Public /web-chat/webhook exposes the same registration/search/SSRF business logic as the bot endpoints, with no auth",
+        "status": "new"
+      }
+    ],
+    "reauditedAt": "2026-07-01",
+    "previousRisk": "high",
+    "reauditNote": "Since the 2026-06-29 audit, the maintainers deleted the specific vulnerable REST routes (GET /missing_people, /missing_people/{id}, /missing_people/search, and the require_private_token auth stub) in commit be8623b, and added HMAC signature verification to the Meta WhatsApp webhook. However, no authentication was added to /bot/registrar, /bot/buscar-nombre, /bot/buscar-foto, /bot/buscar-cedula-foto, or to the public /web-chat endpoints, and the SSRF-prone download_image() still has no allowlist. The public /web-chat/webhook independently exposes the same registration/search/mark-found business logic with full PII to anonymous users, so the net exploitable surface (data injection, SSRF, PII enumeration by name) is essentially unchanged — just relocated from the deleted GET routes to the still-open POST /bot/* and /web-chat/webhook routes. Overall risk remains high; tracking issue #6 is still open."
+  },
+  "centraliza-ayuda": {
+    "risk": "none",
+    "auditedAt": "2026-06-29",
+    "issueUrl": null,
+    "findings": [],
+    "reauditedAt": "2026-07-01",
+    "previousRisk": "none",
+    "reauditNote": "This repo is a fully static, client-side directory site (HTML/CSS/vanilla JS listing external aid links) with no backend, no API routes, no database, no auth, and no PII collection of its own — the only 'submission' path is an external Google Form link. Re-scanned for secrets, injection, XSS (all rendering uses textContent, not innerHTML, for untrusted data - see js/result_item_view_builder.js), and open write endpoints; found none. The one open GitHub issue (#3, 'Auditoría') is a data-quality/curation audit (duplicates, tag taxonomy, description quality) authored by a different AI persona, not a security tracking issue, so issueState is 'none'. No previous findings existed to carry forward, and no new high-impact issues were found."
+  },
+  "conectavenezuela": {
+    "risk": "critical",
+    "auditedAt": "2026-07-01",
+    "issueUrl": null,
+    "findings": [
+      {
+        "severity": "critical",
+        "title": "Unrestricted public self-registration lets anyone pick role='admin', and RLS does not restrict which profile columns a user may set (psicologiaapoyo/src/app/pages/register/register.ts)",
+        "status": "open"
+      },
+      {
+        "severity": "critical",
+        "title": "Self-granted 'admin'/'volunteer' role is the sole gate protecting patient PII and account-creation endpoints (psicologiaapoyo/supabase/functions/_shared/auth.ts)",
+        "status": "open"
+      },
+      {
+        "severity": "low",
+        "title": "supabase/.env is committed to git instead of being gitignored (psicologiaapoyo/supabase/.env)",
+        "status": "open"
+      }
+    ],
+    "reauditNote": "First-time audit; no prior tracking issue exists. The core defect is that role-based authorization is enforced only by a self-set profiles.role column with no server-side gatekeeping: the public /register page lets any anonymous visitor pick role='admin' or 'volunteer' directly, and even without that dropdown, the Postgres RLS UPDATE policy on profiles has no WITH CHECK restricting which columns can change, so any authenticated user can PATCH their own row to role='admin' via a raw REST call. Because every server-side authorization check (edge-function admin/volunteer guards, RLS policies on guest_sessions/sessions) trusts this self-writable role column, an anonymous internet user can trivially become an 'admin' or 'volunteer' and read guest_sessions PII (full name, phone, email, age range, urgency) belonging to people seeking psychological support after the earthquake, and can mint further admin/volunteer accounts via create-profile-user."
+  },
+  "confia": {
+    "risk": "none",
+    "auditedAt": "2026-06-29",
+    "issueUrl": null,
+    "findings": [],
+    "reauditedAt": "2026-07-01",
+    "previousRisk": "none",
+    "reauditNote": "No previous findings were actually recorded for this repo (prior audit risk was already 'none' and no tracking issue was ever filed), so there is nothing to carry forward. Re-scanned app/api/verify, app/api/telegram, app/api/health, lib/forensics.ts, lib/llm.ts, lib/verdict.ts, lib/ratelimit.ts, scripts/set-webhook.ts and git history for secrets: the app is a stateless, read-only earthquake-rumor/crypto-wallet verifier with no database, no user accounts, and no stored PII. The Telegram webhook fails closed without a secret in production, the Anthropic key and Helius RPC URL are only read from env (never logged/returned), no .env files or secrets are committed, and Solana RPC calls only hit a fixed allowlist of endpoints (no SSRF). No high-impact new issues found."
+  },
+  "data-team": {
+    "risk": "none",
+    "auditedAt": "2026-06-29",
+    "issueUrl": null,
+    "findings": [],
+    "reauditedAt": "2026-07-01",
+    "previousRisk": "none",
+    "reauditNote": "The 2026-06-29 audit reported no findings and no tracking issue was filed (nothing to carry forward). Re-audit of the current code (repo now canonically at DataVenezuela/VenezuelaDataCrisis, formerly mathiasaiva/VZLA_DEDUP) found no new high-impact issues: no secrets or .env files are committed (.gitignore excludes them, CI runs gitleaks + a bespoke PII/secret keyword diff-scan + bandit + pip-audit + a 'block real data files' check), all fixture/sample data is clearly synthetic, PII (cedula/phone) is only ever exported as salted HMAC tokens via shared/hashing.py (raises ValueError if PII_HMAC_SECRET is missing, no weak default fallback), minors get foto/cedula_masked/precise-location stripped via scrapers/sanitizers/minor_protection.py, the staging exporter (scrapers/exporters/staging_exporter.py) enforces HTTPS and disables redirect-following specifically to avoid leaking the x-api-key/PII to a redirected host, and GitHub Actions workflows use 'pull_request' (not pull_request_target) with env-var interpolation (not inline shell interpolation) and minimal 'permissions: contents: read'. The live public-facing API (Cloudflare Worker + D1) described in docs/adr/0002-endurecimiento-seguridad-cloudflare.md is not yet implemented in this repo (api/main.py, api/auth.py, api/routes/records.py, shared/config.py, shared/storage.py are all empty stub files, and the README marks that layer 'en desarrollo'), so there is currently no exposed write/read API surface in this repo to audit. No security-labeled or security-titled tracking issue exists in the repo's issue tracker (checked all 200 most recent issues, open and closed)."
+  },
+  "directorio-sismo": {
+    "risk": "medium",
+    "auditedAt": "2026-06-29",
+    "issueUrl": "https://github.com/jeannetteafuentesr/venezuela-solidaria/issues/1",
+    "findings": [
+      {
+        "severity": "medium",
+        "title": "Hardcoded admin password in client-side JavaScript (committed and live)",
+        "status": "open"
+      }
+    ],
+    "reauditedAt": "2026-07-01",
+    "previousRisk": "medium",
+    "reauditNote": "Nothing changed since the 2026-06-29 audit: all commits since then only touch index.html (translation/content tweaks), admin.html is untouched, and the hardcoded ADMIN_PASSWORD ('Venezuela2025!') with client-side comparison is still present and exploitable via view-source. The tracking issue (#1) remains open. No new high-impact issues found on a fresh scan — the repo is a static 3-page site (index.html, admin.html, gracias.html) with no backend/API routes, no database, and no other secrets or keys committed; form submissions go through Netlify Forms (server-side, outside this repo's code) rather than a custom API, so mass-assignment/missing-auth/SQLi/SSRF classes of bugs don't apply here.</reauditNote>\n</invoke>\n"
+  },
+  "doomedag": {
+    "risk": "high",
+    "auditedAt": "2026-06-29",
+    "issueUrl": "https://github.com/uset82/iFoundYou/issues/1",
+    "findings": [
+      {
+        "severity": "high",
+        "title": "Gateway privilege escalation: any authenticated user can self-promote and read/intercept the entire mesh relay message queue",
+        "status": "open"
+      },
+      {
+        "severity": "low",
+        "title": "Netlify scheduled cleanup function has no invocation auth and is reachable at a predictable public path",
+        "status": "new"
+      }
+    ],
+    "reauditedAt": "2026-07-01",
+    "previousRisk": "high",
+    "reauditNote": "No commits have landed since the prior audit (repo HEAD is still 47553f8 from 2026-05-14, predating the 2026-06-29 audit) and the tracking issue #1 remains OPEN with no linked PR. The self-promotion-to-gateway privilege escalation is completely unaddressed: supabase/rls.sql still defines profiles_update_self with only `using (auth.uid() = id)` and no WITH CHECK/column restriction, so any authenticated user can flip their own is_gateway flag and, per supabase/mesh_bridge.sql, gain SELECT/UPDATE on the entire mesh_relay_queue (plaintext message content, sender/recipient PII)."
+  },
+  "erqk-crisis-map": {
+    "risk": "high",
+    "auditedAt": "2026-06-29",
+    "issueUrl": "https://github.com/liderrj/crisis-map/issues/1",
+    "findings": [
+      {
+        "severity": "high",
+        "title": "Unauthenticated single-request suppression of any incident (no_longer_exists resolves immediately)",
+        "status": "open"
+      },
+      {
+        "severity": "medium",
+        "title": "Public GET /confirmations leaks per-device pseudonymous identifiers (deviceId)",
+        "status": "open"
+      },
+      {
+        "severity": "low",
+        "title": "All mutation/upload endpoints require only a self-generated deviceId header; images can be uploaded to ANY incident with no ownership check",
+        "status": "open"
+      }
+    ],
+    "reauditedAt": "2026-07-01",
+    "previousRisk": "high",
+    "reauditNote": "No code changes were made to any of the flagged endpoints since the 2026-06-29 audit — the repo's last commit (8b610a2) predates or is contemporaneous with the audit and touches only UI/reload-FAB code. The repo owner acknowledged the tracking issue on 2026-06-30 ('realizaremos las correcciones necesarias') but no follow-up fix commits exist. All three findings remain fully exploitable exactly as before; a fourth, equally-severe path to the same suppression bug also exists via POST /sync's `confirm` op, which is even weaker (no incident-existence check before resolving)."
+  },
+  "found-people-telegram-bot": {
+    "risk": "critical",
+    "auditedAt": "2026-06-29",
+    "issueUrl": "https://github.com/venezuela-war-room/found-people-ve-bot/issues/40",
+    "findings": [
+      {
+        "severity": "critical",
+        "title": "Unauthenticated bulk API still leaks tens of thousands of located-person records including minors' ages, locations, and named family members",
+        "status": "open"
+      },
+      {
+        "severity": "high",
+        "title": "Unauthenticated API still returns the full unmasked Venezuelan cédula and allows lookup by document ID",
+        "status": "open"
+      },
+      {
+        "severity": "medium",
+        "title": "IP rate limit — the only control on the public PII endpoints — is still bypassable via spoofed X-Forwarded-For",
+        "status": "open"
+      },
+      {
+        "severity": "low",
+        "title": "GET /api/people remains an unauthenticated, fully enumerable victim name/info listing",
+        "status": "open"
+      },
+      {
+        "severity": "low",
+        "title": "Admin/ingest bearer-token check uses non-constant-time comparison for the highest-privilege secret",
+        "status": "new"
+      }
+    ],
+    "reauditedAt": "2026-07-01",
+    "previousRisk": "critical",
+    "reauditNote": "The app was substantially rewritten (Fastify + Prisma + Zod, service/repository layers, structured logging) since the last audit, and the raw record count changed from ~30,751 to ~23,480, but none of the four PII-exposure findings were actually fixed: /api/v1/found-people and /api/people are still fully unauthenticated, paginated, and return unmasked cedulas (documentId) plus free-text relevantInfo containing age, location and named family members for minors; the only gate is a per-IP in-memory rate limit whose IP key is taken directly from the client-supplied X-Forwarded-For header, so it remains trivially spoofable. Live requests against the production URL in the README (bot-production-ed0b.up.railway.app) on 2026-07-01 confirmed all of this still works with no auth."
+  },
+  "generador-de-fichas-de-busqueda-venezuela": {
+    "risk": "none",
+    "auditedAt": "2026-06-29",
+    "issueUrl": null,
+    "findings": [],
+    "reauditedAt": "2026-07-01",
+    "previousRisk": "none",
+    "reauditNote": "Re-audited the current code: this is still a fully static, client-only Astro site (single index.astro + Welcome.astro template) with no server, no API routes, no database, no env vars, and no secrets committed. All PII entered into the missing-person form (name, phone, location, medical notes) is only ever written to browser localStorage and rendered into a canvas the user downloads/copies locally — confirmed no fetch/XHR/network calls exist anywhere in src/. No tracking issue exists on GitHub. Nothing has changed materially since the prior audit; overall risk remains none."
+  },
+  "georesponde": {
+    "risk": "critical",
+    "auditedAt": "2026-07-01",
+    "issueUrl": null,
+    "findings": [
+      {
+        "severity": "critical",
+        "title": "Committed dump of trapped/missing-person names, home addresses, and coordinates from a real earthquake, publicly readable in the repo",
+        "status": "open"
+      },
+      {
+        "severity": "medium",
+        "title": "Unauthenticated, unrate-limited submission proxy (POST /api/submit) forwards straight to a partner's live crisis-reporting API with open CORS",
+        "status": "open"
+      },
+      {
+        "severity": "low",
+        "title": "Unauthenticated debug/diagnostic endpoint left reachable in the deployed gateway",
+        "status": "open"
+      }
+    ],
+    "reauditNote": "First-time audit; no prior security tracking issue exists on GeoResponde/georesponde. The most severe finding is a committed, currently-live PII dump of earthquake victims' names/addresses scraped from a partner API, plus an unauthenticated, unrate-limited proxy endpoint that forwards to a partner's live crisis-reporting API. Nothing has been fixed yet since these are all present at HEAD (da73ef8)."
+  },
+  "guacamalla": {
+    "risk": "none",
+    "auditedAt": "2026-06-29",
+    "issueUrl": "https://github.com/vmlcode/guacamaya-net/issues/14",
+    "findings": [
+      {
+        "severity": "medium",
+        "title": "Public unauthenticated GET /channels/:id/records exposed exact GPS coordinates and distress type of SOS senders, fully enumerable",
+        "status": "resolved"
+      }
+    ],
+    "reauditedAt": "2026-07-01",
+    "previousRisk": "medium",
+    "reauditNote": "Commit f83776e (\"feat: implement location coordinate obfuscation and redesign dashboard UI...\", 2026-06-30) fixed the public GET /channels/:id/records leak: responses now route through a new sanitizeRecordsForPublic() that rounds lat/lon to 2 decimals (~1.1km) and strips the raw frameB64 (which encoded exact coordinates) for the community SOS channels (solicito-ayuda, estoy-bien); official channels stay full-precision as intended. The same sanitizer was also applied to the WebSocket broadcastRecord() path, so the fix is consistent across HTTP and WS. The exact-precision GET /locations endpoint remains gated by requireApiKey as before. Tracking issue #14 is closed and no fresh high-impact issues (secrets, missing auth on writes, mass assignment, SQLi, open CORS-with-cookies, disabled RLS) were found in this pass."
+  },
+  "lanna-naty": {
+    "risk": "critical",
+    "auditedAt": "2026-06-29",
+    "issueUrl": "https://github.com/lannahbett/puentevenezuela/issues/1",
+    "findings": [
+      {
+        "severity": "critical",
+        "title": "Unauthenticated public read of all victim PII via reports table (anon RLS SELECT)",
+        "status": "open"
+      },
+      {
+        "severity": "high",
+        "title": "Public storage bucket + anon-readable attachments table expose uploaded photos and allow arbitrary uploads",
+        "status": "open"
+      },
+      {
+        "severity": "medium",
+        "title": "Anonymous UPDATE of any report (IDOR / data-integrity tampering)",
+        "status": "partial"
+      },
+      {
+        "severity": "low",
+        "title": "Anonymous INSERT into reports enables spam / data poisoning",
+        "status": "open"
+      }
+    ],
+    "reauditedAt": "2026-07-01",
+    "previousRisk": "critical",
+    "reauditNote": "The repository has had no new commits since the prior audit (HEAD is still fb3adc1, dated 2026-06-29 00:34 UTC, matching the state already reviewed) — nothing was actually fixed. Live testing against the production Supabase REST API confirms the anon key still returns full victim PII (names, phone numbers, GPS coordinates) from `reports`. The only nuance versus the last write-up is that the anonymous UPDATE policy is paired with a `protect_report_fields` trigger that restricts anon updates to status/assignment columns only — this was already present at audit time and narrows (but does not close) the IDOR on any report row."
+  },
+  "mapeo-de-signos-vitales-tiempo-real": {
+    "risk": "high",
+    "auditedAt": "2026-07-01",
+    "issueUrl": "https://github.com/ruvnet/RuView/issues/864",
+    "findings": [
+      {
+        "severity": "critical",
+        "title": "HOMECORE control API defaults to accept-any-non-empty bearer token and binds 0.0.0.0, allowing unauthenticated device control (state writes, arbitrary service calls)",
+        "status": "open"
+      },
+      {
+        "severity": "high",
+        "title": "Sensing-server's live WebSocket stream (/ws/sensing, /ws/introspection) has no authentication even when RUVIEW_API_TOKEN is set, leaking real-time presence/pose/vitals data to any network-reachable client",
+        "status": "open"
+      }
+    ],
+    "reauditNote": "First-time audit. Issue #864 (\"Docker default exposes unauthenticated sensing API and /ws/sensing stream\") was closed on the claim that PR #868 shipped a `require_ws_token` middleware gating /ws/sensing and /ws/introspection — but PR #868 is still OPEN/unmerged, and no such middleware exists anywhere in current `main`. Only a partial mitigation from that PR made it in: docker-entrypoint.sh now refuses to start the sensing-server on a non-loopback bind unless RUVIEW_API_TOKEN or RUVIEW_ALLOW_UNAUTHENTICATED=1 is set. That protects `/api/v1/*` once a token is supplied, but the live sensing WebSocket itself — the exact surface the issue was about — remains completely unauthenticated by design. Separately, the HOMECORE home-automation control API (a supported, shipped deployment path in the same Docker image) defaults to accepting any non-empty bearer token and binds 0.0.0.0:8123 unless the operator explicitly sets HOMECORE_TOKENS; this is documented in-code as a 'DEV ONLY' escape hatch but is also the out-of-the-box behavior, and Docker's entrypoint explicitly exempts this binary from its fail-closed auth check."
+  },
+  "proto-bloom-sismo": {
+    "risk": "high",
+    "auditedAt": "2026-06-29",
+    "issueUrl": "https://github.com/DevAndrew64/Bloom-Sismo/issues/2",
+    "findings": [
+      {
+        "severity": "high",
+        "title": "Full plaintext PII map (cedula + full name) embedded in public client",
+        "status": "open"
+      },
+      {
+        "severity": "medium",
+        "title": "Missing-person report submissions silently fail and are never delivered (Supabase schema drift)",
+        "status": "new"
+      }
+    ],
+    "reauditedAt": "2026-07-01",
+    "previousRisk": "high",
+    "reauditNote": "Nothing changed on the original PII finding: BLOOM_SOURCES (cédula+nombre in cleartext) is still shipped in index.html exactly as before, no security-related commits landed since the last audit, and tracking issue #2 remains OPEN. Fresh scan found no leaked secrets (no service_role/JWT-signing keys in code or git history; only the Supabase publishable/anon-style key sb_publishable_... is public, which is expected). I live-tested the Supabase `reports` table with that public key and confirmed RLS is actually configured correctly (anon can INSERT but a follow-up SELECT/PATCH/DELETE with the same key returned 0 rows every time) — so PII submitted via the report form is NOT publicly readable, contradicting my initial suspicion. However I also discovered, via live testing, that real submissions are currently broken end-to-end because the deployed Supabase table is missing columns (descripcion, evento) the client tries to insert, so genuine missing-person reports silently never reach coordinators. Disclosure: to verify RLS behavior I inserted two harmless test rows (id 00000000-0000-4000-8000-000000000097 and ...0096, nombre 'AUDIT-TEST-DELETE-ME'/-2, cedula '00000000') into the live `reports` table; I could not delete them since the anon key correctly lacks delete rights — the project owner should remove them via the Supabase dashboard/service-role key."
+  },
+  "psicoayudave": {
+    "risk": "none",
+    "auditedAt": "2026-06-29",
+    "issueUrl": null,
+    "findings": [],
+    "reauditedAt": "2026-07-01",
+    "previousRisk": "none",
+    "reauditNote": "No previous findings were on record for this repo (the prior audit's findings list was empty; only overall risk=none carried over, and gh issue list confirms no tracking issue exists). A fresh scan of the current code (src/server/*.ts, src/lib/auth.ts, src/routes/media/*, src/routes/admin/index.tsx, wrangler.jsonc, .env.example) found no committed secrets, no missing auth/ownership checks on state-changing server functions, no mass-assignment, and no SQL injection — every mutating createServerFn checks session/ownership or isAdminEmail(), PII-bearing follow-up records (phone, name, crisis reason) are strictly scoped to the owning professional via WHERE professionalId, and R2 media routes are gated appropriately (admin-only for certificates, owner-or-admin for support docs, unauthed-by-design only for public avatar/audio content keyed by unguessable UUIDs with path-traversal guards)."
+  },
+  "puente-de-vida": {
+    "risk": "high",
+    "auditedAt": "2026-07-01",
+    "issueUrl": null,
+    "findings": [
+      {
+        "severity": "high",
+        "title": "Default admin/operator credentials are hardcoded in the repo and get provisioned into the database, with no production safeguard",
+        "status": "open"
+      }
+    ],
+    "reauditNote": "First-time audit; no prior findings to compare against. Core API (apps/api) shows solid security hygiene overall: parameterized SQL everywhere, zod validation on writable endpoints, scrypt+timingSafeEqual password checks, consistent role-based auth (parseAuth/minRole) on all state-changing and PII-bearing routes, and role-aware PII masking (filterReport/filterPerson) for reports and matched-person records. The standout real risk is shipped default/example admin and operator credentials that are duplicated between the demo seeding script and the docker-compose/.env defaults and are never enforced to be rotated for production."
+  },
+  "rastro": {
+    "risk": "critical",
+    "auditedAt": "2026-06-29",
+    "issueUrl": "https://github.com/danieibazgc/rastro/issues/1",
+    "findings": [
+      {
+        "severity": "critical",
+        "title": "Unauthenticated bulk PII exposure via GET /api/personas",
+        "status": "open"
+      },
+      {
+        "severity": "critical",
+        "title": "RLS policies grant anonymous public read AND write of the entire personas (PII) table",
+        "status": "open"
+      },
+      {
+        "severity": "medium",
+        "title": "Unauthenticated creation of missing-person records (data poisoning / fake reports)",
+        "status": "open"
+      }
+    ],
+    "reauditedAt": "2026-07-01",
+    "previousRisk": "critical",
+    "reauditNote": "No fixes were made to any of the three previously reported findings. The three commits made since the audit (301e866, 835ce79, aceee3b) only touched the moderation panel (added a published tab and delete, already properly gated by the mod_token cookie) and env-var validation/CRON_SECRET for the cron route — none touched src/app/api/personas/route.ts or the personas RLS policies in supabase/schema.sql. GET and POST /api/personas remain fully unauthenticated with service-role select('*')/insert, and the anon role still has USING(TRUE)/WITH CHECK(TRUE) SELECT+INSERT access to the personas table. A quick scan of the other routes (reportes, refugios, moderacion, moderacion login, cron) found no new high-impact issues and no committed secrets (.env.example only, no real .env in git history)."
+  },
+  "redacopiovnzla": {
+    "risk": "medium",
+    "auditedAt": "2026-06-29",
+    "issueUrl": null,
+    "findings": [
+      {
+        "severity": "medium",
+        "title": "Rate limiting trivially bypassable via client-controlled x-fingerprint header",
+        "status": "open"
+      },
+      {
+        "severity": "critical",
+        "title": "IDOR via param/body centroId ambiguity in VoluntarioGuard/JefeGuard",
+        "status": "resolved"
+      },
+      {
+        "severity": "medium",
+        "title": "Missing security headers (no Helmet)",
+        "status": "resolved"
+      }
+    ],
+    "reauditedAt": "2026-07-01",
+    "previousRisk": "none",
+    "reauditNote": "The prior audit (2026-06-29) reported no findings and no tracking issue was filed, so there was nothing to carry forward. Since then, the repo's own automated Sentinel/Jules process caught and fixed two real vulnerabilities that appeared in the codebase (a param/body IDOR bypass in VoluntarioGuard/JefeGuard on 2026-07-01, and missing Helmet security headers on 2026-06-30) — both verified fixed in current code with regression tests. This fresh scan found one new, still-open issue: the Redis rate limiter keys on a fully client-controlled `x-fingerprint` header, so login/register/admin-login rate limiting is trivially bypassable by a scripted attacker, undermining brute-force protection."
+  },
+  "reencuentros-terremotos-venezuela": {
+    "risk": "critical",
+    "auditedAt": "2026-06-29",
+    "issueUrl": "https://github.com/iacastillo90/ReencuentroTerremotoVenezuela/issues/2",
+    "findings": [
+      {
+        "severity": "critical",
+        "title": "Raw victim PII dataset — CSV purged from git, but equivalent PII now served live via unauthenticated searchable API",
+        "status": "partial"
+      },
+      {
+        "severity": "high",
+        "title": "Hardcoded JWT signing/verification secret",
+        "status": "resolved"
+      },
+      {
+        "severity": "medium",
+        "title": "MinIO media bucket public-read + unauthenticated upload/AI endpoints",
+        "status": "resolved"
+      },
+      {
+        "severity": "medium",
+        "title": "Unauthenticated n8n webhook ingestion endpoints",
+        "status": "resolved"
+      },
+      {
+        "severity": "high",
+        "title": "CORS origin check uses substring matching, enabling cross-origin credentialed request/CSRF-token theft",
+        "status": "new"
+      },
+      {
+        "severity": "medium",
+        "title": "Password hash returned verbatim in auth API responses",
+        "status": "new"
+      }
+    ],
+    "reauditedAt": "2026-07-01",
+    "previousRisk": "critical",
+    "reauditNote": "The team fixed 3 of 4 findings cleanly: JWT now fails fast with no hardcoded fallback, the MinIO bucket is created without a public-read policy and all media/AI endpoints now require auth, and the n8n webhooks now require a shared secret (fail-closed). The CSV file itself is confirmed gone from the full unshallow git history on every branch. However, finding #1 is only partially fixed in substance: the exact same PII (name+cédula+age+gender+hospital for thousands of people) is now served live and searchable-by-cédula through a brand-new, fully unauthenticated `GET /api/localizados` endpoint and leaks into the public `GET /api/persons` listing via a `data.cedula` field that a background scraper job populates unhashed. Two new high-impact issues were also found: a CORS substring-match bypass combined with credentials:true/SameSite=None that allows attacker-controlled origins to steal the CSRF token and ride victims' cookies, and scrypt password hashes returned verbatim in auth API responses."
+  },
+  "reestructuramos": {
+    "risk": "medium",
+    "auditedAt": "2026-06-29",
+    "issueUrl": "https://github.com/comandoconstrucciones/reestructuramos-pwa/issues/1",
+    "findings": [
+      {
+        "severity": "medium",
+        "title": "inspections table anon-readable at column granularity (RLS using(true))",
+        "status": "resolved"
+      },
+      {
+        "severity": "low",
+        "title": "Public Supabase Storage bucket 'inspection-photos' is anonymously listable and readable",
+        "status": "open"
+      },
+      {
+        "severity": "high",
+        "title": "Unauthenticated server route proxies client images to Gemini using a secret API key, with no rate limiting",
+        "status": "new"
+      }
+    ],
+    "reauditedAt": "2026-07-01",
+    "previousRisk": "medium",
+    "reauditNote": "Commit 3a91766 (2026-07-01) fixed the main PII leak: base tables inspections/inspection_findings/finding_photos now have RLS restricted to owner-or-coordinator, and public reads go through a new inspections_public view that omits inspector_signature, general_comments, and inspector_id. That finding is resolved (minor residual: the view still exposes exact lat/lng, which the original report flagged as 'beyond what the map needs', though this is now a much smaller gap than before). The public Storage bucket finding was NOT touched by the fix commit — storage.objects policies are unchanged from supabase/migrations/0001_init.sql, so it remains open. A new high-impact issue was found: /api/analizar-grieta is a fully unauthenticated server route that forwards client-supplied images to Gemini using a server-side GEMINI_API_KEY, with no auth, rate limiting, or size checks — anyone can script requests to burn the project owner's Gemini API quota/budget."
+  },
+  "refugio-mental": {
+    "risk": "none",
+    "auditedAt": "2026-07-01",
+    "issueUrl": null,
+    "findings": [],
+    "reauditNote": "First-time audit: this app has no backend whatsoever — no API routes, no database, no env/secrets, no fetch/axios calls anywhere in the repo. All 'psychologist directory' data (including self-registered profiles) lives only in each visitor's browser localStorage, so none of the audited categories (auth on write routes, mass-assignment, PII exposure via API, Supabase RLS/CORS, injection/SSRF/upload, hardcoded secrets) apply. Seed data is fictional placeholder content. The one open GitHub issue (#1, 'Integrar Base de datos y remover mocks') is a feature request, not a security issue — re-audit once a real backend/DB lands, since it would introduce genuine attack surface (e.g., an unauthenticated write endpoint accepting psychologist names/emails)."
+  },
+  "responsegrid": {
+    "risk": "low",
+    "auditedAt": "2026-06-29",
+    "issueUrl": null,
+    "findings": [
+      {
+        "severity": "low",
+        "title": "Unauthenticated donor contact-to-name confirmation oracle on /donation-intakes/lookup-contact",
+        "status": "open"
+      }
+    ],
+    "reauditedAt": "2026-07-01",
+    "previousRisk": "low",
+    "reauditNote": "No tracking issue was ever filed and none exists now. The lookup-contact endpoint is unchanged since the prior audit: it remains a public, unauthenticated POST guarded only by a 5-req/min IP throttle, still returns the real donor name plus pending-intake details (resource id, item count) for any phone/email guessed. A fresh scan of all API controllers, DTOs, CORS/Helmet config, file upload, and env/secrets found no new high-impact issues: every state-changing route is behind JwtAuthGuard/PermissionGuard (or an intentional public flow with its own contact+code check), DTOs use class-validator with global whitelist/forbidNonWhitelisted (no mass assignment), CORS is origin-locked to FRONTEND_URL, JWT_SECRET length is enforced in production, and no live secrets are committed (only local dev/test creds)."
+  },
+  "resqlink": {
+    "risk": "high",
+    "auditedAt": "2026-06-29",
+    "issueUrl": "https://github.com/otobonh/resqlink-ai/issues/1",
+    "findings": [
+      {
+        "severity": "high",
+        "title": "Incidents table (victim GPS, address, photos, descriptions) world-readable via anon key",
+        "status": "open"
+      },
+      {
+        "severity": "medium",
+        "title": "Resources table (contact phone numbers, addresses) world-readable via anon key",
+        "status": "open"
+      },
+      {
+        "severity": "high",
+        "title": "Unauthenticated INSERT into incidents and resources allows injecting false emergencies",
+        "status": "open"
+      },
+      {
+        "severity": "medium",
+        "title": "social_feed_items grants public INSERT/UPDATE/DELETE to the anon role",
+        "status": "open"
+      },
+      {
+        "severity": "low",
+        "title": "Unauthenticated AI endpoints proxy to OpenAI on arbitrary input (cost/abuse)",
+        "status": "open"
+      },
+      {
+        "severity": "low",
+        "title": "Feed sync endpoint is fully open when CRON_SECRET is unset (fail-open auth)",
+        "status": "open"
+      }
+    ],
+    "reauditedAt": "2026-07-01",
+    "previousRisk": "high",
+    "reauditNote": "No commits have landed since the 2026-06-29 audit (latest commit is 2026-06-28), and tracking issue #1 remains open with zero comments — nothing was fixed. All six previously reported findings are unchanged and still fully exploitable; the social_feed_items RLS is unchanged (public INSERT/UPDATE/DELETE), and no new high-impact issues beyond the prior list were found on this pass."
+  },
+  "sara": {
+    "risk": "critical",
+    "auditedAt": "2026-06-29",
+    "issueUrl": "https://github.com/daniquishpecod4/SARAB4VE/issues/10",
+    "findings": [
+      {
+        "severity": "critical",
+        "title": "Public, unauthenticated GET /api/help-requests leaks full victim PII in bulk",
+        "status": "open"
+      },
+      {
+        "severity": "high",
+        "title": "Unauthenticated POST /api/help-requests/:id/accept hijacks open requests and re-exposes requester PII",
+        "status": "open"
+      },
+      {
+        "severity": "high",
+        "title": "Unauthenticated POST /api/help-requests/:id/resolve lets anyone close active relief requests",
+        "status": "open"
+      }
+    ],
+    "reauditedAt": "2026-07-01",
+    "previousRisk": "critical",
+    "reauditNote": "No commits have touched backend/src/routes/helpRequests.js (or any auth/middleware code) since the 2026-06-29 audit — all development since then (2026-06-30/07-01) has been frontend-only work (map page with mock data, SOS emergency page). All three previously reported findings remain fully open and unpatched; the tracking issue #10 is still open with no linked fix."
+  },
+  "sismos-venezuela": {
+    "risk": "critical",
+    "auditedAt": "2026-06-29",
+    "issueUrl": "https://github.com/sephirods/venezuelasismos/issues/1",
+    "findings": [
+      {
+        "severity": "critical",
+        "title": "Production server SSH credentials committed in DEPLOY.md (public repo)",
+        "status": "open"
+      },
+      {
+        "severity": "medium",
+        "title": "Scraper cron auth token committed and used over cleartext HTTP",
+        "status": "open"
+      },
+      {
+        "severity": "medium",
+        "title": "Android release-keystore signing password hardcoded and committed in build.gradle.kts",
+        "status": "new"
+      },
+      {
+        "severity": "high",
+        "title": "Authoritative earthquake feed fetched over unauthenticated cleartext HTTP with no integrity check",
+        "status": "new"
+      }
+    ],
+    "reauditedAt": "2026-07-01",
+    "previousRisk": "critical",
+    "reauditNote": "No commits have landed since the prior audit (repo's newest commit is Jun 27, before the Jun 29 audit) — both previously reported findings are completely unremediated: the SSH password and the cron token are still committed in plaintext in DEPLOY.md exactly as before, and no credential rotation has occurred. Fresh scan turned up two new issues: a hardcoded Android release-keystore signing password in app/app/build.gradle.kts, and the app's core data pipeline (FUNVISIS scraper) fetching the authoritative earthquake feed over unauthenticated cleartext HTTP with no integrity check, which is a supply-chain/data-integrity risk specific to an earthquake-alert app."
+  },
+  "sismove": {
+    "risk": "low",
+    "auditedAt": "2026-07-01",
+    "issueUrl": null,
+    "findings": [
+      {
+        "severity": "low",
+        "title": "Firestore security rules are not committed to the repo, so write-protection for the public directory data can't be verified from source",
+        "status": "open"
+      },
+      {
+        "severity": "low",
+        "title": "Site URLs from Firestore are rendered as raw anchor hrefs with no scheme allowlist",
+        "status": "open"
+      }
+    ],
+    "reauditNote": "First-time audit. This is a purely read-only, client-side Next.js directory site (no API routes, no server actions, no auth, no admin/write UI in the codebase at all) that fetches a single Firestore document (`directory/all_sites`) via the public Firebase Web SDK and renders it. No secrets are committed (Firebase config uses NEXT_PUBLIC_* values, which are meant to be public), and git history shows no accidental commits of .env files, service-account keys, or DB URLs. The 'missing persons' data referenced in the directory is just a link/description pointing to an external, third-party Google Sheet — no PII is stored or served by this app itself. Live checks against the deployed site (sismove.info, project `sismo-ve`) confirmed the directory document is publicly readable (expected/by design) and that an unauthenticated write attempt against an unrelated scratch Firestore path was rejected with 403 PERMISSION_DENIED, indicating the project is not left in Firebase's permissive 'test mode'."
+  },
+  "somoshuella": {
+    "risk": "high",
+    "auditedAt": "2026-07-01",
+    "issueUrl": null,
+    "findings": [
+      {
+        "severity": "high",
+        "title": "Public, unauthenticated face search leaks missing persons' name, contact and location to anyone who uploads a photo",
+        "status": "open"
+      },
+      {
+        "severity": "high",
+        "title": "Public, unauthenticated registration endpoint lets anyone inject fabricated 'missing person' records",
+        "status": "open"
+      },
+      {
+        "severity": "medium",
+        "title": "Per-IP rate limiting is neutralized by the server-side proxy architecture",
+        "status": "open"
+      },
+      {
+        "severity": "low",
+        "title": "Real production VPS IP and local admin SSH key path hardcoded/committed",
+        "status": "open"
+      },
+      {
+        "severity": "low",
+        "title": "Legacy prototype API has open CORS and zero authentication on all endpoints, including delete",
+        "status": "open"
+      }
+    ],
+    "reauditNote": "First-time audit; no prior tracking issue exists (gh issue list returns empty) and there is no audit history to compare against. The backend api/main.py has real, well-implemented hardening (constant-time API key check, restrictive CORS, magic-byte upload validation, atomic index writes, rate limiting) — but the app's own product design exposes missing persons' PII to anyone on the internet with no authentication layer in the frontend, contradicting the project's own written spec."
+  },
+  "terrave": {
+    "risk": "high",
+    "auditedAt": "2026-06-29",
+    "issueUrl": "https://github.com/rainvare/terraVE/issues/1",
+    "findings": [
+      {
+        "severity": "high",
+        "title": "Unauthenticated mass-assignment PATCH on /api/lugares/[id]",
+        "status": "open"
+      },
+      {
+        "severity": "medium",
+        "title": "Unauthenticated PATCH on /api/report/[id] lets anyone alter any damage classification",
+        "status": "partial"
+      },
+      {
+        "severity": "low",
+        "title": "Open unauthenticated geocoding proxy (/api/geocode) with no rate limit",
+        "status": "open"
+      }
+    ],
+    "reauditedAt": "2026-07-01",
+    "previousRisk": "high",
+    "reauditNote": "Since the last audit, only the /api/report/[id] PATCH endpoint was hardened: it now validates the UUID and whitelists editable fields with a strict zod schema, closing the mass-assignment vector, but it still has zero authentication so anyone can still flip a location's damage classification. /api/lugares/[id] PATCH is completely unchanged — still `update(body)` with no auth and no field whitelist, and the tracking issue confirms this is exploitable against the production RLS. A new in-memory rate limiter and basic SQL-injection regex were added in middleware.ts, but its matcher list only covers /api/classify, /api/report, /api/lugares — /api/geocode is not in the matcher at all, so the open geocode proxy remains completely unprotected (no auth, no rate limit), unchanged from the last audit."
+  },
+  "venemed": {
+    "risk": "low",
+    "auditedAt": "2026-06-29",
+    "issueUrl": "https://github.com/raulandreroman/venemed/issues/26",
+    "findings": [
+      {
+        "severity": "high",
+        "title": "RLS disabled on all tables (Supabase Data API exposure) — GitHub issue #26",
+        "status": "resolved"
+      },
+      {
+        "severity": "low",
+        "title": "Cron secret uses non-constant-time comparison — GitHub issue #25",
+        "status": "resolved"
+      },
+      {
+        "severity": "medium",
+        "title": "OTP send has no captcha — SMS/email budget exhaustion DoS — GitHub issue #22",
+        "status": "resolved"
+      },
+      {
+        "severity": "low",
+        "title": "(admin) middleware gates on session only, not admin role — GitHub issue #24",
+        "status": "resolved"
+      },
+      {
+        "severity": "low",
+        "title": "Public recordShare action has no rate limit — GitHub issue #23",
+        "status": "partial"
+      },
+      {
+        "severity": "medium",
+        "title": "OTP brute-force protection delegated entirely to Supabase config — GitHub issue #21",
+        "status": "open"
+      },
+      {
+        "severity": "low",
+        "title": "Placeholder contact email on /privacidad — GitHub issue #31 (open)",
+        "status": "open"
+      }
+    ],
+    "reauditedAt": "2026-07-01",
+    "previousRisk": "none",
+    "reauditNote": "The previous audit round (issues #21-#26, filed by another Build4Venezuela participant) is fully addressed in code: RLS deny-all + REVOKE was added in migration 0006_locked_data_api.sql (PR #28, closes #26), the cron bearer-token check now uses crypto.timingSafeEqual with fail-closed semantics (closes #25), Turnstile captcha is wired into every signInWithOtp call (closes #22), and admin pages all call requireAdmin() which independently checks is_platform_admin from the DB (closes #24). A fresh scan of all server actions (registro, editar, gestionar, publicar, aviso, recepcion, moderation) found consistent server-side session-derived authorization, no mass-assignment, and no raw-string SQL interpolation. The only remaining open item is GitHub issue #31: the /privacidad contact email is still the literal placeholder 'contacto@ejemplo.com' in src/app/(public)/privacidad/page.tsx, which is the stated channel for PII-deletion requests on a platform built for an at-risk population — low severity but a real, currently-open gap."
+  },
+  "venezuela-juntos": {
+    "risk": "low",
+    "auditedAt": "2026-06-29",
+    "issueUrl": "https://github.com/OnBeIt/Venezuela_Juntos_v2/issues/1",
+    "findings": [
+      {
+        "severity": "high",
+        "title": "Public /matches endpoint leaks victim PII and rescuer contact info with no authentication",
+        "status": "resolved"
+      },
+      {
+        "severity": "medium",
+        "title": "Public /uploads static mount serves victims' face photos without authentication",
+        "status": "resolved"
+      },
+      {
+        "severity": "low",
+        "title": "All data-entry and matching endpoints are unauthenticated, enabling anonymous PII submission and probe-matching abuse",
+        "status": "partial"
+      }
+    ],
+    "reauditedAt": "2026-07-01",
+    "previousRisk": "high",
+    "reauditNote": "Commit 0079d51 (\"Add authentication, per-user isolation, admin console, and photo quality handling\") added self-signup accounts, signed-cookie sessions, per-user match scoping, and an authenticated /uploads/{filename} route replacing the public StaticFiles mount, which resolves the two higher-severity findings. The residual low-severity finding is only partially closed: registration is free/unverified (no email confirmation, no CAPTCHA, no rate limiting on /login or /register), so an attacker can still trivially create disposable accounts to submit data or run probe-matching against other users' PII, just with one extra step."
+  },
+  "venezuela-response-hub": {
+    "risk": "none",
+    "auditedAt": "2026-06-29",
+    "issueUrl": null,
+    "findings": [],
+    "reauditedAt": "2026-07-01",
+    "previousRisk": "none",
+    "reauditNote": "Re-confirmed: this repo is a static/SSR marketing landing page (TanStack Start, Lovable-generated) with no database, no API routes, no auth, no forms submitting data, and no secrets or env vars referenced anywhere in src/ or config files. The only dynamic server code is src/server.ts, a generic error-normalizing wrapper around the framework's SSR handler with no data handling. No previous findings existed to carry forward (prior audit also reported risk 'none' with no listed findings), and no security tracking issue exists on GitHub. Nothing exploitable was found in this fresh scan."
+  },
+  "vidas-ve": {
+    "risk": "critical",
+    "auditedAt": "2026-07-01",
+    "issueUrl": "https://github.com/aldoapicella/vidasve/issues/4",
+    "findings": [
+      {
+        "severity": "critical",
+        "title": "External image proxy follows redirects without re-validating the allowlist (SSRF)",
+        "status": "open"
+      },
+      {
+        "severity": "high",
+        "title": "Production runs with insecure dev fallbacks for security-critical secrets",
+        "status": "open"
+      },
+      {
+        "severity": "medium",
+        "title": "Rate limiting keys off unauthenticated x-forwarded-for header",
+        "status": "open"
+      },
+      {
+        "severity": "medium",
+        "title": "Media upload validation trusts client-declared MIME type only; new uploads publish immediately",
+        "status": "open"
+      },
+      {
+        "severity": "low",
+        "title": "Media storage account does not disable shared-key access",
+        "status": "open"
+      },
+      {
+        "severity": "low",
+        "title": "Admin moderation auth is a single shared bearer token stored in sessionStorage",
+        "status": "open"
+      },
+      {
+        "severity": "low",
+        "title": "CI/CD workflows use unpinned action tags and unpinned deploy CLI",
+        "status": "open"
+      }
+    ],
+    "reauditNote": "This repo already has 8 open, unfixed security-tracking issues (#4-#11, filed 2026-06-30 at the exact commit currently at HEAD, 6838715). I independently re-verified every one against the live code and all are confirmed still present with no remediation commits since filing. I found no additional high-impact issues beyond what's already tracked: auth/authz on all state-changing routes is solid (requireAdmin HMAC-based constant-time check, owner-token verification, PoW challenge + Turnstile captcha, per-field whitelisted parsers with no mass-assignment), PII (contact info, owner tokens) is AES-256-GCM encrypted/HMAC-hashed and stripped from all public API responses via publicReport/publicEvent, Cosmos DB queries are fully parameterized (no injection), and media reads use short-lived user-delegation SAS tokens rather than public blob access."
+  },
+  "vzla-encuentra": {
+    "risk": "high",
+    "auditedAt": "2026-07-01",
+    "issueUrl": null,
+    "findings": [
+      {
+        "severity": "high",
+        "title": "Unauthenticated bulk PII scraping via the text-search endpoints (phones, locations, minors' names)",
+        "status": "open"
+      },
+      {
+        "severity": "high",
+        "title": "Unauthenticated write lets anyone hijack a found person's live location and contact phone",
+        "status": "open"
+      },
+      {
+        "severity": "medium",
+        "title": "Default admin password 'reencuentros2026' was hardcoded in source and is now permanently visible in git history",
+        "status": "resolved"
+      },
+      {
+        "severity": "medium",
+        "title": "No rate limiting anywhere in the API",
+        "status": "open"
+      },
+      {
+        "severity": "low",
+        "title": "Uploaded photo/testimonio content type is trusted from the client header, not verified, and the standalone nginx config drops security headers on the /fotos/ static path",
+        "status": "open"
+      }
+    ],
+    "reauditNote": "First-time audit; no prior security-tracking issue exists (only an unrelated, closed functional bug about local-photo persistence in Docker Compose, issue #4). The codebase shows real security-conscious effort — parametrized SQL everywhere, bcrypt+JWT admin auth applied consistently via `dependencies=[Depends(get_current_admin)]` on every admin/state-changing-admin route, a well-built SSRF guard for the image-import endpoint, and a previously-committed default admin password that was already found and removed from source (commit 0d868da). However, two public, unauthenticated endpoints undercut the app's own privacy model: a text-search endpoint that lets anyone paginate through and dump every missing/found person's phone number and location with a single wildcard query, and a public write endpoint that lets anyone overwrite a found person's live location/contact phone. Both are exploitable today with a single unauthenticated HTTP request."
+  },
+  "zerena": {
+    "risk": "medium",
+    "auditedAt": "2026-07-01",
+    "issueUrl": null,
+    "findings": [
+      {
+        "severity": "medium",
+        "title": "session_notes table + its role-based RLS exist only as an untracked, hand-applied change on the live DB (schema drift, unauditable)",
+        "status": "open"
+      },
+      {
+        "severity": "medium",
+        "title": "anon/authenticated retain default SELECT grants on PII tables; only RLS (no policy) currently blocks reads",
+        "status": "open"
+      },
+      {
+        "severity": "low",
+        "title": "Case-mutation server functions skip the per-case access check used by session notes, letting any staff role alter any case",
+        "status": "open"
+      },
+      {
+        "severity": "low",
+        "title": "Public support_requests INSERT allows the submitter to set workflow-control fields (status, assigned_to)",
+        "status": "open"
+      },
+      {
+        "severity": "low",
+        "title": "Supabase anon/publishable key and project URL committed in .env",
+        "status": "open"
+      }
+    ],
+    "reauditNote": "First-time audit. No prior tracking issue exists (gh issue list returns empty). The dev history shows genuine security-hardening effort (IDOR fix on session notes with assertCaseAccess, REVOKE EXECUTE on SECURITY DEFINER functions, RLS-gated support_requests/user_roles), and live probing confirms anon cannot currently read support_requests, contact_messages, or session_notes (session_notes correctly returns 401 permission-denied). Remaining gaps are defense-in-depth/process issues rather than live PII leaks: the session_notes table and its RLS were applied by hand directly on the Supabase DB and never committed as a migration (admitted in commit bf60433), so the repo cannot reproduce/verify the protections for the most sensitive data (therapy notes on earthquake survivors); several tables still carry Supabase's default anon/authenticated SELECT grant that was never explicitly revoked, leaving RLS as the sole safety net; and three case-mutation server functions (urgency/status/assignment) skip the per-case assertCaseAccess check that session notes already use, so any staff account (even the lowest 'voluntario' role) can alter any case, not just its own."
+  }
+}

@@ -6,7 +6,20 @@ import { routing } from "./i18n/routing";
 const intlMiddleware = createMiddleware(routing);
 
 function isProtectedRoute(pathname: string) {
-  return pathname === "/submit" || pathname.startsWith("/submit/");
+  const [, locale, segment] = pathname.split("/");
+  const localizedProtectedRoute = routing.locales.some(
+    (supportedLocale) =>
+      supportedLocale === locale &&
+      (segment === "submit" ||
+        pathname === `/${locale}/builder/register` ||
+        pathname === `/${locale}/builder/requests`),
+  );
+
+  return (
+    localizedProtectedRoute ||
+    pathname === "/builder/register" ||
+    pathname === "/builder/requests"
+  );
 }
 
 function skipsIntl(pathname: string) {
@@ -18,16 +31,24 @@ function skipsIntl(pathname: string) {
     pathname.startsWith("/whatsapp") ||
     pathname.startsWith("/wpp") ||
     pathname.startsWith("/luma") ||
+    pathname.startsWith("/discord") ||
     pathname.startsWith("/event") ||
-    pathname.startsWith("/projects") ||
-    pathname.startsWith("/submit") ||
-    pathname.startsWith("/p/") ||
     /\.[^/]+$/.test(pathname)
   );
 }
 
 export default clerkMiddleware(async (auth, request) => {
   const { pathname } = request.nextUrl;
+
+  if (
+    ["build4venezuela.com", "www.build4venezuela.com"].includes(
+      request.nextUrl.hostname,
+    )
+  ) {
+    const destination = new URL("https://build4latam.com/en/ve");
+    destination.search = request.nextUrl.search;
+    return NextResponse.redirect(destination, 308);
+  }
 
   if (isProtectedRoute(pathname)) {
     await auth.protect();

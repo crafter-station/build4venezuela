@@ -1,0 +1,156 @@
+{
+  "project_slug": "sara",
+  "name": "SARA Sistema de Apoyo y Respuesta Accesible para Emergencias",
+  "repo_url": "https://github.com/daniquishpecod4/SARAB4VE",
+  "live_url": "https://github.com/daniquishpecod4/SARAB4VE",
+  "video_url": "",
+  "countries": [
+    "Venezuela",
+    "Ecuador",
+    "México",
+    "Colombia",
+    "España"
+  ],
+  "db_description": "# ♿ SARA\n## Sistema de Apoyo y Respuesta Accesible para Emergencias\n\n> **Una plataforma inclusiva que conecta a personas con discapacidad, voluntarios y organizaciones para coordinar ayuda en tiempo real durante emergencias y desastres naturales.**\n\n---\n\n## 🌎 Descripción\n\n**SARA** nace como una solución desarrollada durante un hackatón para responder a las necesidades de las personas con discapacidad afectadas por un desastre natural.\n\nLa plataforma permite solicitar ayuda específica de forma rápida y geolocalizada, conectando a las personas afectadas con voluntarios, organizaciones humanitarias, profesionales de la salud y donantes cercanos.\n\nNuestro objetivo es garantizar que **nadie quede sin asistencia debido a una barrera de accesibilidad.**\n\n---\n\n# 🚨 Problemática\n\nDespués de un desastre natural, las personas con discapacidad enfrentan dificultades adicionales para acceder a:\n\n- ♿ Equipamiento de apoyo\n- 💊 Medicamentos\n- 🚗 Transporte accesible\n- 🏠 Refugios adaptados\n- 🧏 Información accesible\n- 🧠 Apoyo psicosocial\n\nAdemás, la falta de coordinación entre ciudadanos, voluntarios y organizaciones retrasa la entrega de ayuda.\n\n---\n\n# 💡 Nuestra solución\n\nSARA centraliza las solicitudes de asistencia en una plataforma accesible que permite coordinar la ayuda en tiempo real.\n\nCada solicitud se geolocaliza para facilitar la respuesta de voluntarios y organizaciones cercanas.\n\n---\n\n# 📱 Casos de uso\n\n### 🧑‍🦽 Movilidad reducida\n\nJosé perdió su silla de ruedas durante el terremoto y solicita una silla temporal o unas muletas.\n\n### 🦻 Discapacidad auditiva\n\nMaría necesita reemplazar su audífono y la plataforma la conecta con una organización especializada.\n\n### 🧏 Comunicación accesible\n\nFrancisca requiere un intérprete de lengua de señas o información en un formato accesible.\n\n### 👩‍🦯 Acompañamiento\n\nAna solicita apoyo para trasladarse de forma segura hasta un refugio accesible.\n\n### 🧠 Apoyo psicosocial\n\nCarlos necesita recursos de regulación emocional y orientación durante la emergencia.\n\n---\n\n# ⚙️ ¿Cómo funciona?\n\n1. La persona crea una solicitud de ayuda.\n2. Selecciona el tipo de necesidad.\n3. Comparte su ubicación.\n4. La solicitud aparece en el mapa.\n5. Voluntarios y organizaciones reciben una notificación.\n6. Se asigna la ayuda.\n7. Se realiza seguimiento hasta cerrar el caso.\n\n---\n\n# 🆘 Tipos de ayuda\n\n- ♿ Equipamiento de apoyo\n- 💊 Medicamentos\n- 🚗 Transporte accesible\n- 🤝 Acompañamiento\n- 🧏 Intérpretes\n- 📖 Información accesible\n- 🧠 Apoyo para personas neurodivergentes\n- ❤️ Apoyo psicosocial\n\n---\n\n# ✨ Funcionalidades\n\n- 📍 Solicitudes geolocalizadas\n- 🗺️ Mapa de refugios accesibles\n- 🤝 Red de voluntarios\n- 🏥 Directorio de organizaciones\n- 💬 Chat y seguimiento de solicitudes\n- 🎁 Donación y préstamo de equipamiento\n- 🚨 Priorización de casos críticos\n- 📊 Estadísticas para la coordinación humanitaria\n\n---\n\n# 🚀 MVP\n\n## Fase 1\n\n- Registro de usuarios\n- Perfil de necesidades\n- Solicitud de ayuda\n- Geolocalización\n- Mapa de solicitudes\n- Panel de voluntarios\n\n## Fase 2\n\n- Chat\n- Notificaciones\n- Directorio de organizaciones\n- Gestión de donaciones y préstamos\n\n## Fase 3\n\n- Priorización mediante IA\n- Dashboard para organismos humanitarios\n- Datos abiertos para coordinación en tiempo real\n\n---\n\n# 🎯 Objetivo\n\nReducir el tiempo entre una solicitud de ayuda y la llegada del recurso adecuado, garantizando una respuesta inclusiva, accesible y coordinada durante las primeras horas de una emergencia.\n\n---\n\n# ❤️ Nuestra misión\n\nQue cualquier persona con discapacidad pueda solicitar ayuda en minutos y encontrar una red de apoyo cercana cuando más lo necesita.\n\n## Porque la accesibilidad también salva vidas.",
+  "lifecycle_status": "in_development",
+  "analysis": {
+    "summary": "SARA is a Next.js + Express/Postgres emergency-response MVP for disaster relief in Venezuela, with one real, tested, end-to-end feature (SOS/help-request creation, geolocation search, volunteer acceptance, resolution) backed by a real Postgres schema with constraints, plus several other screens (shelter map, chat, directory, resources) that are entirely static/mock UI with no backend wiring.",
+    "project_type": "Full-stack web app (Next.js frontend + Express REST API backend), mobile-responsive PWA-style UI, no native mobile app despite README claims",
+    "stack": {
+      "frontend": [
+        "Next.js 16 (App Router)",
+        "React 19",
+        "TypeScript",
+        "Tailwind CSS 4",
+        "Leaflet (maps)"
+      ],
+      "backend": [
+        "Node.js",
+        "Express 4"
+      ],
+      "database": [
+        "PostgreSQL (raw SQL via node-postgres 'pg', no ORM)"
+      ],
+      "infra_deploy": [
+        "Vercel (vercel.json for backend as serverless function)",
+        "no Docker, no CI config found"
+      ],
+      "ai_ml": [],
+      "languages": [
+        "TypeScript",
+        "JavaScript",
+        "SQL"
+      ]
+    },
+    "architecture": {
+      "pattern": "Two separate apps: Next.js frontend (client components, mock data) and a standalone Express REST API for a single 'help_requests' resource",
+      "uses_orm": false,
+      "orm_or_db_layer": "Raw parameterized SQL via the 'pg' Pool client (backend/src/db.js), no ORM/query builder",
+      "api_design": "Small REST API: GET/POST /api/help-requests, POST /:id/accept, POST /:id/resolve, plus /health; validation and normalization are cleanly separated into their own modules (validation/helpRequests.js, helpRequests/create.js, search.js, acceptance.js)",
+      "separation_of_concerns": "Backend is well-factored (routes -> validation -> db) for the one implemented feature; frontend has an api/ layer (helpRequests.ts) but most other pages read directly from a mocks/ folder with no data layer abstraction",
+      "modularity": "Backend is modular per-concern (create/query/search/acceptance/shared); frontend is modular by route (app/) but several routes are disconnected islands of static content",
+      "notable_patterns": [
+        "DB-level CHECK constraints enforce business invariants (status/assignment/resolution consistency) in schema.sql, a nice belt-and-suspenders design",
+        "No-auth-by-design for help request creation (explicit ai-specs doc: 'backend-create-help-request-without-auth'), reasonable for anonymous emergency reporting but leaves accept/resolve endpoints also unauthenticated",
+        "Only one domain object (help_requests) has a real backend; shelters/refugios, chat, directory, resources are hardcoded frontend mock arrays with zero API calls"
+      ]
+    },
+    "code_organization": {
+      "score": 3,
+      "directory_structure": "Clear frontend/backend split, App Router conventions followed, backend organized by feature folder (helpRequests/) with routes/validation separated",
+      "naming_quality": "Consistent, descriptive naming in both English (backend) and mixed Spanish/English (frontend, matching Venezuelan-facing UI copy)",
+      "documentation_quality": "Has root README, backend README, ai-specs/ change docs describing intended backend features; frontend has AGENTS.md/CLAUDE.md agent-instruction files rather than developer docs",
+      "reasoning": "Backend portion is genuinely well organized with tests and docs; overall score pulled down by frontend's disconnected mock-only pages and total absence of CI/lint enforcement in the pipeline."
+    },
+    "production_readiness": {
+      "score": 2,
+      "has_auth": false,
+      "has_error_handling": true,
+      "has_logging": false,
+      "has_env_config": true,
+      "has_deploy_config": true,
+      "secrets_handling": "backend/.env.example documents DATABASE_URL/PORT; dotenv used correctly; no secrets committed",
+      "security_notes": "No authentication/authorization anywhere in the app — anyone can create, accept, or resolve help requests via the API with no rate limiting, CAPTCHA, or abuse protection; CORS is wide open (cors() with no origin restriction); only console.error for logging (no structured logging/monitoring)",
+      "scalability_notes": "Single Postgres table with indexes on status/created_at is fine for MVP scale; geolocation search likely uses naive bounding-box/haversine in SQL (not PostGIS), acceptable at hackathon scale but not for large deployments; vercel.json deploys backend as a single serverless function with a persistent pg Pool, which is a known anti-pattern for serverless (connection exhaustion risk)",
+      "reasoning": "Only the help-requests slice is deployable and functional end-to-end; there is no authentication, no observability, no CI, and most of the product surface (shelters, chat, directory) is non-functional mock UI, so it is not ready for real-world emergency deployment as-is."
+    },
+    "maturity": {
+      "score": 2,
+      "has_readme": true,
+      "has_tests": true,
+      "has_ci": false,
+      "is_real_or_boilerplate": "Mixed: backend help-requests feature is real, working, tested logic; frontend is largely AI-generated-looking scaffolding/mock screens (chat, shelters, directory) wired to hardcoded arrays instead of the API",
+      "reasoning": "35 commits, 4 contributors, real backend unit/integration tests (test/helpRequests.*.test.js) and a normalized SQL schema show genuine engineering effort on one feature, but most of the visible app surface is unconnected mock data, and there's no CI pipeline to validate any of it."
+    },
+    "viability": {
+      "score": 2,
+      "reasoning": "The core SOS-reporting flow (geolocation capture, accessible-needs categorization, submission to a real Postgres-backed API) is a credible, narrowly-scoped MVP that could plausibly help in an emergency, but the rest of the promised platform (shelter mapping, volunteer chat, directory) is fake/mocked, there is no auth or abuse protection on a public emergency API, and no deployment pipeline/CI exists, so it is far from something that could be safely turned on for real earthquake victims."
+    },
+    "key_features": [
+      "Multi-step accessible SOS request flow with geolocation capture and fallback coordinates",
+      "Backend REST API for creating, listing (with geo-radius + status filters), accepting, and resolving help requests",
+      "PostgreSQL schema with CHECK constraints enforcing status/assignment/resolution data integrity",
+      "Backend test suite covering validation and route behavior",
+      "Mocked shelter map (Leaflet) with accessibility-tag filters (rampas, baño adaptado, lengua de señas) — UI only, no backend",
+      "Mocked chat/messaging UI for volunteer coordination — static data, no real-time or backend integration"
+    ],
+    "domain_tags": [
+      "people-finder",
+      "shelter-mapping",
+      "volunteer-coordination",
+      "mapping-geo",
+      "comms-chat"
+    ],
+    "merge_potential": "Could contribute its help-request/SOS backend (schema + REST API pattern with geo search and status-constrained workflow) as a solid reference or even direct component for a merged platform's emergency-request module; its mocked shelter map and chat UIs would need to be rebuilt against a real shelters/chat backend rather than merged as-is.",
+    "red_flags": [
+      "No authentication or rate limiting on public endpoints that create/accept/resolve emergency help requests, open to spam or malicious abuse",
+      "Majority of frontend pages (shelters/refugios, chat, directorio, recursos) are hardcoded mock data with no backend connection despite appearing feature-complete in the UI",
+      "No CI/CD pipeline and no Docker/containerization; deployment relies solely on Vercel config with a persistent pg Pool in a serverless function (connection-pool risk)",
+      "No logging/monitoring beyond console.error, making incident response or abuse detection impossible in production",
+      "AGENTS.md/CLAUDE.md files suggest significant AI-assisted/agent-driven development, and the sharp real-vs-mock split across features corroborates uneven, possibly rushed hackathon-style implementation"
+    ]
+  },
+  "signals": {
+    "accessible": true,
+    "stars": 2,
+    "forks": 1,
+    "contributors": 4,
+    "commit_count": 35,
+    "code_loc": 4512,
+    "created_at": "2026-06-28T20:03:41Z",
+    "pushed_at": "2026-07-01T21:13:12Z",
+    "license": null,
+    "languages_bytes": {
+      "TypeScript": 145377,
+      "JavaScript": 24773,
+      "CSS": 3657
+    },
+    "archived": false
+  },
+  "evaluation": {
+    "diffusion": {
+      "score": 2,
+      "ready_to_promote": false,
+      "available_assets": [
+        "clear-value-prop"
+      ],
+      "recommended_angle": "If polished, the accessible-SOS-for-disabled-victims niche is a genuinely differentiated and emotionally resonant angle for social content — but only once a live demo/video exists, since right now there is nothing visual to show.",
+      "gaps": [
+        "No live demo URL or deployed app to link to",
+        "No demo video",
+        "No screenshots",
+        "Most visible screens (shelter map, chat, directory) are mock/fake, so a demo would misrepresent capability",
+        "No branding assets beyond README emoji-heavy markdown"
+      ]
+    },
+    "impact_potential": 4,
+    "live_demo_notes": "Live URL is just the GitHub repo, not a deployed app. No demo video provided. Only one backend feature (help-request creation/accept/resolve) is real and tested; everything else visible in the described UI (shelter map, chat, directory, resources) is static mock data with no backend wiring, so even if someone spun up the repo locally, most of the app would not actually function as advertised.",
+    "live_demo_status": "no-public-demo",
+    "one_line_pitch": "SARA busca que ninguna persona con discapacidad quede sin ayuda tras un terremoto — pero hoy es solo un prototipo de backend, sin demo pública que mostrar.",
+    "overall_recommendation": "improve-first",
+    "problem_severity": "high",
+    "product_quality": 2,
+    "real_problem_reasoning": "Accessibility for people with disabilities during disaster response is a well-documented, severe and often-overlooked gap in emergency relief (lost mobility aids, no accessible shelters, no sign-language interpreters, no accessible information). This is a real and specific problem for a vulnerable subgroup of earthquake victims in Venezuela, distinct from generic aid-matching apps. However, the analysis shows the team only built and tested one slice of the full vision (the SOS/help-request flow with geolocation, backed by a real Postgres schema with CHECK constraints and test coverage); the rest of the described solution (shelter map, volunteer chat, org directory, donations/loans of equipment) is hardcoded mock UI with zero backend integration, so most of the promised problem-solving capability does not actually exist yet.",
+    "solves_real_problem": "partial"
+  }
+}

@@ -3,14 +3,87 @@
     "title": "BUILD4VENEZUELA | グローバルハッカソン",
     "description": "6月24日の地震後のベネズエラに役立つツールをつくる、世界規模の72時間ハッカソン。"
   },
+  "CountryHub": {
+    "metadata": {
+      "venezuela": {
+        "title": "ベネズエラ | Build4Latam",
+        "description": "ベネズエラを支援するために作られたオープンなツール、プロジェクト、リソース。"
+      },
+      "colombia": {
+        "title": "コロンビア | Build4Latam",
+        "description": "コロンビアを支援できるオープンなツール、プロジェクト、リソース。"
+      }
+    },
+    "heroTitle": "私たちが支援する国",
+    "selector": {
+      "choose": "支援する国を選ぶ",
+      "description": "ラテンアメリカの緊急事態に対応する、ツール、Builder、リソースのオープンネットワーク。",
+      "enter": "見る",
+      "networkActive": "ネットワーク稼働中",
+      "solidarity": "連帯のためのテクノロジー",
+      "statement": "ある国で機能したものが、次の国を助ける。"
+    },
+    "addProject": "プロジェクトを追加",
+    "goToCountry": "{country}へ移動",
+    "availableTools": "利用可能なツール",
+    "toolsTitle": "使い、適応し、共有しよう。",
+    "projectsTitle": "{country}向けプロジェクト",
+    "viewAllProjects": "すべてのプロジェクトを見る",
+    "empty": "{country}向けのプロジェクトはまだありません。",
+    "countries": {
+      "venezuela": {
+        "name": "ベネズエラ",
+        "eyebrow": "このネットワークの原点",
+        "description": "Build4LatamはBuild4Venezuelaとして始まりました。地震後に支援、情報、テクノロジーをつなぐオープンな取り組みです。活動は今も続いています。"
+      },
+      "colombia": {
+        "name": "コロンビア",
+        "eyebrow": "国境を越えるネットワーク",
+        "description": "緊急事態はコロンビアにも影響しています。ベネズエラのハッカソンから、ここでも適応して使える新しい取り組みとツールを集めています。"
+      }
+    }
+  },
   "Header": {
     "brand": "Build4Venezuela",
     "mobileBrand": "B4B",
     "navigationLabel": "メインナビゲーション",
     "brandPageLink": "ブランド",
-    "openMenuLabel": "Build4Venezuelaメニューを開く",
-    "homeLink": "ホーム",
-    "projectsLink": "プロジェクト",
+    "homeLabel": "Build4Latam コミュニティホーム",
+    "search": "プロジェクトを検索",
+    "searchDialog": {
+      "description": "プロジェクト、Builder、コミュニティのニーズを検索します。",
+      "placeholder": "コミュニティを検索...",
+      "loading": "コミュニティインデックスを読み込み中...",
+      "empty": "一致するプロジェクト、Builder、ニーズはありません。",
+      "error": "検索は現在利用できません。しばらくしてからお試しください。",
+      "recent": "最近の検索"
+    },
+    "themeToggle": "カラーテーマを切り替える",
+    "menu": "メニューを開く",
+    "menuDescription": "コミュニティを探索し、貢献する方法を見つけましょう。",
+    "signIn": "ログイン",
+    "productLabel": "探索",
+    "communityLabel": "コミュニティ",
+    "partnersLabel": "パートナーと共に構築",
+    "create": {
+      "label": "作成",
+      "project": "プロジェクトを追加",
+      "need": "ニーズを投稿",
+      "resource": "リソースを共有",
+      "profile": "Builder プロフィール"
+    },
+    "links": {
+      "home": "ホーム",
+      "brand": "ブランド",
+      "socials": "ソーシャル",
+      "whatsapp": "WhatsApp",
+      "discord": "Discord",
+      "projects": "プロジェクト",
+      "builders": "Builders",
+      "requests": "ニーズ",
+      "resources": "リソース",
+      "impact": "インパクト"
+    },
     "languageSelector": {
       "label": "言語",
       "locales": {
@@ -30,6 +103,38 @@
     "cta": "SNS画像をダウンロード",
     "download": "{fileName}をダウンロード",
     "downloadFormat": "{format}をダウンロード",
+    "brief": {
+      "eyebrow": "拡散ブリーフ",
+      "title": "ツールをベネズエラへ届ける。",
+      "description": "目的はテクノロジーを目立たせることではありません。被災した人、家族、ボランティアが、役立つツールがすでにあり、どこで見つけられるかを知ることです。",
+      "message": "地震後、何百人もの人がツールを作っています。でも、それは必要な人に届いて初めて役に立ちます。共有し、タグ付けし、ベネズエラ国内へ情報を届けてください。",
+      "checklistEyebrow": "投稿前の確認",
+      "checklist": [
+        "#Build4Venezuela を使う。",
+        "具体的なツールと何に役立つかを伝える。",
+        "build4venezuela.com/projects でリンクと状態を確認する。",
+        "拡散できるベネズエラのクリエイターやアカウントをタグ付けする。",
+        "敬意あるトーンを保つ：見世物ではなく希望を。"
+      ],
+      "linksEyebrow": "主要リンク",
+      "links": [
+        {
+          "label": "プロジェクト",
+          "href": "/ja/projects",
+          "text": "公開済みまたは進行中のツール一覧を共有してください。"
+        },
+        {
+          "label": "ブランドキット",
+          "href": "/ja/brand#social",
+          "text": "投稿用ビジュアルと公式アセットを使ってください。"
+        },
+        {
+          "label": "WhatsApp",
+          "href": "https://build4venezuela.com/whatsapp",
+          "text": "地域や非公式コミュニティのグループへ役立つツールを届けてください。"
+        }
+      ]
+    },
     "assets": {
       "eyebrow": "アセット",
       "title": "ロゴとマーク",
@@ -82,45 +187,117 @@
       }
     }
   },
-  "ProjectsPage": {
-    "noProjects": "まだプロジェクトがありません。最初のビルドを追加しましょう。",
-    "syncingFeed": "ライブフィードを同期中...",
-    "liveFeedEnabled": "ライブフィード有効"
-  },
-  "CommentsSection": {
-    "noComments": "まだコメントがありません。鋭い質問や役立つ提案でスレッドを始めましょう。",
-    "voted": "投票済み",
-    "vote": "投票"
-  },
   "HomePage": {
     "hero": {
       "logoAlt": "ベネズエラのために築く",
       "mapAlt": "ベネズエラの地図",
       "eyebrow": "人道支援のためのハッカソンで",
       "title": "ベネズエラのための技術ソリューションを構築する。",
-      "eventLink": "6月26日、27日、28日 // オンライン // luma.com",
+      "closure": {
+        "label": "クロージングイベント",
+        "date": "7月1日（水）// 18:00 UTC-5 // オンライン"
+      },
+      "showcase": {
+        "title": "本日、Build Showcase を開催",
+        "description": "ハッカソン期間中に生まれた緊急支援のためのソリューションを発表します：人の捜索、避難所、寄付、検証済み情報、市民レポート。",
+        "times": [
+          "18時 コロンビア・ペルー",
+          "19時 ベネズエラ・チリ",
+          "20時 アルゼンチン"
+        ],
+        "share": "ライブ配信をシェアしよう。ベネズエラのためにつくる。"
+      },
+      "stats": [
+        {
+          "value": "+1000",
+          "label": "ビルダー"
+        },
+        {
+          "value": "+80",
+          "label": "プロジェクト"
+        }
+      ],
+      "countdown": {
+        "labels": {
+          "days": "日",
+          "hours": "時間",
+          "minutes": "分",
+          "seconds": "秒",
+          "complete": "クロージングが始まりました。作り続けましょう。"
+        }
+      },
       "whatsapp": "WhatsApp",
       "discord": "Discord",
-      "description": "危機の瞬間に、テクノロジーも連帯の形になり得るからです。"
+      "watch": {
+        "label": "クロージングイベントをライブで視聴"
+      },
+      "description": "公式イベントは閉じますが、活動は続きます。自分のプロジェクトを改善し、既存のものに貢献し、ベネズエラにまだ必要なものを提案してください。",
+      "poweredBy": "提供"
     },
     "context": {
       "eyebrow": "背景",
-      "title": "騒音ではなく、緊急性をもってつくる。",
-      "firstParagraph": "ベネズエラは、6月24日に発生した2度の強い地震の後、大きな緊急事態に直面しています。最新の報告では、少なくとも188人が死亡し、1,500人以上が負傷したとされています。",
-      "secondParagraph": "救助隊は今も生存者の捜索を続けています。国際支援の航空便や支援チームが到着し始める一方で、病院、建物、被災したコミュニティは進行中の人道危機に直面しています。",
+      "title": "一週間を超えて作り続ける。",
+      "firstParagraph": "地震は、今すぐ助けが必要で、一週間では解決しない問題を残しました。家族、ボランティア、組織、地域には、信頼できる情報、調整、支援へのアクセス、限られた接続環境でも動くツールが必要です。",
+      "secondParagraph": "Build4Venezuela は短期スプリントから、より長い共同の取り組みへ移ります。緊急時の短期支援と、ベネズエラの復旧、調整、より強い未来を助ける長期的な解決策の両方に取り組みます。",
       "latestInfo": "最新情報を見る",
       "latestInfoQuery": "ベネズエラの地震に関する最新情報は？"
     },
     "impactStats": [
-      { "value": "188+", "label": "死亡者" },
-      { "value": "1,500+", "label": "負傷者" },
-      { "value": "346+", "label": "損壊した建物" },
-      { "value": "200+", "label": "閉じ込められている可能性のある人" }
+      {
+        "value": "01",
+        "label": "自分のプロジェクトを続ける"
+      },
+      {
+        "value": "02",
+        "label": "既存チームと協力する"
+      },
+      {
+        "value": "03",
+        "label": "新しい解決課題を提案する"
+      },
+      {
+        "value": "04",
+        "label": "対応だけでなく復旧のために設計する"
+      }
     ],
+    "principles": {
+      "eyebrow": "共同アクションの原則",
+      "title": "信頼がオペレーティングシステムです。",
+      "description": "これらの原則は、コード、コミュニケーション、調整、デザイン判断、グループでの発信、メディア対応を導きます。矛盾する判断は、進める前に見直してください。",
+      "items": [
+        {
+          "title": "人を中心に",
+          "text": "デモのためではなく、電波が弱く、バッテリーが少なく、緊急の必要があるベネズエラの誰かのために作ります。"
+        },
+        {
+          "title": "重複しない",
+          "text": "新しく作る前に、すでに何があるか、どう連携できるかを確認します。"
+        },
+        {
+          "title": "長期的な信頼",
+          "text": "何が機能し、何が機能せず、それぞれのツールが現実的に何をできるかを透明に伝えます。"
+        },
+        {
+          "title": "害を与えない",
+          "text": "救助隊や専門機関を尊重します。未確認の救助情報を拡散したり、緊急チャンネルを混雑させたりしません。"
+        }
+      ],
+      "filter": {
+        "eyebrow": "判断フィルター",
+        "title": "公開・構築の前に",
+        "items": [
+          "これは今ベネズエラにいる実在の人に役立つか、それとも私たちが役に立った気になるだけか？",
+          "すでにあるものを重複していないか、連携できないか？",
+          "これは信頼を生むか、混乱を生むか？",
+          "救助活動や専門チームの妨げになる可能性はないか？"
+        ]
+      }
+    },
     "projects": {
       "eyebrow": "プロジェクト案",
       "title": "何をつくれるか",
-      "description": "具体的な問題を選びましょう。スコープを絞りましょう。月曜日に誰かが使えるものを残しましょう。"
+      "description": "具体的な問題を選び、すでにあるものとつながり、緊急時に役立ち復旧にも耐えるものを残しましょう。",
+      "viewAll": "ベネズエラ向けプロジェクトを見る"
     },
     "projectIdeas": [
       "避難所、物資集積所、医療支援先の確認済みディレクトリ。",
@@ -132,13 +309,13 @@
     ],
     "join": {
       "eyebrow": "参加する",
-      "title": "スキルを持って参加し、プロジェクトを持って帰ろう。"
+      "title": "クロージング後も作り続けよう。"
     },
     "channels": [
       {
         "label": "Luma",
         "href": "https://build4venezuela.com/luma",
-        "text": "イベントに登録して公式アップデートを受け取りましょう。"
+        "text": "クロージングイベントに参加し、公式アップデートを受け取りましょう。"
       },
       {
         "label": "WhatsApp",
@@ -148,7 +325,7 @@
       {
         "label": "Discord",
         "href": "https://build4venezuela.com/discord",
-        "text": "チーム、プロジェクトチャンネル、メンター、技術サポートを見つけましょう。"
+        "text": "チームを見つけ、プロジェクトを続け、新しい案を出し、支援を調整しましょう。"
       },
       {
         "label": "GitHub",
@@ -162,7 +339,7 @@
     "partners": [
       {
         "name": "Moraleja Studio",
-        "href": "https://moraleja.co",
+        "href": "https://moraleja.co?utm_source=build4venezuela&utm_medium=referral&utm_campaign=partners",
         "image": "moraleja-studio.svg",
         "width": 65,
         "height": 52,
@@ -170,7 +347,7 @@
       },
       {
         "name": "Crafter Station",
-        "href": "https://crafterstation.com",
+        "href": "https://crafterstation.com?utm_source=build4venezuela&utm_medium=referral&utm_campaign=partners",
         "image": "CS.svg",
         "width": 140,
         "height": 34,
@@ -178,12 +355,627 @@
       },
       {
         "name": "The Hackathon Company",
-        "href": "https://hackathon.lat",
+        "href": "https://hackathon.lat?utm_source=build4venezuela&utm_medium=referral&utm_campaign=partners",
         "image": "THC.svg",
         "width": 92,
         "height": 52,
         "className": "mx-auto h-auto w-full max-w-[104px] select-none sm:max-w-[130px]"
       }
     ]
+  },
+  "Projects": {
+    "eyebrow": "Project list",
+    "title": "Shipped work",
+    "submitCta": {
+      "label": "Submit yours"
+    },
+    "grid": {
+      "empty": "まだプロジェクトがありません。最初のビルドを追加しましょう。",
+      "syncing": "Checking for updates...",
+      "live": "Updated automatically",
+      "searchPlaceholder": "プロジェクト、チーム、場所を検索...",
+      "all": "All",
+      "project": "project",
+      "projects": "projects",
+      "open": "Open",
+      "vote": "vote",
+      "votes": "votes",
+      "views": {
+        "grid": "Grid",
+        "list": "List"
+      },
+      "table": {
+        "project": "Project",
+        "status": "Status",
+        "category": "Category",
+        "countries": "Countries",
+        "applicability": "Applicability",
+        "builder": "Builder",
+        "votes": "Votes",
+        "link": "Link"
+      },
+      "statuses": {
+        "all": "All statuses",
+        "ready_to_use": "Ready to use",
+        "in_development": "In development",
+        "idea": "Idea"
+      },
+      "applicabilities": {
+        "latam": "Reusable across LATAM",
+        "venezuela": "ベネズエラで利用可能",
+        "colombia": "コロンビアで利用可能"
+      }
+    },
+    "categories": {
+      "personas": {
+        "label": "Find People",
+        "title": "Missing & Found People",
+        "description": "Report, search, and reunite missing people and pets — WhatsApp/Telegram bots, facial recognition, and rescue maps. Join here if you want to help families find each other."
+      },
+      "recursos": {
+        "label": "Aid Coordination",
+        "title": "Aid & Resource Coordination",
+        "description": "Live maps and directories of shelters, collection centers, hospitals, volunteers, and needs by zone. Join here to help route help to where it's needed."
+      },
+      "data": {
+        "label": "Data & APIs",
+        "title": "Data, Dedup & Shared APIs",
+        "description": "The shared data layer — scraping, normalization, deduplication, and open APIs other tools build on. Join here to make every other tool speak the same truth."
+      },
+      "damage": {
+        "label": "Damage Assessment",
+        "title": "Structural Damage Assessment",
+        "description": "Crowdsourced and AI-assisted assessment of building damage, habitability, and structural risk. Join here if you work with engineering, CV, or satellite data."
+      },
+      "donations": {
+        "label": "Donations",
+        "title": "Donations & Funding",
+        "description": "Crowdfunding, donor matching, and transparent aid payments. Join here to move money and supplies to people who need them."
+      },
+      "infra": {
+        "label": "Connectivity & Infra",
+        "title": "Connectivity & Infrastructure",
+        "description": "Offline mesh networking, edge inference, sensing, and alerts that keep tools running when the grid is down. Join here for the hardest, highest-leverage bets."
+      },
+      "info": {
+        "label": "Verified Info",
+        "title": "Verified Info & Anti-misinformation",
+        "description": "Fighting rumors with verified, real-time information. Join here to keep the public informed and the noise down."
+      },
+      "other": {
+        "label": "Other",
+        "title": "Community & Other",
+        "description": "Community, meta, and builds that don't fit a single cluster yet."
+      }
+    }
+  },
+  "SubmitProject": {
+    "eyebrow": "Submit",
+    "title": "Add your project",
+    "description": "Every accepted project gets a permanent page at /p/your-slug. You can edit the slug later from this browser.",
+    "submitLabel": "Submit project"
+  },
+  "EditProject": {
+    "eyebrow": "Edit",
+    "title": "Update your project",
+    "description": "Change any field, including the slug. The page URL updates after saving.",
+    "submitLabel": "Save changes"
+  },
+  "ProjectForm": {
+    "slugLabel": "Project slug",
+    "slugPlaceholder": "cool-slug",
+    "nameLabel": "Project name",
+    "lifecycleStatusLabel": "Project status",
+    "lifecycleStatuses": {
+      "ready_to_use": "Ready to use",
+      "in_development": "In development",
+      "idea": "Idea"
+    },
+    "applicabilityLabel": "Where can this project be used?",
+    "applicabilityHint": "Choose LATAM when the tool can be adapted beyond one country.",
+    "applicabilities": {
+      "latam": "Reusable across LATAM",
+      "venezuela": "ベネズエラで利用可能",
+      "colombia": "コロンビアで利用可能"
+    },
+    "projectUrlLabel": "Project link",
+    "countriesLabel": "Participant countries",
+    "countriesPlaceholder": "Venezuela, Colombia, United States",
+    "participantNameLabel": "Team or participant name",
+    "videoUrlLabel": "Demo video link (optional)",
+    "videoUrlPlaceholder": "https://youtu.be/...",
+    "contributeInUrlLabel": "Contribution link (optional)",
+    "contributeInUrlPlaceholder": "https://github.com/... or https://linkedin.com/...",
+    "descriptionMarkdownLabel": "Markdown description",
+    "descriptionMarkdownPlaceholder": "## What did you build?\n\nWho is it for? How does it help? What should people try first?",
+    "pending": "Checking...",
+    "deleteDescription": "Need to remove this submission? Deleting it also removes its votes and comments.",
+    "deleteConfirm": "This cannot be undone. Click delete again to permanently remove this submission.",
+    "deleteButton": "Delete submission",
+    "deleteConfirmButton": "Delete permanently",
+    "deleteCancel": "Cancel",
+    "deletePending": "Deleting...",
+    "imageLabel": "Project image (optional)",
+    "imageHint": "JPG, PNG, or WebP up to 8 MB. The video is shown first when both are provided.",
+    "imagePreviewAlt": "Current project image",
+    "imageRemove": "Remove image",
+    "imageUploading": "Uploading image...",
+    "imageUploadError": "Could not upload the project image."
+  },
+  "ProjectDetail": {
+    "metadata": {
+      "notFoundTitle": "Project not found | Build4Venezuela",
+      "description": "A Build4Venezuela project by {name}."
+    },
+    "builtBy": "Built by",
+    "countries": "Countries",
+    "applicability": "Where it works",
+    "applicabilities": {
+      "latam": "Reusable across LATAM",
+      "venezuela": "ベネズエラで利用可能",
+      "colombia": "コロンビアで利用可能"
+    },
+    "status": "Status",
+    "statuses": {
+      "ready_to_use": "Ready to use",
+      "in_development": "In development",
+      "idea": "Idea"
+    },
+    "openProject": "Open project",
+    "watchDemo": "Watch demo",
+    "contribute": "Contribute",
+    "edit": "Edit project and slug"
+  },
+  "Votes": {
+    "signIn": "Sign in to vote ({count})",
+    "vote": "Vote ({count})",
+    "voted": "Voted ({count})"
+  },
+  "Comments": {
+    "eyebrow": "Comments",
+    "title": "Build feedback",
+    "comment": "comment",
+    "comments": "comments",
+    "placeholder": "Add a useful question, note, or suggestion...",
+    "posting": "Posting...",
+    "post": "Post comment",
+    "signedOutDescription": "Sign in to leave feedback and vote on comments.",
+    "signIn": "Sign in to comment",
+    "vote": "投票 ({count})",
+    "voted": "投票済み ({count})",
+    "empty": "まだコメントがありません。鋭い質問や役立つ提案でスレッドを始めましょう。",
+    "errors": {
+      "tooShort": "Add at least 3 characters.",
+      "tooLong": "Keep comments under 1,200 characters."
+    }
+  },
+  "Requests": {
+    "metadata": {
+      "title": "Requests for solutions | Build4Venezuela",
+      "description": "A live board where people in Venezuela can request useful solutions, vote, and discuss what builders should make next."
+    },
+    "eyebrow": "Requests for solutions",
+    "title": "Tell builders what matters.",
+    "description": "If you are in Venezuela, leave concrete problems that technology, coordination, logistics, or information tools could help solve. The community votes and comments in real time.",
+    "board": {
+      "formEyebrow": "Leave an idea",
+      "formTitle": "Request a solution",
+      "formDescription": "Name the problem. Add context only if it helps builders understand who is affected, what fails today, and what a good outcome looks like.",
+      "namePlaceholder": "Example: reliable medicine availability map",
+      "descriptionPlaceholder": "Optional markdown: who needs this, what is hard today, links, constraints...",
+      "posting": "Posting...",
+      "postRequest": "Post request",
+      "requestSent": "リクエストを送信しました。ボードに表示されました。",
+      "signedOutDescription": "Sign in to leave ideas, vote, and comment.",
+      "signIn": "Sign in",
+      "request": "request",
+      "requests": "requests",
+      "syncing": "Checking for updates...",
+      "live": "Updated automatically",
+      "vote": "Vote ({count})",
+      "voted": "Voted ({count})",
+      "expand": "Expand details",
+      "collapse": "Collapse details",
+      "noDescription": "No extra description yet. Use the comments to ask for missing context.",
+      "comments": "Comments ({count})",
+      "commentPlaceholder": "Ask a question, confirm the need, or add context...",
+      "comment": "Comment",
+      "noComments": "No comments yet.",
+      "empty": "No requests yet. Start with one concrete problem builders should solve.",
+      "errors": {
+        "nameTooShort": "Add a clear request name.",
+        "descriptionTooLong": "Keep the description under 8,000 characters.",
+        "commentTooShort": "Add at least 3 characters.",
+        "commentTooLong": "Keep comments under 1,200 characters."
+      }
+    }
+  },
+  "Builders": {
+    "eyebrow": "Builder ネットワーク",
+    "title": "Builders を探す。",
+    "description": "エンジニア、デザイナー、AI builders を検索できます。連絡リクエストは builder が承認するまで非公開です。",
+    "register": "登録",
+    "profile": "マイプロフィール",
+    "inbox": "受信箱",
+    "unansweredRequests": "{count} 件の未回答リクエスト",
+    "directory": {
+      "searchLabel": "Builders を検索",
+      "searchPlaceholder": "名前、役割、説明で検索",
+      "roleFilterLabel": "役割で絞り込み",
+      "hoursFilterLabel": "週あたりの時間で絞り込み",
+      "allRoles": "すべての役割",
+      "anyHours": "時間指定なし",
+      "minimumHours": "{hours}+ 時間/週",
+      "builderCount": "{count} 人の builder",
+      "paginationLabel": "Builder ページ",
+      "pageStatus": "{page} / {total} ページ",
+      "previousPage": "前へ",
+      "nextPage": "次へ",
+      "refreshing": "更新中...",
+      "liveDirectory": "ライブディレクトリ",
+      "empty": "この条件に一致する builders はまだいません。",
+      "availabilityHidden": "稼働可能時間は非公開です",
+      "hoursPerWeek": "{hours} 時間/週",
+      "unavailable": "対応不可",
+      "portfolio": "ポートフォリオ",
+      "contact": "連絡する",
+      "signIn": "サインイン",
+      "projectName": "プロジェクト名",
+      "coverLetter": "短いカバーレター",
+      "coverLetterPlaceholder": "何を作っているのか、なぜこの builder なのか、どんな支援が必要なのかを書いてください。",
+      "coverLetterHint": "プロジェクトに関連するリンクや公開リソース（リポジトリ、資料、デモ、ドキュメント）をすべて添付してください。",
+      "attachProject": "このリクエストは登録済みのプロジェクトに関するものです。",
+      "attachProjectNamed": "添付中: {name}",
+      "contactEmail": "連絡先メール（任意）",
+      "contactPhone": "連絡先電話番号（任意）",
+      "checking": "確認中...",
+      "sendRequest": "リクエストを送信",
+      "requestSent": "リクエストを送信しました。Builder は受信箱から承認または拒否できます。",
+      "requestSpamError": "このリクエストはスパムの可能性があります。内容を見直してください。",
+      "roles": {
+        "frontend_engineer": "フロントエンドエンジニア",
+        "backend_engineer": "バックエンドエンジニア",
+        "fullstack_engineer": "フルスタックエンジニア",
+        "ai_engineer": "AI エンジニア",
+        "designer": "デザイナー",
+        "product_manager": "プロダクトマネージャー",
+        "devops_engineer": "DevOps エンジニア",
+        "data_engineer": "データエンジニア",
+        "other": "その他"
+      },
+      "days": {
+        "monday": "月",
+        "tuesday": "火",
+        "wednesday": "水",
+        "thursday": "木",
+        "friday": "金",
+        "saturday": "土",
+        "sunday": "日"
+      }
+    },
+    "registerPage": {
+      "eyebrow": "Builder ネットワーク",
+      "titleNew": "Builder として登録。",
+      "titleExisting": "Builder プロフィール。",
+      "descriptionNew": "プロジェクトオーナーが公開ディレクトリで直接の連絡先を見せずに支援を依頼できる、プライバシー重視のプロフィールを作成します。",
+      "descriptionExisting": "Builder プロフィールを管理し、忙しい間は非表示にしたり、プロジェクトオーナーが連絡前に見る項目を更新したりできます。",
+      "backToBuilders": "Builders に戻る",
+      "viewBuilders": "Builders を見る",
+      "requestInbox": "受信箱",
+      "form": {
+        "savedNotice": "Builder プロフィールを保存しました。",
+        "visibleNotice": "Builder プロフィールはディレクトリに表示されています。",
+        "frozenNotice": "Builder プロフィールはディレクトリで非表示です。",
+        "profileStatusTitle": "Builder プロフィール",
+        "frozenDescription": "非表示のプロフィールは編集できますが、builder 一覧には表示されません。",
+        "visibleDescription": "あなたのプロフィールは builder ディレクトリに表示されています。",
+        "frozenStatus": "非表示",
+        "visibleStatus": "表示中",
+        "showProfile": "プロフィールを表示",
+        "hideProfile": "プロフィールを非表示",
+        "deleteProfile": "プロフィールを削除",
+        "deleteDialogTitle": "プロフィールを削除しますか？",
+        "deleteDialogDescription": "Builder プロフィールをディレクトリから削除し、連絡リクエストも消去します。あとで再登録できます。",
+        "cancel": "キャンセル",
+        "deleting": "削除中...",
+        "name": "名前",
+        "role": "役割",
+        "customRole": "役割を説明",
+        "customRolePlaceholder": "コミュニティ運営者、アクセシビリティ専門家...",
+        "description": "説明",
+        "descriptionPlaceholder": "得意なことと、支援できるプロジェクトの種類を書いてください。",
+        "linkedin": "LinkedIn（任意）",
+        "portfolio": "ポートフォリオ（任意）",
+        "setAvailability": "稼働可能時間を設定",
+        "availabilityHelp": "任意。非表示の稼働可能時間は公開の時間フィルターに表示・使用されません。",
+        "weekdaysPreset": "平日 2時間",
+        "weekendsPreset": "週末 4時間",
+        "clearAvailability": "クリア",
+        "hoursPerWeek": "{hours} 時間/週",
+        "saving": "保存中...",
+        "saveProfile": "Builder プロフィールを保存",
+        "publishProfile": "Builder プロフィールを公開"
+      }
+    },
+    "requests": {
+      "eyebrow": "Builder 受信箱",
+      "title": "リクエスト。",
+      "description": "プロジェクトオーナーからの連絡を確認できます。承認すると、プロジェクトに取り組んでいる間は builder プロフィールを非表示にできます。",
+      "backToBuilders": "Builders に戻る",
+      "viewBuilders": "Builders を見る",
+      "inbox": {
+        "requestCount": "{count} 件のリクエスト",
+        "refreshing": "更新中...",
+        "privateInbox": "非公開の受信箱",
+        "empty": "あなたの builder プロフィールにはまだ連絡がありません。",
+        "fromRequester": "{requester} から",
+        "toBuilder": "{builder} へ",
+        "contactEmail": "連絡先メール",
+        "contactPhone": "連絡先電話番号",
+        "notProvided": "未入力",
+        "hideProfileOnAccept": "承認したら builder プロフィールを非表示にする",
+        "accept": "承認",
+        "reject": "拒否",
+        "directions": {
+          "inbound": "受信",
+          "outbound": "送信"
+        },
+        "statuses": {
+          "pending": "保留中",
+          "accepted": "承認済み",
+          "rejected": "拒否済み"
+        }
+      }
+    }
+  },
+  "Insights": {
+    "metadata": {
+      "title": "Project Insights — Build4Venezuela",
+      "description": "Internal triage: tech stack, maturity, viability, overlap, and diffusion readiness across project repositories."
+    },
+    "shared": {
+      "tiers": {
+        "spotlight": "Spotlight",
+        "promote": "Promote",
+        "merge-candidate": "Merge candidate",
+        "improve-first": "Improve first",
+        "deprioritize": "Deprioritize"
+      }
+    },
+    "dashboard": {
+      "eyebrow": "Internal triage",
+      "title": "Project Insights",
+      "description": "{count} repositories analyzed for stack, architecture, maturity, viability, and diffusion readiness — built to spot overlap, merge candidates, and what's ready to spotlight.",
+      "stats": {
+        "analyzed": "Analyzed",
+        "promoReady": "Promo-ready",
+        "totalLoc": "Total LOC",
+        "locValue": "{count}k"
+      },
+      "filters": {
+        "domain": "Domain",
+        "all": "All",
+        "clear": "clear filters"
+      },
+      "panels": {
+        "triage": {
+          "title": "Triage quadrant",
+          "subtitle": "impact × production-readiness · bubble = stars · color = tier"
+        },
+        "overlap": {
+          "title": "Overlap network",
+          "subtitle": "edges = shared domain tags (≥3) · clusters = duplicate solutions"
+        },
+        "leaderboard": {
+          "title": "Leaderboard",
+          "subtitle": "{count, plural, one {# project} other {# projects}} · click a row for detail"
+        },
+        "tech": {
+          "title": "Tech landscape",
+          "subtitle": "across all analyzed repos"
+        }
+      }
+    },
+    "leaderboard": {
+      "columns": {
+        "project": {
+          "label": "Project",
+          "description": "The project name and its repository type (web app, PWA, bot, etc.). Click a row to open full detail."
+        },
+        "tier": {
+          "label": "Tier",
+          "description": "Overall recommendation: Spotlight (back heavily) › Promote › Merge candidate › Improve first › Deprioritize."
+        },
+        "viability": {
+          "label": "Viab",
+          "description": "Viability (1–5): how realistically this can be deployed and maintained to actually help victims — weighs maturity, production-readiness, and how complete the core function is."
+        },
+        "production": {
+          "label": "Prod",
+          "description": "Production-readiness (1–5): auth, error handling, logging, secret handling, security, scalability, and deploy config in the code."
+        },
+        "product": {
+          "label": "Prod-Q",
+          "description": "Product quality (1–5): how complete and usable the actual product is (not the code) — judged from the live demo where one exists."
+        },
+        "diffusion": {
+          "label": "Diff",
+          "description": "Diffusion readiness (1–5): how ready it is to create promo/social content right now — working demo, video, screenshots, clear value prop."
+        },
+        "maturity": {
+          "label": "Mat",
+          "description": "Maturity (1–5): real working software vs. boilerplate — real logic, tests, CI, commit history, README."
+        },
+        "severity": {
+          "label": "Sev",
+          "description": "Problem severity: how urgent the victim-facing problem it addresses is (critical › high › medium › low)."
+        },
+        "stars": {
+          "label": "★",
+          "description": "GitHub stars on the repository — a rough popularity / social-proof signal."
+        },
+        "loc": {
+          "label": "LOC",
+          "description": "Lines of code in real source files (excludes dependencies and build output) — a rough size/effort signal."
+        },
+        "security": {
+          "label": "セキュ",
+          "description": "自動監査によるセキュリティ露出リスク（公開PIIエンドポイント、漏洩した秘密情報、認証の欠如）。クリックで並べ替え。"
+        }
+      },
+      "risk": {
+        "critical": "重大",
+        "high": "高",
+        "medium": "中",
+        "low": "低",
+        "none": "クリーン"
+      }
+    },
+    "triageQuadrant": {
+      "hint": "← ship-ready · high impact ↑",
+      "productionReadiness": "Production-readiness",
+      "productionReadinessAxis": "PRODUCTION-READINESS →",
+      "impact": "Impact",
+      "impactAxis": "IMPACT",
+      "tooltip": {
+        "impact": "impact {score}",
+        "production": "prod {score}",
+        "viability": "viab {score}"
+      }
+    },
+    "overlapNetwork": {
+      "instructions": "scroll to zoom · drag to pan",
+      "ariaLabel": "Project overlap network"
+    },
+    "drawer": {
+      "links": {
+        "repo": "repo ↗",
+        "live": "live ↗",
+        "video": "video ↗"
+      },
+      "scores": {
+        "viability": "Viability",
+        "production": "Prod-ready",
+        "maturity": "Maturity",
+        "organization": "Code org",
+        "product": "Product",
+        "diffusion": "Diffusion"
+      },
+      "signals": {
+        "stars": "Stars",
+        "commits": "Commits",
+        "loc": "LOC",
+        "contributors": "Contributors",
+        "license": "License",
+        "realProblem": "Real problem",
+        "liveDemo": "Live demo",
+        "orm": "ORM"
+      },
+      "none": "none",
+      "yes": "yes",
+      "rawSql": "raw SQL",
+      "sections": {
+        "summary": "Summary",
+        "stack": "Stack",
+        "domainTags": "Domain tags",
+        "overlaps": "Overlaps with ({count})",
+        "redFlags": "Red flags",
+        "diffusionReadiness": "Diffusion readiness",
+        "mergePotential": "Merge potential",
+        "security": "セキュリティ監査"
+      },
+      "stack": {
+        "frontend": "Frontend",
+        "backend": "Backend",
+        "database": "Database",
+        "aiMl": "AI/ML"
+      },
+      "sharedCount": "{count} shared",
+      "readyToPromote": "Ready to promote",
+      "notYet": "Not yet",
+      "assets": "assets: {assets}",
+      "angle": "Angle:",
+      "security": {
+        "badge": "{risk}リスク",
+        "risk": {
+          "critical": "重大",
+          "high": "高",
+          "medium": "中",
+          "low": "低",
+          "none": "クリーン"
+        },
+        "auditedAt": "監査日 {date}",
+        "reauditedAt": "再監査日 {date}",
+        "previously": "以前は{risk}",
+        "notAudited": "未監査 — リポジトリをクローンできませんでした。",
+        "clean": "この監査で露出の問題は見つかりませんでした。",
+        "allResolved": "以前に報告されたすべての問題が修正されました。",
+        "issueLink": "開示Issueを見る →",
+        "status": {
+          "open": "未解決",
+          "partial": "一部対応",
+          "resolved": "修正済み",
+          "new": "新規"
+        }
+      }
+    },
+    "stackCharts": {
+      "titles": {
+        "tech": "Most-used tech",
+        "types": "Project types",
+        "databases": "Databases",
+        "dataLayer": "Data layer"
+      },
+      "types": {
+        "telegramBot": "Telegram bot",
+        "whatsappBot": "WhatsApp bot",
+        "mobileApp": "Mobile app",
+        "pwa": "PWA",
+        "staticSite": "Static site",
+        "apiPipeline": "API / pipeline",
+        "webApp": "Web app"
+      },
+      "dataLayer": {
+        "rawSql": "Raw SQL / BaaS client",
+        "orm": "Uses an ORM"
+      }
+    }
+  },
+  "Resources": {
+    "eyebrow": "Resources",
+    "title": "Materials",
+    "open": "Open",
+    "items": {
+      "deck": {
+        "title": "Build4Venezuela Deck",
+        "description": "Build4Venezuela project presentation in Google Slides.",
+        "kind": "Slides"
+      },
+      "projects": {
+        "title": "Projects",
+        "description": "Project list in Google Sheets.",
+        "kind": "Sheets"
+      },
+      "excel": {
+        "title": "Excel",
+        "description": "Build4Venezuela の全スプレッドシート（Google Sheets）。",
+        "kind": "Sheets"
+      },
+      "brand": {
+        "title": "ブランドと拡散ブリーフ",
+        "description": "ツールをベネズエラへ届けるための公式アセット、投稿ガイド、主要リンク。",
+        "kind": "共有"
+      },
+      "github": {
+        "title": "GitHub",
+        "description": "Build4Venezuela repository on GitHub.",
+        "kind": "Code"
+      },
+      "discord": {
+        "title": "Discord",
+        "description": "Join the community on Discord.",
+        "kind": "Community"
+      }
+    }
   }
 }
