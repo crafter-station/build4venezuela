@@ -3,26 +3,9 @@
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
-const SPLASH_KEY = "bfv-landing-splash-v5";
+const SPLASH_KEY = "bfv-landing-splash-v6";
 const LOAD_MS = 3200;
 const LEAVE_MS = 480;
-
-const PHASES = [
-  {
-    id: "co",
-    label: "Colombia",
-    analyze: "Problem in Colombia",
-    action: "Look for help",
-    to: 52,
-  },
-  {
-    id: "ve",
-    label: "Venezuela",
-    analyze: "Problem in Venezuela",
-    action: "Look for help",
-    to: 100,
-  },
-] as const;
 
 function markSeen() {
   try {
@@ -81,8 +64,6 @@ export function LandingSplash() {
   }, []);
 
   const progress = useLoadProgress(visible && !leaving, LOAD_MS);
-  const phase =
-    PHASES.find((item) => progress < item.to) ?? PHASES[PHASES.length - 1];
 
   useEffect(() => {
     if (!visible || leaving) return;
@@ -129,7 +110,7 @@ export function LandingSplash() {
             <p className="landing-boot__pct">{fill}</p>
           </div>
           <p className="landing-boot__meta" aria-hidden="true">
-            04 11 — {phase.label === "Colombia" ? "CO" : "VE"} 01
+            04 11 — CO 01
           </p>
         </div>
 
@@ -151,9 +132,9 @@ export function LandingSplash() {
         </div>
 
         <div className="landing-boot__bottom">
-          <p className="landing-boot__analyze">{phase.analyze}</p>
+          <p className="landing-boot__analyze">problem in colombia</p>
           <span aria-hidden="true" className="landing-boot__analyze-line" />
-          <p className="landing-boot__action">{phase.action}</p>
+          <p className="landing-boot__action">look for help</p>
         </div>
       </output>
     </div>
