@@ -260,8 +260,8 @@ export function BuildersDirectory({
   }
 
   return (
-    <div className="grid gap-8">
-      <div className="grid gap-3 border border-border bg-card p-4 lg:grid-cols-[1fr_16rem_12rem]">
+    <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-8">
+      <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-3 border border-border bg-card p-4 lg:grid-cols-[minmax(0,1fr)_16rem_12rem]">
         <Input
           aria-label={t("searchLabel")}
           onChange={(event) => {
@@ -313,20 +313,20 @@ export function BuildersDirectory({
           {t("empty")}
         </div>
       ) : (
-        <div className="grid gap-5">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-5">
           {paginatedBuilders.map((builder) => {
             const draft = draftFor(builder.id);
             const isActive = activeBuilderId === builder.id;
 
             return (
               <article
-                className="grid gap-5 border border-border bg-card p-5"
+                className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-5 border border-border bg-card p-5"
                 key={builder.id}
               >
                 <div className="grid gap-4 md:grid-cols-[1fr_auto] md:items-start">
-                  <div>
+                  <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <h2 className="font-mono text-2xl font-black uppercase">
+                      <h2 className="font-mono text-2xl font-black uppercase [overflow-wrap:anywhere]">
                         {builder.name}
                       </h2>
                       <span className="border border-border px-2 py-1 font-mono text-xs font-bold uppercase tracking-[0.1em] text-muted-foreground">
@@ -336,7 +336,7 @@ export function BuildersDirectory({
                         {availabilityText(builder, t)}
                       </span>
                     </div>
-                    <p className="mt-4 max-w-3xl whitespace-pre-wrap font-mono text-sm uppercase leading-7 tracking-[0.08em] text-muted-foreground">
+                    <p className="mt-4 max-w-3xl whitespace-pre-wrap font-mono text-sm uppercase leading-7 tracking-[0.08em] text-muted-foreground [overflow-wrap:anywhere]">
                       {builder.description}
                     </p>
                   </div>

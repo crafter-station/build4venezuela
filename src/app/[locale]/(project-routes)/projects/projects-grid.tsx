@@ -182,7 +182,7 @@ export function ProjectsGrid({
         </div>
       </div>
       {viewMode === "grid" ? (
-        <div className="grid gap-px bg-line md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-px bg-line md:grid-cols-2 lg:grid-cols-3">
           {visible.map(({ project }, index) => (
             <ProjectCard
               applicabilityLabel={t(`applicabilities.${project.applicability}`)}

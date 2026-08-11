@@ -80,15 +80,15 @@ export default async function ProjectPage({ params }: Props) {
   return (
     <ProjectShell>
       <article className="px-5 py-16 sm:px-8 sm:py-20 lg:px-10">
-        <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
-          <aside className="lg:sticky lg:top-8 lg:self-start">
-            <p className="font-mono text-sm uppercase tracking-[0.28em] text-accent">
+        <div className="mx-auto grid max-w-6xl grid-cols-[minmax(0,1fr)] gap-10 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-16">
+          <aside className="min-w-0 lg:sticky lg:top-8 lg:self-start">
+            <p className="font-mono text-sm uppercase tracking-[0.28em] text-accent [overflow-wrap:anywhere]">
               /p/{project.slug}
             </p>
-            <h1 className="mt-5 font-mono text-[clamp(2.25rem,6vw,4.5rem)] font-black uppercase leading-[0.9] tracking-[-0.05em]">
+            <h1 className="mt-5 font-mono text-[clamp(2.25rem,12vw,4.5rem)] font-black uppercase leading-[0.9] tracking-[-0.05em] [overflow-wrap:anywhere] sm:text-[clamp(2.25rem,6vw,4.5rem)]">
               {project.name}
             </h1>
-            <div className="mt-8 grid gap-px bg-border">
+            <div className="mt-8 grid grid-cols-[minmax(0,1fr)] gap-px bg-border">
               <div className="bg-background p-4">
                 <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">
                   {t("builtBy")}
@@ -106,7 +106,7 @@ export default async function ProjectPage({ params }: Props) {
                 <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">
                   {t("countries")}
                 </p>
-                <p className="mt-2 font-mono text-lg uppercase tracking-[0.08em]">
+                <p className="mt-2 font-mono text-lg uppercase tracking-[0.08em] [overflow-wrap:anywhere]">
                   {project.countries.join(" / ")}
                 </p>
               </div>
@@ -175,7 +175,7 @@ export default async function ProjectPage({ params }: Props) {
             ) : null}
           </aside>
 
-          <section className="border border-border bg-card p-5 sm:p-8">
+          <section className="min-w-0 border border-border bg-card p-5 sm:p-8">
             {project.videoUrl ? (
               <ProjectVideoEmbed
                 className="mb-8 bg-background"

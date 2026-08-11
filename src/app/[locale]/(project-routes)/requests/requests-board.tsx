@@ -331,7 +331,7 @@ export function RequestsBoard({
   }
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[0.75fr_1.25fr]">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-[minmax(0,0.75fr)_minmax(0,1.25fr)]">
       {notice ? (
         <output
           aria-live="polite"
@@ -340,7 +340,7 @@ export function RequestsBoard({
           {notice}
         </output>
       ) : null}
-      <aside className="border border-border bg-card p-5 lg:sticky lg:top-24 lg:self-start sm:p-6">
+      <aside className="min-w-0 border border-border bg-card p-5 lg:sticky lg:top-24 lg:self-start sm:p-6">
         <p className="font-mono text-sm uppercase tracking-[0.28em] text-accent">
           {t("formEyebrow")}
         </p>
@@ -406,7 +406,7 @@ export function RequestsBoard({
         ) : null}
       </aside>
 
-      <section>
+      <section className="min-w-0">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
           <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
             {requests.length}{" "}
@@ -416,7 +416,7 @@ export function RequestsBoard({
             {isFetching ? t("syncing") : t("live")}
           </p>
         </div>
-        <div className="grid gap-px bg-border">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-px bg-border">
           {requests.length > 0 ? (
             requests.map((request) => {
               const expanded = expandedRequests.has(request.id);
@@ -425,7 +425,10 @@ export function RequestsBoard({
               const commentBody = commentBodies[request.id] ?? "";
 
               return (
-                <article className="bg-background p-5 sm:p-6" key={request.id}>
+                <article
+                  className="min-w-0 bg-background p-5 sm:p-6"
+                  key={request.id}
+                >
                   <div className="flex flex-wrap items-start justify-between gap-4">
                     <div className="min-w-0 flex-1">
                       <AuthorBadge
@@ -434,7 +437,7 @@ export function RequestsBoard({
                         name={request.authorName}
                       />
                       <button
-                        className="mt-3 block text-left font-mono text-2xl font-black uppercase leading-none tracking-[-0.04em] transition hover:text-primary sm:text-4xl"
+                        className="mt-3 block max-w-full text-left font-mono text-2xl font-black uppercase leading-none tracking-[-0.04em] transition [overflow-wrap:anywhere] hover:text-primary sm:text-4xl"
                         onClick={() => toggleDescription(request.id)}
                         type="button"
                       >

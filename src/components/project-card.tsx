@@ -34,11 +34,11 @@ export function ProjectCard({
   return (
     <article
       className={cn(
-        "project-card group flex h-full min-h-[23rem] flex-col p-6 sm:p-7",
+        "project-card group flex min-w-0 h-full min-h-[23rem] flex-col p-6 sm:p-7",
         className,
       )}
     >
-      <div className="flex items-start justify-between gap-5">
+      <div className="flex min-w-0 items-start justify-between gap-3 sm:gap-5">
         <span className="border border-primary px-2 py-1 font-mono text-[0.6rem] font-bold uppercase tracking-[0.16em] text-primary">
           {applicabilityLabel}
         </span>
@@ -54,9 +54,9 @@ export function ProjectCard({
         videoUrl={project.videoUrl}
       />
 
-      <div className="mt-7 flex flex-1 flex-col">
-        <div className="flex items-center justify-between gap-4">
-          <p className="ui-eyebrow flex items-center gap-2 text-accent">
+      <div className="mt-7 flex min-w-0 flex-1 flex-col">
+        <div className="flex min-w-0 flex-wrap items-center justify-between gap-3 sm:gap-4">
+          <p className="ui-eyebrow flex min-w-0 items-center gap-2 text-accent">
             <span aria-hidden="true" className="size-1.5 bg-current" />
             {lifecycleLabel}
           </p>
@@ -65,7 +65,7 @@ export function ProjectCard({
           </p>
         </div>
 
-        <h3 className="type-title mt-6 text-balance font-mono">
+        <h3 className="type-title mt-6 min-w-0 text-balance font-mono [overflow-wrap:anywhere]">
           <Link className="project-card__title ui-focus block" href={href}>
             {project.name}
           </Link>
@@ -82,8 +82,8 @@ export function ProjectCard({
         />
       </div>
 
-      <div className="mt-8 flex items-end justify-between gap-5 border-line border-t pt-5">
-        <p className="max-w-[75%] font-mono text-xs uppercase leading-5 tracking-[0.14em] text-ink-muted">
+      <div className="mt-8 flex min-w-0 flex-wrap items-end justify-between gap-4 border-line border-t pt-5 sm:gap-5">
+        <p className="min-w-0 font-mono text-xs uppercase leading-5 tracking-[0.14em] text-ink-muted [overflow-wrap:anywhere] sm:max-w-[75%]">
           {project.countries.join(" / ")}
         </p>
         <Link

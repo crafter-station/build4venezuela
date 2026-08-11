@@ -223,10 +223,10 @@ export function CommentsSection({
         )}
       </div>
 
-      <div className="mt-8 grid gap-px bg-border">
+      <div className="mt-8 grid grid-cols-[minmax(0,1fr)] gap-px bg-border">
         {comments.length > 0 ? (
           comments.map((comment) => (
-            <article className="bg-background p-5" key={comment.id}>
+            <article className="min-w-0 bg-background p-5" key={comment.id}>
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <AuthorBadge
                   imageUrl={comment.authorImageUrl}
@@ -257,7 +257,7 @@ export function CommentsSection({
                   </SignInButton>
                 )}
               </div>
-              <p className="mt-5 whitespace-pre-wrap font-mono text-sm leading-7 text-muted-foreground">
+              <p className="mt-5 whitespace-pre-wrap font-mono text-sm leading-7 text-muted-foreground [overflow-wrap:anywhere]">
                 {comment.body}
               </p>
             </article>
