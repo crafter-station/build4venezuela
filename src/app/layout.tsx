@@ -4,6 +4,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { GeistSans } from "geist/font/sans";
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { getLocale } from "next-intl/server";
 import type { ReactNode } from "react";
 import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
@@ -101,10 +102,16 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  const locale = await getLocale();
+
   return (
     <html
-      lang="en"
+      lang={locale}
       className={`${GeistSans.variable} ${inputMonoNarrow.variable} h-full antialiased`}
       suppressHydrationWarning
     >

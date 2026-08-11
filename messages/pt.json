@@ -370,7 +370,7 @@
       "label": "Submit yours"
     },
     "grid": {
-      "empty": "No projects yet. Be the first one to add a build.",
+      "empty": "Nenhum projeto ainda. Seja o primeiro a adicionar o seu.",
       "syncing": "Checking for updates...",
       "live": "Updated automatically",
       "searchPlaceholder": "Buscar projetos, equipes ou lugares...",
@@ -541,9 +541,9 @@
     "post": "Post comment",
     "signedOutDescription": "Sign in to leave feedback and vote on comments.",
     "signIn": "Sign in to comment",
-    "vote": "Vote ({count})",
-    "voted": "Voted ({count})",
-    "empty": "No comments yet. Start the thread with a sharp question or useful suggestion.",
+    "vote": "Votar ({count})",
+    "voted": "Votado ({count})",
+    "empty": "Sem comentários ainda. Inicie a conversa com uma pergunta ou sugestão útil.",
     "errors": {
       "tooShort": "Add at least 3 characters.",
       "tooLong": "Keep comments under 1,200 characters."
