@@ -1,0 +1,173 @@
+{
+  "project_slug": "redacopiovnzla",
+  "name": "Red Acopio Vnzla",
+  "repo_url": "https://github.com/Chappie21/VnzlCentrosDeInsumos",
+  "live_url": "https://www.redacopiovnzla.com/",
+  "video_url": "https://youtu.be/fCczWiT9DGs",
+  "countries": [
+    "Venezuela"
+  ],
+  "db_description": "# Centros de Acopio — Ayuda que llega donde se necesita\n\n## ¿Qué es?\n\nUna aplicación que conecta a quienes **quieren ayudar** con los **centros de acopio** que reciben y reparten insumos durante una emergencia.\n\nEn vez de no saber a dónde llevar una donación o qué hace falta realmente, la app muestra, en un mapa, los centros cercanos y **qué necesita cada uno en este momento**: agua, medicamentos, ropa, alimentos o herramientas.\n\n## ¿Cómo ayuda?\n\n- **A quien quiere donar:** encuentra el centro más cercano y ve qué le hace falta, para llevar lo que de verdad se necesita y no lo que sobra.\n- **A los centros:** llevan el control de lo que entra y sale, y avisan automáticamente cuándo un insumo está **urgente**, **normal** o **suficiente**.\n- **A la comunidad:** la información está siempre actualizada y es confiable, porque un equipo revisa que los centros sean reales.\n\nEl resultado: menos desorden, menos desperdicio y la ayuda llegando más rápido a donde hace falta.\n\n## ¿Quiénes la usan?\n\n- **Personas que donan** — buscan un centro y ven sus necesidades.\n- **Voluntarios** — ayudan a registrar lo que llega y se reparte.\n- **Responsables de un centro (jefes)** — administran el centro, su equipo y su inventario.\n- **Equipo de verificación** — confirma que cada centro sea legítimo.\n\n## Cómo se usa\n\n### Si quieres donar\n1. Abre la app y mira el **mapa** o la **lista de centros** cerca de ti.\n2. Entra a un centro para ver **qué necesita** y si está **recibiendo en este momento**.\n3. Arma tu donación en la app y llévala al centro: ahí la registran al recibirla.\n\n> No necesitas crear una cuenta para mirar el mapa y las necesidades.\n\n### Si eres voluntario o responsable de un centro\n1. **Crea tu cuenta** (con tu cédula y una contraseña, o con Google).\n2. **Registra tu centro**: nombre, ubicación en el mapa y el inventario con el que inicias (puedes cargarlo a mano o importarlo desde un Excel).\n3. Suma a tu equipo: **invita voluntarios** con un enlace o un código QR.\n4. **Mantén el inventario al día**: cada vez que entra una donación o sale un envío, queda registrado. El sistema lleva la cuenta por ti.\n5. **Configura las alertas**: define, para cada insumo, cuándo se considera *urgente* y cuándo *suficiente*. A partir de ahí, **la etiqueta de cada insumo se actualiza sola** según el stock, sin que tengas que cambiarla a mano.\n\n### Cómo se mantiene la confianza\n- Un **equipo de verificación** revisa los centros y los marca como verificados.\n- Cualquier persona puede **reportar** un centro que ya no exista o tenga información incorrecta.\n\n## En resumen\n\nLa app es el puente entre la **ayuda disponible** y la **ayuda necesaria**: muestra dónde están los centros, qué les falta y lo mantiene actualizado, para que cada donación cuente.",
+  "lifecycle_status": "ready_to_use",
+  "analysis": {
+    "summary": "A genuinely mature, well-tested Turborepo monorepo (NestJS API + Next.js 16 web + Prisma) implementing a real emergency-logistics platform for Venezuelan donation collection centers post-earthquake, with device-fingerprint identity, transactional inventory tracking, QR-based intake, volunteer/admin verification workflows, Redis caching/rate-limiting, Sentry monitoring, full CI (build/test/migration-drift checks), Docker + Railway deploy config, and a documented history of real security vulnerabilities found and fixed.",
+    "project_type": "Full-stack web platform (monorepo: REST API backend + Next.js frontend + Prisma DB layer) for emergency donation-center logistics",
+    "stack": {
+      "frontend": [
+        "Next.js 16 (App Router)",
+        "React 19.2",
+        "TanStack Query",
+        "react-hook-form",
+        "Tailwind CSS 4",
+        "react-leaflet/Leaflet",
+        "html5-qrcode",
+        "qrcode.react"
+      ],
+      "backend": [
+        "NestJS 11",
+        "Express 5",
+        "class-validator/class-transformer",
+        "ioredis",
+        "bcryptjs",
+        "google-auth-library"
+      ],
+      "database": [
+        "PostgreSQL",
+        "Prisma 7 (@prisma/adapter-pg)",
+        "Redis"
+      ],
+      "infra_deploy": [
+        "Docker",
+        "Railway (railway.json)",
+        "GitHub Actions CI",
+        "Turborepo",
+        "pnpm workspaces"
+      ],
+      "ai_ml": [],
+      "languages": [
+        "TypeScript",
+        "Python (tutorial/demo scripts only)",
+        "Shell"
+      ]
+    },
+    "architecture": {
+      "pattern": "Turborepo monorepo: NestJS REST API (apps/api) + Next.js 16 App Router web (apps/web) + shared Prisma DB package + shared Venezuela domain-data package",
+      "uses_orm": true,
+      "orm_or_db_layer": "Prisma 7 with @prisma/adapter-pg driver adapter, shared singleton client in packages/database, pooled connections (DB_POOL_MAX)",
+      "api_design": "REST via NestJS controllers/services/guards (centros, insumos, historial, envios, usuarios, auth, admin), device-fingerprint based identity (no traditional login required to browse) plus JWT auth (cédula+password, Google OAuth, admin login)",
+      "separation_of_concerns": "Clear layering: guards for authZ (SesionGuard, IdentidadGuard, VoluntarioGuard, JefeGuard, AdminGuard, RateLimitGuard), services for business logic, Prisma for persistence, Redis for caching/rate-limiting, frontend hooks/lib layer separate from components",
+      "modularity": "Well modularized into apps/packages workspaces with barrel index.ts files per feature folder per project conventions in AGENTS.md",
+      "notable_patterns": [
+        "Fixed-window Redis rate limiter",
+        "Read-through Redis cache with version-key invalidation for directory listing",
+        "Transactional inventory movements (Historial) instead of direct mutation of cantidadTotal",
+        "Device fingerprint + progressive identity completion instead of forced login",
+        "Security sentinel log (.jules/sentinel.md) documenting real vulnerabilities found and fixed (IDOR, validation bypass, missing security headers)",
+        "External cédula verification integration (api.cedula.com.ve) with fail-open handling"
+      ]
+    },
+    "code_organization": {
+      "score": 5,
+      "directory_structure": "Clean monorepo layout: apps/api, apps/web, packages/database, packages/venezuela, docs/, consistent Next.js App Router route-group conventions ((app)/(full)), colocated tests next to source files",
+      "naming_quality": "Consistent Spanish domain naming (Centro, Insumo, Historial, Voluntario) matching the Venezuelan context, clear and descriptive throughout",
+      "documentation_quality": "Extensive docs/ folder with per-feature markdown specs, detailed README with endpoint table and explicit 'deferred on purpose' section, AGENTS.md with coding conventions, inline comments explaining non-obvious decisions ('ponytail' markers for known tech debt)",
+      "reasoning": "Extremely well organized for a hackathon project: workspace packages, barrel files, colocated unit tests (54 test files), docs per feature, and an explicit conventions guide (AGENTS.md) that is actually followed in the code."
+    },
+    "production_readiness": {
+      "score": 4,
+      "has_auth": true,
+      "has_error_handling": true,
+      "has_logging": true,
+      "has_env_config": true,
+      "has_deploy_config": true,
+      "secrets_handling": ".env.example with clear placeholders, JWT_SECRET/GOOGLE_CLIENT_ID/SENTRY_DSN/cédula API tokens externalized, no secrets committed",
+      "security_notes": "Helmet, CORS allow-list via WEB_ORIGIN, class-validator ValidationPipe with whitelist, bcrypt password hashing, JWT-based guards with role checks, Redis-backed rate limiting on write endpoints, and a documented security-sentinel log showing 3 real vulnerabilities (IDOR, validation bypass via TS intersection types, missing security headers) that were found and fixed during development",
+      "scalability_notes": "Redis caching (30s TTL) for public directory, small Postgres connection pool sized for hobby-tier DBs, geospatial ordering done in-memory (explicitly documented as a known limitation to migrate to PostGIS if centers scale to thousands), photo uploads stored on local disk (explicitly flagged as needing object storage for real production use)",
+      "reasoning": "Has CI (3 workflows: API build+test, Web build+test, DB migration drift check against a real Postgres service), Dockerfile for API, railway.json deploy config with pre-deploy migration step, Sentry instrumentation on both API and web, and honest documentation of known gaps (no PostGIS, local disk uploads, no DB trigger for totals) rather than hiding them."
+    },
+    "maturity": {
+      "score": 5,
+      "has_readme": true,
+      "has_tests": true,
+      "has_ci": true,
+      "is_real_or_boilerplate": "real",
+      "reasoning": "198 commits from 4 contributors (including a bot-assisted security review workflow), 54 test files covering services/controllers/components, 3 CI workflows enforcing tests+build+migration integrity, and a documented history of real security vulnerabilities found and remediated — this is far beyond boilerplate or empty scaffolding."
+    },
+    "viability": {
+      "score": 4,
+      "reasoning": "Addresses a concrete, well-scoped problem (donation center directory, inventory tracking, QR-based intake, volunteer/admin verification) with a working, tested, deployable full-stack implementation; main gaps before real-world use are moving off local-disk photo storage, load-testing the in-memory geo sort, and completing a couple of explicitly deferred UI pieces (donation cart/QR scan front-end)."
+    },
+    "key_features": [
+      "Public directory of donation centers with geolocation-based (Haversine) sorting and Redis caching",
+      "Center creation with initial inventory import (manual or Excel upload) and photo evidence",
+      "Inventory movement tracking via transactional Historial records (never direct mutation of totals)",
+      "QR-code based batch drop-off/reception flow for donations",
+      "Volunteer invitation system via JWT tokens (link/QR) with role-based guards (JEFE vs VOLUNTARIO)",
+      "Admin/moderation panel for verifying or rejecting centers with accountability tracking",
+      "Cédula identity verification against external government-adjacent API (api.cedula.com.ve) with fail-open handling",
+      "Google OAuth and cédula+password authentication with progressive profile completion",
+      "Community-driven reporting of invalid/incorrect centers",
+      "Redis-backed rate limiting on write-heavy endpoints"
+    ],
+    "domain_tags": [
+      "donations-aid",
+      "aid-logistics",
+      "volunteer-coordination",
+      "mapping-geo"
+    ],
+    "merge_potential": "Strong standalone candidate; could integrate with a shelter-mapping or people-finder project via shared geolocation/center-directory infrastructure, or expose its centros/insumos API for other aid-coordination tools to consume.",
+    "red_flags": [
+      "Uploaded photos stored on local disk rather than object storage — will not survive redeploys/scale on platforms like Railway with ephemeral filesystems",
+      "Geospatial sorting done in-memory rather than PostGIS — could become a bottleneck if center count grows into the thousands",
+      "cantidadTotal invariant enforced only at the application layer (transaction), not by a DB trigger, so it could be corrupted by out-of-band writes",
+      "Two admin accounts noted as seeded manually with no admin-management UI yet"
+    ]
+  },
+  "signals": {
+    "accessible": true,
+    "stars": 1,
+    "forks": 0,
+    "contributors": 4,
+    "commit_count": 198,
+    "code_loc": 15372,
+    "created_at": "2026-06-26T21:17:54Z",
+    "pushed_at": "2026-07-01T21:41:41Z",
+    "license": null,
+    "languages_bytes": {
+      "TypeScript": 532905,
+      "Python": 18379,
+      "Shell": 6695,
+      "CSS": 1667,
+      "Dockerfile": 1651,
+      "JavaScript": 679
+    },
+    "archived": false
+  },
+  "evaluation": {
+    "diffusion": {
+      "score": 4,
+      "ready_to_promote": true,
+      "available_assets": [
+        "live-demo",
+        "demo-video",
+        "clear-value-prop",
+        "branding"
+      ],
+      "recommended_angle": "From-the-ground logistics fix for earthquake relief: a real, tested platform (not just a landing page) that tells donors exactly what each acopio center needs right now, and gives center managers live inventory control with urgency alerts — built and deployed on a custom domain with 198 commits, 54 tests, and documented security fixes.",
+      "gaps": [
+        "No public screenshots captured yet of the actual map/dashboard UI (site needs JS to render, so static crawlers/social-card previews show a 'Cargando...' loading state — should generate real screenshots or a GIF for social posts)",
+        "No evidence yet of real-world adoption/verified centers (real-users asset not confirmed)",
+        "Repo has no license file"
+      ]
+    },
+    "impact_potential": 5,
+    "live_demo_notes": "The site (https://www.redacopiovnzla.com/) returns HTTP 200, serves a real deployed Next.js 16 app with correct branding, meta description, and PWA manifest (\"Red Acopio Venezuela — directorio de centros de acopio y donaciones de emergencia en Venezuela\"). A static-HTML fetch only sees a client-side \"Cargando…\" loading state because the app is a JS-hydrated SPA that fetches data from a separate NestJS API at runtime — this is expected SPA behavior, not a broken deploy. The backend API is not exposed under the same domain (common /api/* paths 404, confirming it's a separate service per the documented monorepo/Railway architecture) so it could not be independently probed without a browser, but the codebase analysis shows a fully implemented, tested REST API (guards, rate limiting, Redis caching, Prisma transactions) behind it. Overall this reads as a genuinely working, deployed product, not a static mockup — though a human/JS-rendering check (headless browser) would be needed to see the live map and center listings render end-to-end.",
+    "live_demo_status": "partial",
+    "one_line_pitch": "Red Acopio Vnzla conecta donaciones con el centro de acopio más cercano que de verdad las necesita — un mapa en vivo, inventario transaccional y alertas de urgencia, ya desplegado en redacopiovnzla.com.",
+    "overall_recommendation": "spotlight",
+    "problem_severity": "critical",
+    "product_quality": 5,
+    "real_problem_reasoning": "Post-earthquake donation logistics in Venezuela suffer from exactly the failure mode this app targets: donors don't know which centers are legitimate, where they are, or what they actually need right now, leading to misallocated donations (excess of some items, shortages of others) and wasted volunteer effort reconciling inventory by hand. The product directly maps donors to nearby verified centers, shows live urgency-tagged inventory needs (urgent/normal/sufficient), tracks intake/outflow via transactional history records (not ad-hoc counters), supports QR-based batch drop-off, and includes a verification/reporting workflow to keep the directory trustworthy — this is a well-scoped, concrete solution to a real coordination bottleneck in disaster response, not a generic donation platform.",
+    "solves_real_problem": "yes"
+  }
+}

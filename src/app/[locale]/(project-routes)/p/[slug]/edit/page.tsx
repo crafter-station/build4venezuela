@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
+import { Card, CardContent } from "@/components/ui/card";
 import { projectToFormValues } from "@/lib/projects/schema";
 import { canEditProject, getProjectBySlug } from "@/lib/projects/store";
 import { ProjectShell } from "../../../project-shell";
@@ -33,23 +34,25 @@ export default async function EditProjectPage({ params }: Props) {
             <p className="font-mono text-sm uppercase tracking-[0.28em] text-primary">
               {t("eyebrow")}
             </p>
-            <h1 className="mt-5 font-mono text-[clamp(3rem,8vw,7rem)] font-black uppercase leading-[0.85] tracking-[-0.07em]">
+            <h1 className="type-page-title mt-5 font-mono font-black uppercase">
               {t("title")}
             </h1>
             <p className="mt-6 max-w-md font-mono text-base uppercase leading-7 tracking-[0.12em] text-muted-foreground">
               {t("description")}
             </p>
           </div>
-          <div className="border border-border bg-card p-5 sm:p-7">
-            <ProjectForm
-              initialState={{
-                values: projectToFormValues(project),
-                errors: {},
-              }}
-              projectId={project.id}
-              submitLabel={t("submitLabel")}
-            />
-          </div>
+          <Card>
+            <CardContent>
+              <ProjectForm
+                initialState={{
+                  values: projectToFormValues(project),
+                  errors: {},
+                }}
+                projectId={project.id}
+                submitLabel={t("submitLabel")}
+              />
+            </CardContent>
+          </Card>
         </div>
       </section>
     </ProjectShell>

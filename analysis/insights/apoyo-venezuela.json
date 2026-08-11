@@ -1,0 +1,165 @@
+{
+  "project_slug": "apoyo-venezuela",
+  "name": "Apoyo Venezuela",
+  "repo_url": "https://github.com/javierdejesusda/apoyo-venezuela",
+  "live_url": "https://apoyovenezuela.com",
+  "video_url": "",
+  "countries": [
+    "Venezuela"
+  ],
+  "db_description": "## What did you build?\n\nApoyo Venezuela is a mobile-first, anonymous crowd-coordination web app built\nafter the June 24, 2026 earthquake in Venezuela (a doublet of roughly M7.1 and\nM7.5). It lets anyone report affected zones on an interactive map, post the\nspecific needs of each location, mark structural status, and look up verified\nemergency phone numbers, with live updates across all users.\n\nCore features:\n\n- **Interactive map of affected zones** with a structural-status traffic light\n  (collapsed, damaged, stable, unconfirmed), always shown as color plus icon\n  plus text label for accessibility.\n- **Zone reporting** with address autocomplete, reverse geocoding, geolocation,\n  or by dragging a pin, including safe photo uploads.\n- **Needs per zone** (rescue, water, food, medicine, shelter, and more) with a\n  needed → on the way → covered lifecycle.\n- **Verified emergency phone directory** by state, with tap-to-call and the\n  source of each number.\n- **Aid guide**: what to donate and what to avoid, shelters, collection centers,\n  and aid organizations.\n- **Live updates** on the map and lists via Supabase Realtime, a PWA with light\n  and dark mode.\n\nWho is it for? Anyone affected by or responding to the earthquake: families\nreporting damage and needs, volunteers and rescuers locating where help is\nrequired, and donors finding verified collection points. No account or login\nis needed, and reports are anonymous by design.\n\nHow does it help? It turns scattered social-media pleas into a single, live,\nmap-based view of where help is needed and what is already covered, so aid is\nnot duplicated and no zone is forgotten.\n\nWhat should people try first? Open the map, tap an affected zone to see its\nneeds and structural status, then file a report or update a need from your own\nlocation to see it appear live for everyone.\n\nBuilt with Next.js 16, React 19, strict TypeScript, Tailwind CSS v4, Leaflet +\nOpenStreetMap, and Supabase (Postgres + Realtime). A citizen initiative with no\npolitical affiliation; information is community-contributed.",
+  "lifecycle_status": "ready_to_use",
+  "analysis": {
+    "summary": "Apoyo Venezuela is a live, production-deployed (apoyovenezuela.com) Next.js 16 / React 19 PWA for citizen-coordinated earthquake relief: an interactive map of affected zones with structural status, per-zone needs tracking, a verified emergency phone directory, fundraiser listings, and an AI assistant grounded on the live dataset. It is backed by Supabase Postgres with RLS, a public REST API v1 with OpenAPI docs, and an MCP server exposing the same data as tools. Engineering quality is unusually high for a hackathon entry: 1025 passing unit tests, clean typecheck, CI running lint/typecheck/test/build, and a migration history showing deliberate security hardening (closing an initially-open anonymous UPDATE policy, adding hashed-IP rate limiting for reports, fail-open quota checks, AI request validation/rate limiting).",
+    "project_type": "web app (Next.js PWA) with public REST API and MCP server",
+    "stack": {
+      "frontend": [
+        "Next.js 16 App Router",
+        "React 19",
+        "TypeScript (strict)",
+        "Tailwind CSS v4",
+        "Leaflet/react-leaflet",
+        "PWA/service worker"
+      ],
+      "backend": [
+        "Next.js Route Handlers / Server Actions",
+        "Node runtime API routes",
+        "mcp-handler (MCP server)"
+      ],
+      "database": [
+        "Supabase Postgres",
+        "Supabase Realtime",
+        "Row Level Security + SECURITY DEFINER RPCs"
+      ],
+      "infra_deploy": [
+        "Vercel (implied by homepage + env var conventions)",
+        "GitHub Actions CI (lint/typecheck/test/build)"
+      ],
+      "ai_ml": [
+        "OpenAI gpt-4o-mini via @ai-sdk/openai and Vercel AI SDK, grounded tool-calling assistant"
+      ],
+      "languages": [
+        "TypeScript",
+        "JavaScript (import/transform scripts)",
+        "PL/pgSQL",
+        "CSS",
+        "HTML"
+      ]
+    },
+    "architecture": {
+      "pattern": "Next.js App Router monolith with a swappable data-store abstraction (in-memory demo store vs Supabase store) behind a single DataStore interface",
+      "uses_orm": false,
+      "orm_or_db_layer": "Supabase JS client (supabase-js) with hand-written snake_case-to-camelCase row mappers; no ORM. Mutations mostly routed through SECURITY DEFINER Postgres RPC functions rather than direct table writes.",
+      "api_design": "REST v1 under /api/v1 (zonas, pedidos, campanas, estadisticas) with OpenAPI JSON/Markdown docs and a Scalar-based reference UI, plus a parallel MCP server (/api/mcp) exposing the same read operations as tools for AI agents.",
+      "separation_of_concerns": "Clear layering: lib/data (store contract + supabase/memory implementations + pure selectors), lib/ai (assistant tools, rate limiting, validation), lib/api (shared DTO/pagination helpers reused by REST and MCP), components/ for UI, app/ for routes only.",
+      "modularity": "High; shared pure functions (selectors, transforms) are reused across REST, MCP, and UI, and covered individually by unit tests.",
+      "notable_patterns": [
+        "Dual-mode data store: falls back to an in-memory demo dataset when Supabase env vars are absent, so the app runs with zero config",
+        "SECURITY DEFINER Postgres functions used to lock down anonymous writes after an initial migration exposed open UPDATE policies",
+        "Hashed-IP sliding-window report throttle implemented as a fail-open DB function to avoid blocking legitimate emergency reports",
+        "AI assistant is tool-grounded (buscarZonas) with a strict system prompt, per-IP rate limiting, and payload-size validation to bound cost/abuse",
+        "Service worker with an explicit life-safety invariant: dynamic emergency data is never served stale from cache"
+      ]
+    },
+    "code_organization": {
+      "score": 5,
+      "directory_structure": "Idiomatic Next.js App Router layout with well-separated lib/data, lib/ai, lib/api, lib/geocoding, lib/sismos modules; components/ split into feature and ui/ primitives; supabase/migrations tracks incremental, well-commented schema evolution; scripts/ for one-off data imports with matching rollback scripts.",
+      "naming_quality": "Consistent, descriptive naming in Spanish domain terms (locations/zonas, needs/pedidos) mapped cleanly to English code identifiers where appropriate.",
+      "documentation_quality": "Extensive inline comments explaining non-obvious security and reliability decisions (fail-open rate limiting, RLS tightening rationale, SW caching invariants); README, CONTRIBUTING, SECURITY.md, CODE_OF_CONDUCT.md, CHANGELOG.md all present and substantive.",
+      "reasoning": "Directory layout, naming, and comments are all well above hackathon norms and reflect genuine software-engineering discipline rather than generated boilerplate."
+    },
+    "production_readiness": {
+      "score": 4,
+      "has_auth": false,
+      "has_error_handling": true,
+      "has_logging": false,
+      "has_env_config": true,
+      "has_deploy_config": true,
+      "secrets_handling": "Server-only secrets (OPENAI_API_KEY, MAPBOX_TOKEN) explicitly kept without NEXT_PUBLIC_ prefix per .env.example comments; Supabase anon key is public by design (RLS-protected); .env.example present, no secrets committed.",
+      "security_notes": "No user auth is used by design (anonymous civic tool), but the team caught and fixed a real vulnerability where the initial RLS policy let any anonymous client overwrite arbitrary columns on any row, replacing it with SECURITY DEFINER RPCs restricted to validated status transitions; report submission is rate-limited via a hashed-IP throttle function with RLS locking out direct table access; AI assistant route has request size/shape validation and per-IP rate limiting.",
+      "scalability_notes": "In-memory AI rate limiter and demo store are explicitly documented as per-instance/non-durable and acceptable only as an interim measure; Supabase Postgres + Realtime should scale adequately for the traffic profile of a regional relief tool.",
+      "reasoning": "CI enforces lint/typecheck/test/build on every push; live deployed at a custom domain; migrations show real production incident-driven hardening; main gaps are lack of structured server-side logging/observability and no authenticated moderation path (relies on public removal-request queue) beyond what a life-safety MVP typically needs."
+    },
+    "maturity": {
+      "score": 5,
+      "has_readme": true,
+      "has_tests": true,
+      "has_ci": true,
+      "is_real_or_boilerplate": "real, actively developed application with substantial working logic",
+      "reasoning": "1025 passing unit tests (verified by running vitest), clean tsc --noEmit, GitHub Actions CI covering lint/typecheck/test/build, 76 commits with detailed, security-aware commit messages, CONTRIBUTING/SECURITY/CODE_OF_CONDUCT docs, and a running production URL (apoyovenezuela.com) — this is not scaffolding."
+    },
+    "viability": {
+      "score": 4,
+      "reasoning": "Directly addresses the hackathon's real-world need (earthquake relief coordination in Venezuela) with a working, tested, deployed product covering zone mapping, needs tracking, emergency contacts, and fundraiser discovery; main viability risks are reliance on unauthenticated crowd-sourced data integrity and a two-person team's ability to moderate abuse at scale during a real crisis."
+    },
+    "key_features": [
+      "Interactive Leaflet map of affected zones with structural-status traffic light and clustering",
+      "Per-zone needs board (rescue, water, food, medicine, shelter, etc.) with a needed/on-the-way/covered lifecycle",
+      "Zone reporting with address autocomplete, reverse geocoding, geolocation, or map-pin drop, and photo upload with MIME/size restrictions",
+      "Verified emergency phone directory by state with source attribution",
+      "AI assistant (/asistente) grounded on live zone data via tool-calling, rate-limited and validated",
+      "Public REST API v1 with OpenAPI docs and a companion MCP server exposing the same data to AI agents",
+      "PWA with offline fallback and a service worker that deliberately never serves stale emergency data",
+      "Supabase Realtime live updates on map/lists; anonymous-write hardening via SECURITY DEFINER RPCs and hashed-IP report throttling"
+    ],
+    "domain_tags": [
+      "shelter-mapping",
+      "donations-aid",
+      "structural-inspection",
+      "alerts-notifications",
+      "mapping-geo",
+      "aid-logistics"
+    ],
+    "merge_potential": "Strong standalone candidate; could integrate with a separate missing-persons/family-reunification project (the README already links a sister project, desaparecidosterremotovenezuela.com) via its public REST/MCP API rather than merging codebases.",
+    "red_flags": [
+      "No authenticated moderation layer; anyone can create/insert zone and need reports, relying entirely on RLS+RPC constraints and a removal-request queue for correction",
+      "AI assistant and report-throttle rate limiters are in-memory/per-instance, so protections are weaker under multi-instance serverless scaling",
+      "No structured server-side logging/monitoring evident (only ad hoc console usage), which limits incident response during an actual disaster surge"
+    ]
+  },
+  "signals": {
+    "accessible": true,
+    "stars": 0,
+    "forks": 2,
+    "contributors": 2,
+    "commit_count": 76,
+    "code_loc": 28760,
+    "created_at": "2026-06-25T05:35:10Z",
+    "pushed_at": "2026-07-01T13:20:33Z",
+    "license": "MIT",
+    "languages_bytes": {
+      "TypeScript": 1034424,
+      "JavaScript": 116542,
+      "PLpgSQL": 18233,
+      "CSS": 8952,
+      "HTML": 1710
+    },
+    "archived": false
+  },
+  "evaluation": {
+    "diffusion": {
+      "score": 5,
+      "ready_to_promote": true,
+      "available_assets": [
+        "live-demo",
+        "clear-value-prop",
+        "branding",
+        "real-users"
+      ],
+      "recommended_angle": "Show the live map with real zone counts and a real before/after: 'Mientras las redes sociales se llenaban de pedidos de ayuda dispersos, Apoyo Venezuela ya tiene 1,000 zonas mapeadas y 2,570 necesidades registradas en tiempo real.' Pair a screenshot of the interactive map + a stat callout (1000 zonas, 2570 pedidos, teléfonos verificados) with a CTA to report or donate.",
+      "gaps": [
+        "No demo video exists — a 30-60s screen recording of reporting a zone and seeing it appear live would strengthen the pitch",
+        "No dedicated screenshots/press-kit images captured yet for social cards"
+      ]
+    },
+    "impact_potential": 5,
+    "live_demo_notes": "apoyovenezuela.com returns HTTP 200 and serves a real Next.js PWA titled 'Apoyo Venezuela - coordina ayuda tras el terremoto'. Verified the public REST API is live and populated with real data: /api/v1/zonas returns actual geolocated zone reports (lat/lng, structural status like 'derrumbe', uploaded photos hosted on Supabase storage, addresses in Puerto Cabello, Vargas, etc.), and /api/v1/estadisticas shows 1000 zones tracked, 2570 total need requests across categories (agua, alimentos, medicinas, refugio, etc.) with urgency levels. This is not a placeholder — it is an actively used, crowd-populated coordination tool.",
+    "live_demo_status": "working",
+    "one_line_pitch": "Apoyo Venezuela: el mapa colaborativo en vivo que ya coordina 1,000 zonas y 2,570 necesidades tras el terremoto — sin apps que instalar, sin cuentas, solo ayuda que llega a tiempo.",
+    "overall_recommendation": "spotlight",
+    "problem_severity": "critical",
+    "product_quality": 5,
+    "real_problem_reasoning": "Directly addresses the June 24, 2026 M7.1/M7.5 earthquake doublet in Venezuela — the exact scenario the hackathon targets. It replaces scattered, duplicative social-media aid pleas with a single live map of structural status, per-zone needs (rescue, water, food, medicine, shelter) with a needed→on-the-way→covered lifecycle, and a verified emergency phone directory. This is precisely the coordination failure mode (duplicated aid, forgotten zones, unverified numbers) that costs lives and wastes donations in real disasters, and the live API confirms it is actually being used to track real reports, not a hypothetical.",
+    "solves_real_problem": "yes"
+  }
+}

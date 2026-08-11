@@ -1,0 +1,167 @@
+{
+  "project_slug": "aidtrace",
+  "name": "AidTrace | RastroAyuda",
+  "repo_url": "https://github.com/LuisAlejandroCR/AidTrace-RastroAyuda",
+  "live_url": "https://aidtrace-rastroayuda.vercel.app/",
+  "video_url": "https://youtu.be/adx0cZFm-5g",
+  "countries": [
+    "Colombia"
+  ],
+  "db_description": "## ¿Qué construiste?\n\nConstruí **AidTrace | RastroAyuda**, una app offline-first compatible para desktop, mobile y Telegram para rastrear ayuda humanitaria con QR y pruebas en Celo blockchain\n\n## ¿Para quién es?\n\nPara equipos humanitarios, refugios, donantes y auditores que necesitan verificar entregas de agua, comida, medicinas o kits de emergencia.\n\n## ¿Cómo ayuda?\n\nPermite registrar entregas, recepciones y revisiones incluso sin internet. Cuando vuelve la conexión, guarda la prueba en Celo y muestra el enlace en Celoscan.\n\nLos usuarios en campo no necesitan wallet, CELO ni saber de blockchain.\n\n## ¿Qué deberían probar primero?\n\nCrear un lote, generar el QR, registrar una entrega desde el móvil y revisar el historial con el link a Celoscan.\n\nTambién pueden probar Telegram con:\n\n`CELO1 entregar 13 cajas de ibuprofeno para el refugio mayor`\n\n\nlinkedin.com/in/luis-alejandro",
+  "lifecycle_status": "ready_to_use",
+  "analysis": {
+    "architecture": {
+      "pattern": "Serverless functions (Vercel /api) + static PWA frontend + Postgres (Supabase) as queue/state store + Celo blockchain as immutable audit ledger",
+      "uses_orm": false,
+      "orm_or_db_layer": "Raw SQL via Supabase REST/RPC (fetch calls to /rest/v1/rpc/*), no ORM; DB logic (locking, rate limiting, queueing, RLS) implemented directly in PL/pgSQL functions",
+      "api_design": "Vercel serverless handlers (api/*.mjs) exposed as REST-ish endpoints for webhook ingestion (Zavu/Telegram), browser relay, timeline reads (via on-chain log scanning), queue processing/retry, center inventory webhooks, and CSV export",
+      "separation_of_concerns": "Reasonable separation between parsing (lib/*.mjs), chain-write logic (api/zavu.mjs), chain-read/indexing (api/timeline.mjs), and SQL-defined access-control/queue primitives (supabase/*.sql); frontend logic concentrated in a single large app.js",
+      "modularity": "Backend split into small single-purpose api handlers and lib parsers; frontend is a monolithic app.js (1218 lines) and index.html rather than componentized",
+      "notable_patterns": [
+        "Offline-first PWA with IndexedDB/localStorage queue and service worker background sync",
+        "Distributed lock (Supabase RPC or Upstash Redis) to serialize Celo writes and avoid nonce collisions",
+        "Idempotency keys and dedupe guards for relayed browser/telegram events",
+        "Sender allowlist + per-sender hourly rate limiting implemented in Postgres RPCs with RLS",
+        "Gasless meta-relayer pattern: server-held relayer key submits recordAction on behalf of field users so they never hold a wallet",
+        "Multi-channel ingestion (Telegram via Zavu SDK, browser relay, 'Invent' WhatsApp channel) funneled into one queue/processing pipeline"
+      ]
+    },
+    "code_organization": {
+      "score": 4,
+      "directory_structure": "Clear top-level split: api/ (serverless endpoints), lib/ (pure parsers/notify helpers), supabase/ (SQL migrations with detailed comments), scripts/ (deploy/smoke-check tooling incl. PowerShell), test/ (node:test unit tests), zavu/aidtrace-relayer (separate relayer service). Frontend is flat (index.html, app.js, styles.css) at repo root.",
+      "naming_quality": "Consistent, descriptive naming across files, env vars, and SQL functions (e.g. AIDTRACE_SENDER_RATE_LIMIT_HOUR, begin_aidtrace_browser_relay_event)",
+      "documentation_quality": "README is detailed and user-facing (workflow, offline behavior, Telegram command examples); SQL files carry inline operational runbooks; scripts/ has deploy-checklist.md and setup guides",
+      "reasoning": "Well organized for a hackathon project with genuine separation between chain logic, DB logic, and channel adapters, though the frontend remains a single large file rather than modularized components."
+    },
+    "production_readiness": {
+      "score": 3,
+      "has_auth": true,
+      "has_error_handling": true,
+      "has_logging": true,
+      "has_env_config": true,
+      "has_deploy_config": true,
+      "secrets_handling": "Env vars used throughout (relayer private key, Supabase service role key, webhook tokens, Zavu API key); .gitignore excludes .env*; scripts validate key format before use; no secrets found hardcoded in source",
+      "security_notes": "CORS allowlist enforced, timing-safe token comparisons for webhooks (Svix HMAC-style verification in zavu-proxy.mjs), Supabase RLS enabled on tables, sender allowlist + rate limiting to curb abuse, input validation on relay payloads (regex on batchId, length caps, allowed action enum). Weaknesses: single shared relayer private key model (custodial, single point of failure/compromise), CONTRACT_ADDRESS default fallback hardcoded to a specific address, and no visible authz for the coordinator dashboard beyond a client-stored 'coordinator token'.",
+      "scalability_notes": "Serverless functions plus a distributed lock/queue for serialized on-chain writes is a sensible pattern to avoid nonce races, but throughput is bottlenecked by sequential Celo writes (CELO_WRITE_GAP_MS delay) and a single relayer account — acceptable for small-scale disaster response but would need horizontal scaling design for large volume.",
+      "reasoning": "Real error handling, structured logging, environment-driven configuration, and Vercel deploy config are present, plus a genuine security posture (RLS, rate limits, CORS, timing-safe checks) beyond typical hackathon scaffolding; still missing broader operational hardening (monitoring/alerting, key rotation automation, multi-relayer redundancy) expected of a mature production system."
+    },
+    "maturity": {
+      "score": 4,
+      "has_readme": true,
+      "has_tests": true,
+      "has_ci": true,
+      "is_real_or_boilerplate": "Real, working implementation with substantial custom logic (not boilerplate)",
+      "reasoning": "86 commits over ~a few days, GitHub Actions CI running unit tests and syntax checks (node --test, 28/31 tests passing locally — the 3 failures are due to a missing devDependency in this sandbox, not code defects), a deployed Vercel URL, deployed Celo mainnet contract address, and detailed operational docs (smoke-check scripts, deploy checklists) indicating active iterative development rather than a static scaffold."
+    },
+    "viability": {
+      "score": 4,
+      "reasoning": "Directly addresses a concrete, real disaster-relief problem (proving custody/chain-of-custody for aid supplies with offline resilience) with a working end-to-end flow: QR creation, offline queueing, gasless Celo write, Telegram bot channel, and an auditable public timeline; deployable today by a coordinator with minimal setup (Vercel + Supabase + a funded relayer wallet), though it depends on continued Celo gas funding and a single relayer key, which are operational risks for a volunteer-run deployment in Venezuela."
+    },
+    "key_features": [
+      "QR-code based aid batch creation and custody tracking",
+      "Offline-first PWA with local queueing and automatic background sync",
+      "Gasless blockchain audit trail on Celo (server-relayed transactions, no wallet needed by field users)",
+      "Telegram bot channel for text-based custody updates in low-connectivity conditions",
+      "Public, on-chain-verifiable audit timeline with Celoscan transaction links",
+      "Sender allowlist and per-sender rate limiting to prevent abuse of the relay/bot channel",
+      "Distributed locking (Supabase or Redis) to serialize blockchain writes and avoid nonce conflicts",
+      "Center inventory/delivery webhook integration for downstream systems",
+      "CSV export and queue-status/retry admin endpoints"
+    ],
+    "domain_tags": [
+      "aid-logistics",
+      "mapping-geo",
+      "comms-chat",
+      "volunteer-coordination"
+    ],
+    "merge_potential": "Strong standalone candidate for aid-logistics/supply-chain tracking; could complement people-finder or shelter-mapping projects by providing an auditable custody trail for supplies delivered to shelters, but its blockchain/Celo dependency and relayer-funding requirement make it a distinct operational module rather than an easy merge target.",
+    "red_flags": [
+      "Single custodial relayer private key signs all on-chain writes — compromise or loss halts the entire audit trail and is a centralization/security risk",
+      "Depends on continuous Celo gas funding for the relayer wallet to keep functioning, an ongoing operational cost/risk for a volunteer deployment",
+      "Coordinator dashboard/admin access relies on a client-stored token rather than a robust auth system",
+      "No visible handling for personal/sensitive data minimization beyond a README note asking users not to include sensitive info in free-text notes"
+    ],
+    "summary": "AidTrace/RastroAyuda is an offline-first PWA plus serverless backend that gives humanitarian aid shipments a QR-coded, blockchain-anchored chain-of-custody record on Celo, reachable via browser or Telegram, with a Postgres/Supabase-backed queue, distributed locking, rate limiting, and RLS-secured access control. It is a genuinely implemented, tested, and CI-covered system (not boilerplate) addressing a real disaster-logistics need, though it centers on a single custodial relayer key and requires ongoing gas funding and Supabase/Vercel operational upkeep.",
+    "project_type": "Full-stack web app (PWA) + serverless API + smart contract for humanitarian aid custody tracking",
+    "stack": {
+      "frontend": [
+        "Vanilla JS (app.js)",
+        "HTML/CSS",
+        "PWA (service worker, manifest, IndexedDB)",
+        "QR code generation (qrcode.js)"
+      ],
+      "backend": [
+        "Node.js (Vercel serverless functions, api/*.mjs)",
+        "Express (used in relayer service)",
+        "viem (Celo/EVM client)",
+        "Zavu SDK (multi-channel messaging: Telegram/WhatsApp/SMS)"
+      ],
+      "database": [
+        "Supabase/Postgres (queue, rate limiting, access control, center inventory) with RLS and PL/pgSQL RPC functions"
+      ],
+      "infra_deploy": [
+        "Vercel (hosting + serverless functions + rewrites)",
+        "GitHub Actions CI",
+        "Upstash Redis (optional distributed lock)",
+        "PowerShell smoke-check/deploy scripts"
+      ],
+      "ai_ml": [],
+      "languages": [
+        "JavaScript",
+        "TypeScript",
+        "Solidity",
+        "PL/pgSQL",
+        "PowerShell",
+        "HTML/CSS"
+      ]
+    }
+  },
+  "signals": {
+    "accessible": true,
+    "stars": 0,
+    "forks": 0,
+    "contributors": 1,
+    "commit_count": 86,
+    "code_loc": 3711,
+    "created_at": "2026-06-27T16:47:08Z",
+    "pushed_at": "2026-07-01T20:52:04Z",
+    "license": null,
+    "languages_bytes": {
+      "JavaScript": 196863,
+      "PowerShell": 21691,
+      "HTML": 21112,
+      "PLpgSQL": 19280,
+      "CSS": 15458,
+      "TypeScript": 2528,
+      "Solidity": 2168
+    },
+    "archived": false
+  },
+  "evaluation": {
+    "diffusion": {
+      "score": 4,
+      "ready_to_promote": true,
+      "available_assets": [
+        "live-demo",
+        "demo-video",
+        "clear-value-prop",
+        "branding"
+      ],
+      "recommended_angle": "Lead with the offline-first + no-wallet-needed angle: field workers in disaster zones with no signal can still create a tamper-proof, blockchain-verified record of every box of medicine or water delivered, using just a QR code or a WhatsApp/Telegram message - proof donors and auditors can trust even when the internet is down.",
+      "gaps": [
+        "No evidence yet of real-world usage/pilot with an actual Venezuelan humanitarian org (real-users asset missing)",
+        "Single custodial relayer key and dependency on continuous Celo gas funding are operational risks worth flagging before heavy promotion",
+        "Frontend screenshots/GIFs of the QR + Celoscan proof flow would strengthen social assets beyond the video"
+      ]
+    },
+    "impact_potential": 4,
+    "live_demo_notes": "WebFetch confirms the live Vercel URL renders a real, functional dashboard (not a placeholder landing page): batch-creation form with supply type/quantity/origin/destination fields, QR generation and printing, field recording via QR scan/manual code/Telegram, GPS-tagged custody map, and a proof timeline. This matches the technical analysis's description of a working offline-first PWA backed by Supabase and a Celo smart contract.",
+    "live_demo_status": "working",
+    "one_line_pitch": "AidTrace | RastroAyuda: rastrea la ayuda humanitaria (agua, comida, medicinas) con QR y Telegram, incluso sin internet, y deja una prueba inmutable en blockchain que cualquiera puede verificar - sin que el equipo en terreno necesite saber nada de cripto.",
+    "overall_recommendation": "spotlight",
+    "problem_severity": "high",
+    "product_quality": 4,
+    "real_problem_reasoning": "Aid diversion, lack of transparent chain-of-custody, and donor distrust are persistent, well-documented problems in disaster relief and humanitarian logistics generally, and specifically relevant to Venezuela given its history of aid politicization and corruption concerns. AidTrace targets a genuine operational need for refugios/humanitarian teams/auditors: proving that a batch of supplies actually reached its destination, verifiable by anyone via Celoscan, and it explicitly designs around the offline/low-connectivity reality of disaster zones (offline-first PWA + Telegram bot fallback) and around field workers not needing crypto knowledge (gasless relayer). This is a real, non-trivial problem with clear beneficiaries (aid orgs, donors, auditors) rather than a generic blockchain-for-blockchain's-sake exercise.",
+    "solves_real_problem": "yes"
+  }
+}

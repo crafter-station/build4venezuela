@@ -7,28 +7,19 @@ const intlMiddleware = createMiddleware(routing);
 
 function isProtectedRoute(pathname: string) {
   const [, locale, segment] = pathname.split("/");
-  return routing.locales.some(
-    (supportedLocale) => supportedLocale === locale && segment === "submit",
+  const localizedProtectedRoute = routing.locales.some(
+    (supportedLocale) =>
+      supportedLocale === locale &&
+      (segment === "submit" ||
+        pathname === `/${locale}/builder/register` ||
+        pathname === `/${locale}/builder/requests`),
   );
-}
 
-function legacyLocalizedRedirect(request: Request) {
-  const url = new URL(request.url);
-  const { pathname } = url;
-
-  const legacyPaths = ["/projects", "/submit", "/requests", "/recursos"];
-
-  if (legacyPaths.includes(pathname)) {
-    url.pathname = `/${routing.defaultLocale}${pathname}`;
-    return NextResponse.redirect(url, 308);
-  }
-
-  if (pathname === "/p" || pathname.startsWith("/p/")) {
-    url.pathname = `/${routing.defaultLocale}${pathname}`;
-    return NextResponse.redirect(url, 308);
-  }
-
-  return null;
+  return (
+    localizedProtectedRoute ||
+    pathname === "/builder/register" ||
+    pathname === "/builder/requests"
+  );
 }
 
 function skipsIntl(pathname: string) {
@@ -49,10 +40,14 @@ function skipsIntl(pathname: string) {
 export default clerkMiddleware(async (auth, request) => {
   const { pathname } = request.nextUrl;
 
-  const legacyRedirect = legacyLocalizedRedirect(request);
-
-  if (legacyRedirect) {
-    return legacyRedirect;
+  if (
+    ["build4venezuela.com", "www.build4venezuela.com"].includes(
+      request.nextUrl.hostname,
+    )
+  ) {
+    const destination = new URL("https://build4latam.com/en/ve");
+    destination.search = request.nextUrl.search;
+    return NextResponse.redirect(destination, 308);
   }
 
   if (isProtectedRoute(pathname)) {

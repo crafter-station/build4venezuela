@@ -199,3 +199,13 @@ export async function saveProject({ projectId, values }: ProjectMutationInput) {
 
   return data.project;
 }
+
+export async function deleteProject(projectId: string) {
+  const response = await fetch(`/api/projects/${projectId}`, {
+    method: "DELETE",
+  });
+
+  if (!response.ok) {
+    throw await responseError(response, "Could not delete project.");
+  }
+}

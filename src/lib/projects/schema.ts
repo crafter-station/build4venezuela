@@ -5,10 +5,13 @@ export type Project = {
   slug: string;
   name: string;
   status: ProjectStatus;
+  lifecycleStatus: ProjectLifecycleStatus;
+  applicability: ProjectApplicability;
   projectUrl: string;
   countries: string[];
   participantName: string;
   videoUrl: string;
+  imageUrl: string;
   contributeInUrl: string;
   descriptionMarkdown: string;
   ownerName: string;
@@ -33,10 +36,38 @@ export type ProjectComment = {
 
 export type ProjectStatus = "draft" | "published" | "hidden";
 
+export const projectLifecycleStatuses = [
+  "ready_to_use",
+  "in_development",
+  "idea",
+] as const;
+
+export type ProjectLifecycleStatus = (typeof projectLifecycleStatuses)[number];
+
+export const projectApplicabilities = [
+  "latam",
+  "venezuela",
+  "colombia",
+] as const;
+
+export type ProjectApplicability = (typeof projectApplicabilities)[number];
+
+export function projectApplicabilityFromCountryParam(value: unknown) {
+  return value === "venezuela" || value === "colombia" ? value : undefined;
+}
+
+export function isProjectApplicableTo(
+  project: Pick<Project, "applicability">,
+  country: "venezuela" | "colombia",
+) {
+  return project.applicability === "latam" || project.applicability === country;
+}
+
 export function sortProjectsByVotes(projects: Project[]) {
   return [...projects].sort(
     (a, b) =>
       b.votesCount - a.votesCount ||
+      Number(Boolean(b.videoUrl)) - Number(Boolean(a.videoUrl)) ||
       (b.publishedAt ?? b.createdAt).localeCompare(
         a.publishedAt ?? a.createdAt,
       ),
@@ -72,6 +103,13 @@ const allowedVideoHosts = [
   "www.screen.studio",
   "screenstudio.com",
   "www.screenstudio.com",
+  "instagram.com",
+  "www.instagram.com",
+  "tiktok.com",
+  "www.tiktok.com",
+  "m.tiktok.com",
+  "vm.tiktok.com",
+  "vt.tiktok.com",
 ];
 
 const slugSchema = z
@@ -89,6 +127,8 @@ const urlSchema = z.string().trim().url("Enter a valid URL.");
 export const projectFormSchema = z.object({
   slug: slugSchema,
   name: z.string().trim().min(2, "Name is required.").max(120),
+  lifecycleStatus: z.enum(projectLifecycleStatuses).default("ready_to_use"),
+  applicability: z.enum(projectApplicabilities).default("latam"),
   projectUrl: urlSchema,
   countries: z.string().trim().min(2, "Add at least one participant country."),
   participantName: z
@@ -107,7 +147,22 @@ export const projectFormSchema = z.object({
       } catch {
         return false;
       }
-    }, "Use YouTube, Vimeo, Loom, Screen Studio, or a similar hosted video link."),
+    }, "Use YouTube, Vimeo, Loom, Screen Studio, Instagram, TikTok, or a similar hosted video link."),
+  imageUrl: z
+    .string()
+    .trim()
+    .refine((value) => {
+      if (!value) return true;
+      try {
+        const url = new URL(value);
+        return (
+          url.protocol === "https:" &&
+          url.hostname.endsWith(".public.blob.vercel-storage.com")
+        );
+      } catch {
+        return false;
+      }
+    }, "Upload a valid project image."),
   contributeInUrl: z
     .string()
     .trim()
@@ -151,10 +206,13 @@ export function projectToFormValues(project: Project) {
   return {
     slug: project.slug,
     name: project.name,
+    lifecycleStatus: project.lifecycleStatus,
+    applicability: project.applicability,
     projectUrl: project.projectUrl,
     countries: project.countries.join(", "),
     participantName: project.participantName,
     videoUrl: project.videoUrl,
+    imageUrl: project.imageUrl,
     contributeInUrl: project.contributeInUrl,
     descriptionMarkdown: project.descriptionMarkdown,
   };
@@ -164,10 +222,13 @@ export function formDataToValues(formData: FormData) {
   return {
     slug: String(formData.get("slug") ?? ""),
     name: String(formData.get("name") ?? ""),
+    lifecycleStatus: String(formData.get("lifecycleStatus") ?? "ready_to_use"),
+    applicability: String(formData.get("applicability") ?? "latam"),
     projectUrl: String(formData.get("projectUrl") ?? ""),
     countries: String(formData.get("countries") ?? ""),
     participantName: String(formData.get("participantName") ?? ""),
     videoUrl: String(formData.get("videoUrl") ?? ""),
+    imageUrl: String(formData.get("imageUrl") ?? ""),
     contributeInUrl: String(formData.get("contributeInUrl") ?? ""),
     descriptionMarkdown: String(formData.get("descriptionMarkdown") ?? ""),
   };
