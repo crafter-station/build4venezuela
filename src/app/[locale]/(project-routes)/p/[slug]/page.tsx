@@ -8,6 +8,7 @@ import { ProjectVideoEmbed } from "@/components/project-video-embed";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { routing } from "@/i18n/routing";
 import { timed } from "@/lib/log";
 import {
   canEditProject,
@@ -15,6 +16,11 @@ import {
   hasVoted,
   listComments,
 } from "@/lib/projects/store";
+import {
+  buildProjectJsonLd,
+  markdownExcerpt,
+  serializeJsonLd,
+} from "@/lib/projects/structured-data";
 import { withTimeout } from "@/lib/timeout";
 import { ProjectShell } from "../../project-shell";
 import { CommentsSection } from "./comments-section";
@@ -41,9 +47,59 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return { title: t("metadata.notFoundTitle") };
   }
 
+  const title = `${project.name} | Build4Latam`;
+  const description =
+    markdownExcerpt(project.descriptionMarkdown, 160) ||
+    t("metadata.description", { name: project.participantName });
+  const pageUrl = `/${locale}/p/${project.slug}`;
+  const openGraphImages = project.imageUrl
+    ? [{ url: project.imageUrl, alt: project.name }]
+    : [
+        {
+          url: "/assets/og-latam.jpg",
+          width: 1200,
+          height: 630,
+          alt: "Build4Latam",
+        },
+      ];
+  const twitterImages = project.imageUrl
+    ? [{ url: project.imageUrl, alt: project.name }]
+    : [
+        {
+          url: "/og-twitter.png",
+          width: 1200,
+          height: 600,
+          alt: "Build4Latam",
+        },
+      ];
+
   return {
-    title: `${project.name} | Build4Venezuela`,
-    description: t("metadata.description", { name: project.participantName }),
+    title,
+    description,
+    alternates: {
+      canonical: pageUrl,
+      languages: Object.fromEntries([
+        ...routing.locales.map((supportedLocale) => [
+          supportedLocale,
+          `/${supportedLocale}/p/${project.slug}`,
+        ]),
+        ["x-default", `/en/p/${project.slug}`],
+      ]),
+    },
+    openGraph: {
+      type: "website",
+      url: pageUrl,
+      siteName: "Build4Latam",
+      title,
+      description,
+      images: openGraphImages,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: twitterImages,
+    },
   };
 }
 
@@ -80,8 +136,20 @@ export default async function ProjectPage({ params }: Props) {
       ),
   );
 
+  const jsonLd = buildProjectJsonLd(
+    project,
+    `https://build4latam.com/${locale}/p/${project.slug}`,
+  );
+
   return (
     <ProjectShell>
+      <script
+        type="application/ld+json"
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD serialized with < escaped to block </script> breakout
+        dangerouslySetInnerHTML={{
+          __html: serializeJsonLd(jsonLd),
+        }}
+      />
       <article className="px-5 py-16 sm:px-8 sm:py-20 lg:px-10">
         <div className="mx-auto grid max-w-6xl grid-cols-[minmax(0,1fr)] gap-10 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-16">
           <aside className="min-w-0 lg:sticky lg:top-8 lg:self-start">
