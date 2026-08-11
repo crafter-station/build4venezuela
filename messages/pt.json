@@ -402,8 +402,8 @@
       },
       "applicabilities": {
         "latam": "Reusable across LATAM",
-        "venezuela": "Venezuela-specific",
-        "colombia": "Colombia-specific"
+        "venezuela": "Pode ser usado na Venezuela",
+        "colombia": "Pode ser usado na Colômbia"
       }
     },
     "categories": {
@@ -475,8 +475,8 @@
     "applicabilityHint": "Choose LATAM when the tool can be adapted beyond one country.",
     "applicabilities": {
       "latam": "Reusable across LATAM",
-      "venezuela": "Venezuela only",
-      "colombia": "Colombia only"
+      "venezuela": "Pode ser usado na Venezuela",
+      "colombia": "Pode ser usado na Colômbia"
     },
     "projectUrlLabel": "Project link",
     "countriesLabel": "Participant countries",
@@ -512,8 +512,8 @@
     "applicability": "Where it works",
     "applicabilities": {
       "latam": "Reusable across LATAM",
-      "venezuela": "Venezuela-specific",
-      "colombia": "Colombia-specific"
+      "venezuela": "Pode ser usado na Venezuela",
+      "colombia": "Pode ser usado na Colômbia"
     },
     "status": "Status",
     "statuses": {
