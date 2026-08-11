@@ -108,12 +108,14 @@ export function SouthAmericaMapPanel({
     return () => mobile.removeEventListener("change", syncDefault);
   }, []);
 
-  const active = hovered ?? selected;
-  const content = active ? countries[active] : null;
-  const otherSelected = active !== null && isOtherLatamCountry(active);
+  // Brief / leader follow selection; hover only paints map feedback
+  const briefCode = selected ?? hovered;
+  const content = briefCode ? countries[briefCode] : null;
+  const otherSelected = selected !== null && isOtherLatamCountry(selected);
 
   function showCountry(code: SouthAmericaCountryCode, animate: boolean) {
-    if (animate) {
+    // Only redraw the leader when the brief is still in preview mode
+    if (!selected && animate) {
       setDrawToken((token) => token + 1);
     }
     setHovered(code);
@@ -236,20 +238,20 @@ export function SouthAmericaMapPanel({
   }
 
   useLayoutEffect(() => {
-    if (!active) {
+    if (!briefCode) {
       setLeader(null);
       return;
     }
 
     const containerEl = layoutRef.current;
-    const countryEl = pathRefs.current[active];
+    const countryEl = pathRefs.current[briefCode];
     const panelEl = panelRef.current;
     if (!containerEl || !countryEl || !panelEl) return;
 
     const measured = measureLeader(containerEl, countryEl, panelEl);
     setLeader({
       ...measured,
-      key: `${active}-${drawToken}`,
+      key: `${briefCode}-${drawToken}`,
     });
 
     const onResize = () => {
@@ -257,13 +259,13 @@ export function SouthAmericaMapPanel({
       setLeader((current) =>
         current
           ? { ...current, ...next }
-          : { ...next, key: `${active}-${drawToken}` },
+          : { ...next, key: `${briefCode}-${drawToken}` },
       );
     };
 
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
-  }, [active, drawToken]);
+  }, [briefCode, drawToken]);
 
   return (
     <div
@@ -345,8 +347,7 @@ export function SouthAmericaMapPanel({
           >
             {SOUTH_AMERICA_MAP.countries.map((country) => {
               const isSelected = selected === country.code;
-              const isHovered = hovered === country.code;
-              const isActive = active === country.code;
+              const isHovered = hovered === country.code && !isSelected;
               return (
                 <path
                   aria-label={countries[country.code].name}
@@ -354,8 +355,12 @@ export function SouthAmericaMapPanel({
                   className={cn(
                     "sa-map__country ui-focus cursor-pointer outline-none",
                     isSelected && "sa-map__country--selected",
-                    isHovered && !isSelected && "sa-map__country--hovered",
-                    !isActive && active && "sa-map__country--dimmed",
+                    isHovered && "sa-map__country--hovered",
+                    selected && !isSelected && "sa-map__country--dimmed",
+                    !selected &&
+                      briefCode &&
+                      briefCode !== country.code &&
+                      "sa-map__country--dimmed",
                   )}
                   d={country.d}
                   id={`${listboxId}-${country.code}`}
@@ -391,7 +396,7 @@ export function SouthAmericaMapPanel({
                 />
               );
             })}
-            <MapHotspotLayer active={active} pathRefs={pathRefs} />
+            <MapHotspotLayer active={briefCode} pathRefs={pathRefs} />
           </svg>
         </div>
       </div>
@@ -400,8 +405,8 @@ export function SouthAmericaMapPanel({
         className="relative z-10 order-2 hidden min-h-0 flex-col justify-center lg:flex lg:pt-0 lg:pl-4 xl:pl-8"
         ref={panelRef}
       >
-        {content && active ? (
-          renderBrief(active)
+        {content && briefCode ? (
+          renderBrief(briefCode)
         ) : (
           <div className="sa-map__brief sa-map__brief--idle">
             <div className="sa-map__brief-frame" aria-hidden="true" />
