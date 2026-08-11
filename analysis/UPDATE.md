@@ -91,6 +91,50 @@ Then run the evaluate workflow:
 One agent per project reads the analysis + public metadata and **fetches the
 live demo** to score real-problem fit, product quality, and diffusion readiness.
 
+### 5b. Security re-audit (AI workflow)
+
+Regenerates `analysis/security-audit.json` — the per-project security data the
+dashboard drawer/leaderboard read. Build the args by pairing each **cloned** repo
+with its previous findings (from the existing `analysis/security-audit.json`):
+
+```bash
+jq -s --slurpfile prev analysis/security-audit.json '
+  [ .[] | select(.cloned == true)
+    | { s: .project_slug, c: .clone_path, repo: (.slug // .url // ""),
+        prev: ($prev[0][.project_slug] // null) } ]
+' analysis/.work/signals/*.json > analysis/.work/security-args.json
+```
+
+Then run the re-audit workflow:
+
+- Script: `analysis/tools/workflows/security-reaudit.workflow.js`
+- Invoke **Workflow** with that `scriptPath` and `args` = contents of
+  `analysis/.work/security-args.json`.
+- Save its result array to **`analysis/.work/security-raw.json`**.
+
+One agent per repo verifies each **previous** finding as resolved / partial /
+open against the current code, scans for **new** issues, and checks the
+disclosure issue's state (via `gh`). Then rebuild `security-audit.json` (carrying
+forward the original `auditedAt`, stamping `reauditedAt` + `previousRisk`):
+
+```bash
+TODAY=$(date +%F)
+jq -n --arg today "$TODAY" \
+  --slurpfile raw analysis/.work/security-raw.json \
+  --slurpfile argsf analysis/.work/security-args.json '
+  ($argsf[0] | map({key: .s, value: .prev}) | from_entries) as $prev
+  | reduce $raw[0][] as $r ({};
+      ($r.audit) as $a | ($prev[$r.project_slug]) as $p
+      | .[$r.project_slug] = (
+          { risk: $a.risk,
+            auditedAt: (if $p then $p.auditedAt else $today end),
+            issueUrl: ($a.issueUrl // ($p.issueUrl // null)),
+            findings: ($a.findings | map({severity, title, status})) }
+          + (if $p then { reauditedAt: $today, previousRisk: $p.risk } else {} end)
+          + (if ($a.reauditNote // "") != "" then { reauditNote: $a.reauditNote } else {} end)))
+' > analysis/security-audit.json
+```
+
 ### 6. Merge again (now with evaluation) + report
 
 ```bash

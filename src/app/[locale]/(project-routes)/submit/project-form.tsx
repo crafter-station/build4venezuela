@@ -1,13 +1,20 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { upload } from "@vercel/blob/client";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import type { ChangeEvent, FormEvent } from "react";
 import { useState } from "react";
 import { MarkdownEditor } from "@/components/markdown-editor";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  NativeSelect,
+  NativeSelectOption,
+} from "@/components/ui/native-select";
 import {
   deleteProject,
   ProjectFormError,
@@ -16,6 +23,7 @@ import {
 } from "@/lib/projects/queries";
 import {
   type ProjectFormState,
+  projectApplicabilities,
   projectLifecycleStatuses,
 } from "@/lib/projects/schema";
 
@@ -29,10 +37,12 @@ const projectFormFields = [
   "slug",
   "name",
   "lifecycleStatus",
+  "applicability",
   "projectUrl",
   "countries",
   "participantName",
   "videoUrl",
+  "imageUrl",
   "contributeInUrl",
   "descriptionMarkdown",
 ] as const;
@@ -46,7 +56,12 @@ function projectFormValuesFromState(
   return Object.fromEntries(
     projectFormFields.map((field) => [
       field,
-      values[field] ?? (field === "lifecycleStatus" ? "ready_to_use" : ""),
+      values[field] ??
+        (field === "lifecycleStatus"
+          ? "ready_to_use"
+          : field === "applicability"
+            ? "latam"
+            : ""),
     ]),
   ) as ProjectFormValues;
 }
@@ -76,6 +91,8 @@ export function ProjectForm({
     projectFormValuesFromState(initialState.values),
   );
   const [errors, setErrors] = useState(initialState.errors);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const projectMutation = useMutation({
     mutationFn: saveProject,
@@ -141,10 +158,38 @@ export function ProjectForm({
     });
   }
 
-  function submitProject(event: FormEvent<HTMLFormElement>) {
+  async function submitProject(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setErrors({});
-    projectMutation.mutate({ projectId, values });
+
+    let nextValues = values;
+
+    if (imageFile) {
+      setIsUploadingImage(true);
+
+      try {
+        const blob = await upload(
+          `project-images/${values.slug || "project"}/${imageFile.name}`,
+          imageFile,
+          {
+            access: "public",
+            handleUploadUrl: "/api/projects/image-upload",
+          },
+        );
+        nextValues = { ...values, imageUrl: blob.url };
+        setValues(nextValues);
+      } catch (error) {
+        setErrors({
+          imageUrl:
+            error instanceof Error ? error.message : t("imageUploadError"),
+        });
+        return;
+      } finally {
+        setIsUploadingImage(false);
+      }
+    }
+
+    projectMutation.mutate({ projectId, values: nextValues });
   }
 
   function requestDelete() {
@@ -165,9 +210,11 @@ export function ProjectForm({
   return (
     <form className="grid gap-6" onSubmit={submitProject}>
       {errors.form ? (
-        <div className="border border-destructive bg-destructive/10 p-4 font-mono text-sm uppercase tracking-[0.12em] text-destructive">
-          {errors.form}
-        </div>
+        <Alert variant="destructive">
+          <AlertDescription className="font-mono text-sm uppercase tracking-[0.12em]">
+            {errors.form}
+          </AlertDescription>
+        </Alert>
       ) : null}
 
       <label className="grid gap-2" htmlFor="project-slug">
@@ -203,8 +250,8 @@ export function ProjectForm({
         <span className="font-mono text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground">
           {t("lifecycleStatusLabel")}
         </span>
-        <select
-          className="flex h-10 w-full border border-input bg-background px-3 py-2 font-mono text-sm uppercase tracking-[0.12em] text-foreground ring-offset-background transition file:border-0 file:bg-transparent file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+        <NativeSelect
+          className="w-full"
           id="project-lifecycle-status"
           name="lifecycleStatus"
           onChange={handleValueChange("lifecycleStatus")}
@@ -212,12 +259,36 @@ export function ProjectForm({
           value={values.lifecycleStatus}
         >
           {projectLifecycleStatuses.map((status) => (
-            <option key={status} value={status}>
+            <NativeSelectOption key={status} value={status}>
               {t(`lifecycleStatuses.${status}`)}
-            </option>
+            </NativeSelectOption>
           ))}
-        </select>
+        </NativeSelect>
         <FieldError message={errors.lifecycleStatus} />
+      </label>
+
+      <label className="grid gap-2" htmlFor="project-applicability">
+        <span className="font-mono text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground">
+          {t("applicabilityLabel")}
+        </span>
+        <NativeSelect
+          className="w-full"
+          id="project-applicability"
+          name="applicability"
+          onChange={handleValueChange("applicability")}
+          required
+          value={values.applicability}
+        >
+          {projectApplicabilities.map((applicability) => (
+            <NativeSelectOption key={applicability} value={applicability}>
+              {t(`applicabilities.${applicability}`)}
+            </NativeSelectOption>
+          ))}
+        </NativeSelect>
+        <p className="font-mono text-xs leading-5 tracking-[0.08em] text-muted-foreground">
+          {t("applicabilityHint")}
+        </p>
+        <FieldError message={errors.applicability} />
       </label>
 
       <label className="grid gap-2" htmlFor="project-url">
@@ -280,6 +351,56 @@ export function ProjectForm({
         <FieldError message={errors.videoUrl} />
       </label>
 
+      <div className="grid gap-2">
+        <label
+          className="font-mono text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground"
+          htmlFor="project-image"
+        >
+          {t("imageLabel")}
+        </label>
+        {values.imageUrl && !imageFile ? (
+          <div className="relative aspect-video max-w-xl overflow-hidden rounded-xl border border-border bg-card">
+            <Image
+              alt={t("imagePreviewAlt")}
+              className="h-full w-full object-cover"
+              fill
+              sizes="(max-width: 640px) 100vw, 576px"
+              src={values.imageUrl}
+            />
+          </div>
+        ) : null}
+        <Input
+          accept="image/jpeg,image/png,image/webp"
+          id="project-image"
+          onChange={(event) => {
+            setImageFile(event.target.files?.[0] ?? null);
+            setErrors((currentErrors) => ({
+              ...currentErrors,
+              imageUrl: "",
+              form: "",
+            }));
+          }}
+          type="file"
+        />
+        <p className="font-mono text-xs leading-5 tracking-[0.08em] text-muted-foreground">
+          {imageFile ? imageFile.name : t("imageHint")}
+        </p>
+        {values.imageUrl || imageFile ? (
+          <Button
+            className="w-fit uppercase tracking-[0.14em]"
+            onClick={() => {
+              setImageFile(null);
+              setFieldValue("imageUrl", "");
+            }}
+            type="button"
+            variant="outline"
+          >
+            {t("imageRemove")}
+          </Button>
+        ) : null}
+        <FieldError message={errors.imageUrl} />
+      </div>
+
       <label className="grid gap-2" htmlFor="project-contribute-in-url">
         <span className="font-mono text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground">
           {t("contributeInUrlLabel")}
@@ -320,21 +441,30 @@ export function ProjectForm({
       </div>
 
       <Button
-        className="h-12 text-sm uppercase tracking-[0.18em]"
-        disabled={projectMutation.isPending || deleteMutation.isPending}
+        className="uppercase tracking-[0.18em]"
+        size="lg"
+        disabled={
+          isUploadingImage ||
+          projectMutation.isPending ||
+          deleteMutation.isPending
+        }
         type="submit"
       >
-        {projectMutation.isPending ? t("pending") : submitLabel}
+        {isUploadingImage
+          ? t("imageUploading")
+          : projectMutation.isPending
+            ? t("pending")
+            : submitLabel}
       </Button>
 
       {projectId ? (
-        <div className="border border-destructive/40 bg-destructive/10 p-4">
-          <p className="font-mono text-destructive text-xs uppercase tracking-[0.16em]">
+        <Alert variant="destructive">
+          <AlertDescription className="font-mono uppercase tracking-[0.16em]">
             {confirmDelete ? t("deleteConfirm") : t("deleteDescription")}
-          </p>
+          </AlertDescription>
           <div className="mt-4 flex flex-wrap gap-3">
             <Button
-              className="h-10 uppercase tracking-[0.18em]"
+              className="uppercase tracking-[0.18em]"
               disabled={projectMutation.isPending || deleteMutation.isPending}
               onClick={requestDelete}
               type="button"
@@ -348,7 +478,7 @@ export function ProjectForm({
             </Button>
             {confirmDelete ? (
               <Button
-                className="h-10 uppercase tracking-[0.18em]"
+                className="uppercase tracking-[0.18em]"
                 disabled={deleteMutation.isPending}
                 onClick={() => setConfirmDelete(false)}
                 type="button"
@@ -358,7 +488,7 @@ export function ProjectForm({
               </Button>
             ) : null}
           </div>
-        </div>
+        </Alert>
       ) : null}
     </form>
   );

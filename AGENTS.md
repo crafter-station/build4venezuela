@@ -6,26 +6,26 @@ This repo uses Next `16.2.9` and React `19.2.4`; APIs and file conventions may d
 
 ## Commands
 
-- Use Bun: lockfile is `bun.lock`; install with `bun install`.
-- Dev server: `bun dev`.
-- Lint/format: `bun run lint` runs `biome check`; `bun run format` runs `biome format --write`.
-- Tests: `bun test`; focused tests include `bun test src/lib/projects/spam.test.ts` and `bun test src/lib/projects/api-security.test.ts`.
-- Build verification: `bun run build`. There is no typecheck script; use `bunx tsc --noEmit` when a focused TS check is needed.
+- Use Bun (`bun.lock`): `bun install`, `bun run dev`, `bun run build`.
+- Checks: `bun run lint` (`biome check`), `bun run format`, `bun test`. Run one test file with `bun test path/to/file.test.ts`.
+- There is no typecheck script; use `bunx tsc --noEmit`.
+- Production builds validate every key in `src/env.ts`; use real env values or `SKIP_ENV_VALIDATION=1 bun run build` for a configuration-free build check.
+- `db:studio` and `db:pull` load `.env.local`; `db:migrate` does not, so export `DATABASE_URL` before applying migrations. `db:generate` only compares the local schema and migration snapshots.
+- Regenerate OG images and favicons with `bun run gen:assets`; the script writes both `public/favicon.ico` and Next's `src/app/favicon.ico`.
 
 ## App Structure
 
-- Localized marketing pages live under `src/app/[locale]`; supported locales are in `src/i18n/routing.ts` and messages are in `messages/*.json`.
-- Project/community pages are intentionally non-localized: `src/app/(project-routes)` serves `/projects`, `/submit`, `/p/[slug]`, `/requests`, and `/recursos`, wrapping them with English messages from `messages/en.json`.
-- `src/proxy.ts` combines Clerk auth and `next-intl`; it skips intl for APIs, redirects, non-localized project/community routes, and static assets. `/submit` is protected there; API routes and edit ownership also check auth server-side.
+- The root country selector is `src/app/page.tsx`; other user-facing pages, including project/community and builder pages, live below `src/app/[locale]`. Locales are in `src/i18n/routing.ts` and copy is in `messages/*.json`.
+- `src/proxy.ts` composes Clerk and `next-intl`. Unprefixed community URLs such as `/projects`, `/p/[slug]`, `/builders`, and `/insights` are legacy 308 redirects to `/en/...`; APIs and static/redirect routes skip intl.
+- Protected page routing in `src/proxy.ts` is not the only authorization layer: API mutations authenticate again, and project edits/deletes enforce owner identity server-side.
 - Root layout wires Clerk and TanStack Query globally in `src/app/layout.tsx`; client data helpers live in `src/lib/projects/queries.ts`.
 
 ## Data And Env
 
-- Required env vars are enforced in `src/env.ts`; copy keys from `.env.example`, including Upstash Redis for rate limiting and `DATABASE_URL` for Drizzle. Tests that import env-backed modules must set fake env vars before dynamic imports, as `src/lib/projects/spam.test.ts` does.
-- Project persistence (`src/lib/projects/store.ts`) and cluster persistence (`src/lib/projects/category-store.ts`) go through Drizzle (`src/db/index.ts` + `src/db/schema.ts`) over the `DATABASE_URL` Postgres connection, each falling back to local JSON in `.data/` (`projects.json`, `categories.json`). `DATABASE_URL` is optional in dev; **in production it must be set — the store throws rather than serve the empty local fallback so live data is never hidden.**
-- Solution-request persistence (`src/lib/requests/store.ts`) still uses the Supabase service-role client (tables `solution_requests`, `solution_request_votes`, `solution_request_comments`, `solution_request_comment_votes`), with local fallback at `.data/solution-requests.json`. Not yet migrated to Drizzle.
-- Schema source of truth is the raw SQL in `supabase/migrations/` (plus the consolidated `supabase/projects.sql`): triggers, functions, RLS, and the realtime event-queue tables live there. `src/db/schema.ts` is the typed query surface only — keep it in sync by hand or `bun run db:pull`; do NOT `drizzle-kit push`.
-- Realtime UI subscribes directly from the browser with the Supabase anon key via `src/lib/projects/browser-supabase.ts` (Supabase Realtime has no Drizzle equivalent); keep public subscriptions aligned with the event tables in `supabase/projects.sql`.
+- Env shape is in `src/env.ts`/`.env.example`; validation is skipped outside production. Tests importing env-backed modules must set fake env vars before a dynamic import, as in `src/lib/projects/spam.test.ts`.
+- All app stores use Drizzle through `src/db/` when `DATABASE_URL` exists and local `.data/*.json` fallbacks when it does not. Production deliberately throws if `DATABASE_URL` is missing instead of serving empty local data.
+- Neon schema source of truth is `src/db/schema.ts` plus versioned migrations in `drizzle/`. For schema changes, generate and review a migration with `bun run db:generate -- --name=<name>`, then apply it with `bun run db:migrate`; never use `drizzle-kit push`.
+- `supabase/` is historical pre-Neon material, not the active schema. `scripts/migrate-supabase-to-neon.ts` is the one-time data migration utility.
 
 ## UI Conventions
 

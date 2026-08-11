@@ -2,7 +2,45 @@ import { NextResponse } from "next/server";
 import { logError, logEvent } from "@/lib/log";
 import { withTimeout } from "@/lib/timeout";
 
-type MutationResult<T> = { value: T } | { response: NextResponse };
+type OperationResult<T> = { value: T } | { response: NextResponse };
+
+async function runOperation<T>(
+  event: string,
+  fields: Record<string, unknown>,
+  op: () => Promise<T>,
+  ms: number,
+  errorStatus: 500 | 503,
+): Promise<OperationResult<T>> {
+  const start = Date.now();
+  try {
+    const value = await withTimeout(op(), ms, event);
+    logEvent(event, { ...fields, ms: Date.now() - start, ok: true });
+    return { value };
+  } catch (error) {
+    logError(event, error, { ...fields, ms: Date.now() - start });
+    return {
+      response: NextResponse.json(
+        { error: "Something went wrong. Please try again." },
+        { status: errorStatus },
+      ),
+    };
+  }
+}
+
+/**
+ * Read-side counterpart to `runMutation`: same timeout + structured logging,
+ * but a fetch is never "service unavailable, try again" the way a mutation
+ * timeout is — it's an explicit 500 so it doesn't get conflated with the
+ * retry-friendly 503 used for writes below.
+ */
+export async function runQuery<T>(
+  event: string,
+  fields: Record<string, unknown>,
+  op: () => Promise<T>,
+  ms = 10_000,
+): Promise<OperationResult<T>> {
+  return runOperation(event, fields, op, ms, 500);
+}
 
 /**
  * Run a store mutation with a hard server-side timeout and structured logging.
@@ -17,19 +55,6 @@ export async function runMutation<T>(
   fields: Record<string, unknown>,
   op: () => Promise<T>,
   ms = 15_000,
-): Promise<MutationResult<T>> {
-  const start = Date.now();
-  try {
-    const value = await withTimeout(op(), ms, event);
-    logEvent(event, { ...fields, ms: Date.now() - start, ok: true });
-    return { value };
-  } catch (error) {
-    logError(event, error, { ...fields, ms: Date.now() - start });
-    return {
-      response: NextResponse.json(
-        { error: "Something went wrong. Please try again." },
-        { status: 503 },
-      ),
-    };
-  }
+): Promise<OperationResult<T>> {
+  return runOperation(event, fields, op, ms, 503);
 }

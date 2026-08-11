@@ -1,10 +1,8 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { sql } from "drizzle-orm";
 import { db, isDbConfigured } from "@/db";
 import { categoryProposals, projectCategories } from "@/db/schema";
 import { cachedAggregate, invalidateCache } from "@/lib/cache";
-import { logError } from "@/lib/log";
 import type { CategoryProposal, ClassificationDecision } from "./categories";
 
 export type ProjectCategoryAssignment = {
@@ -40,8 +38,8 @@ const localStorePath = path.join(process.cwd(), ".data", "categories.json");
 const CACHE_VERSION = "v1";
 const CACHE_TTL_SECONDS = 60;
 const categoryCacheKeys = {
-  context: `build4venezuela:categories:context:${CACHE_VERSION}`,
-  map: `build4venezuela:categories:map:${CACHE_VERSION}`,
+  context: `build4latam:categories:context:${CACHE_VERSION}`,
+  map: `build4latam:categories:map:${CACHE_VERSION}`,
 };
 
 async function readLocalData(): Promise<LocalCategoryData> {
@@ -101,31 +99,27 @@ function invalidateCategoryCaches() {
 
 async function loadCategoryContext(): Promise<CategoryContext> {
   if (isDbConfigured()) {
-    try {
-      // Serial reads: the pool caps at 3 connections in production and the
-      // projects page already loads projects + the category map in parallel.
-      const proposals = await db
-        .select({
-          id: categoryProposals.id,
-          label: categoryProposals.label,
-          description: categoryProposals.description,
-        })
-        .from(categoryProposals);
-      const assignments = await db
-        .select({ categoryId: projectCategories.categoryId })
-        .from(projectCategories);
+    // Serial reads: the pool caps at 3 connections in production and the
+    // projects page already loads projects + the category map in parallel.
+    const proposals = await db
+      .select({
+        id: categoryProposals.id,
+        label: categoryProposals.label,
+        description: categoryProposals.description,
+      })
+      .from(categoryProposals);
+    const assignments = await db
+      .select({ categoryId: projectCategories.categoryId })
+      .from(projectCategories);
 
-      return {
-        proposals: proposals.map((row) => ({
-          id: row.id,
-          label: row.label,
-          description: row.description,
-        })),
-        counts: countAssignments(assignments),
-      };
-    } catch (error) {
-      logError("category.context.fallback", error);
-    }
+    return {
+      proposals: proposals.map((row) => ({
+        id: row.id,
+        label: row.label,
+        description: row.description,
+      })),
+      counts: countAssignments(assignments),
+    };
   }
 
   const local = await readLocalData();
@@ -147,24 +141,20 @@ async function loadProjectCategoryMap(): Promise<
   Map<string, ProjectCategoryAssignment>
 > {
   if (isDbConfigured()) {
-    try {
-      const rows = await db
-        .select({
-          projectId: projectCategories.projectId,
-          categoryId: projectCategories.categoryId,
-          status: projectCategories.status,
-        })
-        .from(projectCategories);
+    const rows = await db
+      .select({
+        projectId: projectCategories.projectId,
+        categoryId: projectCategories.categoryId,
+        status: projectCategories.status,
+      })
+      .from(projectCategories);
 
-      return new Map(
-        rows.map((row) => [
-          row.projectId,
-          { categoryId: row.categoryId, status: row.status },
-        ]),
-      );
-    } catch (error) {
-      logError("category.map.fallback", error);
-    }
+    return new Map(
+      rows.map((row) => [
+        row.projectId,
+        { categoryId: row.categoryId, status: row.status },
+      ]),
+    );
   }
 
   const local = await readLocalData();
@@ -203,40 +193,36 @@ export async function assignProjectCategory(
   decision: ClassificationDecision,
 ): Promise<void> {
   if (isDbConfigured()) {
-    try {
-      if (decision.proposal) {
-        await db
-          .insert(categoryProposals)
-          .values({
-            id: decision.proposal.id,
-            label: decision.proposal.label,
-            description: decision.proposal.description,
-          })
-          .onConflictDoNothing({ target: categoryProposals.id });
-      }
-
+    if (decision.proposal) {
       await db
-        .insert(projectCategories)
+        .insert(categoryProposals)
         .values({
-          projectId,
+          id: decision.proposal.id,
+          label: decision.proposal.label,
+          description: decision.proposal.description,
+        })
+        .onConflictDoNothing({ target: categoryProposals.id });
+    }
+
+    await db
+      .insert(projectCategories)
+      .values({
+        projectId,
+        categoryId: decision.categoryId,
+        status: decision.status,
+        confidence: decision.confidence,
+      })
+      .onConflictDoUpdate({
+        target: projectCategories.projectId,
+        set: {
           categoryId: decision.categoryId,
           status: decision.status,
           confidence: decision.confidence,
-        })
-        .onConflictDoUpdate({
-          target: projectCategories.projectId,
-          set: {
-            categoryId: decision.categoryId,
-            status: decision.status,
-            confidence: decision.confidence,
-            updatedAt: sql`now()`,
-          },
-        });
-      await invalidateCategoryCaches();
-      return;
-    } catch (error) {
-      logError("category.assign.fallback", error);
-    }
+          updatedAt: new Date(),
+        },
+      });
+    await invalidateCategoryCaches();
+    return;
   }
 
   const local = await readLocalData();

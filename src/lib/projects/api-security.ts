@@ -35,7 +35,7 @@ function getRateLimiter(limit: number, windowMs: number) {
   const limiter = new Ratelimit({
     redis,
     limiter: Ratelimit.slidingWindow(limit, rateLimitWindow(windowMs)),
-    prefix: `build4venezuela:ratelimit:${key}`,
+    prefix: `build4latam:ratelimit:${key}`,
   });
 
   rateLimiters.set(key, limiter);

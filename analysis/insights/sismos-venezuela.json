@@ -10,28 +10,28 @@
   "db_description": "## ¿Qué construiste?\nDesarrollamos **Sismología VE**, un sistema de monitoreo y alerta temprana de sismos en tiempo real diseñado específicamente para Venezuela y sus regiones colindantes. El proyecto consta de:\n1. Una aplicación web altamente interactiva y responsiva desplegada en Wasmer Edge ([terremotos.wasmer.app](https://terremotos.wasmer.app/)).\n2. Una aplicación nativa para Android con un servicio en segundo plano que se ejecuta de forma persistente para recibir alertas inmediatas.\n\n## ¿Para quién es?\nEstá dirigido a la población general de Venezuela, servicios de emergencia locales y cualquier persona que necesite notificaciones confiables e inmediatas de eventos sísmicos, especialmente en una región donde los canales oficiales suelen presentar demoras o caídas de servicio.\n\n## ¿Cómo ayuda?\n- **Entrega en tiempo real**: Utiliza una conexión WebSocket persistente directa con el EMSC (Centro Sismológico Europeo-Mediterráneo) y redes regionales (como el SGC de Colombia) para recibir y notificar sismos en cuestión de segundos, eliminando los retrasos de consulta tradicionales.\n- **Mecanismos de respaldo (Resiliencia)**: Si la conexión a internet falla o el WebSocket se desconecta, el cliente cambia automáticamente a un flujo de respaldo (consulta al servidor de IONOS, lectura de caché local en localStorage y, finalmente, una base de datos local precargada).\n- **Actualización de alta frecuencia**: Cuenta con un scraper optimizado en el servidor que descarga y procesa datos de FUNVISIS cada 20 segundos, evadiendo la caché CDN para garantizar datos frescos constantemente.\n- **Diseño centrado en el usuario**: Incorpora filtros de búsqueda por magnitud y región, alarmas de audio configurables y un simulador visual para pruebas de preparación ciudadana.\n\n## ¿Qué debería probar la gente primero?\n1. Entrar a la web en vivo en [terremotos.wasmer.app](https://terremotos.wasmer.app/).\n2. Probar el **Simulador de Sismos** integrado para generar un sismo de prueba y observar cómo reaccionan la interfaz, los marcadores en el mapa y la alerta sonora.\n3. Descargar e instalar la aplicación de Android (disponible a través del banner superior de la web) para probar el servicio de monitoreo en segundo plano.",
   "lifecycle_status": "ready_to_use",
   "analysis": {
-    "summary": "SismologiaVE is a multi-component seismic monitoring system for Venezuela consisting of: (1) an Android app (Kotlin/Compose) that embeds a WebView loading the web UI and runs a foreground service polling USGS + EMSC + FUNVISIS every 60 seconds with real push notifications; (2) a Vite-built web app with an offline-capable Leaflet map (bundled tiles + GeoJSON), multi-source data fetch with localStorage fallback; and (3) a Python scraper running on IONOS shared hosting via cron every minute, converting FUNVISIS proprietary data to GeoJSON and serving it at a stable non-CDN URL. The system is actively deployed with real APK releases (v1.1.8, versionCode=10) and a live backend. A critical security issue exists: SSH credentials and the keystore password are plaintext in DEPLOY.md and build.gradle.kts respectively.",
-    "project_type": "Android app + Progressive Web App + Python scraper — seismic monitoring and real-time alert system for Venezuela",
+    "summary": "A single-developer earthquake-monitoring tool for Venezuela that scrapes FUNVISIS official seismic data every minute, republishes it as a USGS-style GeoJSON on an IONOS-hosted WordPress site, and serves it through a Vite/Leaflet web map and an Android WebView-wrapper app with background push notifications for new quakes. Functionally it works end-to-end, but the repo commits plaintext production SSH credentials and a cron secret token in DEPLOY.md, ships APKs signed with the Android debug key by design, and has no CI, no meaningful automated tests, and a hand-rolled deploy process reliant on a single external host.",
+    "project_type": "Android app (WebView-based) + companion Vite/Leaflet web map, backed by a Python scraper and a manually-managed IONOS/WordPress backend",
     "stack": {
       "frontend": [
-        "HTML/CSS/JavaScript",
-        "Leaflet.js",
         "Vite",
-        "Web Audio API",
-        "PWA (iOS + Android)"
+        "vanilla JavaScript",
+        "Leaflet.js",
+        "HTML/CSS",
+        "Jetpack Compose (WebView shell only)"
       ],
       "backend": [
-        "Python scraper (requests)",
-        "PHP cron endpoint on WordPress/IONOS",
-        "No REST API server"
+        "Python requests-based scraper (funvisis_scraper.py)",
+        "PHP cron endpoint on IONOS (sismos-cron.php, not in repo)"
       ],
       "database": [
-        "None — JSON files on IONOS shared hosting (sismos_venezuela.json)"
+        "Flat JSON file (sismos_venezuela.json) as the data store, no real DB"
       ],
       "infra_deploy": [
-        "IONOS shared web hosting",
-        "WordPress (ForjaDigitales)",
-        "Manual SSH deploy via Paramiko"
+        "IONOS shared webspace via SSH (paramiko)",
+        "WordPress (ForjaDigital) used purely as static file host",
+        "Manual Gradle APK build/signing",
+        "No CI/CD, no Docker"
       ],
       "ai_ml": [],
       "languages": [
@@ -43,27 +43,25 @@
       ]
     },
     "architecture": {
-      "pattern": "Polling + Static JSON distribution — no server-side API, data flows: FUNVISIS → Python scraper (cron/1min) → IONOS JSON file → Android foreground service + web app fetch",
+      "pattern": "Static-data fan-out: a cron-triggered Python scraper pulls FUNVISIS JSON, transforms it, and republishes a flat GeoJSON file that a web app and an Android WebView app poll with a 3-tier fallback (remote -> localStorage -> bundled local copy)",
       "uses_orm": false,
-      "orm_or_db_layer": "No ORM or database. Data is stored as GeoJSON files on IONOS and SharedPreferences on device for seen-ID deduplication.",
-      "api_design": "No custom API. The app consumes three external GeoJSON endpoints: USGS FDSN, EMSC SeismicPortal, and the custom IONOS-hosted FUNVISIS proxy JSON.",
-      "separation_of_concerns": "Android side uses MVVM skeleton (ViewModel/Repository) but DataRepository is a stub emitting hardcoded 'Android'. Real logic lives in EarthquakeMonitorService and EarthquakeWorker. Web UI is a single main.js monolith with clear function separation.",
-      "modularity": "Low-to-medium. The scraper, web app, and Android app are loosely coupled via the shared JSON URL. Android has both a foreground service and a WorkManager worker doing duplicate polling logic.",
+      "orm_or_db_layer": "None — no database; a single JSON file on disk is the entire persistence layer",
+      "api_design": "No real API; clients GET static JSON files (sismos_venezuela.json, version.json) directly from a shared host, plus one undocumented PHP cron endpoint secured only by a static query-string token",
+      "separation_of_concerns": "Weak: deploy/runtime configuration, secrets, and operational runbook are mixed directly into a Markdown file in the repo (DEPLOY.md) rather than environment variables or a secrets manager",
+      "modularity": "Three loosely coupled artifacts (Android app, Vite web app, Python scraper) sharing a JSON contract; Android app itself is essentially a Compose WebView shell plus a foreground Service for polling/notifications, with an unused DataRepository/ViewModel boilerplate stub left over from the Android Studio template",
       "notable_patterns": [
-        "Three-level offline fallback: IONOS live → localStorage cache → APK-bundled JSON",
-        "Bundled Leaflet map tiles (z7) and Venezuela GeoJSON for fully offline map rendering",
-        "Deduplication across USGS/EMSC/FUNVISIS using time+geo proximity threshold",
-        "Android foreground service with START_STICKY for persistent background monitoring",
-        "WebView JavaScript bridge (AndroidApp interface) for native notification control from web layer",
-        "APK distributed as Debug build intentionally to avoid signing conflicts on sideload updates"
+        "Offline-first fallback chain (network -> localStorage -> bundled asset) explicitly designed for post-earthquake connectivity loss",
+        "Foreground Android Service + polling loop for push notifications on new seismic events",
+        "Manually bundled offline Leaflet map tiles (thousands of PNGs committed to the repo) for offline map rendering",
+        "Deliberate practice of always shipping debug-signed APKs for web distribution to avoid signature-conflict update issues"
       ]
     },
     "code_organization": {
-      "score": 3,
-      "directory_structure": "Root directories are test/ (source), web/ (built output), app/ (Android), public/ (static assets). The naming is confusing — 'test/' contains the actual production source code, not tests. The Android module still has com.example.* package name.",
-      "naming_quality": "Inconsistent: production web source is in test/, the DataRepository stub hasn't been replaced, the Android package is still com.example.sismologavenezuela. Kotlin services and workers are clearly named. Python scraper is well-named.",
-      "documentation_quality": "DEPLOY.md is an unusually thorough operations document covering architecture, credentials, build steps, error table, and AI agent instructions. No README at root. Code comments are in Spanish, clear and helpful.",
-      "reasoning": "The project has strong operational documentation and well-commented business logic, but the source directory naming (test/ for production code) and leftover scaffolding (DataRepository stub, boilerplate UI tests) reduce the score. The Android MVVM layer is partly wired up but DataRepository never actually fetches seismic data — all real logic is in the service layer."
+      "score": 2,
+      "directory_structure": "Confusing/duplicated: app/, test/, and web/ each contain near-full copies of the Android and web projects (e.g. app/app and test/app), with 'test/' actually being the primary web-app source tree rather than a test directory, and 'web/' being a generated build output committed to git",
+      "naming_quality": "Inconsistent — 'test' directory holds production source (src/main.js), not tests; real tests live under Android's standard test/androidTest paths",
+      "documentation_quality": "DEPLOY.md is extremely detailed operationally but functions as an internal runbook with hardcoded secrets rather than developer documentation; no README describing the project for outside contributors",
+      "reasoning": "Duplicated project trees, a build-output directory committed to source control, and a misleadingly named 'test' directory holding real app source create real navigability and hygiene problems."
     },
     "production_readiness": {
       "score": 2,
@@ -72,52 +70,42 @@
       "has_logging": true,
       "has_env_config": false,
       "has_deploy_config": true,
-      "secrets_handling": "CRITICAL: SSH password ('s!crapper1234'), SSH user/host, PHP cron token, and Android keystore password ('sismosve_pass123') are all committed in plaintext to DEPLOY.md and build.gradle.kts. These are now public in the GitHub repo.",
-      "security_notes": "WebView uses deprecated allowFileAccessFromFileURLs and allowUniversalAccessFromFileURLs flags. Debug APK is intentionally distributed to end users. Cron endpoint token is exposed in public URL and DEPLOY.md. No HTTPS enforcement on the scraper's FUNVISIS source (uses http://).",
-      "scalability_notes": "IONOS shared hosting with WordPress is the single point of failure for all data distribution. No CDN, no load balancing. The scraper is a simple Python script run by cron — no retry queue, no dead-letter handling. Would not survive a major earthquake event traffic spike.",
-      "reasoning": "The monitoring logic itself (foreground service, deduplication, multi-source fetch, offline fallback) is genuinely well-implemented and deployed. However, plaintext credentials in the repo, debug-signed production APK, no CI, no env-var management, and shared hosting infrastructure prevent a higher score."
+      "secrets_handling": "Critical failure: DEPLOY.md (tracked in git, pushed to public GitHub) contains the production server hostname, SSH username and plaintext password, and a cron endpoint auth token in cleartext",
+      "security_notes": "Plaintext production SSH credentials and a cron secret are committed to a public repo; the cron endpoint is protected only by a static, guessable-format query token; APKs are deliberately shipped signed with the Android debug key, which is insecure practice for distributed builds; no authentication/authorization exists anywhere since the app only reads public data",
+      "scalability_notes": "Entire system depends on a single shared-hosting VPS (IONOS) with a flat JSON file as the data store and a 1-minute cron scrape; no redundancy, no CDN-appropriate caching strategy (deliberately disabled), and no monitoring/alerting beyond a text log file",
+      "reasoning": "The app has real, working error handling (try/except in scraper, try/catch in Android polling loop) and a thought-out offline fallback chain, but committed production credentials, no CI, no auth, single-host dependency, and debug-signed release binaries make this unsuitable to deploy as-is for a real emergency-response use case without a security remediation pass."
     },
     "maturity": {
       "score": 3,
       "has_readme": false,
-      "has_tests": false,
+      "has_tests": true,
       "has_ci": false,
-      "is_real_or_boilerplate": "Real, deployed application with 403 commits and versioned APK releases (v1.1.8). The scaffolding Android MVVM layer (DataRepository stub, boilerplate MainScreenTest with FAKE_DATA) is leftover template code that was never cleaned up, but the actual earthquake monitoring service is substantive and clearly in production use.",
-      "reasoning": "Active development with 403 commits over ~2 days, real APK releases distributed to users, a live IONOS backend with cron scraping, and a thoughtful DEPLOY.md. No automated tests or CI pipeline exist; the test files present are Android project scaffolding, not functional tests."
+      "is_real_or_boilerplate": "Real, working project with 403 commits and live production deployment, but padded with leftover Android Studio boilerplate (unused DataRepository/ViewModel, template unit tests) and duplicated directory trees",
+      "reasoning": "403 commits, an active FUNVISIS scraper with real timezone-correction bug-fix logic, a functioning Android background monitor service, and evidence of iterative production deploys (DEPLOY.md changelog) show this is a genuinely operated tool, not empty scaffolding — but test coverage is just the unmodified Android template test and there's no README or CI."
     },
     "viability": {
       "score": 3,
-      "reasoning": "The core value proposition — real-time Venezuelan earthquake alerts combining USGS, EMSC, and FUNVISIS on Android and web, with offline capability — is fully functional and actually deployed. The IONOS scraper + FUNVISIS normalization pipeline solves a real gap (FUNVISIS has no standard API). The main blockers for higher viability are the shared hosting single point of failure, exposed credentials requiring immediate rotation, and the absence of any monitoring/alerting on the scraper itself."
+      "reasoning": "It solves a narrow, genuinely useful problem (real-time Venezuelan earthquake alerts with offline resilience) and is already live in production for actual users, which is a strong positive for a disaster-response hackathon; however, the committed plaintext server credentials are a serious, immediately exploitable security liability that must be fixed before any responsible reuse or scaling, and the single-host, no-CI, file-based architecture will not scale to broader emergency infrastructure without rework."
     },
     "key_features": [
-      "Real-time earthquake monitoring combining USGS FDSN, EMSC SeismicPortal, and FUNVISIS data sources",
-      "Android foreground service with 60-second polling and magnitude-based push notifications (alarm priority, vibration pattern)",
-      "Offline-capable web app with bundled Leaflet map tiles (zoom levels 5-8) and Venezuela state GeoJSON",
-      "Three-level data fallback: IONOS live JSON → localStorage cache → APK-bundled JSON",
-      "Cross-source deduplication using time window (10 min) and geo proximity (0.5 degree) thresholds",
-      "Python scraper that normalizes FUNVISIS proprietary format to GeoJSON with timezone correction logic",
-      "WebView–native bridge (Android JavascriptInterface) allowing web UI to control native notification service",
-      "Earthquake simulation mode for UX testing",
-      "iOS PWA support with step-by-step notification onboarding modal",
-      "In-app version update detection via version.json polling"
+      "Scrapes official FUNVISIS seismic data every minute and republishes it as a USGS-style GeoJSON feed",
+      "Android app with foreground background service that polls for new earthquakes and pushes local notifications",
+      "Web map (Leaflet) with offline-bundled map tiles for use without internet access",
+      "Three-tier data fallback (live server -> localStorage cache -> APK-bundled snapshot) designed to keep working when connectivity drops after a quake",
+      "In-app update-check mechanism comparing a remote version.json against the installed APK version"
     ],
     "domain_tags": [
       "seismic-data",
       "alerts-notifications",
       "mapping-geo"
     ],
-    "merge_potential": "Medium-high for the seismic data and alert domain. The multi-source aggregation (USGS + EMSC + FUNVISIS) with deduplication logic and the offline map tile strategy are genuinely novel contributions worth reusing. The Android foreground service notification implementation is production-quality. However, the exposed credentials must be rotated before any merge, and the IONOS dependency would need to be replaced with more robust infrastructure for a hackathon deployment serving earthquake victims.",
+    "merge_potential": "Could serve as a real-time seismic alert data source or offline-map-tile reference for a broader Build4Venezuela disaster-response platform, but its scraped JSON feed and Android app should be integrated via its data API only after the credential leak is remediated and hosting is moved off a single hardcoded shared-hosting account.",
     "red_flags": [
-      "CRITICAL SECURITY: SSH credentials (host, user, password) committed in plaintext to DEPLOY.md — now public on GitHub",
-      "CRITICAL SECURITY: Android keystore password committed in plaintext in app/app/build.gradle.kts",
-      "PHP cron endpoint token exposed in public DEPLOY.md and URL",
-      "DataRepository.kt is a stub emitting hardcoded List<String>(\"Android\") — the MVVM layer is unwired scaffolding",
-      "MainScreenTest uses FAKE_DATA and tests a function signature that does not match the actual MainScreen composable — tests would fail",
-      "Production APK intentionally signed with debug key — reduces trust and creates update signature conflicts",
-      "WebView uses deprecated allowFileAccessFromFileURLs and allowUniversalAccessFromFileURLs (security flags disabled)",
-      "IONOS shared hosting is a single point of failure with no redundancy or monitoring",
-      "No CI pipeline; deployment is fully manual via SSH",
-      "Source code lives in a directory named 'test/' creating significant confusion"
+      "Plaintext production SSH host/username/password and a cron secret token committed to DEPLOY.md in a public GitHub repository",
+      "Release APKs for the general public are deliberately signed with the Android debug key rather than a proper release key",
+      "No CI/CD pipeline and only unmodified Android Studio boilerplate tests, effectively zero real automated test coverage",
+      "Single point of failure: entire backend is one IONOS shared-hosting account with a flat JSON file as the data store and no monitoring beyond a text log",
+      "Duplicated/confusing repo layout ('test/' holds production source code, 'web/' is a committed build artifact)"
     ]
   },
   "signals": {
@@ -140,30 +128,31 @@
     "archived": false
   },
   "evaluation": {
-    "solves_real_problem": "yes",
-    "real_problem_reasoning": "Venezuela sits on active fault zones (including the El Pilar fault) and experiences significant seismic activity, yet FUNVISIS (the national seismic institute) has no public API and its data is hard to access programmatically. Official alert channels are slow and unreliable. This project directly bridges that gap by scraping FUNVISIS data every 20-60 seconds, normalizing it to GeoJSON, and combining it with USGS and EMSC feeds to deliver real-time alerts via Android push notifications and a PWA — something the government has not provided. The offline fallback capability is especially relevant where internet connectivity may degrade during or after an earthquake.",
-    "problem_severity": "high",
-    "impact_potential": 4,
-    "product_quality": 3,
-    "live_demo_status": "partial",
-    "live_demo_notes": "The web app at terremotos.wasmer.app loads and renders a complete UI: time-range filters (24h/7d/30d), magnitude slider (0-6+), intensity classification buttons, Android APK download banner, iOS PWA install guide, and simulation mode. However, the data panel shows \"Sismos Detectados (0)\" with a \"Cargando eventos sísmicos...\" spinner — earthquake data is not rendering during the test. This may reflect a genuine quiet period or a connection issue between the frontend and the IONOS-hosted scraper JSON. The UI is polished and functional in structure; the data pipeline is the uncertain element.",
     "diffusion": {
       "score": 3,
-      "ready_to_promote": false,
+      "ready_to_promote": true,
       "available_assets": [
         "live-demo",
-        "clear-value-prop"
+        "clear-value-prop",
+        "branding"
       ],
-      "recommended_angle": "Frame it as the earthquake early-warning system Venezuela's government never built: real-time alerts combining three seismic data sources, an offline-capable map, and an Android app that works even when connectivity is degraded — built by a solo Venezuelan developer in 48 hours.",
+      "recommended_angle": "Alertas sísmicas en tiempo real para Venezuela, resilientes incluso sin internet tras un terremoto: web + app Android con datos de FUNVISIS/EMSC.",
       "gaps": [
-        "Critical security issue (SSH credentials and keystore password committed publicly to GitHub) must be rotated before any spotlight — linking to the repo exposes live server access",
-        "Live demo was not showing earthquake data during review — needs verification that the IONOS scraper is running and the data feed is live",
-        "No demo video to show the notification system and simulation mode in action",
-        "No screenshots or visual assets for social posts",
-        "Debug-signed APK distributed to end users reduces trust for a safety-critical app"
+        "No demo video available",
+        "No screenshots asset captured/prepared for social posts",
+        "Plaintext production SSH credentials and a cron secret are committed to the public GitHub repo (DEPLOY.md) — should be remediated before driving heavy traffic/attention to the project",
+        "Android APKs are shipped signed with the debug key, not a proper release key",
+        "No README describing the project for outside contributors, which weakens credibility for press/partners who click through to the repo"
       ]
     },
-    "overall_recommendation": "improve-first",
-    "one_line_pitch": "Sismología VE delivers real-time Venezuelan earthquake alerts combining three seismic data sources — including FUNVISIS, which has no public API — with an offline-capable Android app and PWA that works even when connectivity fails."
+    "impact_potential": 4,
+    "live_demo_notes": "WebFetch confirmed the live URL loads a real, functional dashboard (not just a landing page): live stats (24h/monthly max magnitude/avg depth), time-range and magnitude filters, an interactive Leaflet map with a simulation mode, a notification system, and Android APK / iOS home-screen install prompts. At fetch time it showed 0 detected earthquakes (\\\"Cargando eventos sísmicos...\\\"), consistent with no recent seismic activity rather than a broken feed.",
+    "live_demo_status": "working",
+    "one_line_pitch": "Sismología VE: alertas sísmicas en tiempo real para Venezuela que siguen funcionando aunque se caiga la conexión tras un terremoto.",
+    "overall_recommendation": "promote",
+    "problem_severity": "high",
+    "product_quality": 3,
+    "real_problem_reasoning": "Venezuela sits near active seismic zones and its official alert channels (FUNVISIS) are described by the team as slow or unreliable; a real-time, offline-resilient earthquake notification system (web + Android background service, with a network -> localStorage -> bundled-data fallback chain) directly addresses a life-safety gap for the general population and emergency responders during and immediately after a quake. This is a genuine, narrowly-scoped need distinct from Venezuela's broader crisis themes, and the project is already live with 403 commits of real iterative development rather than a hackathon stub.",
+    "solves_real_problem": "yes"
   }
 }

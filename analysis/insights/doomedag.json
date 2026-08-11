@@ -10,63 +10,26 @@
   "db_description": "https://dommedag.netlify.app/\nhttps://github.com/uset82/iFoundYou\n\nNo es solo un localizador. Es una plataforma de alertas y comunicación creada para ayudar a las personas a estar más preparadas ante situaciones inusuales.\n\nLa aplicación ya cuenta con un sistema de alarma que detecta movimientos aéreos inusuales. Además, el proyecto puede crecer con hardware para permitir comunicación directa entre personas, incluso sin acceso a internet.\n\nEstá abierto para todos. Puedes hacer fork, modificarlo, agregar herramientas o colaborar con pull requests.\n\nSi te interesa, eres bienvenido a contribuir y mejorarlo.",
   "lifecycle_status": "ready_to_use",
   "analysis": {
-    "summary": "iFoundYou (branded \"Dommedag\") is a real-time location-sharing, emergency-alerts, and offline-mesh-communications PWA with a React Native mobile companion. It uses Supabase for auth, database (PostGIS), and realtime subscriptions; Netlify Functions for serverless API; and integrates Meshtastic BLE/HTTP hardware for offline mesh networking. A gateway mode bridges Meshtastic mesh messages into Supabase community alerts — directly useful in disaster scenarios where some users have internet and others do not. The codebase is substantive, not boilerplate, but suffers from a 2357-line god-component App.tsx, no CI, and a single trivial test.",
-    "project_type": "Full-stack web PWA + React Native mobile — emergency location-sharing and mesh communications platform",
-    "stack": {
-      "frontend": [
-        "React 19",
-        "TypeScript",
-        "Vite",
-        "MapLibre GL",
-        "PWA (vite-plugin-pwa)",
-        "IndexedDB (idb)"
-      ],
-      "backend": [
-        "Supabase BaaS (auth + realtime + REST)",
-        "Netlify Functions (serverless JS)",
-        "Node.js MCP server (Render)"
-      ],
-      "database": [
-        "PostgreSQL with PostGIS (Supabase-managed)",
-        "IndexedDB (offline outbox)"
-      ],
-      "infra_deploy": [
-        "Netlify (web + serverless functions)",
-        "Render (MCP server)",
-        "Docker (mcp server image)"
-      ],
-      "ai_ml": [],
-      "languages": [
-        "TypeScript",
-        "JavaScript",
-        "Python",
-        "Swift",
-        "Kotlin",
-        "PLpgSQL"
-      ]
-    },
     "architecture": {
-      "pattern": "BaaS + Serverless Functions + Offline-first PWA",
+      "pattern": "Multi-app monorepo: Vite/React PWA web client, React Native mobile app, Netlify serverless functions, a standalone MCP tool server (Express), and a local Python companion server for WiFi/BLE utilities, all backed by Supabase (Postgres+PostGIS+Auth+Realtime).",
       "uses_orm": false,
-      "orm_or_db_layer": "Supabase JS client (supabase-js) used directly — no ORM. Raw PostGIS SQL for spatial queries. IndexedDB via idb library for offline cache.",
-      "api_design": "Supabase REST + Realtime for main data; Netlify Functions (nearby.js, community-alerts.js, discover.js, alerts.js) for geospatial queries requiring server-side auth and business logic",
-      "separation_of_concerns": "Library code well-separated in web/src/lib/{chat,mesh,EWS}. However, App.tsx is a 2357-line god component containing all UI state, effects, and business logic — a significant violation of separation of concerns.",
-      "modularity": "Transport abstraction (MeshTransport interface with BluetoothMeshTransport and HttpMeshTransport implementations) is well-designed. Chat layer has TransportManager, offlineSync, messageStore, realtimeChat as distinct modules. BridgeManager handles mesh-to-internet relay independently.",
+      "orm_or_db_layer": "No ORM. Web client uses @supabase/supabase-js directly against Supabase (PostgREST + Realtime + Auth). Netlify functions call Supabase's REST API via raw fetch with apikey/Authorization headers rather than the SDK.",
+      "api_design": "Netlify Functions as REST-ish handlers (nearby.js, community-alerts.js, alerts.js, location-update.js, discover.js, cleanup.js, mesh-bridge.js) each validating a bearer token against Supabase auth before querying; MCP server exposes tool-call endpoints (get_app_info, get_web_app_url) over StreamableHTTP.",
+      "separation_of_concerns": "Reasonable separation: DB access/RLS policies live in SQL migrations, geo/business logic in netlify functions, transport abstractions (mesh/chat) isolated behind interfaces (MeshTransport, ChatTransport) with pluggable implementations (BLE, HTTP, Bluetooth Multipeer, Internet).",
+      "modularity": "Good modularity for a hackathon project: mesh and chat transports are behind common interfaces with multiple concrete adapters (Meshtastic BLE/HTTP, Web Bluetooth Multipeer, Supabase realtime), offline outbox/sync layer, and an EWS (early warning system) context module.",
       "notable_patterns": [
-        "Offline-first outbox queue: optimistic writes to IndexedDB, drain on reconnect",
-        "Transport abstraction layer with reconnect logic and exponential backoff (BLE transport)",
-        "Gateway mode: elected users bridge Meshtastic mesh messages to Supabase community alerts",
-        "Supabase RLS policies on all 11 tables with spatial-aware location policies",
-        "PostGIS geography columns with spatial GiST indexes for proximity queries",
-        "match_contacts() security-definer SQL function for contact discovery without exposing PII"
+        "Transport abstraction layer (MeshTransport/ChatTransport interfaces with swappable adapters)",
+        "Postgres RLS policies + SECURITY DEFINER function (match_contacts) for privacy-preserving contact matching",
+        "Client-side haversine distance calc duplicated across two Netlify functions (nearby.js, community-alerts.js) instead of shared",
+        "Offline-first message queue/outbox with IndexedDB (idb) for mesh sync"
       ]
     },
     "code_organization": {
-      "score": 3,
-      "directory_structure": "Clean top-level split into web/, mobile/, netlify/, supabase/, mcp/, wifi/. web/src/lib is well-organized into chat/ and mesh/ sub-modules. Root directory is cluttered with 8+ research .md files that are not production artifacts.",
-      "naming_quality": "Good — consistent camelCase TypeScript, descriptive file names (realtimeChat.ts, offlineSync.ts, BluetoothMeshTransport.ts). Netlify function names match their purpose. SQL files have descriptive names.",
-      "documentation_quality": "AGENTS.md, CONTINUITY.md, and a docs/ directory show active planning documentation. In-code JSDoc comments present on key modules with phase tracking (Phase 1.3, 4.4, etc.). README present but not audited in detail.",
-      "reasoning": "The library layer is genuinely well-organized, but App.tsx at 2357 lines is a structural liability — all state, all effects, and most business logic are co-located in one file. Research markdown files in the repo root indicate fast iteration without housekeeping."
+      "score": 4,
+      "directory_structure": "Clear top-level split by concern (web/, mobile/, netlify/functions/, supabase/, mcp/, wifi/, docs/) with web/src further organized into components/lib/mesh/chat subfolders; large but navigable.",
+      "naming_quality": "Descriptive file/function names (BluetoothMeshTransport, useMeshtasticHttp, messageQueue) though the internal project name 'Dommedag' (Norwegian) leaks through package.json/mobile app name while docs/README call it 'iFoundYou', indicating a rename mid-project.",
+      "documentation_quality": "Extensive docs/ (deploy.md, mesh-guardian-plan.md, supabase-setup.md, openai-integration.md) plus a README with setup instructions and a CONTINUITY.md/AGENTS.md workflow log, but several root-level loose research .md files (Loopt research, Off-Grid Mesh Messaging notes) suggest unstructured, AI-assisted iterative development.",
+      "reasoning": "Solid multi-package layout and abundant planning docs, but naming inconsistency (Dommedag vs iFoundYou) and clutter of ad hoc research notes at repo root suggest a fast-moving, not fully polished codebase."
     },
     "production_readiness": {
       "score": 3,
@@ -75,57 +38,85 @@
       "has_logging": false,
       "has_env_config": true,
       "has_deploy_config": true,
-      "secrets_handling": "Secrets via environment variables: VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY for the web frontend; SUPABASE_URL and SUPABASE_ANON_KEY for Netlify Functions. No hardcoded secrets detected. A hasSupabaseConfig guard prevents crashes when env vars are missing.",
-      "security_notes": "RLS enabled on all 11 database tables with well-crafted policies (owner-only writes, friend-visibility reads, discoverable flag for strangers). match_contacts() uses SECURITY DEFINER with explicit REVOKE/GRANT to prevent PII leakage. Netlify Functions validate JWT tokens against Supabase /auth/v1/user before processing. No rate limiting on any serverless endpoint — a risk if deployed under load.",
-      "scalability_notes": "PostGIS GiST spatial indexes on geom columns in last_locations and community_alerts. Supabase Realtime handles push for chat. Netlify Functions scale horizontally by default. Location updates throttled client-side to 15s intervals. No server-side caching or rate limits.",
-      "reasoning": "Auth and RLS are solid — this is the strongest aspect. Deploy configs exist for both Netlify and Render. Error states are surfaced to the UI. However, structured logging is absent (only console.log/warn/error), no rate limiting on serverless functions, and the BridgeManager inserts lat:0/lon:0 for mesh messages without location data — a data quality bug."
+      "secrets_handling": "Service-role Supabase key kept server-side only (netlify/functions/cleanup.js, mesh-bridge.js) while client uses anon key via VITE_ env vars; .env files are gitignored and only .env.example is committed. No secrets found hardcoded in scanned source.",
+      "security_notes": "Supabase RLS is used extensively with explicit policies and a SECURITY DEFINER contact-matching function scoped to authenticated users; Netlify functions manually validate bearer tokens against /auth/v1/user before querying. However, there is no rate limiting, no CI security scanning, and a MAC-address spoofing utility (wifi/mac_spoofer.py) ships as a feature which is a notable red flag for a real-world safety deployment (dual-use/privacy-evasion tooling, requires root/admin).",
+      "scalability_notes": "Serverless functions + Supabase should scale reasonably for a hackathon MVP, but geo queries (nearby.js/community-alerts.js) do full haversine computation client-side in JS over fetched rows rather than using PostGIS server-side, which won't scale well with many users/alerts despite PostGIS being provisioned.",
+      "reasoning": "Has real auth, RLS-backed authorization, env-based secret management, and multiple deploy configs (Dockerfile, render.yaml, netlify.toml), putting it above prototype level, but lacks CI/CD, structured logging/monitoring, and includes a questionable MAC-spoofing feature — not yet production-grade for a safety-critical deployment."
     },
     "maturity": {
       "score": 3,
       "has_readme": true,
       "has_tests": true,
       "has_ci": false,
-      "is_real_or_boilerplate": "Real, substantive implementation. The offline outbox queue, Meshtastic transport abstraction with exponential-backoff reconnect, PostGIS schema with spatial indexes, and Supabase RLS policies are all genuine, working logic — not generated scaffolding.",
-      "reasoning": "47 commits with activity through May 2026 shows sustained development. Tests consist of a single trivial React Native snapshot render with no assertions, which provides no real coverage. No CI/CD pipeline exists (.github directory absent), meaning nothing validates builds or tests on push."
+      "is_real_or_boilerplate": "real",
+      "reasoning": "47 commits over ~5 months with substantive, non-trivial logic (mesh transport adapters, offline sync, RLS policies, geo-fenced alerts) — this is genuinely developed, not scaffolding — but testing is minimal (only the default React Native template test survives, no tests for web/, netlify functions, or SQL) and there is no CI pipeline."
     },
     "viability": {
       "score": 3,
-      "reasoning": "The core feature set — friend location sharing, geo-tagged community emergency alerts, and Meshtastic mesh networking with internet bridge — maps directly onto earthquake disaster needs (finding people, broadcasting resource needs, communicating when internet is down). The PostGIS spatial queries and offline outbox are production-grade. Main blockers to deployment are: the 2357-line god-component App.tsx needs splitting before sustained contribution is viable, no CI makes regressions risky, and the app requires manual Supabase project setup. The app is branded 'Dommedag' (Norwegian: Doomsday) and is not Venezuela-specific, though the functionality is applicable."
+      "reasoning": "A working MVP with real mesh-networking and geo-alert logic that plausibly helps in connectivity-poor disaster scenarios (matches Venezuela earthquake use case for offline family reunification and community alerts), but it is not Venezuela-specific, lacks tests/CI/monitoring, has an unresolved product identity split (Dommedag vs iFoundYou), and includes a MAC-spoofing feature that raises trust/safety concerns for a deployment meant to help real victims."
     },
     "key_features": [
-      "Real-time GPS location sharing with friends (PostGIS + Supabase Realtime)",
-      "Geo-tagged community emergency alerts with category filtering (water/food/medical/shelter/lost)",
-      "Meshtastic BLE and HTTP mesh transport for offline communications",
-      "Internet-to-mesh and mesh-to-internet gateway bridge mode",
-      "Offline-first P2P chat with IndexedDB outbox queue and automatic drain on reconnect",
-      "Group chat rooms",
-      "Contact discovery by email/phone (match_contacts security-definer function)",
-      "Proximity push notifications (Web Notifications API + cooldown)",
-      "QR code invite system for friend pairing",
-      "EWS (Early Warning System) panel with aircraft overlay on MapLibre map",
-      "PWA with iOS/Android install prompts and service worker",
-      "React Native mobile app with native iOS multipeer connectivity (Swift)",
-      "WiFi scanner Python module (cross-platform) for network discovery"
+      "Live map (MapLibre) showing self + nearby friends via geo-fenced Supabase queries",
+      "Off-grid Meshtastic mesh networking (BLE + HTTP transports) for communication without internet",
+      "Group and 1:1 chat with offline outbox/sync (IndexedDB) and multiple pluggable transports (mesh, Bluetooth Multipeer, internet)",
+      "Community/emergency alerts (water, food, medical, shelter, lost person) broadcast to nearby users with radius + expiry",
+      "Friend requests/discovery with privacy-preserving contact matching via a Postgres SECURITY DEFINER function",
+      "React Native mobile companion app (iOS/Android) alongside the PWA web app",
+      "Local Python companion server for WiFi scanning, device discovery, and MAC address spoofing"
     ],
     "domain_tags": [
-      "people-finder",
-      "mapping-geo",
       "comms-chat",
+      "family-reunification",
       "alerts-notifications",
-      "family-reunification"
+      "mapping-geo",
+      "people-finder"
     ],
-    "merge_potential": "Medium. The offline mesh bridge and geo-tagged community alerts are directly deployable for earthquake response and could integrate with shelter-mapping or aid-logistics tools. The PostGIS spatial layer and RLS-secured schema are reusable. Would require: splitting App.tsx, adding CI, configuring a Supabase project, and localizing the UI to Spanish.",
+    "merge_potential": "Strong candidate to merge with shelter-mapping or aid-logistics projects: its offline mesh chat/alert layer (Meshtastic + Supabase realtime + geo-fenced community alerts) could serve as the comms backbone for other Build4Venezuela tools that need connectivity in disaster zones, while its people-finder/friend-location features complement family-reunification-focused apps.",
     "red_flags": [
-      "App.tsx is 2357 lines — all state management, effects, and UI in one god component, making contribution and maintenance fragile",
-      "No CI/CD pipeline — no automated build or test validation on push",
-      "Single trivial mobile snapshot test with no assertions — effectively zero test coverage",
-      "BridgeManager inserts lat:0/lon:0 into community_alerts for mesh messages without embedded location — creates corrupt geospatial data",
-      "No rate limiting on any Netlify Function endpoint — vulnerable to alert spam or location-flooding",
-      "Hardcoded production Netlify URL (imaginative-rolypoly-7fda4b.netlify.app) inside App.tsx shareApp function",
-      "WiFi scanner module (wifi/mac_spoofer.py) includes MAC address spoofing — potential legal/ethical concern in deployment contexts",
-      "8+ research markdown files in repo root (do deep reseach about Loopt app..., googlereseach2.md, etc.) are noise that indicate fast-and-loose development hygiene",
-      "App is branded Dommedag (Norwegian for Doomsday) with no localization to Spanish — requires i18n work before Venezuela deployment"
-    ]
+      "No CI pipeline and near-zero automated test coverage beyond a default RN boilerplate test",
+      "Ships a MAC-address-spoofing tool (wifi/mac_spoofer.py) as a first-class feature, which is a dual-use/security-evasion capability inappropriate for a trust-sensitive emergency safety app",
+      "Project identity confusion: internal package/app name 'Dommedag' vs public name 'iFoundYou' suggests an unfinished rebrand and possible scope drift",
+      "Repo root cluttered with ad hoc AI research notes (Loopt research, mesh messaging research .md files) indicating exploratory, not fully curated, development",
+      "Client-side haversine distance filtering instead of using the already-provisioned PostGIS for geo queries, which will not scale"
+    ],
+    "summary": "iFoundYou (internally named \"Dommedag\") is a multi-platform emergency location-sharing and off-grid mesh communication app built with a Vite/React PWA, a React Native mobile app, Netlify serverless functions, and a Supabase (Postgres+PostGIS+RLS) backend, plus experimental Meshtastic BLE/HTTP mesh transports for connectivity-free messaging and geo-fenced community alerts. It is a genuinely implemented working MVP (RLS-secured auth, transport abstraction layers, offline sync) rather than boilerplate, but lacks CI/tests, has scalability shortcuts (client-side geo math despite PostGIS), unresolved rebranding artifacts, and a concerning built-in MAC-spoofing utility that undermines trust for a safety-critical deployment.",
+    "project_type": "Cross-platform emergency location-sharing / offline mesh communication app (PWA + React Native mobile + serverless backend)",
+    "stack": {
+      "frontend": [
+        "React 19",
+        "Vite",
+        "TypeScript",
+        "MapLibre GL JS",
+        "PWA (vite-plugin-pwa)",
+        "React Native 0.83 (iOS/Android)"
+      ],
+      "backend": [
+        "Netlify Functions (Node.js)",
+        "Express (MCP server)",
+        "Python (Flask-like local companion server)"
+      ],
+      "database": [
+        "Supabase Postgres",
+        "PostGIS",
+        "Supabase Realtime",
+        "IndexedDB (idb, client offline cache)"
+      ],
+      "infra_deploy": [
+        "Netlify",
+        "Render (render.yaml)",
+        "Dockerfile",
+        "EAS (mobile/eas.json)"
+      ],
+      "ai_ml": [],
+      "languages": [
+        "TypeScript",
+        "JavaScript",
+        "Python",
+        "PL/pgSQL",
+        "Kotlin",
+        "Swift"
+      ]
+    }
   },
   "signals": {
     "accessible": true,
@@ -153,13 +144,6 @@
     "archived": false
   },
   "evaluation": {
-    "solves_real_problem": "yes",
-    "real_problem_reasoning": "The feature set maps directly onto earthquake disaster needs: real-time GPS location sharing helps families find each other after displacement; geo-tagged community alerts (water/food/medical/shelter/lost categories) broadcast resource needs; the Meshtastic mesh networking bridge lets people communicate even when cell infrastructure is down — exactly the scenario that hits Venezuela after a major quake. The offline-first outbox queue and internet-to-mesh gateway are genuinely disaster-relevant, not just theoretical.",
-    "problem_severity": "high",
-    "impact_potential": 4,
-    "product_quality": 2,
-    "live_demo_status": "partial",
-    "live_demo_notes": "The page at https://dommedag.netlify.app/ loads and returns an HTML title (\"Dommedag — Mesh Guardian\") but WebFetch could not confirm any functional UI — it is a React SPA so full rendering requires a real browser with JavaScript. The page does not appear to be broken at the network level, but no interactive elements, map, or login screen were confirmed visible. A real user would need to open it in a browser to see the actual PWA shell.",
     "diffusion": {
       "score": 2,
       "ready_to_promote": false,
@@ -167,18 +151,23 @@
         "live-demo",
         "clear-value-prop"
       ],
-      "recommended_angle": "If promoted at all, lead with the offline mesh networking angle — 'communicates without internet via Meshtastic radios' is a genuinely unique differentiator — and pair it with a short screen-recording showing the map and alert categories. Do not promote before Spanish localization and a working demo walkthrough exist.",
       "gaps": [
-        "No demo video whatsoever",
-        "No screenshots confirmed",
-        "Branding is 'Dommedag' (Norwegian for Doomsday) — must be localized to Spanish before Venezuela deployment",
-        "Live demo shows only a title in automated checks — no visible working flow for a promoter to reference",
-        "No license — contributors and NGOs cannot legally fork/deploy",
-        "UI language appears to be English, not Spanish — a barrier for Venezuelan users",
-        "MAC address spoofing module raises legal/ethical concerns that complicate public promotion"
-      ]
+        "No demo video to show the mesh/map/chat features working since the live site is a JS SPA that appears blank/minimal without login",
+        "Unresolved branding: internal name 'Dommedag' (Norwegian for 'doomsday') vs public 'iFoundYou' — confusing for a social post",
+        "No screenshots captured showing actual UI (map, alerts, chat)",
+        "MAC-spoofing utility is a reputational red flag if surfaced in promo",
+        "Not Venezuela-specific in current framing"
+      ],
+      "recommended_angle": "If promoted, frame narrowly around the offline mesh communication + geo-fenced community alerts feature for disaster zones without internet, and get a screen-recorded demo/video first"
     },
+    "impact_potential": 3,
+    "live_demo_notes": "Live URL returns 200 with a legitimate Vite/React SPA shell (title 'Dommedag — Mesh Guardian', meta description mentions real-time location sharing and emergency mesh messaging, proper PWA manifest/icons). This is not a broken deploy, but it is a client-rendered app requiring JS execution (and likely Supabase auth/login) to reveal any real functionality — a plain fetch/crawl only sees an empty '#app' div, so a quick visitor or non-technical judge/donor would see little to nothing without actually running the JS and going through onboarding.",
+    "live_demo_status": "partial",
+    "one_line_pitch": "Dommedag (iFoundYou): a real off-grid mesh network for family reunification and community alerts when the internet goes down after an earthquake.",
     "overall_recommendation": "improve-first",
-    "one_line_pitch": "Dommedag lets earthquake survivors share GPS locations, broadcast emergency alerts, and chat over Meshtastic radios — even when the internet is down."
+    "problem_severity": "high",
+    "product_quality": 3,
+    "real_problem_reasoning": "Loss of connectivity and difficulty locating/reuniting with family is a genuine, high-severity problem after major earthquakes (cell towers down, congested networks). This project directly targets that with real, non-trivial engineering: Meshtastic BLE/HTTP transport abstractions, geo-fenced Supabase/PostGIS community alerts (water, food, medical, shelter, lost person), offline outbox/sync, and RLS-secured friend/location matching — a genuinely built MVP (47 commits, ~14.4k LOC) rather than boilerplate. However it is not Venezuela-specific (built/registered under Peru in the hackathon metadata), has an unresolved rebrand (Dommedag vs iFoundYou) suggesting confused product identity, and ships a MAC-address-spoofing tool that is inappropriate/risky for a trust-critical safety app.",
+    "solves_real_problem": "partial"
   }
 }

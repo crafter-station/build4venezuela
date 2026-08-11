@@ -2,6 +2,7 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { routing } from "@/i18n/routing";
+import { runMutation, runQuery } from "@/lib/api-mutation";
 import { logEvent, timed } from "@/lib/log";
 import {
   checkRateLimit,
@@ -27,9 +28,16 @@ function displayName(user: Awaited<ReturnType<typeof currentUser>>) {
 
 export async function GET() {
   const { userId } = await auth();
-  return NextResponse.json({
-    requests: await listSolutionRequests(userId ?? undefined),
-  });
+
+  const result = await runQuery("request.list", {}, () =>
+    listSolutionRequests(userId ?? undefined),
+  );
+
+  if ("response" in result) {
+    return result.response;
+  }
+
+  return NextResponse.json({ requests: result.value });
 }
 
 export async function POST(request: Request) {
@@ -93,7 +101,7 @@ export async function POST(request: Request) {
   }
 
   const user = await currentUser();
-  const solutionRequest = await timed("request.create", { userId }, () =>
+  const result = await runMutation("request.create", { userId }, () =>
     createSolutionRequest(
       parsed.data,
       userId,
@@ -101,6 +109,12 @@ export async function POST(request: Request) {
       user?.imageUrl ?? "",
     ),
   );
+
+  if ("response" in result) {
+    return result.response;
+  }
+
+  const solutionRequest = result.value;
 
   for (const locale of routing.locales) {
     revalidatePath(`/${locale}/requests`);

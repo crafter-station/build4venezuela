@@ -112,10 +112,22 @@ export function StackCharts({ nodes }: { nodes: InsightNode[] }) {
 
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-      <ChartBlock title={t("titles.tech")} data={tech} color="#16c7e8" />
-      <ChartBlock title={t("titles.types")} data={types} color="#ffd83d" />
-      <ChartBlock title={t("titles.databases")} data={dbs} color="#b388ff" />
-      <ChartBlock title={t("titles.dataLayer")} data={orm} color="#ff4a63" />
+      <ChartBlock title={t("titles.tech")} data={tech} color="var(--chart-1)" />
+      <ChartBlock
+        title={t("titles.types")}
+        data={types}
+        color="var(--chart-3)"
+      />
+      <ChartBlock
+        title={t("titles.databases")}
+        data={dbs}
+        color="var(--chart-4)"
+      />
+      <ChartBlock
+        title={t("titles.dataLayer")}
+        data={orm}
+        color="var(--chart-5)"
+      />
     </div>
   );
 }
@@ -148,18 +160,23 @@ function ChartBlock({
             type="category"
             dataKey="name"
             width={140}
-            tick={{ fill: "#ddd", fontSize: 11, fontFamily: "monospace" }}
-            stroke="#333"
+            tick={{
+              fill: "var(--muted-foreground)",
+              fontSize: 11,
+              fontFamily: "monospace",
+            }}
+            stroke="var(--border)"
           />
           <Tooltip
-            cursor={{ fill: "#ffffff10" }}
+            cursor={{ fill: "var(--muted)" }}
             contentStyle={{
-              background: "#080808",
-              border: "1px solid #262626",
+              background: "var(--popover)",
+              border: "1px solid var(--border)",
+              borderRadius: "var(--radius-lg)",
               fontFamily: "monospace",
               fontSize: 12,
             }}
-            labelStyle={{ color: "#fff" }}
+            labelStyle={{ color: "var(--popover-foreground)" }}
           />
           <Bar dataKey="value" isAnimationActive={false} radius={0}>
             {data.map((d) => (

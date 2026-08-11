@@ -4,19 +4,16 @@ import { z } from "zod";
 const requiredServerEnv = {
   AI_GATEWAY_API_KEY: z.string().min(1),
   CLERK_SECRET_KEY: z.string().min(1),
-  SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
   UPSTASH_REDIS_REST_URL: z.string().url(),
   UPSTASH_REDIS_REST_TOKEN: z.string().min(1),
-  // Postgres (Supabase) connection string for Drizzle. Use the pooler URL
-  // (port 6543, transaction mode) in production. Optional: when absent the
-  // project store falls back to the local `.data/*.json` files.
+  BLOB_READ_WRITE_TOKEN: z.string().min(1),
+  // Neon Postgres connection string. Optional outside production, where stores
+  // can still use local JSON fixtures.
   DATABASE_URL: z.string().url().optional(),
 };
 
 const requiredClientEnv = {
   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string().min(1),
-  NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
-  NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1),
 };
 
 export const env = createEnv({
@@ -30,7 +27,5 @@ export const env = createEnv({
   experimental__runtimeEnv: {
     NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:
       process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
-    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
-    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   },
 });

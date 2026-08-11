@@ -3,20 +3,86 @@
     "title": "BUILD4VENEZUELA | Hackathon Global",
     "description": "Una hackathon global de 72 horas para construir herramientas útiles para Venezuela después de los terremotos del 24 de junio."
   },
+  "CountryHub": {
+    "metadata": {
+      "venezuela": {
+        "title": "Venezuela | Build4Latam",
+        "description": "Herramientas, proyectos y recursos abiertos construidos para ayudar a Venezuela."
+      },
+      "colombia": {
+        "title": "Colombia | Build4Latam",
+        "description": "Herramientas, proyectos y recursos abiertos que pueden ayudar a Colombia."
+      }
+    },
+    "heroTitle": "Construimos por",
+    "selector": {
+      "choose": "Elige dónde ayudar",
+      "description": "Una red abierta de herramientas, builders y recursos para responder a emergencias en América Latina.",
+      "enter": "Entrar",
+      "networkActive": "Red activa",
+      "solidarity": "tecnología en solidaridad",
+      "statement": "Lo que funciona en un país puede ayudar al siguiente."
+    },
+    "addProject": "Agregar un proyecto",
+    "goToCountry": "Ir a {country}",
+    "availableTools": "Herramientas disponibles",
+    "toolsTitle": "Úsalas. Adáptalas. Compártelas.",
+    "projectsTitle": "Proyectos para {country}",
+    "viewAllProjects": "Ver todos los proyectos",
+    "empty": "Todavía no hay proyectos etiquetados para {country}.",
+    "countries": {
+      "venezuela": {
+        "name": "Venezuela",
+        "eyebrow": "El origen de esta red",
+        "description": "Build4Latam nació como Build4Venezuela: una respuesta abierta para conectar ayuda, información y tecnología después de los terremotos. El trabajo continúa."
+      },
+      "colombia": {
+        "name": "Colombia",
+        "eyebrow": "La red cruza fronteras",
+        "description": "La emergencia ahora también golpea a Colombia. Reunimos nuevas iniciativas y herramientas del hackathon venezolano que pueden adaptarse y usarse aquí."
+      }
+    }
+  },
   "Header": {
     "brand": "Build4Venezuela",
     "mobileBrand": "B4B",
     "navigationLabel": "Navegación principal",
     "brandPageLink": "Marca",
+    "homeLabel": "Inicio de la comunidad Build4Latam",
+    "search": "Buscar proyectos",
+    "searchDialog": {
+      "description": "Busca proyectos, builders y necesidades de la comunidad.",
+      "placeholder": "Buscar en la comunidad...",
+      "loading": "Cargando el índice comunitario...",
+      "empty": "No hay proyectos, builders ni necesidades que coincidan.",
+      "error": "La búsqueda no está disponible ahora. Intenta de nuevo pronto.",
+      "recent": "Búsquedas recientes"
+    },
+    "themeToggle": "Cambiar tema de color",
+    "menu": "Abrir menú",
+    "menuDescription": "Explora la comunidad y encuentra una forma de contribuir.",
+    "signIn": "Iniciar sesión",
+    "productLabel": "Explorar",
+    "communityLabel": "Comunidad",
+    "partnersLabel": "Construido con nuestros aliados",
+    "create": {
+      "label": "Crear",
+      "project": "Agregar proyecto",
+      "need": "Publicar necesidad",
+      "resource": "Compartir recurso",
+      "profile": "Perfil de builder"
+    },
     "links": {
       "home": "Inicio",
       "brand": "Marca",
-      "excel": "Excel",
+      "socials": "Socials",
       "whatsapp": "WhatsApp",
       "discord": "Discord",
       "projects": "Proyectos",
-      "requests": "Solicitudes",
-      "resources": "Recursos"
+      "builders": "Builders",
+      "requests": "Necesidades",
+      "resources": "Recursos",
+      "impact": "Impacto"
     },
     "languageSelector": {
       "label": "Idioma",
@@ -129,8 +195,28 @@
       "title": "construir soluciones tech por Venezuela.",
       "closure": {
         "label": "Evento de clausura",
-        "date": "Miércoles 1 de julio // 7:00 PM UTC-5 // online"
+        "date": "Miércoles 1 de julio // 6:00 PM UTC-5 // online"
       },
+      "showcase": {
+        "title": "Hoy es la muestra de proyectos",
+        "description": "Presentamos las soluciones creadas durante la hackathon para ayudar en la emergencia: búsqueda de personas, refugios, donaciones, información verificada y reportes ciudadanos.",
+        "times": [
+          "6 PM Colombia y Perú",
+          "7 PM Venezuela y Chile",
+          "8 PM Argentina"
+        ],
+        "share": "Comparte el live. Construimos por Venezuela."
+      },
+      "stats": [
+        {
+          "value": "+1000",
+          "label": "builders"
+        },
+        {
+          "value": "+80",
+          "label": "proyectos"
+        }
+      ],
       "countdown": {
         "labels": {
           "days": "Días",
@@ -210,7 +296,8 @@
     "projects": {
       "eyebrow": "Ideas de proyectos",
       "title": "Qué puedes construir",
-      "description": "Elige un problema concreto. Conecta con lo que ya existe. Deja algo útil para la emergencia y suficientemente duradero para la recuperación."
+      "description": "Elige un problema concreto. Conecta con lo que ya existe. Deja algo útil para la emergencia y suficientemente duradero para la recuperación.",
+      "viewAll": "Ver proyectos para Venezuela"
     },
     "projectIdeas": [
       "Directorios verificados de refugios, centros de acopio y atención médica.",
@@ -284,8 +371,9 @@
     },
     "grid": {
       "empty": "Todavía no hay proyectos. Sé la primera persona en agregar uno.",
-      "syncing": "Sincronizando feed en vivo...",
-      "live": "Feed en vivo activo",
+      "syncing": "Buscando actualizaciones...",
+      "live": "Actualización automática",
+      "searchPlaceholder": "Buscar proyectos, equipos o lugares...",
       "all": "Todos",
       "project": "proyecto",
       "projects": "proyectos",
@@ -301,6 +389,7 @@
         "status": "Estado",
         "category": "Categoría",
         "countries": "Países",
+        "applicability": "Aplicabilidad",
         "builder": "Autor",
         "votes": "Votos",
         "link": "Enlace"
@@ -310,6 +399,11 @@
         "ready_to_use": "Listo para usar",
         "in_development": "En desarrollo",
         "idea": "Idea"
+      },
+      "applicabilities": {
+        "latam": "Reusable en LATAM",
+        "venezuela": "Se puede usar en Venezuela",
+        "colombia": "Se puede usar en Colombia"
       }
     },
     "categories": {
@@ -377,6 +471,13 @@
       "in_development": "En desarrollo",
       "idea": "Idea"
     },
+    "applicabilityLabel": "¿Dónde se puede usar este proyecto?",
+    "applicabilityHint": "Elige LATAM si la herramienta puede adaptarse a más de un país.",
+    "applicabilities": {
+      "latam": "Reusable en LATAM",
+      "venezuela": "Se puede usar en Venezuela",
+      "colombia": "Se puede usar en Colombia"
+    },
     "projectUrlLabel": "Enlace del proyecto",
     "countriesLabel": "Países participantes",
     "countriesPlaceholder": "Venezuela, Colombia, Estados Unidos",
@@ -393,7 +494,13 @@
     "deleteButton": "Eliminar postulación",
     "deleteConfirmButton": "Eliminar permanentemente",
     "deleteCancel": "Cancelar",
-    "deletePending": "Eliminando..."
+    "deletePending": "Eliminando...",
+    "imageLabel": "Imagen del proyecto (opcional)",
+    "imageHint": "JPG, PNG o WebP de hasta 8 MB. Si agregas ambos, se muestra primero el video.",
+    "imagePreviewAlt": "Imagen actual del proyecto",
+    "imageRemove": "Quitar imagen",
+    "imageUploading": "Subiendo imagen...",
+    "imageUploadError": "No se pudo subir la imagen del proyecto."
   },
   "ProjectDetail": {
     "metadata": {
@@ -402,6 +509,12 @@
     },
     "builtBy": "Construido por",
     "countries": "Países",
+    "applicability": "Dónde funciona",
+    "applicabilities": {
+      "latam": "Reusable en LATAM",
+      "venezuela": "Se puede usar en Venezuela",
+      "colombia": "Se puede usar en Colombia"
+    },
     "status": "Estado",
     "statuses": {
       "ready_to_use": "Listo para usar",
@@ -452,12 +565,13 @@
       "descriptionPlaceholder": "Markdown opcional: quién necesita esto, qué es difícil hoy, enlaces, restricciones...",
       "posting": "Publicando...",
       "postRequest": "Publicar solicitud",
+      "requestSent": "Solicitud enviada. Ya está visible en el tablero.",
       "signedOutDescription": "Inicia sesión para dejar ideas, votar y comentar.",
       "signIn": "Iniciar sesión",
       "request": "solicitud",
       "requests": "solicitudes",
-      "syncing": "Sincronizando tablero en vivo...",
-      "live": "Tablero en vivo activo",
+      "syncing": "Buscando actualizaciones...",
+      "live": "Actualización automática",
       "vote": "Votar ({count})",
       "voted": "Votado ({count})",
       "expand": "Expandir detalles",
@@ -473,6 +587,144 @@
         "descriptionTooLong": "Mantén la descripción por debajo de 8.000 caracteres.",
         "commentTooShort": "Agrega al menos 3 caracteres.",
         "commentTooLong": "Mantén los comentarios por debajo de 1.200 caracteres."
+      }
+    }
+  },
+  "Builders": {
+    "eyebrow": "Red de builders",
+    "title": "Encuentra builders.",
+    "description": "Busca ingenieros, diseñadores y builders de IA. Las solicitudes de contacto permanecen privadas hasta que un builder las acepta.",
+    "register": "Registro",
+    "profile": "Mi perfil",
+    "inbox": "Bandeja",
+    "unansweredRequests": "{count, plural, =0 {0 solicitudes sin responder} one {# solicitud sin responder} other {# solicitudes sin responder}}",
+    "directory": {
+      "searchLabel": "Buscar builders",
+      "searchPlaceholder": "Busca por nombre, rol o descripción",
+      "roleFilterLabel": "Filtrar por rol",
+      "hoursFilterLabel": "Filtrar por horas semanales",
+      "allRoles": "Todos los roles",
+      "anyHours": "Cualquier horario",
+      "minimumHours": "{hours}+ h/semana",
+      "builderCount": "{count, plural, =0 {0 builders} one {# builder} other {# builders}}",
+      "paginationLabel": "Páginas de builders",
+      "pageStatus": "Página {page} de {total}",
+      "previousPage": "Anterior",
+      "nextPage": "Siguiente",
+      "refreshing": "Actualizando...",
+      "liveDirectory": "Directorio en vivo",
+      "empty": "Todavía ningún builder coincide con estos filtros.",
+      "availabilityHidden": "Disponibilidad oculta",
+      "hoursPerWeek": "{hours} h/semana",
+      "unavailable": "No disponible",
+      "portfolio": "Portafolio",
+      "contact": "Contactar",
+      "signIn": "Iniciar sesión",
+      "projectName": "Nombre del proyecto",
+      "coverLetter": "Mini carta de presentación",
+      "coverLetterPlaceholder": "¿Qué estás construyendo, por qué este builder y qué apoyo necesitas?",
+      "coverLetterHint": "Adjunta todo enlace o recurso público relacionado con el proyecto (repo, presentación, demo, docs).",
+      "attachProject": "Esta solicitud es para un proyecto que registré.",
+      "attachProjectNamed": "Adjuntando: {name}",
+      "contactEmail": "Email de contacto (opcional)",
+      "contactPhone": "Teléfono de contacto (opcional)",
+      "checking": "Revisando...",
+      "sendRequest": "Enviar solicitud",
+      "requestSent": "Solicitud enviada. El builder puede aceptarla o rechazarla desde su bandeja.",
+      "requestSpamError": "Esta solicitud parece spam. Revísala, por favor.",
+      "roles": {
+        "frontend_engineer": "Ingeniero frontend",
+        "backend_engineer": "Ingeniero backend",
+        "fullstack_engineer": "Ingeniero full-stack",
+        "ai_engineer": "Ingeniero de IA",
+        "designer": "Diseñador",
+        "product_manager": "Product manager",
+        "devops_engineer": "Ingeniero DevOps",
+        "data_engineer": "Ingeniero de datos",
+        "other": "Otro"
+      },
+      "days": {
+        "monday": "Lun",
+        "tuesday": "Mar",
+        "wednesday": "Mié",
+        "thursday": "Jue",
+        "friday": "Vie",
+        "saturday": "Sáb",
+        "sunday": "Dom"
+      }
+    },
+    "registerPage": {
+      "eyebrow": "Red de builders",
+      "titleNew": "Regístrate como builder.",
+      "titleExisting": "Perfil builder.",
+      "descriptionNew": "Crea un perfil que protege tu privacidad para que dueños de proyectos puedan pedir ayuda sin exponer tu información de contacto directa en el directorio público.",
+      "descriptionExisting": "Gestiona tu perfil de builder, ocúltalo mientras estás ocupado o actualiza los campos que ven los dueños de proyectos antes de contactarte.",
+      "backToBuilders": "Volver a builders",
+      "viewBuilders": "Ver builders",
+      "requestInbox": "Bandeja",
+      "form": {
+        "savedNotice": "Perfil de builder guardado.",
+        "visibleNotice": "Tu perfil de builder está visible en el directorio.",
+        "frozenNotice": "Tu perfil de builder está oculto del directorio.",
+        "profileStatusTitle": "Perfil builder",
+        "frozenDescription": "Los perfiles ocultos siguen siendo editables, pero no aparecen en las listas de builders.",
+        "visibleDescription": "Tu perfil está visible en el directorio de builders.",
+        "frozenStatus": "Oculto",
+        "visibleStatus": "Visible",
+        "showProfile": "Mostrar perfil",
+        "hideProfile": "Ocultar perfil",
+        "deleteProfile": "Eliminar perfil",
+        "deleteDialogTitle": "¿Eliminar perfil?",
+        "deleteDialogDescription": "Esto elimina tu perfil de builder del directorio y borra sus solicitudes de contacto. Puedes registrarte de nuevo más tarde.",
+        "cancel": "Cancelar",
+        "deleting": "Eliminando...",
+        "name": "Nombre",
+        "role": "Rol",
+        "customRole": "Describe el rol",
+        "customRolePlaceholder": "Organizador comunitario, experto en accesibilidad...",
+        "description": "Descripción",
+        "descriptionPlaceholder": "¿Qué construyes bien y qué tipo de proyectos puedes apoyar?",
+        "linkedin": "LinkedIn (opcional)",
+        "portfolio": "Portafolio (opcional)",
+        "setAvailability": "Configurar disponibilidad",
+        "availabilityHelp": "Opcional. La disponibilidad oculta no se muestra ni se usa en filtros públicos de horas.",
+        "weekdaysPreset": "2h entre semana",
+        "weekendsPreset": "4h fines de semana",
+        "clearAvailability": "Limpiar",
+        "hoursPerWeek": "{hours} horas/semana",
+        "saving": "Guardando...",
+        "saveProfile": "Guardar perfil builder",
+        "publishProfile": "Publicar perfil builder"
+      }
+    },
+    "requests": {
+      "eyebrow": "Bandeja de builders",
+      "title": "Solicitudes.",
+      "description": "Revisa mensajes de dueños de proyectos. Al aceptar puedes ocultar tu perfil de builder mientras trabajas en un proyecto.",
+      "backToBuilders": "Volver a builders",
+      "viewBuilders": "Ver builders",
+      "inbox": {
+        "requestCount": "{count, plural, =0 {0 solicitudes} one {# solicitud} other {# solicitudes}}",
+        "refreshing": "Actualizando...",
+        "privateInbox": "Bandeja privada",
+        "empty": "Todavía nadie ha contactado tu perfil de builder.",
+        "fromRequester": "De {requester}",
+        "toBuilder": "Para {builder}",
+        "contactEmail": "Email de contacto",
+        "contactPhone": "Teléfono de contacto",
+        "notProvided": "No indicado",
+        "hideProfileOnAccept": "Ocultar mi perfil de builder si acepto",
+        "accept": "Aceptar",
+        "reject": "Rechazar",
+        "directions": {
+          "inbound": "Entrante",
+          "outbound": "Saliente"
+        },
+        "statuses": {
+          "pending": "Pendiente",
+          "accepted": "Aceptada",
+          "rejected": "Rechazada"
+        }
       }
     }
   },
@@ -653,9 +905,18 @@
           "none": "Limpio"
         },
         "auditedAt": "Auditado {date}",
+        "reauditedAt": "Reauditado {date}",
+        "previously": "era {risk}",
         "notAudited": "Sin auditar — no se pudo clonar el repositorio.",
         "clean": "No se encontraron problemas de exposición en esta auditoría.",
-        "issueLink": "Ver issue de divulgación →"
+        "allResolved": "Todos los problemas reportados ya están corregidos.",
+        "issueLink": "Ver issue de divulgación →",
+        "status": {
+          "open": "abierto",
+          "partial": "parcial",
+          "resolved": "resuelto",
+          "new": "nuevo"
+        }
       }
     },
     "stackCharts": {
@@ -693,6 +954,11 @@
       "projects": {
         "title": "Proyectos",
         "description": "Listado de proyectos en Google Sheets.",
+        "kind": "Sheets"
+      },
+      "excel": {
+        "title": "Excel",
+        "description": "Hoja de cálculo completa de Build4Venezuela en Google Sheets.",
         "kind": "Sheets"
       },
       "brand": {

@@ -1,9 +1,11 @@
+import Image from "next/image";
 import { getVideoEmbedUrl } from "@/lib/projects/video-embed";
 import { cn } from "@/lib/utils";
 
 type ProjectVideoEmbedProps = {
   className?: string;
   detailHref?: string;
+  imageUrl?: string;
   title: string;
   videoUrl: string;
 };
@@ -11,12 +13,46 @@ type ProjectVideoEmbedProps = {
 export function ProjectVideoEmbed({
   className,
   detailHref,
+  imageUrl,
   title,
   videoUrl,
 }: ProjectVideoEmbedProps) {
   const embedUrl = getVideoEmbedUrl(videoUrl);
 
   if (!embedUrl) {
+    if (imageUrl && !videoUrl) {
+      const image = (
+        <Image
+          alt={`${title} project preview`}
+          className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]"
+          fill
+          sizes="(max-width: 640px) 100vw, 33vw"
+          src={imageUrl}
+        />
+      );
+
+      return detailHref ? (
+        <a
+          className={cn(
+            "relative block aspect-video overflow-hidden border border-border bg-card",
+            className,
+          )}
+          href={detailHref}
+        >
+          {image}
+        </a>
+      ) : (
+        <div
+          className={cn(
+            "relative aspect-video overflow-hidden border border-border bg-card",
+            className,
+          )}
+        >
+          {image}
+        </div>
+      );
+    }
+
     const href = videoUrl || detailHref;
     const isExternal = Boolean(videoUrl);
 

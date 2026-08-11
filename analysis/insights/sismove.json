@@ -1,0 +1,150 @@
+{
+  "project_slug": "sismove",
+  "name": "SismoVzla",
+  "repo_url": "https://github.com/s0ymiranda/sismo-ve",
+  "live_url": "https://www.sismove.info/es",
+  "video_url": "",
+  "countries": [
+    "Venezuela"
+  ],
+  "db_description": "# Páginas Amarillas: Sismo Vzla\n\n**Páginas Amarillas: Sismo Vzla** es una plataforma web de contingencia y código abierto diseñada para centralizar, organizar y verificar herramientas de ayuda frente a la crisis sísmica en Venezuela. Ante la sobreinformación y dispersión de enlaces críticos que ocurre en situaciones de emergencia, este directorio actúa como un hub único, ágil y confiable para la ciudadanía.\n\n### ✨ Características Principales:\n*   **Directorio Centralizado:** Agrupa y clasifica bases de datos en tiempo real sobre desaparecidos, pacientes hospitalizados, centros de donación, refugios y mapas de riesgo.\n*   **Búsqueda Inteligente (Algoritmo Flexible):** Implementación de un motor de búsqueda interno con *stemming* básico que permite a los usuarios encontrar recursos rápidamente, reconociendo raíces de palabras para tolerar errores tipográficos en momentos de estrés.\n*   **Diseño Accesible (Estética Retro/Pixel-Art):** Interfaz limpia, de alto contraste y gamificada visualmente para reducir la carga cognitiva del usuario en momentos de crisis. \n*   **Internacionalización (i18n):** Soporte multilingüe nativo para facilitar el acceso a ONG y cuerpos de ayuda internacional.\n\nEstá construido bajo una arquitectura moderna y escalable utilizando:\n*   **Frontend:** Next.js (React), TypeScript y Tailwind CSS.\n*   **Infraestructura:** Despliegue en Vercel (Edge Network) con dominio propio (`sismove.info`) para garantizar alta disponibilidad ante picos de tráfico masivos.",
+  "lifecycle_status": "ready_to_use",
+  "analysis": {
+    "architecture": {
+      "pattern": "Single Next.js App Router client app reading one static Firestore document via the Firebase JS SDK; no backend/API routes of its own",
+      "uses_orm": false,
+      "orm_or_db_layer": "Firebase Firestore client SDK (firebase/firestore) used directly from a client-side service module (getDoc on a single 'directory/all_sites' document); no server-side data layer, no ORM, no writes from the app",
+      "api_design": "None — no REST/GraphQL endpoints; data fetched client-side directly from Firestore, cached in sessionStorage for 30 minutes",
+      "separation_of_concerns": "Reasonable for its size: hooks/useSites.ts wraps services/sitesService.ts wraps lib/firebase.ts, with data/categories.ts and data/sites.ts as typed constants",
+      "modularity": "Small, flat structure (components, hooks, services, lib, data, locales); everything fits in ~716 LOC",
+      "notable_patterns": [
+        "Client-side session caching of Firestore reads",
+        "next-intl i18n middleware for es/en locales",
+        "Category-based client-side filtering with a custom fuzzy-match search function"
+      ]
+    },
+    "code_organization": {
+      "score": 3,
+      "directory_structure": "Clear conventional Next.js layout (src/app, components, hooks, services, lib, data, locales) appropriate for the app's small scope",
+      "naming_quality": "Consistent, descriptive naming (WebSiteItem, useSites, sitesService, CategoryId)",
+      "documentation_quality": "README is a compelling mission statement (origin story, how to contribute) but has zero technical/setup documentation (no env var list, no install/run instructions beyond implicit npm scripts)",
+      "reasoning": "Well-organized for its size but the codebase is extremely thin (~716 LOC total) — essentially a single-page directory listing app with almost no business logic."
+    },
+    "production_readiness": {
+      "score": 2,
+      "has_auth": false,
+      "has_error_handling": true,
+      "has_logging": false,
+      "has_env_config": true,
+      "has_deploy_config": false,
+      "secrets_handling": "Firebase config uses NEXT_PUBLIC_ env vars (expected/acceptable for Firebase client SDK, but there is no .env.example in the repo and no documentation of required vars), .env*.local is gitignored",
+      "security_notes": "No Firestore security rules are present in the repo (data is presumably admin-managed elsewhere), no authentication/authorization anywhere in the app, no rate limiting, no input validation beyond a client-side search filter — acceptable only because the app is read-only public content, but there is no visibility into how the single Firestore document is written/moderated",
+      "scalability_notes": "Entire directory is stored as one Firestore document fetched wholesale on load; fine for tens/hundreds of entries but this pattern doesn't scale to large datasets or support server-side pagination/search",
+      "reasoning": "Only a Dockerfile.dev (development-mode Docker, running `npm run dev`) exists — there is no production Dockerfile, no CI/CD workflow (the only .github file is CODEOWNERS), and no tests of any kind. Error handling exists (try/catch with a user-facing retry UI) but overall this is a lightly-productionized static content directory, not a robust system."
+    },
+    "maturity": {
+      "score": 2,
+      "has_readme": true,
+      "has_tests": false,
+      "has_ci": false,
+      "is_real_or_boilerplate": "Real, working code (not generic AI boilerplate) — it's a genuine, functioning small app reportedly live at sismove.info — but the scope is minimal: a single searchable/filterable card grid pulling from one Firestore doc, no server logic, no tests, no CI.",
+      "reasoning": "25 commits, single contributor, no tests, no CI/CD pipeline, no production deployment config in-repo; README focuses on mission/community rather than engineering rigor."
+    },
+    "viability": {
+      "score": 3,
+      "reasoning": "It is a simple, low-risk, already-deployed link directory that genuinely helps route people to other resources (hospitals, missing-persons lists, donation centers) during the earthquake response, and its simplicity is itself a virtue for fast, reliable operation; however it provides no unique functionality beyond curating external links, has no tests/CI/production Docker config, and its usefulness is entirely dependent on the quality/freshness of a single manually-maintained Firestore document with no visible moderation or update workflow in the code."
+    },
+    "key_features": [
+      "Bilingual (es/en) categorized directory of contingency-related websites/resources (missing persons, hospitals, donations, pets, volunteering, maps)",
+      "Client-side fuzzy search and category filtering over the directory list",
+      "SessionStorage caching of Firestore reads (30 min TTL) to reduce reads",
+      "Retro/pixel-art themed responsive UI with Venezuela flag color branding",
+      "Loading/error states with a manual retry button on Firestore fetch failure"
+    ],
+    "domain_tags": [
+      "people-finder",
+      "shelter-mapping",
+      "donations-aid",
+      "medical-health",
+      "volunteer-coordination",
+      "mapping-geo"
+    ],
+    "merge_potential": "Best used as a lightweight, standalone landing/directory page (e.g., embedded or linked from a more feature-rich hub) rather than merged code-wise into another project, since it has no shared data model, no API, and no auth to integrate with other tools; its Firestore 'directory' document schema (WebSiteItem list) could however be adopted as a simple resource-linking convention by other Build4Venezuela projects.",
+    "red_flags": [
+      "No automated tests of any kind",
+      "No CI/CD workflow (only a CODEOWNERS file under .github)",
+      "No production Dockerfile — only Dockerfile.dev running `next dev`",
+      "No Firestore security rules in-repo and no documentation of how the single 'directory/all_sites' document is authored/moderated, so data integrity/trust cannot be verified from the code",
+      "Single contributor, only 25 commits, project created 3 days before this review (2026-06-28)"
+    ],
+    "summary": "Sismo Vzla is a small, real, and already-live (sismove.info) bilingual Next.js directory app that curates and lets users search/filter external contingency resources (missing persons, hospitals, donation centers, volunteering, maps) for the Venezuela earthquake response. It reads a single Firestore document client-side via the Firebase SDK, has no backend, auth, tests, CI, or production Docker config, and is essentially a well-executed but very thin 'link aggregator' rather than a full-featured aid platform.",
+    "project_type": "web app (Next.js client-rendered directory/link-aggregator)",
+    "stack": {
+      "frontend": [
+        "Next.js 14 (App Router)",
+        "React 18",
+        "TypeScript",
+        "Tailwind CSS",
+        "next-intl (i18n)"
+      ],
+      "backend": [],
+      "database": [
+        "Firebase Firestore (client SDK, read-only)"
+      ],
+      "infra_deploy": [
+        "Docker (dev-only Dockerfile.dev + docker-compose)",
+        "implied Vercel/static hosting for sismove.info (no config in repo)"
+      ],
+      "ai_ml": [],
+      "languages": [
+        "TypeScript",
+        "JavaScript",
+        "CSS"
+      ]
+    }
+  },
+  "signals": {
+    "accessible": true,
+    "stars": 1,
+    "forks": 1,
+    "contributors": 1,
+    "commit_count": 25,
+    "code_loc": 716,
+    "created_at": "2026-06-28T17:47:29Z",
+    "pushed_at": "2026-07-01T06:55:00Z",
+    "license": null,
+    "languages_bytes": {
+      "TypeScript": 25955,
+      "CSS": 799,
+      "JavaScript": 324
+    },
+    "archived": false
+  },
+  "evaluation": {
+    "diffusion": {
+      "score": 2,
+      "ready_to_promote": false,
+      "available_assets": [
+        "clear-value-prop",
+        "branding",
+        "live-demo"
+      ],
+      "recommended_angle": "Position as an open-source 'yellow pages' for the earthquake response — one bilingual link to find missing-persons lists, hospitals, donation centers, and risk maps instead of scattered social media posts. Hold the push until the live directory reliably loads content and has a visible, credible pipeline for who curates/verifies the linked resources.",
+      "gaps": [
+        "Live demo currently shows only a 'Cargando directorio...' loading state with no visible content in an automated fetch — needs manual browser verification that Firestore data actually renders for end users",
+        "No demo video or screenshots to show the populated directory in action",
+        "No documented data moderation/update process, so donors/press can't be told how fresh or trustworthy the listed resources are",
+        "No tests, CI, or production deploy config — a single-document Firestore backend fetched wholesale is fragile at any real traffic spike"
+      ]
+    },
+    "impact_potential": 3,
+    "live_demo_notes": "WebFetch on https://www.sismove.info/es rendered a page shell with the full category navigation (Ver Todo, Desaparecidos, Niños, Mascotas, Hospitales, Ayudas/Donaciones, Voluntariado, Denuncias, Mapas de Riesgo, Aportar) but the content area only showed \"Cargando directorio...\" (Loading directory...) with no directory entries visible. This may be a limitation of the fetch tool not executing the client-side Firebase/Firestore JS fetch (the app is architected as client-side-only data loading per the insight JSON), rather than proof the site is truly broken — but it means the automated check could not confirm the directory actually populates with real resource links. A manual browser check is needed before promoting.",
+    "live_demo_status": "partial",
+    "one_line_pitch": "SismoVzla: las \"páginas amarillas\" del sismo — un solo hub bilingüe que centraliza desaparecidos, hospitales, refugios, donaciones y mapas de riesgo para no perderse en la avalancha de enlaces durante la emergencia.",
+    "overall_recommendation": "improve-first",
+    "problem_severity": "high",
+    "product_quality": 2,
+    "real_problem_reasoning": "During a disaster, critical links (missing-persons registries, hospital status, donation centers, shelters, risk maps) get scattered across social media, WhatsApp forwards, and ad-hoc threads, making them hard to find and easy to lose amid misinformation. A single, bilingual, categorized, searchable directory that curates and verifies these links addresses a well-known and recurring pain point in emergency response (info fragmentation), and is genuinely useful to both victims and NGOs/international responders. However, the project itself is a thin link-aggregator (716 LOC, single Firestore document, no visible moderation workflow) rather than a feature-rich aid platform, so its real-world impact depends entirely on how well-populated and maintained the underlying resource list is — something not verifiable from the code or a quick live check.",
+    "solves_real_problem": "partial"
+  }
+}

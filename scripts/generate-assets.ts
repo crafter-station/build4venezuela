@@ -9,6 +9,7 @@
  * Outputs (idempotent — safe to re-run):
  *   - public/og.png          1200x630  (Open Graph)
  *   - public/og-twitter.png  1200x600  (Twitter / X)
+ *   - public/assets/og-*.jpg 1200x630  (country Open Graph images)
  *   - public/favicon.ico     16/32/48  (multi-size ICO)
  *   - src/app/favicon.ico    (same bytes — this is the one Next.js serves)
  *
@@ -98,6 +99,29 @@ function canvas(w: number, h: number, markTop: number, markH: number): string {
   </svg>`;
 }
 
+function countryCanvas(
+  w: number,
+  h: number,
+  country: string,
+  tagline: string,
+): string {
+  const centerX = w / 2;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
+    <rect width="${w}" height="${h}" fill="${COLOR.bg}" />
+    ${texture(w, h)}
+    <text x="${centerX}" y="118" text-anchor="middle"
+      font-family="${FONT}" font-weight="700" font-size="22"
+      letter-spacing="10" fill="${COLOR.accent}">BUILD4LATAM</text>
+    <text x="${centerX}" y="310" text-anchor="middle"
+      font-family="${FONT}" font-weight="900" font-size="96"
+      letter-spacing="3" fill="${COLOR.fg}">${country.toUpperCase()}</text>
+    <rect x="${centerX - 50}" y="354" width="100" height="4" fill="${COLOR.primary}" />
+    <text x="${centerX}" y="438" text-anchor="middle"
+      font-family="${FONT}" font-weight="500" font-size="30"
+      letter-spacing="2" fill="${COLOR.fg}">${tagline}</text>
+  </svg>`;
+}
+
 /** Recolor the V-mark to brand yellow and seat it on a rounded black tile. */
 function faviconSvg(size: number): string {
   const raw = readFileSync(VMARK, "utf8");
@@ -169,6 +193,18 @@ async function makeOg(w: number, h: number, out: string): Promise<void> {
   console.log(`✓ ${out.replace(`${ROOT}/`, "")}  (${w}×${h})`);
 }
 
+async function makeCountryOg(
+  country: string,
+  tagline: string,
+  out: string,
+): Promise<void> {
+  mkdirSync(dirname(out), { recursive: true });
+  await sharp(Buffer.from(countryCanvas(1200, 630, country, tagline)))
+    .jpeg({ quality: 90 })
+    .toFile(out);
+  console.log(`✓ ${out.replace(`${ROOT}/`, "")}  (1200×630)`);
+}
+
 async function makeFavicon(): Promise<void> {
   const sizes = [16, 32, 48];
   const entries = await Promise.all(
@@ -193,5 +229,20 @@ async function makeFavicon(): Promise<void> {
 
 await makeOg(1200, 630, join(PUBLIC, "og.png"));
 await makeOg(1200, 600, join(PUBLIC, "og-twitter.png"));
+await makeCountryOg(
+  "Latam",
+  "Tecnologia en solidaridad.",
+  join(PUBLIC, "assets/og-latam.jpg"),
+);
+await makeCountryOg(
+  "Colombia",
+  "Herramientas abiertas para Colombia.",
+  join(PUBLIC, "assets/og-colombia.jpg"),
+);
+await makeCountryOg(
+  "Venezuela",
+  "Herramientas abiertas para Venezuela.",
+  join(PUBLIC, "assets/og-venezuela.jpg"),
+);
 await makeFavicon();
 console.log("\nBrand assets generated.");

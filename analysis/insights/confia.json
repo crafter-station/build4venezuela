@@ -10,104 +10,101 @@
   "db_description": "# Confía 🇻🇪 — Verify before you believe. Verify before you donate.\n\n**Live:** https://confia-rose.vercel.app\n\n## What did you build?\n\nConfía is a **zero-onboarding verifier** for the aftermath of the June 2026  Venezuela earthquake. It has one magic box: **paste anything.**\n\n- Paste a **forwarded WhatsApp message / rumor** → Confía tells you if it's  **VERIFICADO**, **FALSO**, or **SIN CONFIRMAR**, with its source.\n- Paste a **crypto donation address** → Confía runs **live on-chain forensics**  and returns a 🔴 / 🟡 / 🟢 scam-risk verdict (account age, history, balances,  activity). If it can't clear the address, it shows the **official verified    addresses** to donate to instead.\n\nOne engine, three surfaces that share the same verdict logic: a **web app** (the viral, no-install, WhatsApp-shareable hero), a **JSON API**, and a **Telegram bot**.\n\nAround that core it also ships a **multi-chain verified-donation allowlist**  (Solana, Ethereum/Base/Polygon/Monad/HyperEVM, Bitcoin, Sui) with address-poisoning defense, a set of **SEO guides** that pull in organic search traffic and funnel it to the verifier, and an optional, conservative **AI long-tail** answerer powered by donated inference.\n\n## The non-obvious angle (why it's different)\n\nConfía builds the rail that **inspects crypto to protect people FROM the donation scams those rails amplify.** That's the single most crypto-shaped harm of this disaster: a high-USDT-adoption country with a large, scam-targeted diaspora. And it leans into the two unglamorous categories the crypto crowd skips — **rumor control and scam defense** — using the one capability only a chain-native builder ships:  on-chain wallet forensics.\n\n## Who is it for?\n\n- **Families inside Venezuela**, often on basic phones with patchy connectivity:\n \"is this rumor real?\", \"where do I get help?\", \"is this 'official' account legit?\" — no app, no wallet, no login.\n- **The diaspora and donors abroad**, flooded with scam DMs: \"is this 'relief fund' wallet a scam?\", \"how do I donate safely?\"\n- **Volunteers, journalists and responders** who need a fast, sourced second opinion before they share.\n\n## How does it help?\n\n1. **A single source of truth in the chaos.** In the first 72 hours the bottleneck is always the same — who and what is real. Confía turns \"I don't know if this is true\" into an answer in seconds, the way Venezuelans already work: by forwarding a message or a link.\n2. **Live on-chain forensics (the unfair advantage).** For Solana addresses it reads the chain in real time (Helius, with a public-RPC fallback): account age, transaction history, and SOL + USDT/USDC-SPL balances and activity. A \"donation\" wallet created three hours ago with no history is flagged 🔴 — and it **never** claims an address is \"100% safe\".\n3. **Conservative by design — it won't hurt you.** A wrong \"all clear\" can endanger someone, so Confía fails toward caution: it never asserts current facts it can't verify, defaults to SIN CONFIRMAR on safety-critical questions (shelters, medical), and a FALSO verdict can only fire on a specific known-misinformation pattern — never on two coincidental keywords. Every verdict cites its source and always shows official channels (FUNVISIS, Protección Civil, Cruz Roja, 911/171).\n4. **Verified donations + anti-impersonation.** A human-curated, multi-chain  allowlist clears official addresses (even brand-new ones) as ✅, surfaces them   as the safe place to give when a pasted address is unverifiable, and flags **lookalike / address-poisoning** wallets (same first and last characters as a real one) as 🔴.\n5. **Fights the misinformation layer.** Grounded in real fact-checkers (Factchequeado, Maldita.es) and science (USGS): it debunks the deadly \"an  aftershock of magnitude X is coming at 6 PM\" myth, recycled videos, fake tsunami/blackout alerts, and Sistema Patria \"bono\" phishing.\n6. **Built for crisis conditions.** Spanish-first (Venezuelan register), mobile-first, installable PWA, works with intermittent power/internet, degrades gracefully when an RPC or source is down, and spreads with a shareable link — no platform approval, no install.\n\n## Tech\n\nNext.js 16 (App Router) · React 19 · Tailwind v4 · Bun · deployed on Vercel.\nForensics is raw JSON-RPC with multi-endpoint fallback (no heavy SDK). One shared verdict engine across web, API and Telegram. Vercel Analytics, dynamic OG cards,\nJSON-LD + sitemap/robots for SEO. The optional donated-inference LLM only handles the long tail (KB and forensics always run first), is rate-limited per IP, and fails closed to a safe \"no puedo confirmar\". No accounts and no database are required to run — it works out of the box on public RPC with built-in curated data.\n\n## What should people try first?\n\nOpen **https://confia-rose.vercel.app** and paste these, one at a time:\n\n1. 💸 **A scam \"donation\" wallet** —\n`Ayuda a las víctimas, envía tu donación a 5tNZjhKDDJvD52ioU3JimVafBmAjpkYyKhv2xUAbtZNZ`\n→ **🔴 ALTO RIESGO** (\"created hours ago, no history\") + the safe official  addresses.\n\n2. 🚨 **A fake aftershock rumor** — `URGENTE: viene una réplica de magnitud 8.0 hoy a las 6 PM` → **🚫 FALSO** (earthquakes can't be predicted), with the source.\n\n3. ✅ **A verified donation address** — `59aQtUWWU2VVU5QZySUxLy3VDsYkoeVZuVU8J4zJmMVq` → **✅ Verified channel.**\n\n4. 🏥 Ask **\"¿dónde está el refugio más cercano?\"** → a conservative \"consulta el  canal oficial\" + emergency numbers (it won't guess on safety-critical info).  Then tap **Compartir por WhatsApp** on any verdict — that's how it spreads.",
   "lifecycle_status": "ready_to_use",
   "analysis": {
-    "summary": "Confía is a zero-onboarding misinformation and donation-scam verifier built for the June 2026 Venezuela earthquake. Users paste any forwarded WhatsApp message or crypto wallet address and receive a VERIFICADO / FALSO / SIN CONFIRMAR verdict backed by a curated Spanish knowledge base, live Solana on-chain forensics, and an optional fail-closed Claude LLM fallback. Three surfaces share one engine: a web UI (Vercel-deployed), a REST API, and a Telegram bot. The codebase is small (~3 800 LOC, TypeScript), stateless (no database), and shows unusually thoughtful design for a two-day hackathon build — conservative bias is a first-class architectural constraint, not an afterthought.",
-    "project_type": "Web app + REST API + Telegram bot (Next.js 16 / React 19, serverless on Vercel)",
-    "stack": {
-      "frontend": [
-        "Next.js 16",
-        "React 19",
-        "Tailwind CSS v4"
-      ],
-      "backend": [
-        "Next.js App Router API routes",
-        "Node.js runtime"
-      ],
-      "database": [],
-      "infra_deploy": [
-        "Vercel",
-        "Vercel Analytics"
-      ],
-      "ai_ml": [
-        "Anthropic SDK (claude-sonnet-4-6, optional, fail-closed)",
-        "Solana JSON-RPC multi-endpoint forensics"
-      ],
-      "languages": [
-        "TypeScript",
-        "CSS"
-      ]
-    },
     "architecture": {
-      "pattern": "Serverless, stateless Next.js App Router with a single shared verdict engine",
+      "pattern": "Next.js 16 App Router monolith with a single orchestrator library (lib/verdict.ts) called by three thin surfaces (web page, /api/verify JSON API, /api/telegram webhook)",
       "uses_orm": false,
-      "orm_or_db_layer": "No database — all knowledge is static TypeScript data files (rumors, resources, official channels, verified wallets). Live data comes exclusively from Solana JSON-RPC calls.",
-      "api_design": "REST: POST /api/verify returns a typed Verdict JSON. POST /api/telegram handles Telegram webhooks. GET /api/health returns service status. Single getVerdict() function is called by all three surfaces.",
-      "separation_of_concerns": "Clean: lib/ owns all business logic (classify, forensics, verdict orchestration, LLM, rate limit, knowledge data); app/api/* routes are thin adapters; components/ are pure presentation. No logic duplicated across surfaces.",
-      "modularity": "lib/knowledge/*.ts isolates editable data from code paths — new rumors/wallets can be added without touching routing or rendering logic. ForensicResult and Verdict types are shared contract.",
+      "orm_or_db_layer": "No database. Stateless: knowledge base is TypeScript data modules (lib/knowledge/*.ts), rate limiting is an in-memory Map (explicitly documented as per-instance/best-effort, not durable), and wallet data is fetched live from Solana JSON-RPC on each request.",
+      "api_design": "Two small REST-ish endpoints (POST /api/verify, POST /api/telegram) plus a GET /api/health. Clean typed request/response contracts (VerifyResponse, Verdict union) shared with the frontend.",
+      "separation_of_concerns": "Strong: classify.ts (routing) -> forensics.ts (on-chain) / knowledge/* (rumor and resource matching) / llm.ts (fallback AI) all feed into verdict.ts, which is the only place that builds the final typed Verdict. Surfaces (page.tsx, API routes, Telegram) never duplicate logic.",
+      "modularity": "High for a codebase this size — clear single-responsibility files, no circular sprawl, explicit conventions documented in CLAUDE.md/AGENTS.md.",
       "notable_patterns": [
-        "Conservative-by-default: never asserts 'safe', defaults to SIN_CONFIRMAR on any doubt",
-        "Multi-endpoint fallback for Solana RPC with last-good-endpoint memory",
-        "Address-poisoning lookalike detection (head+tail prefix matching against verified allowlist)",
-        "FALSO verdict gated on regex pattern match only — stray keywords cannot brand a message false",
-        "LLM disabled by default, per-client rate-capped, instructed to have no live internet assumption",
-        "In-memory sliding-window rate limiter with documented serverless caveat"
+        "Fail-closed security defaults (Telegram webhook requires shared secret in production, LLM defaults off, wallet risk defaults to caution not safe)",
+        "Multi-endpoint RPC fallback with automatic 'preferred endpoint' stickiness",
+        "Regex pattern + keyword scoring classifier with an explicit safety guard so a FALSO verdict can only fire on a strong pattern match, not stray keywords",
+        "Address-poisoning/lookalike detection against a verified-wallet allowlist",
+        "Per-client sliding-window rate limiting shared across web, API, and Telegram, plus a separate per-hour cap on donated LLM calls"
       ]
     },
     "code_organization": {
-      "score": 5,
-      "directory_structure": "Textbook: lib/ (logic), app/ (Next.js routes + pages), components/ (UI), lib/knowledge/ (data). No circular deps, no god files.",
-      "naming_quality": "Excellent — files, functions, and types are descriptive and consistent (getVerdict, analyzeAddress, extractAddresses, ForensicResult, WalletSignal, RiskLevel, InfoStatus).",
-      "documentation_quality": "High for a hackathon: every file has a top-level comment stating its role and constraints. Critical design rules are captured in CLAUDE.md/AGENTS.md. Rate limiter documents its serverless limitation inline.",
-      "reasoning": "This is among the cleanest hackathon codebases possible. Architecture comments, naming, type definitions, and data/logic separation all reflect deliberate engineering rather than speed-coding. The main gap is the complete absence of tests."
+      "score": 4,
+      "directory_structure": "Idiomatic small Next.js layout: app/ (routes), components/ (2 UI components), lib/ (business logic) with lib/knowledge/ for curated data. Everything has an obvious home.",
+      "naming_quality": "Consistently descriptive (getVerdict, analyzeAddress, extractAddresses, buildWalletVerdict) with Spanish-language user-facing strings kept separate from English code identifiers.",
+      "documentation_quality": "Unusually good for a hackathon repo: header comments in every lib file explain intent and tradeoffs, plus a CLAUDE.md/AGENTS.md with explicit non-negotiable design rules and a detailed README with architecture diagram and env var table.",
+      "reasoning": "Small (3.7k LOC), single-contributor, but deliberately organized with real inline rationale comments rather than boilerplate; loses a point only for total absence of tests."
     },
     "production_readiness": {
       "score": 3,
       "has_auth": false,
       "has_error_handling": true,
-      "has_logging": true,
+      "has_logging": false,
       "has_env_config": true,
-      "has_deploy_config": true,
-      "secrets_handling": "API keys and tokens are environment variables. Telegram webhook secret is validated (fail-closed in production if absent). No secrets hardcoded.",
-      "security_notes": "Telegram route fails 403 if WEBHOOK_SECRET not set in production. Input truncated to 4000 chars. Rate limiting is per-IP best-effort. No CORS policy set in next.config.ts (default permissive). No auth needed by design (zero-onboarding product).",
-      "scalability_notes": "Stateless serverless design scales horizontally on Vercel. In-memory rate limiter is per-instance, not global — documented in code but means determined abusers on many IPs can bypass it. Solana RPC fan-out up to 5 addresses + 4 ATAs per request could hit timeout under load. No persistent cache.",
-      "reasoning": "The app runs correctly in its current state and handles errors gracefully (fail closed on RPC/LLM errors, rate limited, input validated). The main production gaps are: no global rate limiting (needs Upstash or similar), no tests, no CI, and no observability beyond a health endpoint and Vercel Analytics."
+      "has_deploy_config": false,
+      "secrets_handling": "Secrets (ANTHROPIC_API_KEY, TELEGRAM_BOT_TOKEN, TELEGRAM_WEBHOOK_SECRET, RPC URLs) are read from process.env only, never hardcoded; README documents them but no .env.example file is actually committed to the repo despite being referenced in the README's 'cp .env.example .env.local' instruction (that file is missing).",
+      "security_notes": "Telegram webhook fails closed without a secret in production; LLM path fails closed on any error/refusal; classify.ts has an explicit safety guard against false 'FALSO' verdicts from stray keywords; rate limiting exists on all input surfaces. However, no auth is needed since it's a public read-only tool, and address-poisoning/lookalike checks show real threat-modeling for the donation-scam domain.",
+      "scalability_notes": "In-memory rate limiter is explicitly per-instance on serverless (won't hold under multi-instance scale-out or abuse); Solana forensics does up to 1000-signature RPC scans plus token-account sub-scans per request with an 8s timeout and multi-endpoint fallback — reasonable for MVP traffic but could get slow/costly under load without caching.",
+      "reasoning": "No auth needed (public tool), decent fail-closed error handling and env-based config, but no logging/observability beyond console.error, no CI/CD or Dockerfile, no committed .env.example, and rate limiting is best-effort only — solid MVP hardening but not enterprise-grade ops."
     },
     "maturity": {
-      "score": 2,
+      "score": 3,
       "has_readme": true,
       "has_tests": false,
       "has_ci": false,
-      "is_real_or_boilerplate": "Real, functional product — not boilerplate. The forensics engine, knowledge base, and Telegram integration are all working custom code. The rumor knowledge base contains 12 sourced, pattern-matched entries specific to the June 2026 Venezuela earthquakes.",
-      "reasoning": "7 commits across 2 days from a single contributor. The code is well-structured and deployed (confia-rose.vercel.app), but there are zero tests and no CI pipeline. The verified-wallet allowlist points exclusively to Confía's own donation addresses rather than established NGOs, which is a governance concern."
+      "is_real_or_boilerplate": "Real, working logic — not boilerplate. On-chain forensics, regex-based misinformation classification, and a fail-closed LLM fallback are all genuinely implemented with real edge-case handling (address poisoning, multi-address messages, capped tx sampling, stablecoin balances).",
+      "reasoning": "7 commits over ~1 day by a single contributor; live at confia-rose.vercel.app; no automated tests or CI pipeline at all, which is the main gap for a tool meant to give risk verdicts to disaster victims."
     },
     "viability": {
       "score": 4,
-      "reasoning": "The concept directly targets the highest-probability harm vector in a crypto-aware diaspora disaster response: donation scams. It requires no install, no account, and works from a shared WhatsApp link — exactly how information spreads in Venezuela. The Solana forensics are real and running live. Conservative-by-default design means false positives (calling something safe when it isn't) are structurally minimized. Primary viability risk is the verified-wallet list linking to the project's own addresses rather than established relief organizations, which could undermine trust."
+      "reasoning": "A zero-onboarding, no-wallet, no-login web/Telegram tool that runs real Solana on-chain forensics and a curated Spanish misinformation KB is directly deployable today and addresses a concrete, well-scoped harm (donation scams and misinformation after the Venezuela earthquake); main risks to production use are the lack of tests/CI and the per-instance rate limiter under real scale, but the core logic is sound and conservative by design."
     },
     "key_features": [
-      "Live Solana on-chain forensics: account age, tx count, stablecoin balances, swept-wallet and high-velocity heuristics",
-      "Multi-chain address detection (Solana, EVM, Tron, Bitcoin, Sui) with chain-appropriate handling",
-      "Address-poisoning lookalike detection against verified allowlist",
-      "Curated Spanish rumor knowledge base (12 entries) sourced from FUNVISIS, Factchequeado, USGS, Maldita.es, INFOVERITAS",
-      "Pattern-gated FALSO verdicts — stray keywords cannot falsely brand a message",
-      "Optional fail-closed LLM (Claude) for long-tail queries, disabled by default, per-client rate-capped",
-      "Telegram bot surface using the same verdict engine",
-      "WhatsApp one-tap share built into every verdict",
-      "In-memory rate limiting per IP (with documented serverless caveat)",
-      "Health check endpoint with RPC/Telegram config status"
+      "Live Solana on-chain forensics (account age, tx count, SOL/USDT/USDC balances) with multi-RPC-endpoint fallback to flag scam donation wallets",
+      "Multi-chain address detection (Solana, EVM, Tron, Bitcoin, Sui) with honest 'can't deep-verify' messaging for non-Solana chains",
+      "Verified-wallet allowlist plus address-poisoning/lookalike detection to catch copy-paste impersonation scams",
+      "Curated, sourced Spanish rumor knowledge base (FUNVISIS, USGS, Cruz Roja, fact-checkers) with pattern-gated FALSO verdicts to avoid false positives",
+      "Three surfaces on one shared engine: web UI, JSON API (/api/verify), and a Telegram bot webhook",
+      "Fail-closed, rate-capped donated-LLM fallback for long-tail queries that never asserts unverifiable current facts",
+      "Per-client rate limiting across all surfaces and a separate cap on AI calls to conserve donated inference credits",
+      "One-tap WhatsApp-shareable verdict text for viral spread in the target community"
     ],
     "domain_tags": [
       "donations-aid",
-      "alerts-notifications",
-      "comms-chat"
+      "seismic-data",
+      "comms-chat",
+      "alerts-notifications"
     ],
-    "merge_potential": "High standalone viability — already deployed, Spanish-first, no-install, directly combats donation fraud which other hackathon projects (donation rails) inadvertently amplify. Could be integrated as a verification widget or linked from any donation UI. The clean REST API (POST /api/verify) makes embedding straightforward.",
+    "merge_potential": "Could serve as a standalone misinformation/scam-verification module that other Build4Venezuela projects (e.g. donation platforms, shelter-mapping apps) embed or link to for wallet-risk checks and rumor debunking before users act — its typed Verdict API and Telegram bot make it easy to integrate as a shared trust layer rather than a full merge.",
     "red_flags": [
-      "Verified-wallet allowlist contains only Confía's own donation addresses — no Cruz Roja, UNICEF, or other established NGO addresses are pre-verified, undermining the core trust proposition",
-      "In-memory rate limiter resets on every cold start; on a viral traffic spike across many serverless instances it provides no global protection against RPC quota exhaustion or LLM abuse",
-      "Zero tests — the forensics heuristics and pattern-matching logic have no automated coverage",
-      "No CI pipeline — a bad rumor entry or wrong wallet address could ship without any gate",
-      "next.config.ts is empty (default config) — no security headers, no CSP, no CORS restrictions"
-    ]
+      "No automated tests or CI despite giving safety-relevant risk verdicts to disaster victims",
+      "In-memory rate limiter is per-serverless-instance only, not a real global guard against abuse at scale",
+      "README references a .env.example file that is not actually committed to the repo",
+      "Single contributor, ~1 day of commits, no code review process visible",
+      "No logging/observability infrastructure beyond console.error for a public-facing production tool"
+    ],
+    "summary": "Confía is a genuinely well-engineered, single-purpose Next.js tool for the Venezuela earthquake response: paste a forwarded message or crypto address and get a conservative VERIFICADO/FALSO/SIN CONFIRMAR verdict, backed by real Solana on-chain forensics (multi-RPC, address-poisoning detection, verified-wallet allowlist) and a curated, sourced Spanish rumor knowledge base, exposed via web, JSON API, and Telegram bot on one shared orchestrator engine. The code is small (3.7k LOC) but has real logic throughout — not boilerplate — with thoughtful fail-closed security defaults, though it ships with zero tests, no CI, and no committed .env.example.",
+    "project_type": "Web app + API + Telegram bot (misinformation and crypto-donation-scam verifier)",
+    "stack": {
+      "frontend": [
+        "Next.js 16 (App Router)",
+        "React 19",
+        "Tailwind CSS v4"
+      ],
+      "backend": [
+        "Next.js API routes (Node runtime)"
+      ],
+      "database": [],
+      "infra_deploy": [
+        "Vercel",
+        "Bun (package manager/runtime for scripts)"
+      ],
+      "ai_ml": [
+        "Anthropic SDK (@anthropic-ai/sdk) — optional donated-inference fallback (claude-sonnet-4-6 by default)"
+      ],
+      "languages": [
+        "TypeScript",
+        "CSS",
+        "JavaScript"
+      ]
+    }
   },
   "signals": {
     "accessible": true,
@@ -128,12 +125,12 @@
   },
   "evaluation": {
     "solves_real_problem": "yes",
-    "real_problem_reasoning": "Donation scams and viral misinformation are documented, high-velocity harms in every major disaster — and Venezuela's high USDT/crypto adoption plus a large diaspora make this context particularly acute. In the first 72 hours after the June 2026 earthquake, fake aftershock warnings, recycled videos, phishing \"bono\" messages, and scam wallet addresses all circulate faster than any official channel can correct them. Confía directly intercepts that harm at the moment of decision: when someone is about to forward a rumor or send crypto. The no-install, WhatsApp-shareable design matches exactly how information (and misinformation) spreads inside Venezuela.",
+    "real_problem_reasoning": "Directly targets two acute, well-documented post-disaster harms in Venezuela: (1) viral misinformation/rumors (fake aftershock predictions, fake tsunami/blackout alerts, phishing) that can cause panic or endanger people, and (2) crypto donation scams targeting a high-USDT-adoption diaspora trying to send relief funds. It offers a zero-onboarding, no-login, no-wallet paste-and-verify tool with real on-chain forensics (Solana account age/history/balances via Helius with RPC fallback), an address-poisoning/lookalike detector, a verified multi-chain donation allowlist, and a sourced Spanish-language misinformation knowledge base (FUNVISIS, USGS, Cruz Roja, fact-checkers) with conservative fail-closed defaults (never falsely says 'safe', defaults to SIN CONFIRMAR on safety-critical questions). This is a concrete, scoped, victim/donor-facing utility, not generic tech.",
     "problem_severity": "high",
-    "impact_potential": 4,
+    "impact_potential": 5,
     "product_quality": 4,
     "live_demo_status": "working",
-    "live_demo_notes": "The app loads cleanly at https://confia-rose.vercel.app/ and presents a functional verification interface — not just a landing page. The paste-and-verify input is front and center, verified donation addresses across multiple chains are listed with copy-to-clipboard, official emergency channels (FUNVISIS, Cruz Roja, 911/171) are surfaced, and the WhatsApp share flow is built in. Live Solana forensics via Helius appear active. The tool is genuinely usable right now with zero onboarding.",
+    "live_demo_notes": "WebFetch on https://confia-rose.vercel.app/ confirms a real interactive tool, not just a static landing page: a verification text input ('Ctrl/Cmd+Enter to verify'), three verification categories (rumors, crypto wallets, resources), 8 verified multi-chain donation addresses with copy-to-clipboard, methodology transparency, and official emergency contacts (911/171). This matches the technical analysis (Next.js 16 app, verdict.ts orchestrator, live Solana JSON-RPC forensics, curated KB) — the product is genuinely functional and testable live today, not vaporware.",
     "diffusion": {
       "score": 4,
       "ready_to_promote": true,
@@ -142,15 +139,15 @@
         "clear-value-prop",
         "branding"
       ],
-      "recommended_angle": "Lead with the scam-wallet forensics angle: 'Before you donate, paste the address.' That is the most concrete, shareable, and instantly understandable use case for the diaspora audience. Secondary angle for inside Venezuela: 'Paste the rumor, get the truth in seconds — no app, no login.' Pair with a 30-second screen recording of the two demo flows (scam wallet → red flag, fake aftershock rumor → FALSO) and it becomes highly shareable on Twitter/X, WhatsApp channels, and Venezuelan diaspora Telegram groups.",
+      "recommended_angle": "'Verifica antes de creer, verifica antes de donar' — paste any WhatsApp rumor or crypto donation wallet from the Venezuela earthquake relief effort and get an instant VERIFICADO/FALSO/SIN CONFIRMAR verdict with on-chain scam forensics, in seconds, no app or login needed.",
       "gaps": [
-        "No demo video — a 30-second screen recording of both key flows would dramatically increase shareability",
-        "No screenshots provided for social cards or press kits",
-        "Verified-wallet allowlist contains only the project's own addresses, not Cruz Roja or UNICEF — this needs to be disclosed or fixed before heavy promotion to avoid trust backlash",
-        "No real users / adoption signals yet (2 stars, 1 contributor, 7 commits)"
+        "No demo video — a 30-60s screen recording showing the three example pastes (scam wallet, fake rumor, verified address) from the README's own 'try this first' script would be extremely effective and cheap to produce",
+        "No screenshots captured/attached yet for social cards",
+        "No evidence of real usage/traction (stars=2, forks=0, single contributor, ~1 day of commits) — 'real-users' asset not yet earned",
+        "Zero automated tests/CI for a tool giving safety-relevant verdicts is a credibility risk worth disclosing or fixing before a large promotional push"
       ]
     },
-    "overall_recommendation": "promote",
-    "one_line_pitch": "Pega cualquier rumor o dirección cripto en Confía y en segundos sabes si es verdad, falso o una estafa — sin instalar nada, sin registrarte."
+    "overall_recommendation": "spotlight",
+    "one_line_pitch": "Confía: paste any earthquake rumor or crypto donation wallet and get an instant, sourced VERIFICADO/FALSO/SIN CONFIRMAR verdict — real on-chain scam forensics and misinformation-busting for Venezuela, no app or login required."
   }
 }

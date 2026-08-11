@@ -5,6 +5,10 @@ import { getTranslations } from "next-intl/server";
 import { AuthorBadge } from "@/components/author-badge";
 import { ProjectMarkdown } from "@/components/project-markdown";
 import { ProjectVideoEmbed } from "@/components/project-video-embed";
+import { Badge } from "@/components/ui/badge";
+import { buttonVariants } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { routing } from "@/i18n/routing";
 import { timed } from "@/lib/log";
 import {
   canEditProject,
@@ -12,6 +16,11 @@ import {
   hasVoted,
   listComments,
 } from "@/lib/projects/store";
+import {
+  buildProjectJsonLd,
+  markdownExcerpt,
+  serializeJsonLd,
+} from "@/lib/projects/structured-data";
 import { withTimeout } from "@/lib/timeout";
 import { ProjectShell } from "../../project-shell";
 import { CommentsSection } from "./comments-section";
@@ -38,9 +47,59 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return { title: t("metadata.notFoundTitle") };
   }
 
+  const title = `${project.name} | Build4Latam`;
+  const description =
+    markdownExcerpt(project.descriptionMarkdown, 160) ||
+    t("metadata.description", { name: project.participantName });
+  const pageUrl = `/${locale}/p/${project.slug}`;
+  const openGraphImages = project.imageUrl
+    ? [{ url: project.imageUrl, alt: project.name }]
+    : [
+        {
+          url: "/assets/og-latam.jpg",
+          width: 1200,
+          height: 630,
+          alt: "Build4Latam",
+        },
+      ];
+  const twitterImages = project.imageUrl
+    ? [{ url: project.imageUrl, alt: project.name }]
+    : [
+        {
+          url: "/og-twitter.png",
+          width: 1200,
+          height: 600,
+          alt: "Build4Latam",
+        },
+      ];
+
   return {
-    title: `${project.name} | Build4Venezuela`,
-    description: t("metadata.description", { name: project.participantName }),
+    title,
+    description,
+    alternates: {
+      canonical: pageUrl,
+      languages: Object.fromEntries([
+        ...routing.locales.map((supportedLocale) => [
+          supportedLocale,
+          `/${supportedLocale}/p/${project.slug}`,
+        ]),
+        ["x-default", `/en/p/${project.slug}`],
+      ]),
+    },
+    openGraph: {
+      type: "website",
+      url: pageUrl,
+      siteName: "Build4Latam",
+      title,
+      description,
+      images: openGraphImages,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: twitterImages,
+    },
   };
 }
 
@@ -77,52 +136,77 @@ export default async function ProjectPage({ params }: Props) {
       ),
   );
 
+  const jsonLd = buildProjectJsonLd(
+    project,
+    `https://build4latam.com/${locale}/p/${project.slug}`,
+  );
+
   return (
     <ProjectShell>
+      <script
+        type="application/ld+json"
+        // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD serialized with < escaped to block </script> breakout
+        dangerouslySetInnerHTML={{
+          __html: serializeJsonLd(jsonLd),
+        }}
+      />
       <article className="px-5 py-16 sm:px-8 sm:py-20 lg:px-10">
-        <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
-          <aside className="lg:sticky lg:top-8 lg:self-start">
-            <p className="font-mono text-sm uppercase tracking-[0.28em] text-accent">
+        <div className="mx-auto grid max-w-6xl grid-cols-[minmax(0,1fr)] gap-10 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-16">
+          <aside className="min-w-0 lg:sticky lg:top-8 lg:self-start">
+            <p className="font-mono text-sm uppercase tracking-[0.28em] text-accent [overflow-wrap:anywhere]">
               /p/{project.slug}
             </p>
-            <h1 className="mt-5 font-mono text-[clamp(2.25rem,6vw,4.5rem)] font-black uppercase leading-[0.9] tracking-[-0.05em]">
+            <h1 className="type-page-title mt-5 font-mono font-black uppercase [overflow-wrap:anywhere]">
               {project.name}
             </h1>
-            <div className="mt-8 grid gap-px bg-border">
-              <div className="bg-background p-4">
-                <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">
-                  {t("builtBy")}
-                </p>
-                <AuthorBadge
-                  className="mt-3"
-                  imageClassName="size-12"
-                  imageUrl={project.ownerImageUrl}
-                  meta={project.participantName}
-                  name={project.ownerName || project.participantName}
-                  nameClassName="text-lg tracking-[0.08em]"
-                />
-              </div>
-              <div className="bg-background p-4">
-                <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">
-                  {t("countries")}
-                </p>
-                <p className="mt-2 font-mono text-lg uppercase tracking-[0.08em]">
-                  {project.countries.join(" / ")}
-                </p>
-              </div>
-              <div className="bg-background p-4">
-                <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">
-                  {t("status")}
-                </p>
-                <p className="mt-2 font-mono text-lg uppercase tracking-[0.08em] text-accent">
-                  {t(`statuses.${project.lifecycleStatus}`)}
-                </p>
-              </div>
-            </div>
+            <Card className="mt-8" size="sm">
+              <CardContent className="grid grid-cols-[minmax(0,1fr)] gap-5">
+                <div>
+                  <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">
+                    {t("builtBy")}
+                  </p>
+                  <AuthorBadge
+                    className="mt-3"
+                    imageClassName="size-12"
+                    imageUrl={project.ownerImageUrl}
+                    meta={project.participantName}
+                    name={project.ownerName || project.participantName}
+                    nameClassName="text-lg tracking-[0.08em]"
+                  />
+                </div>
+                <div className="border-t pt-5">
+                  <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">
+                    {t("countries")}
+                  </p>
+                  <p className="mt-2 font-mono text-lg uppercase tracking-[0.08em] [overflow-wrap:anywhere]">
+                    {project.countries.join(" / ")}
+                  </p>
+                </div>
+                <div className="border-t pt-5">
+                  <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">
+                    {t("status")}
+                  </p>
+                  <Badge
+                    className="mt-2 font-mono uppercase tracking-[0.08em]"
+                    variant="secondary"
+                  >
+                    {t(`statuses.${project.lifecycleStatus}`)}
+                  </Badge>
+                </div>
+                <div className="border-t pt-5">
+                  <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">
+                    {t("applicability")}
+                  </p>
+                  <Badge className="mt-2 font-mono uppercase tracking-[0.08em]">
+                    {t(`applicabilities.${project.applicability}`)}
+                  </Badge>
+                </div>
+              </CardContent>
+            </Card>
             <div className="mt-6 flex flex-wrap gap-3">
               {project.projectUrl ? (
                 <a
-                  className="inline-flex h-12 items-center border border-primary bg-primary px-5 font-mono text-sm font-bold uppercase tracking-[0.18em] text-primary-foreground transition hover:bg-primary/80"
+                  className={buttonVariants({ size: "lg" })}
                   href={project.projectUrl}
                   target="_blank"
                 >
@@ -131,7 +215,7 @@ export default async function ProjectPage({ params }: Props) {
               ) : null}
               {project.videoUrl ? (
                 <a
-                  className="inline-flex h-12 items-center border border-border px-5 font-mono text-sm font-bold uppercase tracking-[0.18em] transition hover:border-foreground hover:bg-foreground hover:text-background"
+                  className={buttonVariants({ size: "lg", variant: "outline" })}
                   href={project.videoUrl}
                   rel="noreferrer"
                   target="_blank"
@@ -141,7 +225,7 @@ export default async function ProjectPage({ params }: Props) {
               ) : null}
               {project.contributeInUrl ? (
                 <a
-                  className="inline-flex h-12 items-center border border-border px-5 font-mono text-sm font-bold uppercase tracking-[0.18em] transition hover:border-foreground hover:bg-foreground hover:text-background"
+                  className={buttonVariants({ size: "lg", variant: "outline" })}
                   href={project.contributeInUrl}
                   rel="noreferrer"
                   target="_blank"
@@ -166,16 +250,19 @@ export default async function ProjectPage({ params }: Props) {
             ) : null}
           </aside>
 
-          <section className="border border-border bg-card p-5 sm:p-8">
-            {project.videoUrl ? (
-              <ProjectVideoEmbed
-                className="mb-8 bg-background"
-                title={project.name}
-                videoUrl={project.videoUrl}
-              />
-            ) : null}
-            <ProjectMarkdown markdown={project.descriptionMarkdown} />
-          </section>
+          <Card className="min-w-0 [--card-spacing:--spacing(8)]">
+            <CardContent>
+              {project.videoUrl || project.imageUrl ? (
+                <ProjectVideoEmbed
+                  className="mb-8 bg-background"
+                  imageUrl={project.imageUrl}
+                  title={project.name}
+                  videoUrl={project.videoUrl}
+                />
+              ) : null}
+              <ProjectMarkdown markdown={project.descriptionMarkdown} />
+            </CardContent>
+          </Card>
         </div>
         <CommentsSection
           initialComments={comments}

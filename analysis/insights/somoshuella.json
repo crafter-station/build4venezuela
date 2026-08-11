@@ -1,0 +1,168 @@
+{
+  "project_slug": "somoshuella",
+  "name": "Somos Huella",
+  "repo_url": "https://github.com/Repetto-A/ML-FaceRecognizer",
+  "live_url": "https://www.somoshuella.org",
+  "video_url": "",
+  "countries": [
+    "Argentina"
+  ],
+  "db_description": "Somos Huella permite registrar personas buscadas con foto, última ubicación y contacto.\n\nDespués, si alguien encuentra a una persona (desde chicos hasta personas lesionadas que no pueden comunicarse) puede subir una foto y el sistema compara ese rostro contra el registro para sugerir posibles candidatos usando visión artificial.\n\nLa idea es convertir cada rostro en una huella numérica y usar esa huella para buscar coincidencias de forma rápida y ordenada.\n\nEl flujo es simple:\n\nLa familia registra.\nEl sistema compara.\nUna persona verifica.\n\nAlgunos detalles técnicos:\n\n→ Cada rostro se convierte en una huella de 512 dimensiones.\n→ La comparación típica tarda alrededor de 0,5 segundos.\n→ Las coincidencias se ordenan por parecido.\n→ El sistema está en producción con sitio, API y búsqueda por rostro.",
+  "lifecycle_status": "ready_to_use",
+  "analysis": {
+    "summary": "Somos Huella (ML-FaceRecognizer) is a real, working face-recognition system for family reunification of earthquake/disaster victims: families register a missing person with a photo, and finders upload a photo to get ranked candidate matches for human verification. It has a genuinely well-engineered FastAPI backend (auth, rate limiting, magic-byte upload validation, atomic writes, CORS), a facenet-pytorch (MTCNN + InceptionResnetV1) matching core, a local-GPU indexer / VPS-CPU search split, a Next.js frontend proxying requests server-side to hide the API key, and deploy configs already targeting a live domain (somoshuella.org).",
+    "project_type": "web app (FastAPI backend + Next.js frontend) with an ML batch-indexing CLI tool",
+    "stack": {
+      "frontend": [
+        "Next.js 15 (App Router)",
+        "React 19",
+        "TypeScript",
+        "Tailwind CSS v4"
+      ],
+      "backend": [
+        "FastAPI",
+        "Uvicorn",
+        "slowapi (rate limiting)",
+        "pydantic-settings"
+      ],
+      "database": [
+        "Flat-file index: numpy .npz embeddings matrix + index.json metadata (no relational DB); docs mention future migration to Supabase pgvector"
+      ],
+      "infra_deploy": [
+        "Docker (frontend Dockerfile, multi-stage, standalone Next output)",
+        "systemd unit for API on VPS (OVH)",
+        "Caddy reverse-proxy snippet",
+        "Cloudflare notes",
+        "docker-compose for frontend",
+        "no CI/CD (.github absent)"
+      ],
+      "ai_ml": [
+        "facenet-pytorch (MTCNN face detector + InceptionResnetV1 VGGFace2 encoder)",
+        "PyTorch (CUDA for local indexer, CPU for VPS API)",
+        "OpenCV",
+        "cosine similarity matching, L2-normalized 512-d embeddings"
+      ],
+      "languages": [
+        "Python",
+        "TypeScript",
+        "PowerShell",
+        "Dockerfile"
+      ]
+    },
+    "architecture": {
+      "pattern": "Split GPU-indexer / CPU-search-API architecture with a proxy frontend: core/ (shared matching engine) + indexer/ (local GPU batch embedding CLI) + api/ (FastAPI search/register REST service on VPS) + frontend/ (Next.js UI with server-side route handlers proxying to the API to keep the API key server-only)",
+      "uses_orm": false,
+      "orm_or_db_layer": "No ORM/DB — custom IndexStore class persists an in-memory (N,512) float32 matrix + JSON metadata list to disk atomically (tmp file + os.replace), loaded at API startup; explicitly designed to later swap for Supabase pgvector without changing the calling interface.",
+      "api_design": "REST endpoints via FastAPI (/health, /search, /register, /people, /people/{id} DELETE, /index/reload), Pydantic response schemas, per-endpoint rate limits, all endpoints except /health gated behind x-api-key header dependency with constant-time comparison.",
+      "separation_of_concerns": "Clean separation between core matching logic, GPU indexer, API layer (auth/uploads/config/schemas as separate modules), and frontend; frontend never talks directly with the backend API key, only via its own server route handlers.",
+      "modularity": "Well modularized: core/, indexer/, api/, frontend/, deploy/, docs/specs/ each with focused responsibility and even a legacy prototype/ folder kept for reference.",
+      "notable_patterns": [
+        "magic-byte file type sniffing instead of trusting extension/mimetype",
+        "streaming upload size limiting to avoid loading whole file in memory",
+        "global threading.Lock to serialize writes to the shared index",
+        "atomic file writes via tmp+os.replace for index persistence",
+        "fail-fast boot if API_KEY missing (refuses to run unauthenticated)",
+        "query photos deleted immediately after embedding extraction (data minimization)"
+      ]
+    },
+    "code_organization": {
+      "score": 4,
+      "directory_structure": "Clear top-level split (core/indexer/api/frontend/deploy/docs/tests/registry/scripts) mirroring the documented specs in docs/specs/*.md; deploy/ further split by target (vps/cloudflare/scripts).",
+      "naming_quality": "Consistent, descriptive Spanish/English mixed naming, docstrings explain intent and reference spec numbers throughout.",
+      "documentation_quality": "Strong: README with architecture diagram, docs/ARCHITECTURE.md, per-module docs/specs/*.md, per-folder README files (api/README.md, indexer/README.md, registry/README.md, deploy/vps/README.md), inline module docstrings explaining hardening decisions.",
+      "reasoning": "Directory layout matches a deliberate design (specs written before/alongside implementation), naming and docstrings are unusually thorough for a hackathon project, though there's no CI to enforce structure/quality over time."
+    },
+    "production_readiness": {
+      "score": 4,
+      "has_auth": true,
+      "has_error_handling": true,
+      "has_logging": true,
+      "has_env_config": true,
+      "has_deploy_config": true,
+      "secrets_handling": ".env-based via pydantic-settings, .env.example provided with placeholders, API key never sent to browser (frontend proxies via server-only route handlers), boot fails hard if API_KEY unset.",
+      "security_notes": "API key auth with constant-time compare, restricted CORS (never '*'), magic-byte + size-limited upload validation, rate limiting per IP via slowapi, audit logging of register/delete/reload actions with masked API key. Weaknesses: no user auth/roles (single shared API key for all admin actions), no HTTPS enforcement in code itself (relies on Caddy), no encryption at rest for photos/index, single VPS with single systemd worker is a scalability/availability bottleneck.",
+      "scalability_notes": "Explicitly single-worker (uvicorn --workers 1) with a global write lock serializing register/delete/reload — fine for low-volume MVP but will bottleneck under real disaster-response load; index is held fully in memory and grows unbounded; docs acknowledge a planned migration to Supabase pgvector for scale but that migration has not been implemented.",
+      "reasoning": "Backend shows genuine production-hardening effort (auth, validation, rate limiting, atomic persistence, CORS) unusual for a hackathon submission, but lacks CI/CD, automated deploy pipeline, horizontal scalability, and a real database, and there is no evidence of monitoring/alerting beyond a PowerShell go-live-monitor script."
+    },
+    "maturity": {
+      "score": 3,
+      "has_readme": true,
+      "has_tests": true,
+      "has_ci": false,
+      "is_real_or_boilerplate": "real, working implementation — not boilerplate",
+      "reasoning": "Only 10 commits from a single contributor over ~1 day, and no automated CI, but the code is functionally complete end-to-end (indexer -> API -> frontend), includes a genuine smoke test that exercises the real ML pipeline, and is already deployed with production-style hardening at a live domain."
+    },
+    "viability": {
+      "score": 4,
+      "reasoning": "This directly and concretely serves the hackathon's stated goal (reuniting missing persons after a disaster) with a working, already-deployed system (somoshuella.org), real ML matching, and sane security defaults; main risks to real-world use are scale (single VPS, single-writer file-based index, no real DB), lack of CI, and the ethical/legal weight of biometric matching on vulnerable populations which the team does acknowledge (human-verification disclaimer)."
+    },
+    "key_features": [
+      "Face registration endpoint (photo -> 512-d embedding via MTCNN+InceptionResnetV1, stored with contact/location metadata)",
+      "Face search endpoint returning ranked candidate matches above a similarity threshold with a human-verification disclaimer",
+      "GPU-side batch indexer CLI for bulk-loading a registry of missing persons",
+      "API-key auth, IP rate limiting, magic-byte upload validation, atomic index persistence",
+      "Next.js frontend with photo capture/register/search UI and server-side API-key-hiding proxy routes",
+      "Deploy tooling for a VPS (systemd unit, Caddy snippet, docker-compose, go-live monitor script)"
+    ],
+    "domain_tags": [
+      "people-finder",
+      "family-reunification"
+    ],
+    "merge_potential": "Could integrate as a specialized face-matching microservice behind a broader disaster-response platform (e.g., feeding its /search results into a shelter-mapping or aid-logistics coordination system), or accept missing-person registrations from a shared intake/database layer instead of maintaining its own flat-file index.",
+    "red_flags": [
+      "No CI/CD or automated testing pipeline (tests exist but are manual smoke tests, not run in CI)",
+      "Single shared API key for all write operations — no per-user accounts, roles, or granular audit trail beyond masked key + IP",
+      "Index persisted as flat .npz/.json files with a single in-process lock and single uvicorn worker — will not scale or survive concurrent multi-instance deployment without the planned (unimplemented) Supabase/pgvector migration",
+      "Biometric facial recognition on vulnerable disaster-affected populations raises consent/privacy/legal concerns not addressed beyond a UI disclaimer and query-photo deletion"
+    ]
+  },
+  "signals": {
+    "accessible": true,
+    "stars": 1,
+    "forks": 0,
+    "contributors": 1,
+    "commit_count": 10,
+    "code_loc": 4305,
+    "created_at": "2026-06-28T08:07:16Z",
+    "pushed_at": "2026-06-29T03:15:57Z",
+    "license": null,
+    "languages_bytes": {
+      "Python": 82652,
+      "TypeScript": 65896,
+      "CSS": 4896,
+      "PowerShell": 3204,
+      "Dockerfile": 765,
+      "Vim Snippet": 656,
+      "JavaScript": 146
+    },
+    "archived": false
+  },
+  "evaluation": {
+    "solves_real_problem": "yes",
+    "real_problem_reasoning": "After a major earthquake, families get separated and injured/disoriented survivors often cannot communicate who they are. Somos Huella lets families register a missing person with a photo and lets rescuers/finders upload a photo of someone found to get ranked face-match candidates for human verification, directly addressing family reunification — a well-documented acute need in disaster response.",
+    "problem_severity": "critical",
+    "impact_potential": 4,
+    "product_quality": 4,
+    "live_demo_status": "working",
+    "live_demo_notes": "https://www.somoshuella.org returns HTTP 200 (Next.js prerendered page served via Cloudflare/Caddy, matching the documented deploy architecture). WebFetch tool itself was blocked by Cloudflare bot protection (403), but curl with a browser user-agent successfully retrieved full HTML: a polished Spanish-language landing page ('Volver a encontrar a quien falta') with working navigation to /registro (register a missing person), /buscar (search by photo), and /ejemplos (demo examples), plus a live 'expediente vivo' stats widget. This is consistent with the codebase's described FastAPI backend + Next.js frontend architecture, not just a static mockup.",
+    "diffusion": {
+      "score": 4,
+      "ready_to_promote": true,
+      "available_assets": [
+        "live-demo",
+        "clear-value-prop",
+        "branding",
+        "screenshots"
+      ],
+      "recommended_angle": "Highlight the human story: 'Cada rostro deja una huella' — a working face-recognition tool that helps reunite families after disasters when lists and memory aren't enough, built and deployed to production in ~1 day.",
+      "gaps": [
+        "No demo video (video_url empty) — a short screen recording of register+search flow would strengthen any social push",
+        "No documented real-world usage/real-users yet (only 1 star, 1 contributor, 10 commits over 1 day) — frame as 'ready MVP' not 'battle-tested'",
+        "Project's own metadata lists Argentina as country context, not explicitly Venezuela — messaging should tie it clearly to the Venezuela earthquake use case",
+        "Biometric/privacy concerns on vulnerable populations are acknowledged in code but not addressed in any public-facing consent/legal copy — worth flagging before large-scale promotion"
+      ]
+    },
+    "overall_recommendation": "promote",
+    "one_line_pitch": "Somos Huella convierte cada rostro en una huella digital para reunir familias separadas por el terremoto — sube una foto, el sistema sugiere coincidencias en segundos."
+  }
+}

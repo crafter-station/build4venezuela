@@ -2,6 +2,8 @@
 
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -23,6 +25,7 @@ import {
   TIER_COLOR,
 } from "@/lib/insights/constants";
 import type { InsightNode } from "@/lib/insights/types";
+import { cn } from "@/lib/utils";
 
 type SortKey =
   | "viability"
@@ -117,14 +120,12 @@ export function Leaderboard({
                 <Tooltip>
                   <TooltipTrigger
                     render={
-                      <button
+                      <Button
                         type="button"
                         onClick={() => setSort(column)}
-                        className={`cursor-help font-mono text-[10px] uppercase tracking-widest hover:text-foreground ${
-                          sort === column
-                            ? "text-accent"
-                            : "text-muted-foreground"
-                        }`}
+                        variant={sort === column ? "secondary" : "ghost"}
+                        size="xs"
+                        className="cursor-help font-mono text-[10px] uppercase tracking-widest"
                       />
                     }
                   >
@@ -146,9 +147,10 @@ export function Leaderboard({
               onMouseEnter={() => onHover(n.slug)}
               onMouseLeave={() => onHover(null)}
               onClick={() => onSelect(n.slug)}
-              className={`cursor-pointer border-border ${
-                hover === n.slug ? "bg-muted" : ""
-              }`}
+              className={cn(
+                "cursor-pointer border-border",
+                hover === n.slug && "bg-muted",
+              )}
             >
               <TableCell className="max-w-[260px]">
                 <div className="truncate font-mono font-bold">{n.name}</div>
@@ -157,15 +159,16 @@ export function Leaderboard({
                 </div>
               </TableCell>
               <TableCell>
-                <span
-                  className="inline-block whitespace-nowrap border px-1.5 py-0.5 font-mono text-[10px]"
+                <Badge
+                  variant="outline"
+                  className="font-mono text-[10px]"
                   style={{
                     color: TIER_COLOR[n.tier],
                     borderColor: TIER_COLOR[n.tier],
                   }}
                 >
                   {tShared(`tiers.${n.tier}`)}
-                </span>
+                </Badge>
               </TableCell>
               <ScoreCell v={n.scores.viability} />
               <ScoreCell v={n.scores.production} />
@@ -201,18 +204,25 @@ function RiskBadge({ node, label }: { node: InsightNode; label: string }) {
   const risk = node.security?.risk ?? "none";
   const color = SECURITY_RISK_COLOR[risk];
   return (
-    <span
-      className="inline-block whitespace-nowrap border px-1.5 py-0.5 font-mono text-[10px] uppercase"
+    <Badge
+      variant="outline"
+      className="font-mono text-[10px] uppercase"
       style={{ color, borderColor: color }}
     >
       {label}
-    </span>
+    </Badge>
   );
 }
 
 function ScoreCell({ v }: { v: number }) {
   const color =
-    v >= 4 ? "#ffd83d" : v >= 3 ? "#16c7e8" : v >= 2 ? "#a6a6a6" : "#ff4a63";
+    v >= 4
+      ? "var(--primary)"
+      : v >= 3
+        ? "var(--accent)"
+        : v >= 2
+          ? "var(--muted-foreground)"
+          : "var(--destructive)";
   return (
     <TableCell className="text-right">
       <span className="font-mono font-bold tabular-nums" style={{ color }}>

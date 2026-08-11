@@ -1,6 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import { runMutation } from "@/lib/api-mutation";
+import { runMutation, runQuery } from "@/lib/api-mutation";
 import {
   checkRateLimit,
   rateLimitKey,
@@ -21,14 +21,33 @@ export async function GET(_request: Request, { params }: Props) {
   const { requestId, commentId } = await params;
   const { userId } = await auth();
 
-  if (!(await solutionRequestCommentBelongsToRequest(requestId, commentId))) {
+  const result = await runQuery(
+    "request.commentVote.get",
+    { requestId, commentId },
+    async () => {
+      if (
+        !(await solutionRequestCommentBelongsToRequest(requestId, commentId))
+      ) {
+        return null;
+      }
+
+      return Promise.all([
+        getSolutionRequestCommentVoteCount(commentId),
+        hasSolutionRequestCommentVoted(commentId, userId ?? undefined),
+      ]);
+    },
+  );
+
+  if ("response" in result) {
+    return result.response;
+  }
+
+  if (!result.value) {
     return NextResponse.json({ error: "Comment not found." }, { status: 404 });
   }
 
-  return NextResponse.json({
-    count: await getSolutionRequestCommentVoteCount(commentId),
-    voted: await hasSolutionRequestCommentVoted(commentId, userId ?? undefined),
-  });
+  const [count, voted] = result.value;
+  return NextResponse.json({ count, voted });
 }
 
 export async function POST(request: Request, { params }: Props) {
