@@ -10,6 +10,7 @@ import {
   RadarChart,
   ResponsiveContainer,
 } from "recharts";
+import { ProjectExternalLink } from "@/components/project-external-link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -116,7 +117,11 @@ export function ProjectDrawer({
                   <Link href={node.repoUrl} label={t("links.repo")} />
                 )}
                 {node.liveUrl && /^https?:/.test(node.liveUrl) && (
-                  <Link href={node.liveUrl} label={t("links.live")} keepReferrer />
+                  <Link
+                    href={node.liveUrl}
+                    label={t("links.live")}
+                    sendReferrer
+                  />
                 )}
                 {node.videoUrl && (
                   <Link href={node.videoUrl} label={t("links.video")} />
@@ -470,21 +475,19 @@ function StackLine({ label, items }: { label: string; items: string[] }) {
 function Link({
   href,
   label,
-  keepReferrer = false,
+  sendReferrer = false,
 }: {
   href: string;
   label: string;
-  keepReferrer?: boolean;
+  sendReferrer?: boolean;
 }) {
   return (
-    <a
+    <ProjectExternalLink
       href={href}
-      target="_blank"
-      // keepReferrer: live_url links omit noreferrer so destinations see traffic came from here
-      rel={keepReferrer ? undefined : "noopener noreferrer"}
+      sendReferrer={sendReferrer}
       className="text-accent underline underline-offset-4 hover:opacity-80"
     >
       {label}
-    </a>
+    </ProjectExternalLink>
   );
 }
