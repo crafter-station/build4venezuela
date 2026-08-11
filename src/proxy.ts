@@ -1,5 +1,5 @@
 import { clerkMiddleware } from "@clerk/nextjs/server";
-import { NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import createMiddleware from "next-intl/middleware";
 import { routing } from "./i18n/routing";
 
@@ -22,7 +22,7 @@ function isProtectedRoute(pathname: string) {
   );
 }
 
-function legacyLocalizedRedirect(request: Request) {
+function legacyLocalizedRedirect(request: NextRequest) {
   const url = new URL(request.url);
   const { pathname } = url;
 
@@ -37,14 +37,16 @@ function legacyLocalizedRedirect(request: Request) {
     "/insights",
   ];
 
-  if (legacyPaths.includes(pathname)) {
-    url.pathname = `/${routing.defaultLocale}${pathname}`;
-    return NextResponse.redirect(url, 308);
-  }
-
-  if (pathname === "/p" || pathname.startsWith("/p/")) {
-    url.pathname = `/${routing.defaultLocale}${pathname}`;
-    return NextResponse.redirect(url, 308);
+  if (
+    legacyPaths.includes(pathname) ||
+    pathname === "/p" ||
+    pathname.startsWith("/p/")
+  ) {
+    const response = intlMiddleware(request);
+    return new NextResponse(null, {
+      headers: response.headers,
+      status: 308,
+    });
   }
 
   return null;
