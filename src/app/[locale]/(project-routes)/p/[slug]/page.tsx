@@ -52,9 +52,26 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     markdownExcerpt(project.descriptionMarkdown, 160) ||
     t("metadata.description", { name: project.participantName });
   const pageUrl = `/${locale}/p/${project.slug}`;
-  const images = project.imageUrl
+  const openGraphImages = project.imageUrl
     ? [{ url: project.imageUrl, alt: project.name }]
-    : undefined;
+    : [
+        {
+          url: "/assets/og-latam.jpg",
+          width: 1200,
+          height: 630,
+          alt: "Build4Latam",
+        },
+      ];
+  const twitterImages = project.imageUrl
+    ? [{ url: project.imageUrl, alt: project.name }]
+    : [
+        {
+          url: "/og-twitter.png",
+          width: 1200,
+          height: 600,
+          alt: "Build4Latam",
+        },
+      ];
 
   return {
     title,
@@ -75,9 +92,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       siteName: "Build4Latam",
       title,
       description,
-      images,
+      images: openGraphImages,
     },
-    twitter: { card: "summary_large_image", title, description, images },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: twitterImages,
+    },
   };
 }
 
