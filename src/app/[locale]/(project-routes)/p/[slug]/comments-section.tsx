@@ -5,7 +5,9 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { type FormEvent, useState } from "react";
 import { AuthorBadge } from "@/components/author-badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import {
   createProjectComment,
@@ -159,117 +161,135 @@ export function CommentsSection({
   }
 
   return (
-    <section className="mx-auto mt-10 max-w-6xl border border-border bg-card p-5 sm:p-8">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="font-mono text-sm uppercase tracking-[0.28em] text-accent">
-            {t("eyebrow")}
+    <section
+      aria-labelledby="comments-title"
+      className="mx-auto mt-10 max-w-6xl"
+    >
+      <Card className="[--card-spacing:--spacing(8)]">
+        <CardHeader className="flex flex-row flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="font-mono text-sm uppercase tracking-[0.28em] text-accent">
+              {t("eyebrow")}
+            </p>
+            <CardTitle>
+              <h2
+                className="mt-3 font-mono text-3xl font-black uppercase leading-none tracking-[-0.04em] sm:text-4xl"
+                id="comments-title"
+              >
+                {t("title")}
+              </h2>
+            </CardTitle>
+          </div>
+          <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">
+            {comments.length}{" "}
+            {comments.length === 1 ? t("comment") : t("comments")}
           </p>
-          <h2 className="mt-3 font-mono text-3xl font-black uppercase leading-none tracking-[-0.04em] sm:text-5xl">
-            {t("title")}
-          </h2>
-        </div>
-        <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">
-          {comments.length}{" "}
-          {comments.length === 1 ? t("comment") : t("comments")}
-        </p>
-      </div>
+        </CardHeader>
 
-      <div className="mt-8">
-        {signedIn ? (
-          <form className="grid gap-3" onSubmit={submitComment}>
-            <Textarea
-              aria-invalid={Boolean(error)}
-              className="min-h-28 bg-background font-mono text-sm leading-6"
-              disabled={commentMutation.isPending}
-              maxLength={maxCommentLength}
-              name="body"
-              onChange={(event) => setBody(event.target.value)}
-              placeholder={t("placeholder")}
-              value={body}
-            />
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <p className="font-mono text-xs uppercase tracking-[0.16em] text-muted-foreground">
-                {body.trim().length}/{maxCommentLength}
-              </p>
-              <Button
-                className="h-11 px-5 text-sm uppercase tracking-[0.18em]"
+        <CardContent>
+          {signedIn ? (
+            <form className="grid gap-3" onSubmit={submitComment}>
+              <Textarea
+                aria-invalid={Boolean(error)}
+                className="min-h-28 bg-background font-mono text-sm leading-6"
                 disabled={commentMutation.isPending}
-                type="submit"
-              >
-                {commentMutation.isPending ? t("posting") : t("post")}
-              </Button>
-            </div>
-            {error ? (
-              <p className="font-mono text-xs uppercase tracking-[0.14em] text-destructive">
-                {error}
-              </p>
-            ) : null}
-          </form>
-        ) : (
-          <div className="border border-border bg-background p-5">
-            <p className="font-mono text-sm uppercase leading-6 tracking-[0.14em] text-muted-foreground">
-              {t("signedOutDescription")}
-            </p>
-            <SignInButton mode="modal">
-              <Button
-                className="mt-4 h-11 px-5 text-sm uppercase tracking-[0.18em]"
-                type="button"
-              >
-                {t("signIn")}
-              </Button>
-            </SignInButton>
-          </div>
-        )}
-      </div>
-
-      <div className="mt-8 grid grid-cols-[minmax(0,1fr)] gap-px bg-border">
-        {comments.length > 0 ? (
-          comments.map((comment) => (
-            <article className="min-w-0 bg-background p-5" key={comment.id}>
+                maxLength={maxCommentLength}
+                name="body"
+                onChange={(event) => setBody(event.target.value)}
+                placeholder={t("placeholder")}
+                value={body}
+              />
               <div className="flex flex-wrap items-center justify-between gap-3">
-                <AuthorBadge
-                  imageUrl={comment.authorImageUrl}
-                  meta={comment.createdAt.slice(0, 10)}
-                  name={comment.authorName}
-                />
-                {signedIn ? (
-                  <Button
-                    className="h-10 px-4 text-xs uppercase tracking-[0.16em]"
-                    disabled={pendingCommentVotes.has(comment.id)}
-                    onClick={() => vote(comment.id)}
-                    type="button"
-                    variant={comment.voted ? "default" : "outline"}
-                  >
-                    {comment.voted
-                      ? t("voted", { count: comment.votesCount })
-                      : t("vote", { count: comment.votesCount })}
-                  </Button>
-                ) : (
-                  <SignInButton mode="modal">
-                    <Button
-                      className="h-10 px-4 text-xs uppercase tracking-[0.16em]"
-                      type="button"
-                      variant="outline"
-                    >
-                      {t("vote", { count: comment.votesCount })}
-                    </Button>
-                  </SignInButton>
-                )}
+                <p className="font-mono text-xs uppercase tracking-[0.16em] text-muted-foreground">
+                  {body.trim().length}/{maxCommentLength}
+                </p>
+                <Button
+                  className="uppercase tracking-[0.18em]"
+                  size="lg"
+                  disabled={commentMutation.isPending}
+                  type="submit"
+                >
+                  {commentMutation.isPending ? t("posting") : t("post")}
+                </Button>
               </div>
-              <p className="mt-5 whitespace-pre-wrap font-mono text-sm leading-7 text-muted-foreground [overflow-wrap:anywhere]">
-                {comment.body}
-              </p>
-            </article>
-          ))
-        ) : (
-          <div className="bg-background p-5">
-            <p className="font-mono text-sm uppercase leading-6 tracking-[0.14em] text-muted-foreground">
-              {t("empty")}
-            </p>
+              {error ? (
+                <Alert variant="destructive">
+                  <AlertDescription className="font-mono uppercase tracking-[0.14em]">
+                    {error}
+                  </AlertDescription>
+                </Alert>
+              ) : null}
+            </form>
+          ) : (
+            <Alert>
+              <AlertDescription className="font-mono text-sm uppercase leading-6 tracking-[0.14em]">
+                {t("signedOutDescription")}
+              </AlertDescription>
+              <SignInButton mode="modal">
+                <Button
+                  className="mt-4 uppercase tracking-[0.18em]"
+                  size="lg"
+                  type="button"
+                >
+                  {t("signIn")}
+                </Button>
+              </SignInButton>
+            </Alert>
+          )}
+
+          <div className="mt-8 grid grid-cols-[minmax(0,1fr)] gap-4">
+            {comments.length > 0 ? (
+              comments.map((comment) => (
+                <article className="min-w-0" key={comment.id}>
+                  <Card size="sm">
+                    <CardContent>
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <AuthorBadge
+                          imageUrl={comment.authorImageUrl}
+                          meta={comment.createdAt.slice(0, 10)}
+                          name={comment.authorName}
+                        />
+                        {signedIn ? (
+                          <Button
+                            className="uppercase tracking-[0.16em]"
+                            disabled={pendingCommentVotes.has(comment.id)}
+                            onClick={() => vote(comment.id)}
+                            type="button"
+                            variant={comment.voted ? "default" : "outline"}
+                          >
+                            {comment.voted
+                              ? t("voted", { count: comment.votesCount })
+                              : t("vote", { count: comment.votesCount })}
+                          </Button>
+                        ) : (
+                          <SignInButton mode="modal">
+                            <Button
+                              className="uppercase tracking-[0.16em]"
+                              type="button"
+                              variant="outline"
+                            >
+                              {t("vote", { count: comment.votesCount })}
+                            </Button>
+                          </SignInButton>
+                        )}
+                      </div>
+                      <p className="mt-5 whitespace-pre-wrap font-mono text-sm leading-7 text-muted-foreground [overflow-wrap:anywhere]">
+                        {comment.body}
+                      </p>
+                    </CardContent>
+                  </Card>
+                </article>
+              ))
+            ) : (
+              <Card size="sm">
+                <CardContent className="font-mono text-sm uppercase leading-6 tracking-[0.14em] text-muted-foreground">
+                  {t("empty")}
+                </CardContent>
+              </Card>
+            )}
           </div>
-        )}
-      </div>
+        </CardContent>
+      </Card>
     </section>
   );
 }

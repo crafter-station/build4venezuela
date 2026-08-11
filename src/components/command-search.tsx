@@ -7,7 +7,7 @@ import {
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { startTransition, useDeferredValue, useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -20,6 +20,7 @@ import { Input } from "@/components/ui/input";
 import type { BuilderProfile } from "@/lib/builders/schema";
 import type { Project } from "@/lib/projects/schema";
 import type { SolutionRequest } from "@/lib/requests/schema";
+import { cn } from "@/lib/utils";
 
 const RECENT_SEARCHES_KEY = "b4v-recent-searches-v1";
 
@@ -186,7 +187,7 @@ export function CommandSearch({ locale, labels }: CommandSearchProps) {
       >
         <MagnifyingGlassIcon />
       </DialogTrigger>
-      <DialogContent className="top-[12vh] max-w-xl translate-y-0 gap-0 overflow-hidden rounded-2xl border p-0 text-sm shadow-2xl duration-0 sm:max-w-xl">
+      <DialogContent className="top-[12vh] max-w-xl translate-y-0 gap-0 overflow-hidden p-0 text-sm shadow-2xl duration-0 sm:max-w-xl">
         <DialogHeader className="sr-only">
           <DialogTitle>{labels.label}</DialogTitle>
           <DialogDescription>{labels.description}</DialogDescription>
@@ -196,7 +197,8 @@ export function CommandSearch({ locale, labels }: CommandSearchProps) {
           <MagnifyingGlassIcon className="shrink-0 text-muted-foreground" />
           <Input
             autoFocus
-            className="h-14 border-0 bg-transparent px-0 text-base shadow-none focus-visible:ring-0"
+            className="border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
+            size="lg"
             onChange={(event) => setQuery(event.target.value)}
             placeholder={labels.placeholder}
             value={query}
@@ -210,15 +212,16 @@ export function CommandSearch({ locale, labels }: CommandSearchProps) {
           {!query.trim() && recent.length > 0 ? (
             <SearchGroup label={labels.recent}>
               {recent.map((item) => (
-                <button
-                  className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm hover:bg-muted"
+                <Button
+                  className="w-full justify-start"
                   key={item}
                   onClick={() => setQuery(item)}
                   type="button"
+                  variant="ghost"
                 >
                   <ClockCounterClockwiseIcon />
                   {item}
-                </button>
+                </Button>
               ))}
             </SearchGroup>
           ) : null}
@@ -307,7 +310,10 @@ function SearchResult({
 }) {
   return (
     <Link
-      className="flex min-w-0 items-center justify-between gap-4 rounded-lg px-3 py-2.5 hover:bg-muted focus-visible:bg-muted focus-visible:outline-none"
+      className={cn(
+        buttonVariants({ variant: "ghost" }),
+        "flex h-auto min-w-0 justify-between py-2.5",
+      )}
       href={href}
       onClick={onSelect}
     >

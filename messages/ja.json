@@ -19,6 +19,8 @@
     "goToCountry": "{country}へ移動",
     "availableTools": "利用可能なツール",
     "toolsTitle": "使い、適応し、共有しよう。",
+    "projectsTitle": "{country}向けプロジェクト",
+    "viewAllProjects": "すべてのプロジェクトを見る",
     "empty": "{country}向けのプロジェクトはまだありません。",
     "countries": {
       "venezuela": {
@@ -362,6 +364,7 @@
       "empty": "No projects yet. Be the first one to add a build.",
       "syncing": "Checking for updates...",
       "live": "Updated automatically",
+      "searchPlaceholder": "プロジェクト、チーム、場所を検索...",
       "all": "All",
       "project": "project",
       "projects": "projects",

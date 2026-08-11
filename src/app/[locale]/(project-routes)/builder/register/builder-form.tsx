@@ -10,7 +10,10 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import type { ChangeEvent, FormEvent } from "react";
 import { useMemo, useState } from "react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -20,6 +23,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import {
+  NativeSelect,
+  NativeSelectOption,
+} from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
 import {
   builderQueryKeys,
@@ -234,98 +241,97 @@ export function BuilderForm({ initialBuilder, locale }: BuilderFormProps) {
   return (
     <form className="grid gap-6" onSubmit={submit}>
       {errors.form ? (
-        <div className="border border-destructive bg-destructive/10 p-4 font-mono text-sm uppercase tracking-[0.12em] text-destructive">
-          {errors.form}
-        </div>
+        <Alert variant="destructive">
+          <AlertDescription>{errors.form}</AlertDescription>
+        </Alert>
       ) : null}
 
       {notice ? (
-        <div className="border border-primary bg-primary/10 p-4 font-mono text-sm uppercase tracking-[0.12em] text-primary">
-          {notice}
-        </div>
+        <Alert>
+          <AlertDescription>{notice}</AlertDescription>
+        </Alert>
       ) : null}
 
       {currentBuilder ? (
-        <section className="grid gap-4 border border-border p-4">
-          <div className="grid gap-2 sm:grid-cols-[1fr_auto] sm:items-start">
-            <div>
-              <p className="font-mono text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
-                {t("profileStatusTitle")}
-              </p>
-              <p className="mt-2 font-mono text-sm uppercase leading-6 tracking-[0.08em]">
-                {isFrozen ? t("frozenDescription") : t("visibleDescription")}
-              </p>
+        <Card>
+          <CardContent className="grid gap-4">
+            <div className="grid gap-2 sm:grid-cols-[1fr_auto] sm:items-start">
+              <div>
+                <p className="font-mono text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                  {t("profileStatusTitle")}
+                </p>
+                <p className="mt-2 font-mono text-sm uppercase leading-6 tracking-[0.08em]">
+                  {isFrozen ? t("frozenDescription") : t("visibleDescription")}
+                </p>
+              </div>
+              <Badge
+                className="font-mono font-black uppercase tracking-[0.12em]"
+                variant={isFrozen ? "secondary" : "default"}
+              >
+                {isFrozen ? t("frozenStatus") : t("visibleStatus")}
+              </Badge>
             </div>
-            <span
-              className={`border px-2 py-1 font-mono text-xs font-black uppercase tracking-[0.12em] ${
-                isFrozen
-                  ? "border-muted-foreground text-muted-foreground"
-                  : "border-primary text-primary"
-              }`}
-            >
-              {isFrozen ? t("frozenStatus") : t("visibleStatus")}
-            </span>
-          </div>
 
-          <div className="flex flex-wrap gap-2">
-            <Button
-              disabled={visibilityMutation.isPending}
-              onClick={() => visibilityMutation.mutate(!isFrozen)}
-              type="button"
-              variant="outline"
-            >
-              {isFrozen ? (
-                <UserCircleCheckIcon data-icon="inline-start" />
-              ) : (
-                <PauseCircleIcon data-icon="inline-start" />
-              )}
-              {isFrozen ? t("showProfile") : t("hideProfile")}
-            </Button>
-            <Button
-              disabled={deleteMutation.isPending}
-              onClick={() => setDeleteOpen(true)}
-              type="button"
-              variant="destructive"
-            >
-              <TrashIcon data-icon="inline-start" />
-              {t("deleteProfile")}
-            </Button>
-          </div>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                disabled={visibilityMutation.isPending}
+                onClick={() => visibilityMutation.mutate(!isFrozen)}
+                type="button"
+                variant="outline"
+              >
+                {isFrozen ? (
+                  <UserCircleCheckIcon data-icon="inline-start" />
+                ) : (
+                  <PauseCircleIcon data-icon="inline-start" />
+                )}
+                {isFrozen ? t("showProfile") : t("hideProfile")}
+              </Button>
+              <Button
+                disabled={deleteMutation.isPending}
+                onClick={() => setDeleteOpen(true)}
+                type="button"
+                variant="destructive"
+              >
+                <TrashIcon data-icon="inline-start" />
+                {t("deleteProfile")}
+              </Button>
+            </div>
 
-          <Dialog
-            open={deleteOpen}
-            onOpenChange={(open) => setDeleteOpen(open)}
-          >
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>{t("deleteDialogTitle")}</DialogTitle>
-                <DialogDescription>
-                  {t("deleteDialogDescription")}
-                </DialogDescription>
-              </DialogHeader>
-              <DialogFooter>
-                <Button
-                  disabled={deleteMutation.isPending}
-                  onClick={() => setDeleteOpen(false)}
-                  type="button"
-                  variant="outline"
-                >
-                  {t("cancel")}
-                </Button>
-                <Button
-                  disabled={deleteMutation.isPending}
-                  onClick={() => deleteMutation.mutate()}
-                  type="button"
-                  variant="destructive"
-                >
-                  {deleteMutation.isPending
-                    ? t("deleting")
-                    : t("deleteProfile")}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </section>
+            <Dialog
+              open={deleteOpen}
+              onOpenChange={(open) => setDeleteOpen(open)}
+            >
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>{t("deleteDialogTitle")}</DialogTitle>
+                  <DialogDescription>
+                    {t("deleteDialogDescription")}
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                  <Button
+                    disabled={deleteMutation.isPending}
+                    onClick={() => setDeleteOpen(false)}
+                    type="button"
+                    variant="outline"
+                  >
+                    {t("cancel")}
+                  </Button>
+                  <Button
+                    disabled={deleteMutation.isPending}
+                    onClick={() => deleteMutation.mutate()}
+                    type="button"
+                    variant="destructive"
+                  >
+                    {deleteMutation.isPending
+                      ? t("deleting")
+                      : t("deleteProfile")}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </CardContent>
+        </Card>
       ) : null}
 
       <label className="grid gap-2" htmlFor="builder-name">
@@ -348,19 +354,19 @@ export function BuilderForm({ initialBuilder, locale }: BuilderFormProps) {
         <span className="font-mono text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
           {t("role")}
         </span>
-        <select
-          className="flex h-10 w-full border border-input bg-background px-3 py-2 font-mono text-sm uppercase tracking-widest text-foreground ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        <NativeSelect
+          className="w-full"
           id="builder-role"
           onChange={changeRole}
           required
           value={values.role}
         >
           {builderRoles.map((role) => (
-            <option key={role} value={role}>
+            <NativeSelectOption key={role} value={role}>
               {directoryT(`roles.${role}`)}
-            </option>
+            </NativeSelectOption>
           ))}
-        </select>
+        </NativeSelect>
         <FieldError message={errors.role} />
       </label>
 
@@ -428,88 +434,91 @@ export function BuilderForm({ initialBuilder, locale }: BuilderFormProps) {
         </label>
       </div>
 
-      <section className="grid gap-4 border border-border p-4">
-        <label className="flex items-center gap-3 font-mono text-xs font-bold uppercase tracking-[0.12em]">
-          <input
-            checked={values.availabilityVisible}
-            className="size-4 accent-primary"
-            onChange={(event) =>
-              setField("availabilityVisible", event.target.checked)
-            }
-            type="checkbox"
-          />
-          {t("setAvailability")}
-        </label>
-        <p className="font-mono text-xs uppercase leading-5 tracking-[0.08em] text-muted-foreground">
-          {t("availabilityHelp")}
-        </p>
+      <Card>
+        <CardContent className="grid gap-4">
+          <label className="flex items-center gap-3 font-mono text-xs font-bold uppercase tracking-[0.12em]">
+            <input
+              checked={values.availabilityVisible}
+              className="size-4 accent-primary"
+              onChange={(event) =>
+                setField("availabilityVisible", event.target.checked)
+              }
+              type="checkbox"
+            />
+            {t("setAvailability")}
+          </label>
+          <p className="font-mono text-xs uppercase leading-5 tracking-[0.08em] text-muted-foreground">
+            {t("availabilityHelp")}
+          </p>
 
-        {values.availabilityVisible ? (
-          <div className="grid gap-4">
-            <div className="flex flex-wrap gap-2">
-              <Button
-                onClick={() => setPreset("weekdays", 2)}
-                type="button"
-                variant="outline"
-              >
-                {t("weekdaysPreset")}
-              </Button>
-              <Button
-                onClick={() => setPreset("weekends", 4)}
-                type="button"
-                variant="outline"
-              >
-                {t("weekendsPreset")}
-              </Button>
-              <Button
-                onClick={() => setPreset("clear")}
-                type="button"
-                variant="outline"
-              >
-                {t("clearAvailability")}
-              </Button>
-            </div>
-
-            <div className="grid gap-3 sm:grid-cols-2">
-              {availabilityDays.map((day) => (
-                <label
-                  className="grid grid-cols-[1fr_5rem] items-center gap-3"
-                  htmlFor={`availability-${day}`}
-                  key={day}
+          {values.availabilityVisible ? (
+            <div className="grid gap-4">
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  onClick={() => setPreset("weekdays", 2)}
+                  type="button"
+                  variant="outline"
                 >
-                  <span className="font-mono text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
-                    {directoryT(`days.${day}`)}
-                  </span>
-                  <Input
-                    id={`availability-${day}`}
-                    max={12}
-                    min={0}
-                    onChange={(event) => {
-                      const nextHours = setDayHours(day, event.target.value);
-                      // React skips re-syncing number inputs whose DOM value is
-                      // numerically equal to state (e.g. "02" vs 2), so leading
-                      // zeros stick around unless we normalize the DOM directly.
-                      if (event.target.value !== String(nextHours)) {
-                        event.target.value = String(nextHours);
-                      }
-                    }}
-                    onFocus={(event) => event.target.select()}
-                    type="number"
-                    value={values.availability[day]}
-                  />
-                </label>
-              ))}
-            </div>
+                  {t("weekdaysPreset")}
+                </Button>
+                <Button
+                  onClick={() => setPreset("weekends", 4)}
+                  type="button"
+                  variant="outline"
+                >
+                  {t("weekendsPreset")}
+                </Button>
+                <Button
+                  onClick={() => setPreset("clear")}
+                  type="button"
+                  variant="outline"
+                >
+                  {t("clearAvailability")}
+                </Button>
+              </div>
 
-            <p className="font-mono text-sm font-bold uppercase tracking-[0.12em]">
-              {t("hoursPerWeek", { hours: totalHours })}
-            </p>
-          </div>
-        ) : null}
-      </section>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {availabilityDays.map((day) => (
+                  <label
+                    className="grid grid-cols-[1fr_5rem] items-center gap-3"
+                    htmlFor={`availability-${day}`}
+                    key={day}
+                  >
+                    <span className="font-mono text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                      {directoryT(`days.${day}`)}
+                    </span>
+                    <Input
+                      id={`availability-${day}`}
+                      max={12}
+                      min={0}
+                      onChange={(event) => {
+                        const nextHours = setDayHours(day, event.target.value);
+                        // React skips re-syncing number inputs whose DOM value is
+                        // numerically equal to state (e.g. "02" vs 2), so leading
+                        // zeros stick around unless we normalize the DOM directly.
+                        if (event.target.value !== String(nextHours)) {
+                          event.target.value = String(nextHours);
+                        }
+                      }}
+                      onFocus={(event) => event.target.select()}
+                      type="number"
+                      value={values.availability[day]}
+                    />
+                  </label>
+                ))}
+              </div>
+
+              <p className="font-mono text-sm font-bold uppercase tracking-[0.12em]">
+                {t("hoursPerWeek", { hours: totalHours })}
+              </p>
+            </div>
+          ) : null}
+        </CardContent>
+      </Card>
 
       <Button
-        className="h-12 text-sm uppercase tracking-[0.16em]"
+        className="uppercase tracking-[0.16em]"
+        size="lg"
         disabled={mutation.isPending}
         type="submit"
       >

@@ -8,7 +8,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { CommandSearch } from "@/components/command-search";
 import { LanguageSelector } from "@/components/language-selector";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -48,7 +48,7 @@ export function SiteHeader() {
 
   return (
     <header className="fixed inset-x-0 top-0 z-40 border-border/80 border-b bg-background/88 backdrop-blur-xl">
-      <div className="mx-auto flex h-16 max-w-7xl items-center gap-2 px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex h-16 max-w-7xl items-center gap-2 px-5 sm:px-8 lg:px-10">
         <Link
           aria-label={t("homeLabel")}
           className="ui-focus mr-auto inline-flex items-center font-mono text-lg font-black tracking-[-0.055em] sm:text-xl"
@@ -67,7 +67,8 @@ export function SiteHeader() {
                 <Link
                   aria-current={active ? "page" : undefined}
                   className={cn(
-                    "ui-focus rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
+                    buttonVariants({ size: "sm", variant: "ghost" }),
+                    "text-muted-foreground",
                     active && "bg-muted text-foreground",
                   )}
                   href={link.href}
@@ -179,7 +180,10 @@ export function SiteHeader() {
               className="flex flex-col gap-1 p-4"
             >
               <Link
-                className="rounded-lg px-3 py-3 text-base font-semibold hover:bg-muted"
+                className={cn(
+                  buttonVariants({ variant: "ghost" }),
+                  "h-auto justify-start py-3 text-base",
+                )}
                 href={homeHref}
               >
                 {t("links.home")}
@@ -187,7 +191,10 @@ export function SiteHeader() {
               {navigationLinks.map((link) => (
                 <Link
                   aria-current={pathname === link.href ? "page" : undefined}
-                  className="rounded-lg px-3 py-3 text-base font-semibold hover:bg-muted aria-[current=page]:bg-muted"
+                  className={cn(
+                    buttonVariants({ variant: "ghost" }),
+                    "h-auto justify-start py-3 text-base aria-[current=page]:bg-muted",
+                  )}
                   href={link.href}
                   key={link.href}
                 >
@@ -203,7 +210,10 @@ export function SiteHeader() {
               <div className="grid grid-cols-2 gap-2">
                 {createLinks.map((link) => (
                   <Link
-                    className="rounded-lg border bg-surface p-3 text-sm font-medium transition-colors hover:bg-muted"
+                    className={cn(
+                      buttonVariants({ variant: "outline" }),
+                      "h-auto min-h-12 justify-start whitespace-normal p-3",
+                    )}
                     href={link.href}
                     key={link.href}
                   >

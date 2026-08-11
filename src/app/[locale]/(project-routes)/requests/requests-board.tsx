@@ -6,7 +6,16 @@ import { useTranslations } from "next-intl";
 import { type FormEvent, useEffect, useState } from "react";
 import { AuthorBadge } from "@/components/author-badge";
 import { ProjectMarkdown } from "@/components/project-markdown";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -333,77 +342,93 @@ export function RequestsBoard({
   return (
     <div className="grid grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-[minmax(0,0.75fr)_minmax(0,1.25fr)]">
       {notice ? (
-        <output
+        <Alert
           aria-live="polite"
-          className="fixed inset-x-4 bottom-4 z-50 border border-accent bg-background px-4 py-3 font-mono text-xs font-black uppercase leading-5 tracking-[0.14em] text-foreground shadow-2xl sm:left-auto sm:right-6 sm:w-80"
+          className="fixed inset-x-4 bottom-4 z-50 border-accent font-mono font-black uppercase tracking-[0.14em] shadow-2xl sm:right-6 sm:left-auto sm:w-80"
         >
-          {notice}
-        </output>
+          <AlertDescription className="text-foreground">
+            {notice}
+          </AlertDescription>
+        </Alert>
       ) : null}
-      <aside className="min-w-0 border border-border bg-card p-5 lg:sticky lg:top-24 lg:self-start sm:p-6">
-        <p className="font-mono text-sm uppercase tracking-[0.28em] text-accent">
-          {t("formEyebrow")}
-        </p>
-        <h2 className="mt-3 font-mono text-3xl font-black uppercase leading-none tracking-[-0.04em]">
-          {t("formTitle")}
-        </h2>
-        <p className="mt-4 font-mono text-xs uppercase leading-6 tracking-[0.14em] text-muted-foreground">
-          {t("formDescription")}
-        </p>
-
-        {signedIn ? (
-          <form className="mt-6 grid gap-4" onSubmit={submitRequest}>
-            <Input
-              className="h-12 bg-background font-mono text-sm"
-              disabled={createMutation.isPending}
-              maxLength={140}
-              name="name"
-              onChange={(event) => setName(event.target.value)}
-              placeholder={t("namePlaceholder")}
-              value={name}
-            />
-            <Textarea
-              className="min-h-40 bg-background font-mono text-sm leading-6"
-              disabled={createMutation.isPending}
-              maxLength={maxDescriptionLength}
-              name="descriptionMarkdown"
-              onChange={(event) => setDescriptionMarkdown(event.target.value)}
-              placeholder={t("descriptionPlaceholder")}
-              value={descriptionMarkdown}
-            />
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <p className="font-mono text-xs uppercase tracking-[0.16em] text-muted-foreground">
-                {descriptionMarkdown.trim().length}/{maxDescriptionLength}
-              </p>
-              <Button
-                className="h-11 px-5 text-sm uppercase tracking-[0.18em]"
-                disabled={createMutation.isPending}
-                type="submit"
-              >
-                {createMutation.isPending ? t("posting") : t("postRequest")}
-              </Button>
-            </div>
-          </form>
-        ) : (
-          <div className="mt-6 border border-border bg-background p-5">
-            <p className="font-mono text-sm uppercase leading-6 tracking-[0.14em] text-muted-foreground">
-              {t("signedOutDescription")}
+      <aside className="min-w-0 lg:sticky lg:top-24 lg:self-start">
+        <Card>
+          <CardHeader>
+            <p className="font-mono text-sm uppercase tracking-[0.28em] text-accent">
+              {t("formEyebrow")}
             </p>
-            <SignInButton mode="modal">
-              <Button
-                className="mt-4 h-11 px-5 text-sm uppercase tracking-[0.18em]"
-                type="button"
-              >
-                {t("signIn")}
-              </Button>
-            </SignInButton>
-          </div>
-        )}
-        {error ? (
-          <p className="mt-4 font-mono text-xs uppercase tracking-[0.14em] text-destructive">
-            {error}
-          </p>
-        ) : null}
+            <CardTitle>
+              <h2 className="mt-2 font-mono text-3xl font-black uppercase leading-none tracking-[-0.04em]">
+                {t("formTitle")}
+              </h2>
+            </CardTitle>
+            <CardDescription className="mt-2 font-mono uppercase leading-6 tracking-[0.14em]">
+              {t("formDescription")}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {signedIn ? (
+              <form className="grid gap-4" onSubmit={submitRequest}>
+                <Input
+                  className="bg-background font-mono"
+                  disabled={createMutation.isPending}
+                  maxLength={140}
+                  name="name"
+                  size="lg"
+                  onChange={(event) => setName(event.target.value)}
+                  placeholder={t("namePlaceholder")}
+                  value={name}
+                />
+                <Textarea
+                  className="min-h-40 bg-background font-mono text-sm leading-6"
+                  disabled={createMutation.isPending}
+                  maxLength={maxDescriptionLength}
+                  name="descriptionMarkdown"
+                  onChange={(event) =>
+                    setDescriptionMarkdown(event.target.value)
+                  }
+                  placeholder={t("descriptionPlaceholder")}
+                  value={descriptionMarkdown}
+                />
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <p className="font-mono text-xs uppercase tracking-[0.16em] text-muted-foreground">
+                    {descriptionMarkdown.trim().length}/{maxDescriptionLength}
+                  </p>
+                  <Button
+                    className="uppercase tracking-[0.18em]"
+                    disabled={createMutation.isPending}
+                    type="submit"
+                    size="lg"
+                  >
+                    {createMutation.isPending ? t("posting") : t("postRequest")}
+                  </Button>
+                </div>
+              </form>
+            ) : (
+              <Alert>
+                <AlertDescription className="font-mono text-sm uppercase leading-6 tracking-[0.14em]">
+                  {t("signedOutDescription")}
+                </AlertDescription>
+                <SignInButton mode="modal">
+                  <Button
+                    className="mt-4 uppercase tracking-[0.18em]"
+                    size="lg"
+                    type="button"
+                  >
+                    {t("signIn")}
+                  </Button>
+                </SignInButton>
+              </Alert>
+            )}
+            {error ? (
+              <Alert className="mt-4" variant="destructive">
+                <AlertDescription className="font-mono uppercase tracking-[0.14em]">
+                  {error}
+                </AlertDescription>
+              </Alert>
+            ) : null}
+          </CardContent>
+        </Card>
       </aside>
 
       <section className="min-w-0">
@@ -412,11 +437,11 @@ export function RequestsBoard({
             {requests.length}{" "}
             {requests.length === 1 ? t("request") : t("requests")}
           </p>
-          <p className="font-mono text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground">
+          <Badge variant="outline">
             {isFetching ? t("syncing") : t("live")}
-          </p>
+          </Badge>
         </div>
-        <div className="grid grid-cols-[minmax(0,1fr)] gap-px bg-border">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-4">
           {requests.length > 0 ? (
             requests.map((request) => {
               const expanded = expandedRequests.has(request.id);
@@ -425,176 +450,196 @@ export function RequestsBoard({
               const commentBody = commentBodies[request.id] ?? "";
 
               return (
-                <article
-                  className="min-w-0 bg-background p-5 sm:p-6"
-                  key={request.id}
-                >
-                  <div className="flex flex-wrap items-start justify-between gap-4">
-                    <div className="min-w-0 flex-1">
-                      <AuthorBadge
-                        imageUrl={request.authorImageUrl}
-                        meta={request.createdAt.slice(0, 10)}
-                        name={request.authorName}
-                      />
-                      <button
-                        className="mt-3 block max-w-full text-left font-mono text-2xl font-black uppercase leading-none tracking-[-0.04em] transition [overflow-wrap:anywhere] hover:text-primary sm:text-4xl"
-                        onClick={() => toggleDescription(request.id)}
-                        type="button"
-                      >
-                        {request.name}
-                      </button>
-                    </div>
-                    {signedIn ? (
-                      <Button
-                        className="h-11 px-4 text-xs uppercase tracking-[0.16em]"
-                        disabled={pendingRequestVotes.has(request.id)}
-                        onClick={() => voteForRequest(request.id)}
-                        type="button"
-                        variant={request.voted ? "default" : "outline"}
-                      >
-                        {request.voted
-                          ? t("voted", { count: request.votesCount })
-                          : t("vote", { count: request.votesCount })}
-                      </Button>
-                    ) : (
-                      <SignInButton mode="modal">
-                        <Button
-                          className="h-11 px-4 text-xs uppercase tracking-[0.16em]"
-                          type="button"
-                          variant="outline"
-                        >
-                          {t("vote", { count: request.votesCount })}
-                        </Button>
-                      </SignInButton>
-                    )}
-                  </div>
-
-                  <button
-                    className="mt-4 font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground underline underline-offset-4 transition hover:text-primary"
-                    onClick={() => toggleDescription(request.id)}
-                    type="button"
-                  >
-                    {expanded ? t("collapse") : t("expand")}
-                  </button>
-
-                  {expanded ? (
-                    <>
-                      <div className="mt-5 border border-border bg-card p-5">
-                        {hasDescription ? (
-                          <ProjectMarkdown
-                            markdown={request.descriptionMarkdown}
+                <article className="min-w-0" key={request.id}>
+                  <Card>
+                    <CardContent>
+                      <div className="flex flex-wrap items-start justify-between gap-4">
+                        <div className="min-w-0 flex-1">
+                          <AuthorBadge
+                            imageUrl={request.authorImageUrl}
+                            meta={request.createdAt.slice(0, 10)}
+                            name={request.authorName}
                           />
+                          <Button
+                            className="mt-3 h-auto max-w-full justify-start whitespace-normal text-left font-mono text-xl font-black uppercase leading-tight tracking-[-0.03em] text-foreground [overflow-wrap:anywhere] sm:text-2xl"
+                            onClick={() => toggleDescription(request.id)}
+                            type="button"
+                            variant="ghost"
+                          >
+                            {request.name}
+                          </Button>
+                        </div>
+                        {signedIn ? (
+                          <Button
+                            className="uppercase tracking-[0.16em]"
+                            disabled={pendingRequestVotes.has(request.id)}
+                            onClick={() => voteForRequest(request.id)}
+                            type="button"
+                            variant={request.voted ? "default" : "outline"}
+                          >
+                            {request.voted
+                              ? t("voted", { count: request.votesCount })
+                              : t("vote", { count: request.votesCount })}
+                          </Button>
                         ) : (
-                          <p className="font-mono text-sm uppercase leading-6 tracking-[0.14em] text-muted-foreground">
-                            {t("noDescription")}
-                          </p>
+                          <SignInButton mode="modal">
+                            <Button
+                              className="uppercase tracking-[0.16em]"
+                              type="button"
+                              variant="outline"
+                            >
+                              {t("vote", { count: request.votesCount })}
+                            </Button>
+                          </SignInButton>
                         )}
                       </div>
 
-                      <div className="mt-6 border-t border-border pt-5">
-                        <div className="flex flex-wrap items-center justify-between gap-3">
-                          <p className="font-mono text-xs uppercase tracking-[0.18em] text-accent">
-                            {t("comments", { count: request.comments.length })}
-                          </p>
-                        </div>
+                      <Button
+                        className="mt-4 uppercase tracking-[0.18em]"
+                        onClick={() => toggleDescription(request.id)}
+                        size="sm"
+                        type="button"
+                        variant="link"
+                      >
+                        {expanded ? t("collapse") : t("expand")}
+                      </Button>
 
-                        {signedIn ? (
-                          <form
-                            className="mt-4 grid gap-3"
-                            onSubmit={(event) =>
-                              submitComment(event, request.id)
-                            }
-                          >
-                            <Textarea
-                              className="min-h-24 bg-card font-mono text-sm leading-6"
-                              disabled={commentMutation.isPending}
-                              maxLength={maxCommentLength}
-                              onChange={(event) =>
-                                setCommentBodies((current) => ({
-                                  ...current,
-                                  [request.id]: event.target.value,
-                                }))
-                              }
-                              placeholder={t("commentPlaceholder")}
-                              value={commentBody}
-                            />
-                            <div className="flex flex-wrap items-center justify-between gap-3">
-                              <p className="font-mono text-xs uppercase tracking-[0.16em] text-muted-foreground">
-                                {commentBody.trim().length}/{maxCommentLength}
-                              </p>
-                              <Button
-                                className="h-10 px-4 text-xs uppercase tracking-[0.16em]"
-                                disabled={commentMutation.isPending}
-                                type="submit"
-                              >
-                                {t("comment")}
-                              </Button>
-                            </div>
-                          </form>
-                        ) : null}
-
-                        <div className="mt-4 grid gap-px bg-border">
-                          {request.comments.length > 0 ? (
-                            request.comments.map((comment) => (
-                              <div className="bg-card p-4" key={comment.id}>
-                                <div className="flex flex-wrap items-center justify-between gap-3">
-                                  <AuthorBadge
-                                    imageClassName="size-8"
-                                    imageUrl={comment.authorImageUrl}
-                                    meta={comment.createdAt.slice(0, 10)}
-                                    metaClassName="text-[0.65rem]"
-                                    name={comment.authorName}
-                                    nameClassName="text-xs tracking-[0.16em]"
-                                  />
-                                  {signedIn ? (
-                                    <Button
-                                      className="h-9 px-3 text-[0.65rem] uppercase tracking-[0.16em]"
-                                      disabled={pendingCommentVotes.has(
-                                        commentVoteKey(request.id, comment.id),
-                                      )}
-                                      onClick={() =>
-                                        voteForComment(request.id, comment.id)
-                                      }
-                                      type="button"
-                                      variant={
-                                        comment.voted ? "default" : "outline"
-                                      }
-                                    >
-                                      {comment.voted
-                                        ? t("voted", {
-                                            count: comment.votesCount,
-                                          })
-                                        : t("vote", {
-                                            count: comment.votesCount,
-                                          })}
-                                    </Button>
-                                  ) : null}
-                                </div>
-                                <p className="mt-4 whitespace-pre-wrap font-mono text-sm leading-7 text-muted-foreground">
-                                  {comment.body}
+                      {expanded ? (
+                        <>
+                          <Card className="mt-5" size="sm">
+                            <CardContent>
+                              {hasDescription ? (
+                                <ProjectMarkdown
+                                  markdown={request.descriptionMarkdown}
+                                />
+                              ) : (
+                                <p className="font-mono text-sm uppercase leading-6 tracking-[0.14em] text-muted-foreground">
+                                  {t("noDescription")}
                                 </p>
-                              </div>
-                            ))
-                          ) : (
-                            <div className="bg-card p-4">
-                              <p className="font-mono text-xs uppercase leading-6 tracking-[0.14em] text-muted-foreground">
-                                {t("noComments")}
+                              )}
+                            </CardContent>
+                          </Card>
+
+                          <div className="mt-6 border-t border-border pt-5">
+                            <div className="flex flex-wrap items-center justify-between gap-3">
+                              <p className="font-mono text-xs uppercase tracking-[0.18em] text-accent">
+                                {t("comments", {
+                                  count: request.comments.length,
+                                })}
                               </p>
                             </div>
-                          )}
-                        </div>
-                      </div>
-                    </>
-                  ) : null}
+
+                            {signedIn ? (
+                              <form
+                                className="mt-4 grid gap-3"
+                                onSubmit={(event) =>
+                                  submitComment(event, request.id)
+                                }
+                              >
+                                <Textarea
+                                  className="min-h-24 bg-card font-mono text-sm leading-6"
+                                  disabled={commentMutation.isPending}
+                                  maxLength={maxCommentLength}
+                                  onChange={(event) =>
+                                    setCommentBodies((current) => ({
+                                      ...current,
+                                      [request.id]: event.target.value,
+                                    }))
+                                  }
+                                  placeholder={t("commentPlaceholder")}
+                                  value={commentBody}
+                                />
+                                <div className="flex flex-wrap items-center justify-between gap-3">
+                                  <p className="font-mono text-xs uppercase tracking-[0.16em] text-muted-foreground">
+                                    {commentBody.trim().length}/
+                                    {maxCommentLength}
+                                  </p>
+                                  <Button
+                                    className="uppercase tracking-[0.16em]"
+                                    disabled={commentMutation.isPending}
+                                    type="submit"
+                                  >
+                                    {t("comment")}
+                                  </Button>
+                                </div>
+                              </form>
+                            ) : null}
+
+                            <div className="mt-4 grid gap-3">
+                              {request.comments.length > 0 ? (
+                                request.comments.map((comment) => (
+                                  <Card key={comment.id} size="sm">
+                                    <CardContent>
+                                      <div className="flex flex-wrap items-center justify-between gap-3">
+                                        <AuthorBadge
+                                          imageClassName="size-8"
+                                          imageUrl={comment.authorImageUrl}
+                                          meta={comment.createdAt.slice(0, 10)}
+                                          metaClassName="text-[0.65rem]"
+                                          name={comment.authorName}
+                                          nameClassName="text-xs tracking-[0.16em]"
+                                        />
+                                        {signedIn ? (
+                                          <Button
+                                            className="uppercase tracking-[0.16em]"
+                                            size="sm"
+                                            disabled={pendingCommentVotes.has(
+                                              commentVoteKey(
+                                                request.id,
+                                                comment.id,
+                                              ),
+                                            )}
+                                            onClick={() =>
+                                              voteForComment(
+                                                request.id,
+                                                comment.id,
+                                              )
+                                            }
+                                            type="button"
+                                            variant={
+                                              comment.voted
+                                                ? "default"
+                                                : "outline"
+                                            }
+                                          >
+                                            {comment.voted
+                                              ? t("voted", {
+                                                  count: comment.votesCount,
+                                                })
+                                              : t("vote", {
+                                                  count: comment.votesCount,
+                                                })}
+                                          </Button>
+                                        ) : null}
+                                      </div>
+                                      <p className="mt-4 whitespace-pre-wrap font-mono text-sm leading-7 text-muted-foreground">
+                                        {comment.body}
+                                      </p>
+                                    </CardContent>
+                                  </Card>
+                                ))
+                              ) : (
+                                <Card size="sm">
+                                  <CardContent className="font-mono text-xs uppercase leading-6 tracking-[0.14em] text-muted-foreground">
+                                    {t("noComments")}
+                                  </CardContent>
+                                </Card>
+                              )}
+                            </div>
+                          </div>
+                        </>
+                      ) : null}
+                    </CardContent>
+                  </Card>
                 </article>
               );
             })
           ) : (
-            <div className="bg-background p-8">
-              <p className="font-mono text-lg uppercase leading-8 tracking-[0.14em] text-muted-foreground">
+            <Card>
+              <CardContent className="font-mono text-lg uppercase leading-8 tracking-[0.14em] text-muted-foreground">
                 {t("empty")}
-              </p>
-            </div>
+              </CardContent>
+            </Card>
           )}
         </div>
       </section>

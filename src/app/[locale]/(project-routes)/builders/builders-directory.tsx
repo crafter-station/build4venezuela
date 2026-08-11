@@ -11,8 +11,15 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import type { FormEvent } from "react";
 import { useEffect, useMemo, useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import {
+  NativeSelect,
+  NativeSelectOption,
+} from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
 import {
   builderQueryKeys,
@@ -261,47 +268,55 @@ export function BuildersDirectory({
 
   return (
     <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-8">
-      <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-3 border border-border bg-card p-4 lg:grid-cols-[minmax(0,1fr)_16rem_12rem]">
-        <Input
-          aria-label={t("searchLabel")}
-          onChange={(event) => {
-            setSearch(event.target.value);
-            resetDirectoryPage();
-          }}
-          placeholder={t("searchPlaceholder")}
-          value={search}
-        />
-        <select
-          aria-label={t("roleFilterLabel")}
-          className="h-8 border border-input bg-background px-2.5 font-mono text-xs uppercase tracking-[0.1em]"
-          onChange={(event) => {
-            setRole(event.target.value as BuilderRole | "all");
-            resetDirectoryPage();
-          }}
-          value={role}
-        >
-          <option value="all">{t("allRoles")}</option>
-          {builderRoles.map((builderRole) => (
-            <option key={builderRole} value={builderRole}>
-              {t(`roles.${builderRole}`)}
-            </option>
-          ))}
-        </select>
-        <select
-          aria-label={t("hoursFilterLabel")}
-          className="h-8 border border-input bg-background px-2.5 font-mono text-xs uppercase tracking-[0.1em]"
-          onChange={(event) => {
-            setMinimumHours(event.target.value);
-            resetDirectoryPage();
-          }}
-          value={minimumHours}
-        >
-          <option value="0">{t("anyHours")}</option>
-          <option value="5">{t("minimumHours", { hours: 5 })}</option>
-          <option value="10">{t("minimumHours", { hours: 10 })}</option>
-          <option value="20">{t("minimumHours", { hours: 20 })}</option>
-        </select>
-      </div>
+      <Card>
+        <CardContent className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-3 lg:grid-cols-[minmax(0,1fr)_16rem_12rem]">
+          <Input
+            aria-label={t("searchLabel")}
+            onChange={(event) => {
+              setSearch(event.target.value);
+              resetDirectoryPage();
+            }}
+            placeholder={t("searchPlaceholder")}
+            value={search}
+          />
+          <NativeSelect
+            aria-label={t("roleFilterLabel")}
+            className="w-full"
+            onChange={(event) => {
+              setRole(event.target.value as BuilderRole | "all");
+              resetDirectoryPage();
+            }}
+            value={role}
+          >
+            <NativeSelectOption value="all">{t("allRoles")}</NativeSelectOption>
+            {builderRoles.map((builderRole) => (
+              <NativeSelectOption key={builderRole} value={builderRole}>
+                {t(`roles.${builderRole}`)}
+              </NativeSelectOption>
+            ))}
+          </NativeSelect>
+          <NativeSelect
+            aria-label={t("hoursFilterLabel")}
+            className="w-full"
+            onChange={(event) => {
+              setMinimumHours(event.target.value);
+              resetDirectoryPage();
+            }}
+            value={minimumHours}
+          >
+            <NativeSelectOption value="0">{t("anyHours")}</NativeSelectOption>
+            <NativeSelectOption value="5">
+              {t("minimumHours", { hours: 5 })}
+            </NativeSelectOption>
+            <NativeSelectOption value="10">
+              {t("minimumHours", { hours: 10 })}
+            </NativeSelectOption>
+            <NativeSelectOption value="20">
+              {t("minimumHours", { hours: 20 })}
+            </NativeSelectOption>
+          </NativeSelect>
+        </CardContent>
+      </Card>
 
       <div className="flex items-center justify-between gap-4 font-mono text-xs uppercase tracking-[0.12em] text-muted-foreground">
         <span>{t("builderCount", { count: filteredBuilders.length })}</span>
@@ -309,9 +324,11 @@ export function BuildersDirectory({
       </div>
 
       {filteredBuilders.length === 0 ? (
-        <div className="border border-border p-8 font-mono text-sm uppercase leading-7 tracking-[0.1em] text-muted-foreground">
-          {t("empty")}
-        </div>
+        <Card>
+          <CardContent className="font-mono text-sm uppercase leading-7 tracking-[0.1em] text-muted-foreground">
+            {t("empty")}
+          </CardContent>
+        </Card>
       ) : (
         <div className="grid grid-cols-[minmax(0,1fr)] gap-5">
           {paginatedBuilders.map((builder) => {
@@ -319,271 +336,295 @@ export function BuildersDirectory({
             const isActive = activeBuilderId === builder.id;
 
             return (
-              <article
-                className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-5 border border-border bg-card p-5"
-                key={builder.id}
-              >
-                <div className="grid gap-4 md:grid-cols-[1fr_auto] md:items-start">
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h2 className="font-mono text-2xl font-black uppercase [overflow-wrap:anywhere]">
-                        {builder.name}
-                      </h2>
-                      <span className="border border-border px-2 py-1 font-mono text-xs font-bold uppercase tracking-[0.1em] text-muted-foreground">
-                        {roleText(builder, t)}
-                      </span>
-                      <span className="border border-border px-2 py-1 font-mono text-xs font-bold uppercase tracking-[0.1em] text-muted-foreground">
-                        {availabilityText(builder, t)}
-                      </span>
-                    </div>
-                    <p className="mt-4 max-w-3xl whitespace-pre-wrap font-mono text-sm uppercase leading-7 tracking-[0.08em] text-muted-foreground [overflow-wrap:anywhere]">
-                      {builder.description}
-                    </p>
-                  </div>
-                  <div className="flex flex-wrap gap-2 md:justify-end">
-                    {builder.linkedinUrl ? (
-                      <a
-                        className="inline-flex h-8 items-center justify-center gap-1.5 border border-border bg-background px-2.5 font-mono text-xs font-medium transition hover:bg-muted"
-                        href={builder.linkedinUrl}
-                      >
-                        LinkedIn
-                        <ArrowSquareOutIcon data-icon="inline-end" />
-                      </a>
-                    ) : null}
-                    {builder.portfolioUrl ? (
-                      <a
-                        className="inline-flex h-8 items-center justify-center gap-1.5 border border-border bg-background px-2.5 font-mono text-xs font-medium transition hover:bg-muted"
-                        href={builder.portfolioUrl}
-                      >
-                        {t("portfolio")}
-                        <ArrowSquareOutIcon data-icon="inline-end" />
-                      </a>
-                    ) : null}
-                    {signedIn ? (
-                      <Button
-                        onClick={() =>
-                          setActiveBuilderId(isActive ? null : builder.id)
-                        }
-                        type="button"
-                      >
-                        <EnvelopeSimpleIcon data-icon="inline-start" />
-                        {t("contact")}
-                      </Button>
-                    ) : (
-                      <SignInButton mode="modal">
-                        <Button type="button">
-                          <EnvelopeSimpleIcon data-icon="inline-start" />
-                          {t("signIn")}
-                        </Button>
-                      </SignInButton>
-                    )}
-                  </div>
-                </div>
-
-                {builder.availabilityVisible ? (
-                  <div className="grid grid-cols-4 gap-1.5 border-border border-t pt-4 sm:grid-cols-7 sm:gap-2">
-                    {availabilityDays.map((day) => {
-                      const hours = builder.availability[day];
-                      const unavailable = !hours;
-
-                      return (
-                        <div
-                          className={`border border-border p-1.5 text-center sm:p-2 ${
-                            unavailable ? "opacity-50" : ""
-                          }`}
-                          key={day}
-                        >
-                          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground sm:text-xs">
-                            {t(`days.${day}`)}
-                          </p>
-                          {unavailable ? (
-                            <p className="mt-1 font-mono text-[9px] uppercase leading-tight tracking-[0.08em] text-muted-foreground">
-                              {t("unavailable")}
-                            </p>
-                          ) : (
-                            <p className="mt-1 font-mono text-base font-black sm:text-lg">
-                              {hours}h
-                            </p>
-                          )}
+              <article key={builder.id}>
+                <Card>
+                  <CardContent className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-5">
+                    <div className="grid gap-4 md:grid-cols-[1fr_auto] md:items-start">
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h2 className="font-mono text-2xl font-black uppercase [overflow-wrap:anywhere]">
+                            {builder.name}
+                          </h2>
+                          <Badge
+                            className="font-mono uppercase tracking-[0.1em]"
+                            variant="outline"
+                          >
+                            {roleText(builder, t)}
+                          </Badge>
+                          <Badge
+                            className="font-mono uppercase tracking-[0.1em]"
+                            variant="outline"
+                          >
+                            {availabilityText(builder, t)}
+                          </Badge>
                         </div>
-                      );
-                    })}
-                  </div>
-                ) : null}
+                        <p className="mt-4 max-w-3xl whitespace-pre-wrap font-mono text-sm uppercase leading-7 tracking-[0.08em] text-muted-foreground [overflow-wrap:anywhere]">
+                          {builder.description}
+                        </p>
+                      </div>
+                      <div className="flex flex-wrap gap-2 md:justify-end">
+                        {builder.linkedinUrl ? (
+                          <a
+                            className={buttonVariants({
+                              size: "sm",
+                              variant: "outline",
+                            })}
+                            href={builder.linkedinUrl}
+                          >
+                            LinkedIn
+                            <ArrowSquareOutIcon data-icon="inline-end" />
+                          </a>
+                        ) : null}
+                        {builder.portfolioUrl ? (
+                          <a
+                            className={buttonVariants({
+                              size: "sm",
+                              variant: "outline",
+                            })}
+                            href={builder.portfolioUrl}
+                          >
+                            {t("portfolio")}
+                            <ArrowSquareOutIcon data-icon="inline-end" />
+                          </a>
+                        ) : null}
+                        {signedIn ? (
+                          <Button
+                            onClick={() =>
+                              setActiveBuilderId(isActive ? null : builder.id)
+                            }
+                            type="button"
+                          >
+                            <EnvelopeSimpleIcon data-icon="inline-start" />
+                            {t("contact")}
+                          </Button>
+                        ) : (
+                          <SignInButton mode="modal">
+                            <Button type="button">
+                              <EnvelopeSimpleIcon data-icon="inline-start" />
+                              {t("signIn")}
+                            </Button>
+                          </SignInButton>
+                        )}
+                      </div>
+                    </div>
 
-                {errors[builder.id] ? (
-                  <div className="border border-destructive bg-destructive/10 p-3 font-mono text-xs uppercase leading-5 tracking-[0.1em] text-destructive">
-                    {errors[builder.id]}
-                  </div>
-                ) : null}
+                    {builder.availabilityVisible ? (
+                      <div className="grid grid-cols-4 gap-1.5 border-border border-t pt-4 sm:grid-cols-7 sm:gap-2">
+                        {availabilityDays.map((day) => {
+                          const hours = builder.availability[day];
+                          const unavailable = !hours;
 
-                {status[builder.id] ? (
-                  <div className="border border-border bg-background p-3 font-mono text-xs uppercase leading-5 tracking-[0.1em] text-muted-foreground">
-                    {status[builder.id]}
-                  </div>
-                ) : null}
+                          return (
+                            <div
+                              className={`rounded-lg border border-border p-1.5 text-center sm:p-2 ${
+                                unavailable ? "opacity-50" : ""
+                              }`}
+                              key={day}
+                            >
+                              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground sm:text-xs">
+                                {t(`days.${day}`)}
+                              </p>
+                              {unavailable ? (
+                                <p className="mt-1 font-mono text-[9px] uppercase leading-tight tracking-[0.08em] text-muted-foreground">
+                                  {t("unavailable")}
+                                </p>
+                              ) : (
+                                <p className="mt-1 font-mono text-base font-black sm:text-lg">
+                                  {hours}h
+                                </p>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : null}
 
-                {isActive ? (
-                  <form
-                    className="grid gap-4 border-border border-t pt-5"
-                    onSubmit={submitContact(builder.id)}
-                  >
-                    {ownedProjects.length > 0 ? (
-                      <div className="grid gap-2 border border-border bg-background p-3">
-                        <label className="flex items-start gap-2 font-mono text-xs uppercase leading-5 tracking-[0.1em] text-muted-foreground">
-                          <input
-                            checked={Boolean(draft.projectSlug)}
-                            className="mt-0.5 h-4 w-4 accent-foreground"
+                    {errors[builder.id] ? (
+                      <Alert variant="destructive">
+                        <AlertDescription>
+                          {errors[builder.id]}
+                        </AlertDescription>
+                      </Alert>
+                    ) : null}
+
+                    {status[builder.id] ? (
+                      <Alert>
+                        <AlertDescription>
+                          {status[builder.id]}
+                        </AlertDescription>
+                      </Alert>
+                    ) : null}
+
+                    {isActive ? (
+                      <form
+                        className="grid gap-4 border-border border-t pt-5"
+                        onSubmit={submitContact(builder.id)}
+                      >
+                        {ownedProjects.length > 0 ? (
+                          <div className="grid gap-2 rounded-lg border border-border bg-background p-3">
+                            <label className="flex items-start gap-2 font-mono text-xs uppercase leading-5 tracking-[0.1em] text-muted-foreground">
+                              <input
+                                checked={Boolean(draft.projectSlug)}
+                                className="mt-0.5 h-4 w-4 accent-foreground"
+                                onChange={(event) =>
+                                  setAttachedProject(
+                                    builder.id,
+                                    event.target.checked
+                                      ? ownedProjects[0].slug
+                                      : "",
+                                  )
+                                }
+                                type="checkbox"
+                              />
+                              <span>{t("attachProject")}</span>
+                            </label>
+                            {draft.projectSlug ? (
+                              ownedProjects.length > 1 ? (
+                                <NativeSelect
+                                  aria-label={t("attachProject")}
+                                  size="sm"
+                                  onChange={(event) =>
+                                    setAttachedProject(
+                                      builder.id,
+                                      event.target.value,
+                                    )
+                                  }
+                                  value={draft.projectSlug}
+                                >
+                                  {ownedProjects.map((project) => (
+                                    <NativeSelectOption
+                                      key={project.slug}
+                                      value={project.slug}
+                                    >
+                                      {project.name}
+                                    </NativeSelectOption>
+                                  ))}
+                                </NativeSelect>
+                              ) : (
+                                <p className="font-mono text-xs uppercase tracking-[0.1em] text-foreground">
+                                  {t("attachProjectNamed", {
+                                    name: ownedProjects[0].name,
+                                  })}
+                                </p>
+                              )
+                            ) : null}
+                          </div>
+                        ) : null}
+                        <label
+                          className="grid gap-2"
+                          htmlFor={`project-${builder.id}`}
+                        >
+                          <span className="font-mono text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                            {t("projectName")}
+                          </span>
+                          <Input
+                            id={`project-${builder.id}`}
+                            maxLength={160}
+                            minLength={2}
                             onChange={(event) =>
-                              setAttachedProject(
+                              setDraftField(
                                 builder.id,
-                                event.target.checked
-                                  ? ownedProjects[0].slug
-                                  : "",
+                                "projectName",
+                                event.target.value,
                               )
                             }
-                            type="checkbox"
+                            readOnly={Boolean(draft.projectSlug)}
+                            required
+                            value={draft.projectName}
                           />
-                          <span>{t("attachProject")}</span>
+                          <CharCount
+                            max={160}
+                            min={2}
+                            value={draft.projectName}
+                          />
                         </label>
-                        {draft.projectSlug ? (
-                          ownedProjects.length > 1 ? (
-                            <select
-                              aria-label={t("attachProject")}
-                              className="h-8 border border-input bg-background px-2.5 font-mono text-xs uppercase tracking-[0.1em]"
+                        <label
+                          className="grid gap-2"
+                          htmlFor={`letter-${builder.id}`}
+                        >
+                          <span className="font-mono text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                            {t("coverLetter")}
+                          </span>
+                          <span className="font-mono text-[11px] normal-case leading-4 tracking-[0.04em] text-muted-foreground">
+                            {t("coverLetterHint")}
+                          </span>
+                          <Textarea
+                            id={`letter-${builder.id}`}
+                            maxLength={2000}
+                            minLength={40}
+                            onChange={(event) =>
+                              setDraftField(
+                                builder.id,
+                                "coverLetter",
+                                event.target.value,
+                              )
+                            }
+                            placeholder={t("coverLetterPlaceholder")}
+                            required
+                            rows={5}
+                            value={draft.coverLetter}
+                          />
+                          <CharCount
+                            max={2000}
+                            min={40}
+                            value={draft.coverLetter}
+                          />
+                        </label>
+                        <div className="grid gap-4 sm:grid-cols-2">
+                          <label
+                            className="grid gap-2"
+                            htmlFor={`email-${builder.id}`}
+                          >
+                            <span className="font-mono text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                              {t("contactEmail")}
+                            </span>
+                            <Input
+                              id={`email-${builder.id}`}
                               onChange={(event) =>
-                                setAttachedProject(
+                                setDraftField(
                                   builder.id,
+                                  "contactEmail",
                                   event.target.value,
                                 )
                               }
-                              value={draft.projectSlug}
-                            >
-                              {ownedProjects.map((project) => (
-                                <option key={project.slug} value={project.slug}>
-                                  {project.name}
-                                </option>
-                              ))}
-                            </select>
-                          ) : (
-                            <p className="font-mono text-xs uppercase tracking-[0.1em] text-foreground">
-                              {t("attachProjectNamed", {
-                                name: ownedProjects[0].name,
-                              })}
-                            </p>
-                          )
-                        ) : null}
-                      </div>
+                              type="email"
+                              value={draft.contactEmail}
+                            />
+                          </label>
+                          <label
+                            className="grid gap-2"
+                            htmlFor={`phone-${builder.id}`}
+                          >
+                            <span className="font-mono text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                              {t("contactPhone")}
+                            </span>
+                            <Input
+                              id={`phone-${builder.id}`}
+                              maxLength={80}
+                              onChange={(event) =>
+                                setDraftField(
+                                  builder.id,
+                                  "contactPhone",
+                                  event.target.value,
+                                )
+                              }
+                              value={draft.contactPhone}
+                            />
+                          </label>
+                        </div>
+                        <Button
+                          className="justify-self-start uppercase tracking-[0.14em]"
+                          disabled={contactMutation.isPending}
+                          type="submit"
+                        >
+                          {contactMutation.isPending
+                            ? t("checking")
+                            : t("sendRequest")}
+                        </Button>
+                      </form>
                     ) : null}
-                    <label
-                      className="grid gap-2"
-                      htmlFor={`project-${builder.id}`}
-                    >
-                      <span className="font-mono text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
-                        {t("projectName")}
-                      </span>
-                      <Input
-                        id={`project-${builder.id}`}
-                        maxLength={160}
-                        minLength={2}
-                        onChange={(event) =>
-                          setDraftField(
-                            builder.id,
-                            "projectName",
-                            event.target.value,
-                          )
-                        }
-                        readOnly={Boolean(draft.projectSlug)}
-                        required
-                        value={draft.projectName}
-                      />
-                      <CharCount max={160} min={2} value={draft.projectName} />
-                    </label>
-                    <label
-                      className="grid gap-2"
-                      htmlFor={`letter-${builder.id}`}
-                    >
-                      <span className="font-mono text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
-                        {t("coverLetter")}
-                      </span>
-                      <span className="font-mono text-[11px] normal-case leading-4 tracking-[0.04em] text-muted-foreground">
-                        {t("coverLetterHint")}
-                      </span>
-                      <Textarea
-                        id={`letter-${builder.id}`}
-                        maxLength={2000}
-                        minLength={40}
-                        onChange={(event) =>
-                          setDraftField(
-                            builder.id,
-                            "coverLetter",
-                            event.target.value,
-                          )
-                        }
-                        placeholder={t("coverLetterPlaceholder")}
-                        required
-                        rows={5}
-                        value={draft.coverLetter}
-                      />
-                      <CharCount
-                        max={2000}
-                        min={40}
-                        value={draft.coverLetter}
-                      />
-                    </label>
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      <label
-                        className="grid gap-2"
-                        htmlFor={`email-${builder.id}`}
-                      >
-                        <span className="font-mono text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
-                          {t("contactEmail")}
-                        </span>
-                        <Input
-                          id={`email-${builder.id}`}
-                          onChange={(event) =>
-                            setDraftField(
-                              builder.id,
-                              "contactEmail",
-                              event.target.value,
-                            )
-                          }
-                          type="email"
-                          value={draft.contactEmail}
-                        />
-                      </label>
-                      <label
-                        className="grid gap-2"
-                        htmlFor={`phone-${builder.id}`}
-                      >
-                        <span className="font-mono text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
-                          {t("contactPhone")}
-                        </span>
-                        <Input
-                          id={`phone-${builder.id}`}
-                          maxLength={80}
-                          onChange={(event) =>
-                            setDraftField(
-                              builder.id,
-                              "contactPhone",
-                              event.target.value,
-                            )
-                          }
-                          value={draft.contactPhone}
-                        />
-                      </label>
-                    </div>
-                    <Button
-                      className="h-10 justify-self-start uppercase tracking-[0.14em]"
-                      disabled={contactMutation.isPending}
-                      type="submit"
-                    >
-                      {contactMutation.isPending
-                        ? t("checking")
-                        : t("sendRequest")}
-                    </Button>
-                  </form>
-                ) : null}
+                  </CardContent>
+                </Card>
               </article>
             );
           })}
@@ -597,21 +638,23 @@ export function BuildersDirectory({
               </p>
               <div className="flex items-center gap-2">
                 <Button
-                  className="h-9 uppercase tracking-[0.12em]"
+                  className="uppercase tracking-[0.12em]"
                   disabled={currentPage === 1}
                   onClick={() => goToPage(currentPage - 1)}
                   type="button"
                   variant="outline"
+                  size="sm"
                 >
                   <CaretLeftIcon data-icon="inline-start" />
                   {t("previousPage")}
                 </Button>
                 <Button
-                  className="h-9 uppercase tracking-[0.12em]"
+                  className="uppercase tracking-[0.12em]"
                   disabled={currentPage === totalPages}
                   onClick={() => goToPage(currentPage + 1)}
                   type="button"
                   variant="outline"
+                  size="sm"
                 >
                   {t("nextPage")}
                   <CaretRightIcon data-icon="inline-end" />

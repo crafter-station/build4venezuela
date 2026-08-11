@@ -8,8 +8,13 @@ import { useLocale, useTranslations } from "next-intl";
 import type { ChangeEvent, FormEvent } from "react";
 import { useState } from "react";
 import { MarkdownEditor } from "@/components/markdown-editor";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  NativeSelect,
+  NativeSelectOption,
+} from "@/components/ui/native-select";
 import {
   deleteProject,
   ProjectFormError,
@@ -205,9 +210,11 @@ export function ProjectForm({
   return (
     <form className="grid gap-6" onSubmit={submitProject}>
       {errors.form ? (
-        <div className="border border-destructive bg-destructive/10 p-4 font-mono text-sm uppercase tracking-[0.12em] text-destructive">
-          {errors.form}
-        </div>
+        <Alert variant="destructive">
+          <AlertDescription className="font-mono text-sm uppercase tracking-[0.12em]">
+            {errors.form}
+          </AlertDescription>
+        </Alert>
       ) : null}
 
       <label className="grid gap-2" htmlFor="project-slug">
@@ -243,8 +250,8 @@ export function ProjectForm({
         <span className="font-mono text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground">
           {t("lifecycleStatusLabel")}
         </span>
-        <select
-          className="flex h-10 w-full border border-input bg-background px-3 py-2 font-mono text-sm uppercase tracking-[0.12em] text-foreground ring-offset-background transition file:border-0 file:bg-transparent file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+        <NativeSelect
+          className="w-full"
           id="project-lifecycle-status"
           name="lifecycleStatus"
           onChange={handleValueChange("lifecycleStatus")}
@@ -252,11 +259,11 @@ export function ProjectForm({
           value={values.lifecycleStatus}
         >
           {projectLifecycleStatuses.map((status) => (
-            <option key={status} value={status}>
+            <NativeSelectOption key={status} value={status}>
               {t(`lifecycleStatuses.${status}`)}
-            </option>
+            </NativeSelectOption>
           ))}
-        </select>
+        </NativeSelect>
         <FieldError message={errors.lifecycleStatus} />
       </label>
 
@@ -264,8 +271,8 @@ export function ProjectForm({
         <span className="font-mono text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground">
           {t("applicabilityLabel")}
         </span>
-        <select
-          className="flex h-10 w-full border border-input bg-background px-3 py-2 font-mono text-sm uppercase tracking-[0.12em] text-foreground ring-offset-background transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        <NativeSelect
+          className="w-full"
           id="project-applicability"
           name="applicability"
           onChange={handleValueChange("applicability")}
@@ -273,11 +280,11 @@ export function ProjectForm({
           value={values.applicability}
         >
           {projectApplicabilities.map((applicability) => (
-            <option key={applicability} value={applicability}>
+            <NativeSelectOption key={applicability} value={applicability}>
               {t(`applicabilities.${applicability}`)}
-            </option>
+            </NativeSelectOption>
           ))}
-        </select>
+        </NativeSelect>
         <p className="font-mono text-xs leading-5 tracking-[0.08em] text-muted-foreground">
           {t("applicabilityHint")}
         </p>
@@ -352,7 +359,7 @@ export function ProjectForm({
           {t("imageLabel")}
         </label>
         {values.imageUrl && !imageFile ? (
-          <div className="relative aspect-video max-w-xl overflow-hidden border border-border bg-card">
+          <div className="relative aspect-video max-w-xl overflow-hidden rounded-xl border border-border bg-card">
             <Image
               alt={t("imagePreviewAlt")}
               className="h-full w-full object-cover"
@@ -434,7 +441,8 @@ export function ProjectForm({
       </div>
 
       <Button
-        className="h-12 text-sm uppercase tracking-[0.18em]"
+        className="uppercase tracking-[0.18em]"
+        size="lg"
         disabled={
           isUploadingImage ||
           projectMutation.isPending ||
@@ -450,13 +458,13 @@ export function ProjectForm({
       </Button>
 
       {projectId ? (
-        <div className="border border-destructive/40 bg-destructive/10 p-4">
-          <p className="font-mono text-destructive text-xs uppercase tracking-[0.16em]">
+        <Alert variant="destructive">
+          <AlertDescription className="font-mono uppercase tracking-[0.16em]">
             {confirmDelete ? t("deleteConfirm") : t("deleteDescription")}
-          </p>
+          </AlertDescription>
           <div className="mt-4 flex flex-wrap gap-3">
             <Button
-              className="h-10 uppercase tracking-[0.18em]"
+              className="uppercase tracking-[0.18em]"
               disabled={projectMutation.isPending || deleteMutation.isPending}
               onClick={requestDelete}
               type="button"
@@ -470,7 +478,7 @@ export function ProjectForm({
             </Button>
             {confirmDelete ? (
               <Button
-                className="h-10 uppercase tracking-[0.18em]"
+                className="uppercase tracking-[0.18em]"
                 disabled={deleteMutation.isPending}
                 onClick={() => setConfirmDelete(false)}
                 type="button"
@@ -480,7 +488,7 @@ export function ProjectForm({
               </Button>
             ) : null}
           </div>
-        </div>
+        </Alert>
       ) : null}
     </form>
   );

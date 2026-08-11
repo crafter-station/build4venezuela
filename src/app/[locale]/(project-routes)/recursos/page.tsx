@@ -1,4 +1,14 @@
 import { getTranslations } from "next-intl/server";
+import { Badge } from "@/components/ui/badge";
+import { buttonVariants } from "@/components/ui/button";
+import {
+  Card,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 import { ProjectShell } from "../project-shell";
 
 type Resource = {
@@ -66,33 +76,42 @@ export default async function RecursosPage({ params }: Props) {
             <p className="font-mono text-sm uppercase tracking-[0.28em] text-accent">
               {t("eyebrow")}
             </p>
-            <h1 className="mt-4 font-mono text-[clamp(3rem,8vw,7rem)] font-black uppercase leading-[0.85] tracking-[-0.07em]">
+            <h1 className="type-page-title mt-4 font-mono font-black uppercase">
               {t("title")}
             </h1>
           </div>
 
-          <div className="grid grid-cols-[minmax(0,1fr)] border-border border-t border-l bg-background md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-[minmax(0,1fr)] gap-6 md:grid-cols-2 lg:grid-cols-3">
             {resources.map((resource) => (
-              <a
-                className="group flex min-w-0 flex-col border-border border-r border-b bg-background p-6 transition hover:bg-card sm:p-7"
-                href={resource.href}
-                key={resource.href}
-                rel={resource.external ? "noopener noreferrer" : undefined}
-                target={resource.external ? "_blank" : undefined}
-              >
-                <p className="font-mono text-xs uppercase tracking-[0.24em] text-muted-foreground">
-                  {resource.kind}
-                </p>
-                <h2 className="mt-8 font-mono text-3xl font-black uppercase leading-none tracking-[-0.04em] transition [overflow-wrap:anywhere] group-hover:text-primary">
-                  {resource.title}
-                </h2>
-                <p className="mt-5 font-mono text-sm uppercase leading-6 tracking-[0.14em] text-muted-foreground">
-                  {resource.description}
-                </p>
-                <span className="mt-8 inline-flex items-center font-mono text-xs font-bold uppercase tracking-[0.18em] text-primary transition group-hover:translate-x-1">
-                  {t("open")} &rarr;
-                </span>
-              </a>
+              <Card className="min-w-0" key={resource.href}>
+                <CardHeader className="flex-1 gap-5">
+                  <Badge
+                    className="font-mono uppercase tracking-[0.18em]"
+                    variant="outline"
+                  >
+                    {resource.kind}
+                  </Badge>
+                  <CardTitle className="font-mono text-2xl font-black uppercase leading-none tracking-[-0.04em] [overflow-wrap:anywhere]">
+                    {resource.title}
+                  </CardTitle>
+                  <CardDescription className="font-mono text-sm uppercase leading-6 tracking-[0.14em]">
+                    {resource.description}
+                  </CardDescription>
+                </CardHeader>
+                <CardFooter>
+                  <a
+                    className={cn(
+                      buttonVariants({ size: "sm", variant: "outline" }),
+                      "font-mono uppercase tracking-[0.18em]",
+                    )}
+                    href={resource.href}
+                    rel={resource.external ? "noopener noreferrer" : undefined}
+                    target={resource.external ? "_blank" : undefined}
+                  >
+                    {t("open")} &rarr;
+                  </a>
+                </CardFooter>
+              </Card>
             ))}
           </div>
         </div>

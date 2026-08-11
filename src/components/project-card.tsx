@@ -1,28 +1,35 @@
+import Image from "next/image";
 import Link from "next/link";
-import type { Project } from "@/lib/projects/schema";
+import { Badge } from "@/components/ui/badge";
+import type { Project, ProjectLifecycleStatus } from "@/lib/projects/schema";
 import { cn } from "@/lib/utils";
 import { AuthorBadge } from "./author-badge";
-import { ProjectVideoEmbed } from "./project-video-embed";
 
 type ProjectCardProps = {
   project: Project;
   href: string;
-  index: number;
   applicabilityLabel: string;
   lifecycleLabel: string;
   openLabel: string;
   voteLabel: string;
+  categoryLabel?: string;
   className?: string;
+};
+
+const statusStyles: Record<ProjectLifecycleStatus, string> = {
+  ready_to_use: "border-success/20 bg-success/10 text-success",
+  in_development: "border-brand-blue/20 bg-brand-blue/10 text-link",
+  idea: "border-warning/20 bg-warning/10 text-warning",
 };
 
 export function ProjectCard({
   project,
   href,
-  index,
   applicabilityLabel,
   lifecycleLabel,
   openLabel,
   voteLabel,
+  categoryLabel,
   className,
 }: ProjectCardProps) {
   const author = project.ownerName || project.participantName;
@@ -34,70 +41,195 @@ export function ProjectCard({
   return (
     <article
       className={cn(
-        "project-card group flex min-w-0 h-full min-h-[23rem] flex-col p-6 sm:p-7",
+        "group flex min-w-0 flex-col overflow-hidden rounded-xl border bg-card shadow-sm transition-[border-color,box-shadow,transform] duration-200 ease-[var(--ease-out)] hover:-translate-y-0.5 hover:border-line-strong hover:shadow-lg motion-reduce:hover:translate-y-0",
         className,
       )}
     >
-      <div className="flex min-w-0 items-start justify-between gap-3 sm:gap-5">
-        <span className="border border-primary px-2 py-1 font-mono text-[0.6rem] font-bold uppercase tracking-[0.16em] text-primary">
-          {applicabilityLabel}
-        </span>
-        <span className="ui-eyebrow text-ink-muted">
-          {String(index).padStart(3, "0")}
-        </span>
-      </div>
+      <ProjectPreview href={href} project={project} />
 
-      <ProjectVideoEmbed
-        className="mt-7"
-        detailHref={href}
-        imageUrl={project.imageUrl}
-        title={project.name}
-        videoUrl={project.videoUrl}
-      />
-
-      <div className="mt-7 flex min-w-0 flex-1 flex-col">
-        <div className="flex min-w-0 flex-wrap items-center justify-between gap-3 sm:gap-4">
-          <p className="ui-eyebrow flex min-w-0 items-center gap-2 text-accent">
-            <span aria-hidden="true" className="size-1.5 bg-current" />
+      <div className="flex flex-1 flex-col p-5 sm:p-6">
+        <div className="flex min-w-0 items-center gap-2">
+          <Badge
+            className={cn(
+              "shrink-0 font-mono font-bold uppercase tracking-[0.08em]",
+              statusStyles[project.lifecycleStatus],
+            )}
+            variant="outline"
+          >
             {lifecycleLabel}
-          </p>
-          <p className="ui-eyebrow shrink-0 text-primary tabular-nums">
-            {project.votesCount} {voteLabel}
-          </p>
+          </Badge>
+          <span className="truncate text-xs text-muted-foreground">
+            {categoryLabel || applicabilityLabel}
+          </span>
         </div>
 
-        <h3 className="type-title mt-6 min-w-0 text-balance font-mono [overflow-wrap:anywhere]">
-          <Link className="project-card__title ui-focus block" href={href}>
+        <h3 className="mt-4 text-balance text-xl font-semibold leading-tight tracking-[-0.025em]">
+          <Link
+            className="ui-focus transition-colors group-hover:text-link"
+            href={href}
+          >
             {project.name}
           </Link>
         </h3>
+        <p className="mt-2 line-clamp-2 text-sm leading-6 text-muted-foreground">
+          {projectSummary(project)}
+        </p>
 
         <AuthorBadge
-          className="mt-6"
+          className="mt-5"
           imageClassName="size-8"
           imageUrl={project.ownerImageUrl}
           meta={authorMeta}
-          metaClassName="text-[0.65rem]"
+          metaClassName="text-xs normal-case tracking-normal"
           name={author}
-          nameClassName="text-xs"
+          nameClassName="font-sans text-sm normal-case tracking-normal"
         />
+
+        <div className="mt-5 flex min-w-0 items-center justify-between gap-4 border-t pt-4">
+          <p className="truncate text-xs text-muted-foreground">
+            {project.countries.join(" · ")}
+          </p>
+          <div className="flex shrink-0 items-center gap-3">
+            <span className="font-mono text-xs text-muted-foreground tabular-nums">
+              {project.votesCount} {voteLabel}
+            </span>
+            <Link
+              aria-label={`${openLabel} ${project.name}`}
+              className="ui-focus text-sm font-semibold text-link"
+              href={href}
+            >
+              {openLabel} <span aria-hidden="true">→</span>
+            </Link>
+          </div>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+type ProjectListItemProps = Omit<ProjectCardProps, "className">;
+
+export function ProjectListItem({
+  project,
+  href,
+  applicabilityLabel,
+  lifecycleLabel,
+  openLabel,
+  voteLabel,
+  categoryLabel,
+}: ProjectListItemProps) {
+  const author = project.ownerName || project.participantName;
+
+  return (
+    <article className="group grid min-w-0 grid-cols-[6.5rem_minmax(0,1fr)] items-start gap-4 rounded-xl border bg-card p-4 transition-[border-color,box-shadow] hover:border-line-strong hover:shadow-md sm:grid-cols-[10rem_minmax(0,1fr)_auto] sm:items-center sm:gap-5">
+      <ProjectPreview compact href={href} project={project} />
+
+      <div className="min-w-0">
+        <div className="flex min-w-0 flex-wrap items-center gap-2">
+          <Badge
+            className={cn(
+              "font-mono font-bold uppercase tracking-[0.08em]",
+              statusStyles[project.lifecycleStatus],
+            )}
+            variant="outline"
+          >
+            {lifecycleLabel}
+          </Badge>
+          <span className="text-xs text-muted-foreground">
+            {categoryLabel || applicabilityLabel}
+          </span>
+        </div>
+        <h3 className="mt-2 truncate text-lg font-semibold tracking-[-0.02em]">
+          <Link
+            className="ui-focus transition-colors group-hover:text-link"
+            href={href}
+          >
+            {project.name}
+          </Link>
+        </h3>
+        <p className="mt-1 line-clamp-1 text-sm text-muted-foreground">
+          {projectSummary(project)}
+        </p>
+        <p className="mt-2 truncate text-xs text-muted-foreground">
+          {author} · {project.countries.join(" · ")}
+        </p>
       </div>
 
-      <div className="mt-8 flex min-w-0 flex-wrap items-end justify-between gap-4 border-line border-t pt-5 sm:gap-5">
-        <p className="min-w-0 font-mono text-xs uppercase leading-5 tracking-[0.14em] text-ink-muted [overflow-wrap:anywhere] sm:max-w-[75%]">
-          {project.countries.join(" / ")}
-        </p>
+      <div className="col-span-2 flex items-center justify-between gap-4 border-t pt-3 sm:col-span-1 sm:flex-col sm:items-end sm:border-t-0 sm:pt-0">
+        <span className="font-mono text-xs text-muted-foreground tabular-nums">
+          {project.votesCount} {voteLabel}
+        </span>
         <Link
           aria-label={`${openLabel} ${project.name}`}
-          className="project-card__action ui-focus ui-pressable flex shrink-0 items-center gap-2 text-primary"
+          className="ui-focus text-sm font-semibold text-link"
           href={href}
         >
-          {openLabel}
-          <span aria-hidden="true" className="project-card__arrow">
-            →
-          </span>
+          {openLabel} <span aria-hidden="true">→</span>
         </Link>
       </div>
     </article>
   );
+}
+
+function ProjectPreview({
+  compact = false,
+  href,
+  project,
+}: {
+  compact?: boolean;
+  href: string;
+  project: Project;
+}) {
+  return (
+    <Link
+      aria-label={project.name}
+      className={cn(
+        "relative block overflow-hidden bg-muted",
+        compact
+          ? "aspect-square rounded-lg sm:aspect-[5/3]"
+          : "aspect-[16/10] rounded-t-xl",
+      )}
+      href={href}
+    >
+      {project.imageUrl ? (
+        <Image
+          alt={`${project.name} project preview`}
+          className="object-cover transition-transform duration-300 ease-[var(--ease-out)] group-hover:scale-[1.02] motion-reduce:transition-none"
+          fill
+          sizes={
+            compact
+              ? "(max-width: 640px) 104px, 160px"
+              : "(max-width: 768px) 100vw, 33vw"
+          }
+          src={project.imageUrl}
+        />
+      ) : (
+        <div className="bg-grid absolute inset-0 flex items-center justify-center bg-surface-subtle">
+          <span className="font-mono text-4xl font-black tracking-[-0.08em] text-foreground/15 sm:text-5xl">
+            {projectInitials(project.name)}
+          </span>
+        </div>
+      )}
+    </Link>
+  );
+}
+
+function projectInitials(name: string) {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((word) => word[0]?.toUpperCase())
+    .join("");
+}
+
+function projectSummary(project: Project) {
+  const summary = project.descriptionMarkdown
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, "")
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
+    .replace(/[#>*_`~|-]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  return summary || project.name;
 }

@@ -1,10 +1,19 @@
 "use client";
 
+import {
+  MagnifyingGlassIcon,
+  RowsIcon,
+  SquaresFourIcon,
+} from "@phosphor-icons/react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
 import type { ReactNode } from "react";
-import { useMemo, useState } from "react";
-import { ProjectCard } from "@/components/project-card";
+import { useDeferredValue, useState } from "react";
+import { ProjectCard, ProjectListItem } from "@/components/project-card";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   categorizeProject,
   type ResolvedCluster,
@@ -22,9 +31,7 @@ type ViewMode = "grid" | "list";
 
 type ProjectsGridProps = {
   initialProjects: Project[];
-  /** Filterable clusters: built-ins plus any graduated proposals. */
   clusters: ResolvedCluster[];
-  /** project slug -> resolved display cluster id. */
   assignments: Record<string, string>;
 };
 
@@ -38,6 +45,10 @@ export function ProjectsGrid({
   const [activeCategory, setActiveCategory] = useState<CategoryFilter>("all");
   const [activeStatus, setActiveStatus] = useState<StatusFilter>("all");
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
+  const [query, setQuery] = useState("");
+  const deferredQuery = useDeferredValue(
+    query.trim().toLocaleLowerCase(locale),
+  );
   const { data: projects = [], isFetching } = useQuery({
     initialData: initialProjects,
     queryFn: fetchProjects,
@@ -46,148 +57,151 @@ export function ProjectsGrid({
     refetchIntervalInBackground: false,
   });
 
-  const clusterById = useMemo(
-    () => new Map(clusters.map((cluster) => [cluster.id, cluster])),
-    [clusters],
+  const clusterById = new Map(clusters.map((cluster) => [cluster.id, cluster]));
+  const tagged = projects.map((project) => ({
+    project,
+    categoryId: assignments[project.slug] ?? categorizeProject(project),
+  }));
+  const counts = new Map<string, number>();
+  const statusCounts = new Map<ProjectLifecycleStatus, number>();
+  for (const { categoryId, project } of tagged) {
+    counts.set(categoryId, (counts.get(categoryId) ?? 0) + 1);
+    statusCounts.set(
+      project.lifecycleStatus,
+      (statusCounts.get(project.lifecycleStatus) ?? 0) + 1,
+    );
+  }
+  const visibleClusters = clusters.filter(
+    (cluster) => (counts.get(cluster.id) ?? 0) > 0,
   );
-  const tagged = useMemo(
-    () =>
-      projects.map((project) => ({
-        project,
-        // Persisted assignment when present; keyword heuristic covers projects
-        // that arrive through polling before the page is rendered again.
-        categoryId: assignments[project.slug] ?? categorizeProject(project),
-      })),
-    [projects, assignments],
-  );
-  const counts = useMemo(() => {
-    const map = new Map<string, number>();
-    for (const { categoryId } of tagged) {
-      map.set(categoryId, (map.get(categoryId) ?? 0) + 1);
-    }
-    return map;
-  }, [tagged]);
-  const statusCounts = useMemo(() => {
-    const map = new Map<ProjectLifecycleStatus, number>();
-    for (const { project } of tagged) {
-      map.set(
-        project.lifecycleStatus,
-        (map.get(project.lifecycleStatus) ?? 0) + 1,
-      );
-    }
-    return map;
-  }, [tagged]);
-  const visibleClusters = useMemo(
-    () => clusters.filter((cluster) => (counts.get(cluster.id) ?? 0) > 0),
-    [clusters, counts],
-  );
-  const categoryVisible = useMemo(
-    () =>
-      activeCategory === "all"
-        ? tagged
-        : tagged.filter((entry) => entry.categoryId === activeCategory),
-    [tagged, activeCategory],
-  );
-  const visible = useMemo(
-    () =>
-      activeStatus === "all"
-        ? categoryVisible
-        : categoryVisible.filter(
-            ({ project }) => project.lifecycleStatus === activeStatus,
-          ),
-    [categoryVisible, activeStatus],
-  );
+  const visible = tagged.filter(({ categoryId, project }) => {
+    const categoryMatches =
+      activeCategory === "all" || categoryId === activeCategory;
+    const statusMatches =
+      activeStatus === "all" || project.lifecycleStatus === activeStatus;
+    const queryMatches =
+      !deferredQuery ||
+      `${project.name} ${project.descriptionMarkdown} ${project.ownerName} ${project.participantName} ${project.countries.join(" ")}`
+        .toLocaleLowerCase(locale)
+        .includes(deferredQuery);
+
+    return categoryMatches && statusMatches && queryMatches;
+  });
   const activeMeta =
     activeCategory === "all" ? null : clusterById.get(activeCategory);
 
   if (projects.length === 0) {
     return (
-      <div className="border border-border bg-card p-8">
-        <p className="font-mono text-lg uppercase leading-8 tracking-[0.14em] text-muted-foreground">
+      <Card>
+        <CardContent className="text-muted-foreground">
           {t("empty")}
-        </p>
-      </div>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <div className="relative">
-      <div className="mb-6 flex flex-wrap gap-2">
-        <CategoryChip
-          active={activeCategory === "all"}
-          count={projects.length}
-          label={t("all")}
-          onClick={() => setActiveCategory("all")}
-        />
-        {visibleClusters.map((cluster) => (
-          <CategoryChip
-            active={activeCategory === cluster.id}
-            count={counts.get(cluster.id) ?? 0}
-            key={cluster.id}
-            label={cluster.label}
-            onClick={() => setActiveCategory(cluster.id)}
-          />
-        ))}
-      </div>
-
-      <div className="mb-6 flex flex-wrap gap-2">
-        <CategoryChip
-          active={activeStatus === "all"}
-          count={projects.length}
-          label={t("statuses.all")}
-          onClick={() => setActiveStatus("all")}
-        />
-        {projectLifecycleStatuses.map((status) => (
-          <CategoryChip
-            active={activeStatus === status}
-            count={statusCounts.get(status) ?? 0}
-            key={status}
-            label={t(`statuses.${status}`)}
-            onClick={() => setActiveStatus(status)}
-          />
-        ))}
-      </div>
-
-      {activeMeta ? (
-        <div className="mb-6 border-accent border-l-2 bg-card px-5 py-4">
-          <p className="font-mono text-xs uppercase tracking-[0.24em] text-accent">
-            {activeMeta.title}
-          </p>
-          <p className="mt-2 max-w-3xl font-mono text-sm leading-6 tracking-[0.04em] text-muted-foreground">
-            {activeMeta.description}
-          </p>
-        </div>
-      ) : null}
-
-      <div className="mb-3 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-        <p className="font-mono text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground">
-          {visible.length} {visible.length === 1 ? t("project") : t("projects")}
-        </p>
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="inline-flex border border-border bg-background">
-            <ViewModeButton
-              active={viewMode === "grid"}
-              label={t("views.grid")}
-              onClick={() => setViewMode("grid")}
-            />
-            <ViewModeButton
-              active={viewMode === "list"}
-              label={t("views.list")}
-              onClick={() => setViewMode("list")}
+    <div>
+      <Card className="shadow-sm" size="sm">
+        <CardContent>
+          <div className="relative">
+            <MagnifyingGlassIcon className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              aria-label={t("searchPlaceholder")}
+              className="bg-background pl-10"
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder={t("searchPlaceholder")}
+              type="search"
+              value={query}
             />
           </div>
-          <p className="font-mono text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground">
+
+          <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+            <FilterChip
+              active={activeCategory === "all"}
+              count={projects.length}
+              label={t("all")}
+              onClick={() => setActiveCategory("all")}
+            />
+            {visibleClusters.map((cluster) => (
+              <FilterChip
+                active={activeCategory === cluster.id}
+                count={counts.get(cluster.id) ?? 0}
+                key={cluster.id}
+                label={cluster.label}
+                onClick={() => setActiveCategory(cluster.id)}
+              />
+            ))}
+          </div>
+
+          <div className="mt-2 flex gap-2 overflow-x-auto border-t pt-3 pb-1">
+            <FilterChip
+              active={activeStatus === "all"}
+              count={projects.length}
+              label={t("statuses.all")}
+              onClick={() => setActiveStatus("all")}
+            />
+            {projectLifecycleStatuses.map((status) => (
+              <FilterChip
+                active={activeStatus === status}
+                count={statusCounts.get(status) ?? 0}
+                key={status}
+                label={t(`statuses.${status}`)}
+                onClick={() => setActiveStatus(status)}
+              />
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {activeMeta ? (
+        <Alert className="mt-4 border-brand-blue/20 bg-brand-blue/5">
+          <AlertTitle className="text-link">{activeMeta.title}</AlertTitle>
+          <AlertDescription className="max-w-3xl">
+            {activeMeta.description}
+          </AlertDescription>
+        </Alert>
+      ) : null}
+
+      <div className="my-6 flex items-center justify-between gap-4">
+        <p className="text-sm text-muted-foreground">
+          <span className="font-medium text-foreground tabular-nums">
+            {visible.length}
+          </span>{" "}
+          {visible.length === 1 ? t("project") : t("projects")}
+          <span className="ml-2 hidden text-xs sm:inline">
             {isFetching ? t("syncing") : t("live")}
-          </p>
+          </span>
+        </p>
+        <div className="inline-flex rounded-lg border bg-card p-1">
+          <ViewModeButton
+            active={viewMode === "grid"}
+            icon={<SquaresFourIcon />}
+            label={t("views.grid")}
+            onClick={() => setViewMode("grid")}
+          />
+          <ViewModeButton
+            active={viewMode === "list"}
+            icon={<RowsIcon />}
+            label={t("views.list")}
+            onClick={() => setViewMode("list")}
+          />
         </div>
       </div>
-      {viewMode === "grid" ? (
-        <div className="grid grid-cols-[minmax(0,1fr)] gap-px bg-line md:grid-cols-2 lg:grid-cols-3">
-          {visible.map(({ project }, index) => (
+
+      {visible.length === 0 ? (
+        <Card>
+          <CardContent className="text-center text-muted-foreground">
+            {t("empty")}
+          </CardContent>
+        </Card>
+      ) : viewMode === "grid" ? (
+        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+          {visible.map(({ categoryId, project }) => (
             <ProjectCard
               applicabilityLabel={t(`applicabilities.${project.applicability}`)}
+              categoryLabel={clusterById.get(categoryId)?.label}
               href={`/${locale}/p/${project.slug}`}
-              index={index + 1}
               key={project.id}
               lifecycleLabel={t(`statuses.${project.lifecycleStatus}`)}
               openLabel={t("open")}
@@ -197,72 +211,19 @@ export function ProjectsGrid({
           ))}
         </div>
       ) : (
-        <div className="overflow-x-auto border border-border bg-background">
-          <table className="w-full min-w-[900px] border-collapse text-left">
-            <thead className="border-border border-b bg-card">
-              <tr>
-                <TableHeader>{t("table.project")}</TableHeader>
-                <TableHeader>{t("table.status")}</TableHeader>
-                <TableHeader>{t("table.category")}</TableHeader>
-                <TableHeader>{t("table.countries")}</TableHeader>
-                <TableHeader>{t("table.applicability")}</TableHeader>
-                <TableHeader>{t("table.builder")}</TableHeader>
-                <TableHeader align="right">{t("table.votes")}</TableHeader>
-                <TableHeader align="right">{t("table.link")}</TableHeader>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {visible.map(({ project, categoryId }) => (
-                <tr className="group transition hover:bg-card" key={project.id}>
-                  <td className="max-w-[260px] px-4 py-3 align-middle">
-                    <a
-                      className="block truncate font-mono text-sm font-black uppercase tracking-[-0.03em] transition group-hover:text-primary"
-                      href={`/${locale}/p/${project.slug}`}
-                    >
-                      {project.name}
-                    </a>
-                  </td>
-                  <td className="px-4 py-3 align-middle">
-                    <span className="whitespace-nowrap border border-accent px-2 py-1 font-mono text-[0.58rem] font-bold uppercase tracking-[0.14em] text-accent">
-                      {t(`statuses.${project.lifecycleStatus}`)}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 align-middle">
-                    <button
-                      className="max-w-[150px] truncate font-mono text-[0.62rem] font-bold uppercase tracking-[0.18em] text-accent transition hover:text-primary"
-                      onClick={() => setActiveCategory(categoryId)}
-                      type="button"
-                    >
-                      {clusterById.get(categoryId)?.label ??
-                        clusterById.get("other")?.label}
-                    </button>
-                  </td>
-                  <td className="max-w-[180px] truncate px-4 py-3 align-middle font-mono text-[0.65rem] uppercase tracking-[0.16em] text-muted-foreground">
-                    {project.countries.join(" / ")}
-                  </td>
-                  <td className="px-4 py-3 align-middle">
-                    <span className="whitespace-nowrap border border-primary px-2 py-1 font-mono text-[0.58rem] font-bold uppercase tracking-[0.14em] text-primary">
-                      {t(`applicabilities.${project.applicability}`)}
-                    </span>
-                  </td>
-                  <td className="max-w-[170px] truncate px-4 py-3 align-middle font-mono text-[0.65rem] uppercase tracking-[0.16em] text-muted-foreground">
-                    {project.ownerName || project.participantName}
-                  </td>
-                  <td className="px-4 py-3 text-right align-middle font-mono text-xs font-bold uppercase tracking-[0.16em] text-primary tabular-nums">
-                    {project.votesCount}
-                  </td>
-                  <td className="px-4 py-3 text-right align-middle">
-                    <a
-                      className="font-mono text-[0.62rem] font-bold uppercase tracking-[0.18em] text-muted-foreground transition hover:text-primary"
-                      href={`/${locale}/p/${project.slug}`}
-                    >
-                      {t("open")}
-                    </a>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="flex flex-col gap-3">
+          {visible.map(({ categoryId, project }) => (
+            <ProjectListItem
+              applicabilityLabel={t(`applicabilities.${project.applicability}`)}
+              categoryLabel={clusterById.get(categoryId)?.label}
+              href={`/${locale}/p/${project.slug}`}
+              key={project.id}
+              lifecycleLabel={t(`statuses.${project.lifecycleStatus}`)}
+              openLabel={t("open")}
+              project={project}
+              voteLabel={project.votesCount === 1 ? t("vote") : t("votes")}
+            />
+          ))}
         </div>
       )}
     </div>
@@ -271,67 +232,47 @@ export function ProjectsGrid({
 
 type ViewModeButtonProps = {
   active: boolean;
+  icon: ReactNode;
   label: string;
   onClick: () => void;
 };
 
-function ViewModeButton({ active, label, onClick }: ViewModeButtonProps) {
+function ViewModeButton({ active, icon, label, onClick }: ViewModeButtonProps) {
   return (
-    <button
+    <Button
+      aria-label={label}
       aria-pressed={active}
-      className={`px-3 py-2 font-mono text-[0.65rem] font-bold uppercase tracking-[0.18em] transition ${
-        active
-          ? "bg-primary text-primary-foreground"
-          : "text-muted-foreground hover:text-foreground"
-      }`}
+      size="icon-sm"
+      variant={active ? "default" : "ghost"}
       onClick={onClick}
+      title={label}
       type="button"
     >
-      {label}
-    </button>
+      {icon}
+    </Button>
   );
 }
 
-type TableHeaderProps = {
-  align?: "left" | "right";
-  children: ReactNode;
-};
-
-function TableHeader({ align = "left", children }: TableHeaderProps) {
-  return (
-    <th
-      className={`px-4 py-3 font-mono text-[0.58rem] font-bold uppercase tracking-[0.2em] text-muted-foreground ${
-        align === "right" ? "text-right" : "text-left"
-      }`}
-      scope="col"
-    >
-      {children}
-    </th>
-  );
-}
-
-type CategoryChipProps = {
+type FilterChipProps = {
   active: boolean;
   count: number;
   label: string;
   onClick: () => void;
 };
 
-function CategoryChip({ active, count, label, onClick }: CategoryChipProps) {
+function FilterChip({ active, count, label, onClick }: FilterChipProps) {
   return (
-    <button
-      className={`inline-flex items-center gap-2 border px-3 py-2 font-mono text-[0.65rem] font-bold uppercase tracking-[0.18em] transition ${
-        active
-          ? "border-primary bg-primary text-primary-foreground"
-          : "border-border text-muted-foreground hover:border-foreground hover:text-foreground"
-      }`}
+    <Button
+      aria-pressed={active}
       onClick={onClick}
+      size="sm"
       type="button"
+      variant={active ? "default" : "outline"}
     >
       <span>{label}</span>
-      <span className={active ? "text-primary-foreground" : "text-accent"}>
+      <span className="font-mono text-[0.68rem] opacity-70 tabular-nums">
         {count}
       </span>
-    </button>
+    </Button>
   );
 }

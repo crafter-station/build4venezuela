@@ -121,10 +121,7 @@ export function VoteButton({
   if (!signedIn) {
     return (
       <SignInButton mode="modal">
-        <Button
-          className="h-12 px-5 text-sm uppercase tracking-[0.18em]"
-          type="button"
-        >
+        <Button className="uppercase tracking-[0.18em]" size="lg" type="button">
           {t("signIn", { count: voteState.count })}
         </Button>
       </SignInButton>
@@ -133,7 +130,8 @@ export function VoteButton({
 
   return (
     <Button
-      className="h-12 px-5 text-sm uppercase tracking-[0.18em]"
+      className="uppercase tracking-[0.18em]"
+      size="lg"
       aria-disabled={voteMutation.isPending}
       onClick={vote}
       type="button"

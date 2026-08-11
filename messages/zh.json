@@ -19,6 +19,8 @@
     "goToCountry": "前往{country}",
     "availableTools": "可用工具",
     "toolsTitle": "使用、改造、分享。",
+    "projectsTitle": "面向{country}的项目",
+    "viewAllProjects": "查看所有项目",
     "empty": "目前还没有标记为适用于{country}的项目。",
     "countries": {
       "venezuela": {
@@ -362,6 +364,7 @@
       "empty": "No projects yet. Be the first one to add a build.",
       "syncing": "Checking for updates...",
       "live": "Updated automatically",
+      "searchPlaceholder": "搜索项目、团队或地点...",
       "all": "All",
       "project": "project",
       "projects": "projects",

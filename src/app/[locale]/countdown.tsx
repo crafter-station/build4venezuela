@@ -1,6 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Alert, AlertTitle } from "@/components/ui/alert";
+import {
+  Card,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 const SECOND = 1000;
 const MINUTE = 60 * SECOND;
@@ -46,9 +53,11 @@ export function Countdown({ labels, targetIso }: CountdownProps) {
 
   if (parts.complete) {
     return (
-      <p className="border border-primary/70 px-4 py-3 font-mono text-sm font-bold uppercase tracking-[0.18em] text-primary">
-        {labels.complete}
-      </p>
+      <Alert className="border-primary/70 text-primary">
+        <AlertTitle className="font-mono text-sm font-bold uppercase tracking-[0.18em]">
+          {labels.complete}
+        </AlertTitle>
+      </Alert>
     );
   }
 
@@ -60,16 +69,18 @@ export function Countdown({ labels, targetIso }: CountdownProps) {
   ];
 
   return (
-    <div className="grid w-full grid-cols-2 gap-px bg-border sm:grid-cols-4">
+    <div className="grid w-full grid-cols-2 gap-3 sm:grid-cols-4">
       {units.map((unit) => (
-        <div className="bg-background px-4 py-5 text-center" key={unit.label}>
-          <p className="font-mono text-[clamp(2rem,5vw,4rem)] font-black leading-none tracking-[-0.06em] text-primary">
-            {String(unit.value).padStart(2, "0")}
-          </p>
-          <p className="mt-3 font-mono text-[0.65rem] uppercase tracking-[0.22em] text-muted-foreground">
-            {unit.label}
-          </p>
-        </div>
+        <Card className="text-center" key={unit.label} size="sm">
+          <CardHeader>
+            <CardTitle className="font-mono text-[clamp(2rem,5vw,4rem)] font-black leading-none tracking-[-0.06em] text-primary">
+              {String(unit.value).padStart(2, "0")}
+            </CardTitle>
+            <CardDescription className="mt-2 font-mono text-[0.65rem] uppercase tracking-[0.22em]">
+              {unit.label}
+            </CardDescription>
+          </CardHeader>
+        </Card>
       ))}
     </div>
   );

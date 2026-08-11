@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { buttonVariants } from "@/components/ui/button";
 
 export const metadata: Metadata = {
   title: "Build4Latam | Technology in solidarity",
@@ -15,7 +16,7 @@ const countries = [
     href: "/ve",
     name: "Venezuela",
     description: "Herramientas creadas tras los terremotos en Venezuela.",
-    colors: ["#ffd83d", "#16c7e8", "#ff4a63"],
+    colors: ["bg-brand-yellow", "bg-accent", "bg-brand-red"],
   },
   {
     code: "CO",
@@ -24,7 +25,7 @@ const countries = [
     name: "Colombia",
     description:
       "Ayuda para Colombia y herramientas regionales listas para adaptarse.",
-    colors: ["#ffd83d", "#16c7e8", "#ff4a63"],
+    colors: ["bg-brand-yellow", "bg-accent", "bg-brand-red"],
   },
 ] as const;
 
@@ -44,7 +45,7 @@ export default function LatamHome() {
         className="absolute inset-y-0 right-[8vw] hidden w-px bg-line/40 lg:block"
       />
 
-      <section className="relative mx-auto w-full max-w-7xl border border-line bg-background/96 shadow-[0_24px_80px_rgba(0,0,0,0.65)]">
+      <section className="relative mx-auto w-full max-w-7xl overflow-hidden rounded-xl border border-line bg-background/96 shadow-panel">
         <header className="flex items-center justify-between gap-6 border-line border-b px-5 py-4 sm:px-7 sm:py-5 lg:px-9">
           <p className="ui-eyebrow text-primary">
             Build4Latam <span aria-hidden="true">{"//"}</span>{" "}
@@ -59,10 +60,7 @@ export default function LatamHome() {
               Red activa
             </p>
             <ThemeToggle label="Cambiar tema de color" />
-            <Link
-              className="ui-focus border border-primary bg-primary px-3 py-2 font-mono text-[0.625rem] font-black uppercase tracking-[0.13em] text-primary-foreground transition-colors hover:bg-transparent hover:text-primary sm:px-4 sm:text-xs"
-              href="/es/submit"
-            >
+            <Link className={buttonVariants({ size: "sm" })} href="/es/submit">
               Agregar proyecto
             </Link>
           </div>
@@ -110,11 +108,7 @@ export default function LatamHome() {
                     </span>
                     <div className="flex w-full max-w-56 gap-1">
                       {country.colors.map((color) => (
-                        <span
-                          className="h-1.5 flex-1"
-                          key={color}
-                          style={{ backgroundColor: color }}
-                        />
+                        <span className={`h-1.5 flex-1 ${color}`} key={color} />
                       ))}
                     </div>
                   </div>

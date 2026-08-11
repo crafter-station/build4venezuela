@@ -10,6 +10,9 @@ import {
   RadarChart,
   ResponsiveContainer,
 } from "recharts";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Sheet,
   SheetContent,
@@ -71,22 +74,24 @@ export function ProjectDrawer({
         {node && (
           <>
             <SheetHeader className="border-border border-b">
-              <div className="flex items-center gap-2">
-                <span
-                  className="border px-1.5 py-0.5 font-mono text-[10px]"
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge
+                  variant="outline"
+                  className="font-mono text-[10px]"
                   style={{
                     color: TIER_COLOR[node.tier],
                     borderColor: TIER_COLOR[node.tier],
                   }}
                 >
                   {tShared(`tiers.${node.tier}`)}
-                </span>
+                </Badge>
                 <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-widest">
                   {node.type} · {node.severity}
                 </span>
                 {node.security && node.security.risk !== "none" && (
-                  <span
-                    className="border px-1.5 py-0.5 font-mono text-[10px] uppercase"
+                  <Badge
+                    variant="outline"
+                    className="font-mono text-[10px] uppercase"
                     style={{
                       color: SECURITY_RISK_COLOR[node.security.risk],
                       borderColor: SECURITY_RISK_COLOR[node.security.risk],
@@ -95,7 +100,7 @@ export function ProjectDrawer({
                     {t("security.badge", {
                       risk: t(`security.risk.${node.security.risk}`),
                     })}
-                  </span>
+                  </Badge>
                 )}
               </div>
               <SheetTitle className="font-mono text-2xl font-black uppercase leading-tight tracking-tight">
@@ -119,36 +124,38 @@ export function ProjectDrawer({
               </div>
             </SheetHeader>
 
-            <div className="space-y-6 px-4 py-5">
+            <div className="flex flex-col gap-6 px-4 py-5">
               {/* radar + signals */}
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div className="border border-border">
-                  <ResponsiveContainer width="100%" height={220}>
-                    <RadarChart data={radarData} outerRadius="72%">
-                      <PolarGrid stroke="#262626" />
-                      <PolarAngleAxis
-                        dataKey="axis"
-                        tick={{
-                          fill: "#a6a6a6",
-                          fontSize: 9,
-                          fontFamily: "monospace",
-                        }}
-                      />
-                      <PolarRadiusAxis
-                        domain={[0, 5]}
-                        tick={false}
-                        axisLine={false}
-                      />
-                      <Radar
-                        dataKey="value"
-                        stroke={TIER_COLOR[node.tier]}
-                        fill={TIER_COLOR[node.tier]}
-                        fillOpacity={0.35}
-                        isAnimationActive={false}
-                      />
-                    </RadarChart>
-                  </ResponsiveContainer>
-                </div>
+                <Card size="sm" className="py-0">
+                  <CardContent className="px-0">
+                    <ResponsiveContainer width="100%" height={220}>
+                      <RadarChart data={radarData} outerRadius="72%">
+                        <PolarGrid stroke="var(--border)" />
+                        <PolarAngleAxis
+                          dataKey="axis"
+                          tick={{
+                            fill: "var(--muted-foreground)",
+                            fontSize: 9,
+                            fontFamily: "monospace",
+                          }}
+                        />
+                        <PolarRadiusAxis
+                          domain={[0, 5]}
+                          tick={false}
+                          axisLine={false}
+                        />
+                        <Radar
+                          dataKey="value"
+                          stroke={TIER_COLOR[node.tier]}
+                          fill={TIER_COLOR[node.tier]}
+                          fillOpacity={0.35}
+                          isAnimationActive={false}
+                        />
+                      </RadarChart>
+                    </ResponsiveContainer>
+                  </CardContent>
+                </Card>
                 <div className="grid grid-cols-2 gap-2 font-mono text-xs">
                   <Sig label={t("signals.stars")} value={node.signals.stars} />
                   <Sig
@@ -218,12 +225,13 @@ export function ProjectDrawer({
               <Section title={t("sections.domainTags")}>
                 <div className="flex flex-wrap gap-1.5">
                   {node.tags.map((t) => (
-                    <span
+                    <Badge
                       key={t}
-                      className="border border-border px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground"
+                      variant="outline"
+                      className="font-mono text-[10px] text-muted-foreground"
                     >
                       {tagLabel(t)}
-                    </span>
+                    </Badge>
                   ))}
                 </div>
               </Section>
@@ -232,19 +240,24 @@ export function ProjectDrawer({
                 <Section
                   title={t("sections.overlaps", { count: overlaps.length })}
                 >
-                  <div className="space-y-1.5">
+                  <div className="flex flex-col gap-1.5">
                     {overlaps.map((o) => (
-                      <button
+                      <Button
                         key={o.slug}
                         type="button"
                         onClick={() => onSelect(o.slug)}
-                        className="flex w-full items-center justify-between gap-2 border border-border px-2 py-1.5 text-left font-mono text-xs hover:border-foreground"
+                        variant="outline"
+                        size="sm"
+                        className="w-full justify-between font-mono"
                       >
                         <span className="truncate font-bold">{o.name}</span>
-                        <span className="shrink-0 text-accent text-[10px]">
+                        <Badge
+                          variant="secondary"
+                          className="shrink-0 font-mono"
+                        >
                           {t("sharedCount", { count: o.shared.length })}
-                        </span>
-                      </button>
+                        </Badge>
+                      </Button>
                     ))}
                   </div>
                 </Section>
@@ -252,7 +265,7 @@ export function ProjectDrawer({
 
               {node.redFlags.length > 0 && (
                 <Section title={t("sections.redFlags")}>
-                  <ul className="space-y-1">
+                  <ul className="flex flex-col gap-1">
                     {node.redFlags.map((r) => (
                       <li
                         key={r}
@@ -317,14 +330,15 @@ function SecurityBlock({ security }: { security: InsightNode["security"] }) {
     security.findings.every((f) => f.status === "resolved");
 
   return (
-    <div className="space-y-3">
+    <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center gap-2">
-        <span
-          className="border px-1.5 py-0.5 font-mono text-[10px] uppercase"
+        <Badge
+          variant="outline"
+          className="font-mono text-[10px] uppercase"
           style={{ color, borderColor: color }}
         >
           {t("badge", { risk: t(`risk.${security.risk}`) })}
-        </span>
+        </Badge>
         {improved && security.previousRisk && (
           <span className="font-mono text-[10px] text-muted-foreground line-through">
             {t("previously", { risk: t(`risk.${security.previousRisk}`) })}
@@ -351,7 +365,7 @@ function SecurityBlock({ security }: { security: InsightNode["security"] }) {
               {t("allResolved")}
             </p>
           )}
-          <ul className="space-y-1">
+          <ul className="flex flex-col gap-1">
             {security.findings.map((f) => (
               <li
                 key={f.title}
@@ -373,15 +387,16 @@ function SecurityBlock({ security }: { security: InsightNode["security"] }) {
                   {f.title}
                 </span>
                 {f.status && (
-                  <span
-                    className="ml-auto shrink-0 self-start border px-1 font-bold text-[9px] uppercase"
+                  <Badge
+                    variant="outline"
+                    className="ml-auto h-5 shrink-0 self-start px-1 font-bold text-[9px] uppercase"
                     style={{
                       color: FINDING_STATUS_COLOR[f.status],
                       borderColor: FINDING_STATUS_COLOR[f.status],
                     }}
                   >
                     {t(`status.${f.status}`)}
-                  </span>
+                  </Badge>
                 )}
               </li>
             ))}
@@ -432,12 +447,14 @@ function Section({
 
 function Sig({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="border border-border px-2 py-1.5">
-      <div className="truncate font-bold tabular-nums">{value}</div>
-      <div className="text-[9px] text-muted-foreground uppercase tracking-widest">
-        {label}
-      </div>
-    </div>
+    <Card size="sm" className="py-2">
+      <CardContent className="flex flex-col gap-0.5 px-3">
+        <div className="truncate font-bold tabular-nums">{value}</div>
+        <div className="text-[9px] text-muted-foreground uppercase tracking-widest">
+          {label}
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 

@@ -1,5 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { getTranslations } from "next-intl/server";
+import { Badge } from "@/components/ui/badge";
+import { buttonVariants } from "@/components/ui/button";
 import {
   getBuilderByUserId,
   listBuilderContactRequests,
@@ -37,7 +39,7 @@ export default async function BuildersPage({ params }: Props) {
               <p className="font-mono text-sm uppercase tracking-[0.16em] text-accent">
                 {t("eyebrow")}
               </p>
-              <h1 className="mt-4 font-mono text-5xl font-black uppercase leading-none sm:text-7xl lg:text-8xl">
+              <h1 className="type-page-title mt-4 font-mono font-black uppercase">
                 {t("title")}
               </h1>
             </div>
@@ -47,13 +49,13 @@ export default async function BuildersPage({ params }: Props) {
               </p>
               <div className="flex flex-wrap gap-3">
                 <a
-                  className="inline-flex h-10 items-center border border-border px-4 font-mono text-xs font-bold uppercase tracking-[0.12em] transition hover:border-foreground hover:bg-foreground hover:text-background"
+                  className={buttonVariants({ variant: "outline" })}
                   href={`/${locale}/builder/register`}
                 >
                   {builderProfile ? t("profile") : t("register")}
                 </a>
                 <a
-                  className="inline-flex h-10 items-center gap-2 border border-border px-4 font-mono text-xs font-bold uppercase tracking-[0.12em] transition hover:border-foreground hover:bg-foreground hover:text-background"
+                  className={buttonVariants({ variant: "outline" })}
                   href={`/${locale}/builder/requests`}
                 >
                   {t("inbox")}
@@ -64,12 +66,13 @@ export default async function BuildersPage({ params }: Props) {
                           count: unansweredRequestCount,
                         })}
                       </span>
-                      <span
+                      <Badge
                         aria-hidden="true"
-                        className="inline-flex min-w-5 items-center justify-center border border-current px-1.5 py-0.5 font-mono text-[0.65rem] font-black leading-none"
+                        className="min-w-5 font-mono text-[0.65rem] font-black leading-none"
+                        variant="secondary"
                       >
                         {unansweredRequestCount}
-                      </span>
+                      </Badge>
                     </>
                   ) : null}
                 </a>

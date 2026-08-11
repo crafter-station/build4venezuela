@@ -19,6 +19,8 @@
     "goToCountry": "Go to {country}",
     "availableTools": "Available tools",
     "toolsTitle": "Use them. Adapt them. Share them.",
+    "projectsTitle": "Projects for {country}",
+    "viewAllProjects": "View all projects",
     "empty": "There are no projects tagged for {country} yet.",
     "countries": {
       "venezuela": {
@@ -362,6 +364,7 @@
       "empty": "No projects yet. Be the first one to add a build.",
       "syncing": "Checking for updates...",
       "live": "Updated automatically",
+      "searchPlaceholder": "Search projects, teams, or places...",
       "all": "All",
       "project": "project",
       "projects": "projects",

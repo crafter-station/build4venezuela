@@ -1,13 +1,11 @@
 import type { FindingStatus, SecurityRisk, Severity, Tier } from "./types";
 
-// Poster palette (see src/app/globals.css): bg #000, primary #ffd83d,
-// accent #16c7e8, destructive #ff4a63, muted-foreground #a6a6a6.
 export const TIER_COLOR: Record<Tier, string> = {
-  spotlight: "#ffd83d",
-  promote: "#16c7e8",
-  "merge-candidate": "#b388ff",
-  "improve-first": "#a6a6a6",
-  deprioritize: "#ff4a63",
+  spotlight: "var(--primary)",
+  promote: "var(--accent)",
+  "merge-candidate": "var(--chart-4)",
+  "improve-first": "var(--muted-foreground)",
+  deprioritize: "var(--destructive)",
 };
 
 export const TIER_LABEL: Record<Tier, string> = {
@@ -33,15 +31,12 @@ export const SEVERITY_RANK: Record<Severity, number> = {
   low: 0,
 };
 
-// Security exposure risk (separate axis from the product `severity` score).
-// Poster palette: destructive #ff4a63 (red), #ff8a3d (amber), primary #ffd83d
-// (yellow), muted #a6a6a6 (grey), #3ad29f (green = clean).
 export const SECURITY_RISK_COLOR: Record<SecurityRisk, string> = {
-  critical: "#ff4a63",
-  high: "#ff8a3d",
-  medium: "#ffd83d",
-  low: "#a6a6a6",
-  none: "#3ad29f",
+  critical: "var(--destructive)",
+  high: "var(--warning)",
+  medium: "var(--primary)",
+  low: "var(--muted-foreground)",
+  none: "var(--success)",
 };
 
 export const SECURITY_RISK_RANK: Record<SecurityRisk, number> = {
@@ -55,10 +50,10 @@ export const SECURITY_RISK_RANK: Record<SecurityRisk, number> = {
 // Per-finding resolution status on re-audit. Green = fixed, amber = partial,
 // red = still open, cyan = newly found this pass.
 export const FINDING_STATUS_COLOR: Record<FindingStatus, string> = {
-  resolved: "#3ad29f",
-  partial: "#ffd83d",
-  open: "#ff4a63",
-  new: "#16c7e8",
+  resolved: "var(--success)",
+  partial: "var(--primary)",
+  open: "var(--destructive)",
+  new: "var(--accent)",
 };
 
 export const SCORE_KEYS = [

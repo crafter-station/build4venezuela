@@ -42,7 +42,9 @@
   --color-card: var(--card);
   --color-surface: var(--surface);
   --color-surface-raised: var(--surface-raised);
+  --color-surface-subtle: var(--surface-subtle);
   --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
   --color-ink-muted: var(--ink-muted);
   --color-brand-yellow: var(--brand-yellow);
   --color-brand-blue: var(--brand-blue);
@@ -50,6 +52,11 @@
   --color-link: var(--link);
   --color-success: var(--success);
   --color-warning: var(--warning);
+  --color-overlay: var(--overlay);
+  --color-channel-kick: var(--channel-kick);
+  --color-channel-twitch: var(--channel-twitch);
+  --color-channel-youtube: var(--channel-youtube);
+  --shadow-panel: 0 1.5rem 5rem var(--panel-shadow);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -161,7 +168,9 @@
   --foreground: #171714;
   --surface: #ffffff;
   --surface-raised: #ffffff;
+  --surface-subtle: #efeee9;
   --line: #dcdad2;
+  --line-strong: #b8b5aa;
   --ink-muted: #66665f;
   --brand-yellow: #f3c623;
   --brand-blue: #2457d6;
@@ -169,6 +178,12 @@
   --link: #174ec4;
   --success: #16734b;
   --warning: #8a5a00;
+  --overlay: rgb(23 23 20 / 45%);
+  --panel-shadow: rgb(23 23 20 / 18%);
+  --channel-kick: #318a10;
+  --channel-twitch: #6d35c7;
+  --channel-youtube: #c90028;
+  --country-card-foreground: #10100f;
   --card: var(--surface);
   --card-foreground: var(--foreground);
   --popover: var(--surface-raised);
@@ -212,7 +227,9 @@
   --foreground: #f4f3ee;
   --surface: #171716;
   --surface-raised: #1d1d1b;
+  --surface-subtle: #22221f;
   --line: #343430;
+  --line-strong: #52524c;
   --ink-muted: #a8a79f;
   --brand-yellow: #ffd83d;
   --brand-blue: #6d96ff;
@@ -220,6 +237,12 @@
   --link: #8aabff;
   --success: #56c995;
   --warning: #f0b84b;
+  --overlay: rgb(0 0 0 / 60%);
+  --panel-shadow: rgb(0 0 0 / 65%);
+  --channel-kick: #53fc18;
+  --channel-twitch: #a970ff;
+  --channel-youtube: #ff4d6d;
+  --country-card-foreground: #10100f;
   --card: var(--surface);
   --card-foreground: var(--foreground);
   --popover: var(--surface-raised);
@@ -277,7 +300,7 @@
 }
 
 @utility type-display {
-  font-size: clamp(3.25rem, 5.5vw, 6rem);
+  font-size: clamp(2.75rem, 5vw, 4rem);
   font-weight: 900;
   line-height: 0.84;
   letter-spacing: -0.06em;
@@ -285,10 +308,19 @@
 }
 
 @utility type-section {
-  font-size: clamp(2.25rem, 3.8vw, 4.25rem);
+  font-size: clamp(2rem, 3.5vw, 3.5rem);
   font-weight: 900;
   line-height: 0.88;
   letter-spacing: -0.055em;
+  text-transform: uppercase;
+}
+
+@utility type-page-title {
+  font-size: clamp(2.25rem, 5vw, 3.75rem);
+  font-family: var(--font-mono);
+  font-weight: 900;
+  line-height: 0.94;
+  letter-spacing: -0.05em;
   text-transform: uppercase;
 }
 
@@ -382,11 +414,11 @@
 
   .country-card:hover .country-card__content,
   .country-card:hover .country-card__action {
-    color: #000000;
+    color: var(--country-card-foreground);
   }
 
   .country-card:hover .country-card__meta {
-    color: rgb(0 0 0 / 62%);
+    color: color-mix(in srgb, var(--country-card-foreground) 62%, transparent);
   }
 
   .country-card:hover .country-card__arrow {

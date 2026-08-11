@@ -4,7 +4,10 @@ import { CheckIcon, XIcon } from "@phosphor-icons/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   builderQueryKeys,
   fetchBuilderContactRequests,
@@ -77,117 +80,122 @@ export function BuilderRequestsInbox({
       </div>
 
       {error ? (
-        <div className="border border-destructive bg-destructive/10 p-4 font-mono text-sm uppercase tracking-[0.12em] text-destructive">
-          {error}
-        </div>
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       ) : null}
 
       {requests.length === 0 ? (
-        <div className="border border-border p-8 font-mono text-sm uppercase leading-7 tracking-[0.1em] text-muted-foreground">
-          {t("empty")}
-        </div>
+        <Card>
+          <CardContent className="font-mono text-sm uppercase leading-7 tracking-[0.1em] text-muted-foreground">
+            {t("empty")}
+          </CardContent>
+        </Card>
       ) : (
         <div className="grid gap-5">
           {requests.map((request) => (
-            <article
-              className="grid gap-5 border border-border bg-card p-5"
-              key={request.id}
-            >
-              <div className="grid gap-3 md:grid-cols-[1fr_auto] md:items-start">
-                <div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span
-                      className={`border px-2 py-1 font-mono text-[0.68rem] font-black uppercase tracking-[0.12em] ${directionClass(
-                        request.direction,
-                      )}`}
+            <article key={request.id}>
+              <Card>
+                <CardContent className="grid gap-5">
+                  <div className="grid gap-3 md:grid-cols-[1fr_auto] md:items-start">
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Badge
+                          className={`font-mono text-[0.68rem] font-black uppercase tracking-[0.12em] ${directionClass(
+                            request.direction,
+                          )}`}
+                          variant="outline"
+                        >
+                          {t(`directions.${request.direction}`)}
+                        </Badge>
+                        <p className="font-mono text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                          {request.direction === "inbound"
+                            ? t("fromRequester", {
+                                requester: request.requesterName,
+                              })
+                            : t("toBuilder", { builder: request.builderName })}
+                        </p>
+                      </div>
+                      <h2 className="mt-3 font-mono text-2xl font-black uppercase">
+                        {request.direction === "inbound"
+                          ? request.requesterName
+                          : request.builderName}
+                      </h2>
+                      <p className="mt-2 font-mono text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                        {request.projectName}
+                      </p>
+                    </div>
+                    <Badge
+                      className={`font-mono font-black uppercase tracking-[0.12em] ${statusClass(request.status)}`}
+                      variant="secondary"
                     >
-                      {t(`directions.${request.direction}`)}
-                    </span>
-                    <p className="font-mono text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
-                      {request.direction === "inbound"
-                        ? t("fromRequester", {
-                            requester: request.requesterName,
-                          })
-                        : t("toBuilder", { builder: request.builderName })}
-                    </p>
+                      {t(`statuses.${request.status}`)}
+                    </Badge>
                   </div>
-                  <h2 className="mt-3 font-mono text-2xl font-black uppercase">
-                    {request.direction === "inbound"
-                      ? request.requesterName
-                      : request.builderName}
-                  </h2>
-                  <p className="mt-2 font-mono text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
-                    {request.projectName}
-                  </p>
-                </div>
-                <span
-                  className={`font-mono text-xs font-black uppercase tracking-[0.12em] ${statusClass(request.status)}`}
-                >
-                  {t(`statuses.${request.status}`)}
-                </span>
-              </div>
 
-              <p className="whitespace-pre-wrap font-mono text-sm uppercase leading-7 tracking-[0.08em] text-muted-foreground">
-                {request.coverLetter}
-              </p>
+                  <p className="whitespace-pre-wrap font-mono text-sm uppercase leading-7 tracking-[0.08em] text-muted-foreground">
+                    {request.coverLetter}
+                  </p>
 
-              <div className="grid gap-3 border-border border-t pt-4 sm:grid-cols-2">
-                <div>
-                  <p className="font-mono text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
-                    {t("contactEmail")}
-                  </p>
-                  <p className="mt-1 font-mono text-sm">
-                    {request.contactEmail || t("notProvided")}
-                  </p>
-                </div>
-                <div>
-                  <p className="font-mono text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
-                    {t("contactPhone")}
-                  </p>
-                  <p className="mt-1 font-mono text-sm">
-                    {request.contactPhone || t("notProvided")}
-                  </p>
-                </div>
-              </div>
-
-              {request.direction === "inbound" &&
-              request.status === "pending" ? (
-                <div className="grid gap-4 border-border border-t pt-4">
-                  <label className="flex items-center gap-3 font-mono text-xs font-bold uppercase tracking-[0.12em]">
-                    <input
-                      checked={Boolean(hideProfile[request.id])}
-                      className="size-4 accent-primary"
-                      onChange={(event) =>
-                        setHideProfile((current) => ({
-                          ...current,
-                          [request.id]: event.target.checked,
-                        }))
-                      }
-                      type="checkbox"
-                    />
-                    {t("hideProfileOnAccept")}
-                  </label>
-                  <div className="flex flex-wrap gap-2">
-                    <Button
-                      disabled={mutation.isPending}
-                      onClick={() => setRequestStatus(request, "accepted")}
-                      type="button"
-                    >
-                      <CheckIcon data-icon="inline-start" />
-                      {t("accept")}
-                    </Button>
-                    <Button
-                      disabled={mutation.isPending}
-                      onClick={() => setRequestStatus(request, "rejected")}
-                      type="button"
-                      variant="destructive"
-                    >
-                      <XIcon data-icon="inline-start" />
-                      {t("reject")}
-                    </Button>
+                  <div className="grid gap-3 border-border border-t pt-4 sm:grid-cols-2">
+                    <div>
+                      <p className="font-mono text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                        {t("contactEmail")}
+                      </p>
+                      <p className="mt-1 font-mono text-sm">
+                        {request.contactEmail || t("notProvided")}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="font-mono text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                        {t("contactPhone")}
+                      </p>
+                      <p className="mt-1 font-mono text-sm">
+                        {request.contactPhone || t("notProvided")}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              ) : null}
+
+                  {request.direction === "inbound" &&
+                  request.status === "pending" ? (
+                    <div className="grid gap-4 border-border border-t pt-4">
+                      <label className="flex items-center gap-3 font-mono text-xs font-bold uppercase tracking-[0.12em]">
+                        <input
+                          checked={Boolean(hideProfile[request.id])}
+                          className="size-4 accent-primary"
+                          onChange={(event) =>
+                            setHideProfile((current) => ({
+                              ...current,
+                              [request.id]: event.target.checked,
+                            }))
+                          }
+                          type="checkbox"
+                        />
+                        {t("hideProfileOnAccept")}
+                      </label>
+                      <div className="flex flex-wrap gap-2">
+                        <Button
+                          disabled={mutation.isPending}
+                          onClick={() => setRequestStatus(request, "accepted")}
+                          type="button"
+                        >
+                          <CheckIcon data-icon="inline-start" />
+                          {t("accept")}
+                        </Button>
+                        <Button
+                          disabled={mutation.isPending}
+                          onClick={() => setRequestStatus(request, "rejected")}
+                          type="button"
+                          variant="destructive"
+                        >
+                          <XIcon data-icon="inline-start" />
+                          {t("reject")}
+                        </Button>
+                      </div>
+                    </div>
+                  ) : null}
+                </CardContent>
+              </Card>
             </article>
           ))}
         </div>

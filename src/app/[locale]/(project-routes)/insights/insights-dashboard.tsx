@@ -2,8 +2,17 @@
 
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { TIER_COLOR, TIER_ORDER, tagLabel } from "@/lib/insights/constants";
 import type { InsightDataset, Tier } from "@/lib/insights/types";
+import { cn } from "@/lib/utils";
 import { Leaderboard } from "./leaderboard";
 import { OverlapNetwork } from "./overlap-network";
 import { ProjectDrawer } from "./project-drawer";
@@ -58,7 +67,7 @@ export function InsightsDashboard({ dataset }: { dataset: InsightDataset }) {
           <p className="font-mono text-sm uppercase tracking-[0.28em] text-accent">
             {t("eyebrow")}
           </p>
-          <h1 className="mt-4 font-mono text-[clamp(2.5rem,7vw,6rem)] font-black uppercase leading-[0.85] tracking-[-0.07em]">
+          <h1 className="type-page-title mt-4 font-mono font-black uppercase">
             {t("title")}
           </h1>
           <p className="mt-4 max-w-2xl font-mono text-muted-foreground text-sm">
@@ -105,16 +114,18 @@ export function InsightsDashboard({ dataset }: { dataset: InsightDataset }) {
             />
           ))}
           {(tier || tag) && (
-            <button
+            <Button
               type="button"
               onClick={() => {
                 setTier(null);
                 setTag(null);
               }}
-              className="ml-2 font-mono text-accent text-xs underline underline-offset-4 hover:opacity-80"
+              className="ml-2 font-mono"
+              size="sm"
+              variant="link"
             >
               {t("filters.clear")}
-            </button>
+            </Button>
           )}
         </div>
 
@@ -201,13 +212,18 @@ function Tile({
 }) {
   const clickable = Boolean(onClick);
   return (
-    <button
+    <Button
       type="button"
       onClick={onClick}
-      disabled={!clickable}
-      className={`border bg-card px-4 py-3 text-left transition ${
-        clickable ? "cursor-pointer hover:border-foreground" : "cursor-default"
-      } ${active ? "border-foreground" : "border-border"}`}
+      aria-disabled={!clickable}
+      aria-pressed={clickable ? active : undefined}
+      tabIndex={clickable ? undefined : -1}
+      variant={active ? "secondary" : "outline"}
+      size="lg"
+      className={cn(
+        "h-auto flex-col items-start gap-1 px-4 py-3 text-left font-mono",
+        !clickable && "cursor-default",
+      )}
     >
       <div
         className="font-mono text-3xl font-black tabular-nums"
@@ -215,10 +231,10 @@ function Tile({
       >
         {value}
       </div>
-      <div className="mt-1 font-mono text-[10px] text-muted-foreground uppercase tracking-widest">
+      <div className="text-[10px] text-muted-foreground uppercase tracking-widest">
         {label}
       </div>
-    </button>
+    </Button>
   );
 }
 
@@ -232,17 +248,15 @@ function Chip({
   onClick: () => void;
 }) {
   return (
-    <button
+    <Button
       type="button"
       onClick={onClick}
-      className={`border px-2.5 py-1 font-mono text-xs transition ${
-        active
-          ? "border-accent bg-accent text-accent-foreground"
-          : "border-border text-muted-foreground hover:border-foreground hover:text-foreground"
-      }`}
+      className="font-mono"
+      size="sm"
+      variant={active ? "default" : "outline"}
     >
       {label}
-    </button>
+    </Button>
   );
 }
 
@@ -256,18 +270,16 @@ function Panel({
   children: React.ReactNode;
 }) {
   return (
-    <div className="border border-border bg-card">
-      <div className="border-border border-b px-4 py-3">
-        <h2 className="font-mono text-sm font-bold uppercase tracking-widest">
+    <Card>
+      <CardHeader className="border-b">
+        <CardTitle className="font-mono font-bold uppercase tracking-widest">
           {title}
-        </h2>
+        </CardTitle>
         {subtitle && (
-          <p className="mt-0.5 font-mono text-[11px] text-muted-foreground">
-            {subtitle}
-          </p>
+          <CardDescription className="font-mono">{subtitle}</CardDescription>
         )}
-      </div>
-      <div className="p-4">{children}</div>
-    </div>
+      </CardHeader>
+      <CardContent>{children}</CardContent>
+    </Card>
   );
 }

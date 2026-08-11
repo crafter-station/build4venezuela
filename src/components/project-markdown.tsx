@@ -57,13 +57,13 @@ export function ProjectMarkdown({ markdown }: { markdown: string }) {
             // Markdown images must never retain an intrinsic width wider than the article.
             // biome-ignore lint/performance/noImgElement: Markdown image hosts and dimensions are not known ahead of time.
             <img
-              className="mt-6 h-auto max-w-full"
+              className="mt-6 h-auto max-w-full rounded-xl"
               alt={alt ?? ""}
               {...props}
             />
           ),
           table: ({ children }) => (
-            <div className="mt-6 w-full overflow-x-auto border border-border">
+            <div className="mt-6 w-full overflow-x-auto rounded-xl border border-border">
               <table className="w-full min-w-max border-collapse text-left text-sm">
                 {children}
               </table>
@@ -80,12 +80,12 @@ export function ProjectMarkdown({ markdown }: { markdown: string }) {
             </td>
           ),
           code: ({ children }) => (
-            <code className="border border-border bg-secondary px-1.5 py-0.5 text-sm text-primary">
+            <code className="rounded-md border border-border bg-secondary px-1.5 py-0.5 text-sm text-primary">
               {children}
             </code>
           ),
           pre: ({ children }) => (
-            <pre className="mt-6 overflow-x-auto border border-border bg-secondary p-4 text-sm leading-6">
+            <pre className="mt-6 overflow-x-auto rounded-xl border border-border bg-secondary p-4 text-sm leading-6">
               {children}
             </pre>
           ),

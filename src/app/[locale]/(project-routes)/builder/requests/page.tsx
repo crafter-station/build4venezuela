@@ -1,7 +1,9 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
+import { buttonVariants } from "@/components/ui/button";
 import { listBuilderContactRequests } from "@/lib/builders/store";
+import { cn } from "@/lib/utils";
 import { ProjectShell } from "../../project-shell";
 import { BuilderRequestsInbox } from "./requests-inbox";
 
@@ -31,7 +33,7 @@ export default async function BuilderRequestsPage({ params }: Props) {
               <p className="font-mono text-sm uppercase tracking-[0.16em] text-accent">
                 {t("eyebrow")}
               </p>
-              <h1 className="mt-4 font-mono text-5xl font-black uppercase leading-none sm:text-7xl lg:text-8xl">
+              <h1 className="type-page-title mt-4 font-mono font-black uppercase">
                 {t("title")}
               </h1>
             </div>
@@ -40,7 +42,7 @@ export default async function BuilderRequestsPage({ params }: Props) {
                 {t("description")}
               </p>
               <a
-                className="mt-6 inline-flex h-10 items-center border border-border px-4 font-mono text-xs font-bold uppercase tracking-[0.12em] transition hover:border-foreground hover:bg-foreground hover:text-background"
+                className={cn(buttonVariants({ variant: "outline" }), "mt-6")}
                 href={`/${locale}/builders`}
               >
                 {t("viewBuilders")}

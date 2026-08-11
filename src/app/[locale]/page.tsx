@@ -1,23 +1,39 @@
 import Image from "next/image";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import type { CSSProperties } from "react";
 import { SponsorLink } from "@/components/sponsor-link";
+import { Badge } from "@/components/ui/badge";
+import { buttonVariants } from "@/components/ui/button";
+import {
+  Card,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 import { Countdown } from "./countdown";
 
 const assetPath = "/BFV/assets/";
 const closureEventTargetIso = "2026-07-01T23:00:00.000Z";
 
 const watchChannels = [
-  { label: "Kick", href: "https://kick.com/build4venezuela", color: "#53fc18" },
+  {
+    label: "Kick",
+    href: "https://kick.com/build4venezuela",
+    className: "border-channel-kick text-channel-kick",
+    dotClassName: "bg-channel-kick",
+  },
   {
     label: "Twitch",
     href: "https://twitch.tv/build4venezuela",
-    color: "#9146ff",
+    className: "border-channel-twitch text-channel-twitch",
+    dotClassName: "bg-channel-twitch",
   },
   {
     label: "YouTube",
     href: "https://youtube.com/@build4venezuela",
-    color: "#ff0033",
+    className: "border-channel-youtube text-channel-youtube",
+    dotClassName: "bg-channel-youtube",
   },
 ] as const;
 
@@ -96,7 +112,7 @@ export default async function Home({ params }: Props) {
 
   return (
     <main className="min-h-screen overflow-hidden bg-background text-foreground">
-      <section className="relative isolate flex min-h-screen items-center justify-center px-4 pt-20 pb-4 sm:px-8 lg:px-10">
+      <section className="relative isolate flex min-h-screen items-center justify-center px-5 pt-20 pb-5 sm:px-8 lg:px-10">
         <div className="absolute inset-0 -z-20 bg-background" />
         <div className="bg-grid absolute inset-0 -z-10 opacity-[0.06]" />
 
@@ -105,7 +121,7 @@ export default async function Home({ params }: Props) {
         <VMark className="absolute bottom-5 left-4 h-8 w-8 opacity-70 sm:bottom-8 sm:left-8 sm:h-10 sm:w-10 lg:left-14" />
         <VMark className="absolute right-4 bottom-5 h-8 w-8 opacity-70 sm:right-8 sm:bottom-8 sm:h-10 sm:w-10 lg:right-14" />
 
-        <article className="movement-surface poster-frame relative flex min-h-[calc(100svh-8rem)] w-full max-w-[1120px] flex-col items-center justify-center gap-[clamp(1.75rem,4svh,3.5rem)] border border-line bg-background px-4 py-10 shadow-xl sm:min-h-[calc(100svh-10rem)] sm:px-8 sm:py-12 lg:gap-[clamp(1.6rem,3svh,3rem)] lg:px-10 lg:py-10">
+        <article className="movement-surface poster-frame relative flex min-h-[calc(100svh-8rem)] w-full max-w-[1120px] flex-col items-center justify-center gap-[clamp(1.75rem,4svh,3.5rem)] rounded-xl border border-line bg-background px-4 py-10 shadow-xl sm:min-h-[calc(100svh-10rem)] sm:px-8 sm:py-12 lg:gap-[clamp(1.6rem,3svh,3rem)] lg:px-10 lg:py-10">
           <header className="flex w-full flex-col items-center">
             <Image
               alt={t("hero.logoAlt")}
@@ -169,7 +185,7 @@ export default async function Home({ params }: Props) {
           </div>
 
           <div className="w-full max-w-[860px] text-center font-mono uppercase">
-            <div className="mx-auto max-w-[760px] border border-border bg-background/70 p-4 sm:p-5">
+            <div className="mx-auto max-w-[760px] rounded-xl border border-border bg-background/70 p-4 sm:p-5">
               <p className="text-[clamp(1.05rem,2vw,1.6rem)] font-black leading-[1.2] tracking-[0.1em] text-accent">
                 {t("hero.showcase.title")}
               </p>
@@ -190,7 +206,7 @@ export default async function Home({ params }: Props) {
               </div>
               <div className="mt-5 border-border border-t pt-5" />
               <a
-                className="inline-flex border border-primary/70 px-4 py-3 text-xs font-bold tracking-[0.2em] text-primary transition hover:border-foreground hover:bg-foreground hover:text-background focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-4 focus-visible:ring-offset-background"
+                className={buttonVariants({ variant: "outline" })}
                 href="https://build4venezuela.com/luma"
               >
                 {t("hero.closure.label")}
@@ -211,23 +227,21 @@ export default async function Home({ params }: Props) {
                 <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
                   {watchChannels.map((channel) => (
                     <a
-                      className="group inline-flex items-center gap-2 border px-4 py-2.5 text-xs font-bold tracking-[0.18em] transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-4 focus-visible:ring-offset-background"
+                      className={cn(
+                        buttonVariants({ size: "sm", variant: "outline" }),
+                        channel.className,
+                      )}
                       href={channel.href}
                       key={channel.label}
                       rel="noreferrer"
-                      style={
-                        {
-                          borderColor: channel.color,
-                          color: channel.color,
-                          "--tw-ring-color": channel.color,
-                        } as CSSProperties
-                      }
                       target="_blank"
                     >
                       <span
                         aria-hidden="true"
-                        className="h-2 w-2 rounded-full transition group-hover:scale-125"
-                        style={{ backgroundColor: channel.color }}
+                        className={cn(
+                          "size-2 rounded-full transition group-hover:scale-125",
+                          channel.dotClassName,
+                        )}
                       />
                       {channel.label}
                     </a>
@@ -262,16 +276,21 @@ export default async function Home({ params }: Props) {
                 </div>
               </div>
             </div>
-            <div className="mt-4 flex justify-center gap-4 text-xs font-light tracking-[0.24em] text-foreground/65 sm:gap-6 sm:text-sm">
+            <div className="mt-4 flex justify-center gap-3">
               <a
-                className="transition hover:text-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-4 focus-visible:ring-offset-background"
+                className={cn(
+                  buttonVariants({ size: "sm", variant: "ghost" }),
+                  "font-mono uppercase tracking-[0.2em]",
+                )}
                 href="https://build4venezuela.com/whatsapp"
               >
                 {t("hero.whatsapp")}
               </a>
-              <span aria-hidden="true">{"//"}</span>
               <a
-                className="transition hover:text-destructive focus:outline-none focus-visible:ring-2 focus-visible:ring-destructive focus-visible:ring-offset-4 focus-visible:ring-offset-background"
+                className={cn(
+                  buttonVariants({ size: "sm", variant: "ghost" }),
+                  "font-mono uppercase tracking-[0.2em]",
+                )}
                 href="https://build4venezuela.com/discord"
               >
                 {t("hero.discord")}
@@ -343,7 +362,7 @@ export default async function Home({ params }: Props) {
             <p className="font-mono text-sm uppercase tracking-[0.28em] text-accent">
               {t("context.eyebrow")}
             </p>
-            <h2 className="mt-5 text-balance font-mono text-[clamp(2.25rem,5vw,5rem)] font-black uppercase leading-[0.9] tracking-[-0.04em]">
+            <h2 className="mt-5 text-balance font-mono text-[clamp(2.25rem,5vw,4rem)] font-black uppercase leading-[0.9] tracking-[-0.04em]">
               {t("context.title")}
             </h2>
           </div>
@@ -352,7 +371,10 @@ export default async function Home({ params }: Props) {
             <p>{t("context.firstParagraph")}</p>
             <p>{t("context.secondParagraph")}</p>
             <a
-              className="inline-flex border border-accent/60 px-4 py-3 text-sm font-bold uppercase tracking-[0.18em] text-accent transition hover:border-foreground hover:bg-foreground hover:text-background"
+              className={cn(
+                buttonVariants({ variant: "outline" }),
+                "self-start uppercase tracking-[0.18em]",
+              )}
               href={latestInfoHref}
               rel="noreferrer"
               target="_blank"
@@ -364,16 +386,18 @@ export default async function Home({ params }: Props) {
       </section>
 
       <section className="px-5 pb-20 sm:px-8 sm:pb-24 lg:px-10">
-        <div className="mx-auto grid max-w-6xl gap-px bg-border sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mx-auto grid max-w-6xl gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {impactStats.map((stat) => (
-            <article className="bg-background p-6 sm:p-7" key={stat.label}>
-              <p className="font-mono text-[clamp(2.5rem,5vw,4.5rem)] font-black leading-none tracking-[-0.06em] text-foreground">
-                {stat.value}
-              </p>
-              <p className="mt-4 font-mono text-xs uppercase leading-5 tracking-[0.2em] text-muted-foreground">
-                {stat.label}
-              </p>
-            </article>
+            <Card key={stat.label}>
+              <CardHeader>
+                <CardTitle className="font-mono text-[clamp(2.5rem,5vw,4rem)] font-black leading-none tracking-[-0.06em]">
+                  {stat.value}
+                </CardTitle>
+                <CardDescription className="mt-3 font-mono text-xs uppercase leading-5 tracking-[0.2em]">
+                  {stat.label}
+                </CardDescription>
+              </CardHeader>
+            </Card>
           ))}
         </div>
       </section>
@@ -385,7 +409,7 @@ export default async function Home({ params }: Props) {
               <p className="font-mono text-sm uppercase tracking-[0.28em] text-destructive">
                 {t("principles.eyebrow")}
               </p>
-              <h2 className="mt-4 font-mono text-[clamp(2.2rem,5vw,5rem)] font-black uppercase leading-[0.88] tracking-[-0.06em]">
+              <h2 className="mt-4 font-mono text-[clamp(2.2rem,5vw,4rem)] font-black uppercase leading-[0.88] tracking-[-0.06em]">
                 {t("principles.title")}
               </h2>
             </div>
@@ -394,42 +418,47 @@ export default async function Home({ params }: Props) {
             </p>
           </div>
 
-          <div className="grid gap-px bg-border md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             {principles.map((principle, index) => (
-              <article
-                className="bg-background p-6 sm:p-7"
-                key={principle.title}
-              >
-                <p className="font-mono text-xs uppercase tracking-[0.24em] text-primary">
-                  0{index + 1}
-                </p>
-                <h3 className="mt-6 font-mono text-2xl font-black uppercase leading-none tracking-[-0.03em]">
-                  {principle.title}
-                </h3>
-                <p className="mt-5 font-mono text-sm uppercase leading-6 tracking-[0.12em] text-muted-foreground">
-                  {principle.text}
-                </p>
-              </article>
+              <Card key={principle.title}>
+                <CardHeader className="gap-5">
+                  <Badge
+                    className="font-mono tracking-[0.2em]"
+                    variant="outline"
+                  >
+                    0{index + 1}
+                  </Badge>
+                  <CardTitle className="font-mono text-2xl font-black uppercase leading-none tracking-[-0.03em]">
+                    {principle.title}
+                  </CardTitle>
+                  <CardDescription className="font-mono text-sm uppercase leading-6 tracking-[0.12em]">
+                    {principle.text}
+                  </CardDescription>
+                </CardHeader>
+              </Card>
             ))}
           </div>
 
-          <div className="mt-px grid gap-px bg-border lg:grid-cols-[0.65fr_1.35fr]">
-            <div className="bg-foreground p-6 text-background sm:p-7">
-              <p className="font-mono text-xs uppercase tracking-[0.24em] text-background/55">
-                {t("principles.filter.eyebrow")}
-              </p>
-              <h3 className="mt-5 font-mono text-[clamp(2rem,4vw,3.5rem)] font-black uppercase leading-[0.9] tracking-[-0.06em]">
-                {t("principles.filter.title")}
-              </h3>
-            </div>
-            <div className="grid gap-px bg-border sm:grid-cols-2">
+          <div className="mt-6 grid gap-6 lg:grid-cols-[0.65fr_1.35fr]">
+            <Card className="bg-foreground text-background ring-foreground">
+              <CardHeader className="gap-5">
+                <Badge variant="secondary">
+                  {t("principles.filter.eyebrow")}
+                </Badge>
+                <CardTitle className="font-mono text-[clamp(2rem,4vw,3.5rem)] font-black uppercase leading-[0.9] tracking-[-0.06em]">
+                  {t("principles.filter.title")}
+                </CardTitle>
+              </CardHeader>
+            </Card>
+            <div className="grid gap-6 sm:grid-cols-2">
               {principleFilter.map((item) => (
-                <p
-                  className="bg-background p-6 font-mono text-sm uppercase leading-6 tracking-[0.14em] text-foreground/75 sm:p-7"
-                  key={item}
-                >
-                  {item}
-                </p>
+                <Card key={item} size="sm">
+                  <CardHeader>
+                    <CardDescription className="font-mono text-sm uppercase leading-6 tracking-[0.14em] text-foreground/75">
+                      {item}
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
               ))}
             </div>
           </div>
@@ -452,16 +481,21 @@ export default async function Home({ params }: Props) {
             </p>
           </div>
 
-          <div className="grid gap-px bg-border sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {projectIdeas.map((idea, index) => (
-              <article className="bg-background p-6 sm:p-7" key={idea}>
-                <p className="font-mono text-xs uppercase tracking-[0.24em] text-muted-foreground/70">
-                  0{index + 1}
-                </p>
-                <p className="mt-6 font-mono text-xl font-light leading-snug tracking-[0.04em] text-foreground sm:text-2xl">
-                  {idea}
-                </p>
-              </article>
+              <Card key={idea}>
+                <CardHeader className="gap-5">
+                  <Badge
+                    className="font-mono tracking-[0.2em]"
+                    variant="outline"
+                  >
+                    0{index + 1}
+                  </Badge>
+                  <CardDescription className="font-mono text-xl font-light leading-snug tracking-[0.04em] text-foreground sm:text-2xl">
+                    {idea}
+                  </CardDescription>
+                </CardHeader>
+              </Card>
             ))}
           </div>
         </div>
@@ -474,25 +508,37 @@ export default async function Home({ params }: Props) {
               <p className="font-mono text-sm uppercase tracking-[0.28em] text-background/45">
                 {t("join.eyebrow")}
               </p>
-              <h2 className="mt-4 font-mono text-[clamp(2.3rem,5vw,5.5rem)] font-black uppercase leading-[0.88] tracking-[-0.06em]">
+              <h2 className="mt-4 font-mono text-[clamp(2.3rem,5vw,4rem)] font-black uppercase leading-[0.88] tracking-[-0.06em]">
                 {t("join.title")}
               </h2>
             </div>
 
-            <div className="grid gap-3">
+            <div className="grid gap-6">
               {channels.map((channel) => (
-                <a
-                  className="group grid gap-3 border border-background/15 p-5 font-mono transition hover:border-background hover:bg-background hover:text-foreground sm:grid-cols-[10rem_1fr] sm:items-center sm:p-6"
-                  href={channel.href}
+                <Card
+                  className="bg-foreground text-background ring-background/20"
                   key={channel.label}
                 >
-                  <span className="text-xl font-black uppercase tracking-[0.08em]">
-                    {channel.label}
-                  </span>
-                  <span className="text-base leading-7 tracking-[0.05em] text-background/65 transition group-hover:text-foreground/75">
-                    {channel.text}
-                  </span>
-                </a>
+                  <CardHeader>
+                    <CardTitle className="font-mono text-xl font-black uppercase tracking-[0.08em]">
+                      {channel.label}
+                    </CardTitle>
+                    <CardDescription className="font-mono text-base leading-7 tracking-[0.05em] text-background/65">
+                      {channel.text}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardFooter className="border-background/15 bg-background/5">
+                    <a
+                      className={cn(
+                        buttonVariants({ variant: "inverse" }),
+                        "font-mono uppercase tracking-[0.16em]",
+                      )}
+                      href={channel.href}
+                    >
+                      {channel.label}
+                    </a>
+                  </CardFooter>
+                </Card>
               ))}
             </div>
           </div>

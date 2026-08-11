@@ -19,6 +19,8 @@
     "goToCountry": "Ir a {country}",
     "availableTools": "Herramientas disponibles",
     "toolsTitle": "Úsalas. Adáptalas. Compártelas.",
+    "projectsTitle": "Proyectos para {country}",
+    "viewAllProjects": "Ver todos los proyectos",
     "empty": "Todavía no hay proyectos etiquetados para {country}.",
     "countries": {
       "venezuela": {
@@ -362,6 +364,7 @@
       "empty": "Todavía no hay proyectos. Sé la primera persona en agregar uno.",
       "syncing": "Buscando actualizaciones...",
       "live": "Actualización automática",
+      "searchPlaceholder": "Buscar proyectos, equipos o lugares...",
       "all": "Todos",
       "project": "proyecto",
       "projects": "proyectos",

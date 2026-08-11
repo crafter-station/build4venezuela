@@ -1,6 +1,8 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
+import { buttonVariants } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { getBuilderByUserId } from "@/lib/builders/store";
 import { ProjectShell } from "../../project-shell";
 import { BuilderForm } from "./builder-form";
@@ -33,7 +35,7 @@ export default async function BuilderRegisterPage({ params }: Props) {
             <p className="font-mono text-sm uppercase tracking-[0.16em] text-accent">
               {t("eyebrow")}
             </p>
-            <h1 className="mt-5 font-mono text-5xl font-black uppercase leading-none sm:text-7xl lg:text-8xl">
+            <h1 className="type-page-title mt-5 font-mono font-black uppercase">
               {title}
             </h1>
             <p className="mt-6 max-w-md font-mono text-base uppercase leading-7 tracking-[0.08em] text-muted-foreground">
@@ -41,22 +43,24 @@ export default async function BuilderRegisterPage({ params }: Props) {
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <a
-                className="inline-flex h-10 items-center border border-border px-4 font-mono text-xs font-bold uppercase tracking-[0.12em] transition hover:border-foreground hover:bg-foreground hover:text-background"
+                className={buttonVariants({ variant: "outline" })}
                 href={`/${locale}/builders`}
               >
                 {t("viewBuilders")}
               </a>
               <a
-                className="inline-flex h-10 items-center border border-border px-4 font-mono text-xs font-bold uppercase tracking-[0.12em] transition hover:border-foreground hover:bg-foreground hover:text-background"
+                className={buttonVariants({ variant: "outline" })}
                 href={`/${locale}/builder/requests`}
               >
                 {t("requestInbox")}
               </a>
             </div>
           </div>
-          <div className="border border-border bg-card p-5 sm:p-7">
-            <BuilderForm initialBuilder={builder} locale={locale} />
-          </div>
+          <Card>
+            <CardContent>
+              <BuilderForm initialBuilder={builder} locale={locale} />
+            </CardContent>
+          </Card>
         </div>
       </section>
     </ProjectShell>

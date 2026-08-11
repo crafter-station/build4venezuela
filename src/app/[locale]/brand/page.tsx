@@ -1,5 +1,16 @@
 import Image from "next/image";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { Badge } from "@/components/ui/badge";
+import { buttonVariants } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -186,13 +197,13 @@ export default async function BrandPage({ params }: Props) {
             {t("eyebrow")}
           </p>
           <div className="mt-5 grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
-            <h1 className="text-balance font-mono text-[clamp(3rem,8vw,8rem)] font-black uppercase leading-[0.84] tracking-[-0.07em]">
+            <h1 className="type-page-title text-balance font-mono font-black uppercase">
               {t("title")}
             </h1>
             <div className="flex flex-col gap-5 font-mono text-[clamp(1rem,1.7vw,1.35rem)] font-light leading-relaxed tracking-[0.07em] text-foreground/75">
               <p>{t("description")}</p>
               <a
-                className="inline-flex border border-accent/60 px-4 py-3 text-sm font-bold uppercase tracking-[0.18em] text-accent transition hover:border-foreground hover:bg-foreground hover:text-background focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-4 focus-visible:ring-offset-background"
+                className={buttonVariants({ variant: "outline" })}
                 href="#social"
               >
                 {t("cta")}
@@ -209,7 +220,7 @@ export default async function BrandPage({ params }: Props) {
               <p className="font-mono text-sm uppercase tracking-[0.28em] text-accent">
                 {t("brief.eyebrow")}
               </p>
-              <h2 className="mt-4 font-mono text-[clamp(2.2rem,5vw,5rem)] font-black uppercase leading-[0.88] tracking-[-0.06em]">
+              <h2 className="mt-4 font-mono text-[clamp(2.2rem,5vw,4rem)] font-black uppercase leading-[0.88] tracking-[-0.06em]">
                 {t("brief.title")}
               </h2>
             </div>
@@ -219,39 +230,57 @@ export default async function BrandPage({ params }: Props) {
             </div>
           </div>
 
-          <div className="grid gap-px bg-border lg:grid-cols-[1.1fr_0.9fr]">
-            <div className="bg-background p-6 sm:p-7">
-              <p className="font-mono text-xs uppercase tracking-[0.24em] text-primary">
-                {t("brief.checklistEyebrow")}
-              </p>
-              <div className="mt-6 grid gap-px bg-border sm:grid-cols-2">
-                {checklist.map((item) => (
-                  <p
-                    className="bg-background p-5 font-mono text-sm uppercase leading-6 tracking-[0.14em] text-foreground/75"
-                    key={item}
-                  >
-                    {item}
-                  </p>
-                ))}
-              </div>
-            </div>
-            <div className="grid gap-3 bg-foreground p-6 text-background sm:p-7">
-              <p className="font-mono text-xs uppercase tracking-[0.24em] text-background/50">
-                {t("brief.linksEyebrow")}
-              </p>
-              {links.map((link) => (
-                <a
-                  className="group border border-background/15 p-5 font-mono transition hover:border-background hover:bg-background hover:text-foreground"
-                  href={link.href}
-                  key={link.href}
+          <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+            <Card>
+              <CardHeader>
+                <Badge
+                  className="font-mono uppercase tracking-[0.18em]"
+                  variant="outline"
                 >
-                  <span className="block text-xl font-black uppercase tracking-[0.04em]">
-                    {link.label}
-                  </span>
-                  <span className="mt-3 block text-sm uppercase leading-6 tracking-[0.14em] text-background/65 transition group-hover:text-foreground/75">
-                    {link.text}
-                  </span>
-                </a>
+                  {t("brief.checklistEyebrow")}
+                </Badge>
+              </CardHeader>
+              <CardContent className="grid gap-4 sm:grid-cols-2">
+                {checklist.map((item) => (
+                  <Card key={item} size="sm">
+                    <CardHeader>
+                      <CardDescription className="font-mono text-sm uppercase leading-6 tracking-[0.14em] text-foreground/75">
+                        {item}
+                      </CardDescription>
+                    </CardHeader>
+                  </Card>
+                ))}
+              </CardContent>
+            </Card>
+            <div className="grid gap-4">
+              <Badge
+                className="font-mono uppercase tracking-[0.18em]"
+                variant="secondary"
+              >
+                {t("brief.linksEyebrow")}
+              </Badge>
+              {links.map((link) => (
+                <Card key={link.href} size="sm">
+                  <CardHeader>
+                    <CardTitle className="font-mono text-xl font-black uppercase tracking-[0.04em]">
+                      {link.label}
+                    </CardTitle>
+                    <CardDescription className="font-mono text-sm uppercase leading-6 tracking-[0.14em]">
+                      {link.text}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardFooter>
+                    <a
+                      className={cn(
+                        buttonVariants({ size: "sm", variant: "outline" }),
+                        "font-mono uppercase tracking-[0.16em]",
+                      )}
+                      href={link.href}
+                    >
+                      {link.label}
+                    </a>
+                  </CardFooter>
+                </Card>
               ))}
             </div>
           </div>
@@ -264,13 +293,10 @@ export default async function BrandPage({ params }: Props) {
             eyebrow={t("assets.eyebrow")}
             title={t("assets.title")}
           />
-          <div className="grid gap-px bg-border md:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-3">
             {brandAssets.map((asset) => (
-              <article
-                className="border border-border bg-background p-6 sm:p-7"
-                key={asset.key}
-              >
-                <div className="flex h-48 items-center justify-center border border-border bg-background p-8">
+              <Card key={asset.key}>
+                <CardContent className="flex h-48 items-center justify-center bg-muted p-8">
                   <Image
                     alt={t(`assets.items.${asset.key}.title`)}
                     className={`max-h-full w-auto max-w-full select-none object-contain ${asset.previewClassName ?? ""}`}
@@ -279,15 +305,23 @@ export default async function BrandPage({ params }: Props) {
                     src={asset.preview}
                     width={asset.width}
                   />
-                </div>
-                <h2 className="mt-6 font-mono text-2xl font-black uppercase tracking-[-0.02em]">
-                  {t(`assets.items.${asset.key}.title`)}
-                </h2>
-                <p className="mt-3 font-mono text-sm uppercase leading-6 tracking-[0.12em] text-muted-foreground">
-                  {t(`assets.items.${asset.key}.description`)}
-                </p>
-                <DownloadOptions downloads={asset.downloads} t={t} />
-              </article>
+                </CardContent>
+                <CardHeader>
+                  <CardTitle className="font-mono text-2xl font-black uppercase tracking-[-0.02em]">
+                    {t(`assets.items.${asset.key}.title`)}
+                  </CardTitle>
+                  <CardDescription className="font-mono text-sm uppercase leading-6 tracking-[0.12em]">
+                    {t(`assets.items.${asset.key}.description`)}
+                  </CardDescription>
+                </CardHeader>
+                <CardFooter>
+                  <DownloadOptions
+                    className=""
+                    downloads={asset.downloads}
+                    t={t}
+                  />
+                </CardFooter>
+              </Card>
             ))}
           </div>
         </div>
@@ -299,29 +333,34 @@ export default async function BrandPage({ params }: Props) {
             eyebrow={t("fonts.eyebrow")}
             title={t("fonts.title")}
           />
-          <div className="grid gap-px bg-background/15 md:grid-cols-5">
+          <div className="grid gap-6 md:grid-cols-5">
             {fonts.map((font) => (
-              <article
-                className="bg-foreground p-5 font-mono"
+              <Card
+                className="bg-foreground font-mono text-background ring-background/20"
                 key={font.fileName}
               >
-                <p className="text-xs uppercase tracking-[0.22em] text-background/45">
-                  {font.weight}
-                </p>
-                <p className="mt-5 text-[clamp(2.2rem,5vw,4rem)] font-black leading-none tracking-[-0.08em]">
-                  Aa
-                </p>
-                <p className="mt-4 break-all text-xs uppercase leading-5 tracking-[0.12em] text-background/55">
-                  {font.fileName}
-                </p>
-                <a
-                  className="mt-6 inline-flex border border-background/20 px-3 py-2 text-xs font-bold uppercase tracking-[0.16em] text-background transition hover:border-background hover:bg-background hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-background focus-visible:ring-offset-4 focus-visible:ring-offset-foreground"
-                  download
-                  href={font.href}
-                >
-                  {t("fonts.download")}
-                </a>
-              </article>
+                <CardHeader>
+                  <Badge variant="secondary">{font.weight}</Badge>
+                  <CardTitle className="mt-4 text-[clamp(2.2rem,5vw,4rem)] font-black leading-none tracking-[-0.08em]">
+                    Aa
+                  </CardTitle>
+                  <CardDescription className="mt-3 break-all text-xs uppercase leading-5 tracking-[0.12em] text-background/55">
+                    {font.fileName}
+                  </CardDescription>
+                </CardHeader>
+                <CardFooter className="border-background/15 bg-background/5">
+                  <a
+                    className={cn(
+                      buttonVariants({ size: "sm", variant: "inverse" }),
+                      "uppercase tracking-[0.16em]",
+                    )}
+                    download
+                    href={font.href}
+                  >
+                    {t("fonts.download")}
+                  </a>
+                </CardFooter>
+              </Card>
             ))}
           </div>
           <p className="mt-6 max-w-3xl font-mono text-sm uppercase leading-6 tracking-[0.16em] text-background/55">
@@ -344,11 +383,8 @@ export default async function BrandPage({ params }: Props) {
 
           <div className="grid gap-6 md:grid-cols-3">
             {socialAssets.map((asset) => (
-              <article
-                className="flex h-full flex-col border border-border bg-card p-4"
-                key={asset.key}
-              >
-                <div className="flex h-72 items-center justify-center overflow-hidden bg-muted">
+              <Card className="h-full" key={asset.key}>
+                <CardContent className="flex h-72 items-center justify-center overflow-hidden bg-muted">
                   <Image
                     alt={t(`social.items.${asset.key}.title`)}
                     className="max-h-full w-auto max-w-full select-none object-contain"
@@ -357,21 +393,23 @@ export default async function BrandPage({ params }: Props) {
                     src={asset.downloads[0].href}
                     width={asset.width}
                   />
-                </div>
-                <div className="flex flex-1 flex-col p-2 pt-5 font-mono">
-                  <p className="text-xl font-black uppercase tracking-[-0.02em]">
+                </CardContent>
+                <CardHeader className="flex-1 font-mono">
+                  <CardTitle className="text-xl font-black uppercase tracking-[-0.02em]">
                     {t(`social.items.${asset.key}.title`)}
-                  </p>
-                  <p className="mt-2 text-sm uppercase leading-6 tracking-[0.12em] text-muted-foreground">
+                  </CardTitle>
+                  <CardDescription className="mt-1 text-sm uppercase leading-6 tracking-[0.12em]">
                     {t(`social.items.${asset.key}.description`)}
-                  </p>
+                  </CardDescription>
+                </CardHeader>
+                <CardFooter>
                   <DownloadOptions
-                    className="mt-auto pt-6"
+                    className=""
                     downloads={asset.downloads}
                     t={t}
                   />
-                </div>
-              </article>
+                </CardFooter>
+              </Card>
             ))}
           </div>
         </div>
@@ -386,7 +424,7 @@ function SectionHeader({ eyebrow, title }: { eyebrow: string; title: string }) {
       <p className="font-mono text-sm uppercase tracking-[0.28em] text-destructive">
         {eyebrow}
       </p>
-      <h2 className="mt-4 font-mono text-[clamp(2.2rem,5vw,5rem)] font-black uppercase leading-[0.88] tracking-[-0.06em]">
+      <h2 className="mt-4 font-mono text-[clamp(2.2rem,5vw,4rem)] font-black uppercase leading-[0.88] tracking-[-0.06em]">
         {title}
       </h2>
     </div>
@@ -406,7 +444,10 @@ function DownloadOptions({
     <div className={`${className} flex flex-wrap gap-2`}>
       {downloads.map((download) => (
         <a
-          className="inline-flex border border-border px-3 py-2 font-mono text-xs font-bold uppercase tracking-[0.16em] text-foreground transition hover:border-foreground hover:bg-foreground hover:text-background focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-background"
+          className={cn(
+            buttonVariants({ size: "sm", variant: "outline" }),
+            "font-mono uppercase tracking-[0.16em]",
+          )}
           download
           href={download.href}
           key={download.fileName}
