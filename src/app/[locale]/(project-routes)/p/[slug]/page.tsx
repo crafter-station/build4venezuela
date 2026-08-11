@@ -8,6 +8,7 @@ import { ProjectVideoEmbed } from "@/components/project-video-embed";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { routing } from "@/i18n/routing";
 import { timed } from "@/lib/log";
 import {
   canEditProject,
@@ -18,6 +19,7 @@ import {
 import {
   buildProjectJsonLd,
   markdownExcerpt,
+  serializeJsonLd,
 } from "@/lib/projects/structured-data";
 import { withTimeout } from "@/lib/timeout";
 import { ProjectShell } from "../../project-shell";
@@ -45,24 +47,37 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     return { title: t("metadata.notFoundTitle") };
   }
 
-  const title = `${project.name} | Build4Venezuela`;
+  const title = `${project.name} | Build4Latam`;
   const description =
     markdownExcerpt(project.descriptionMarkdown, 160) ||
     t("metadata.description", { name: project.participantName });
   const pageUrl = `/${locale}/p/${project.slug}`;
+  const images = project.imageUrl
+    ? [{ url: project.imageUrl, alt: project.name }]
+    : undefined;
 
   return {
     title,
     description,
-    alternates: { canonical: pageUrl },
+    alternates: {
+      canonical: pageUrl,
+      languages: Object.fromEntries([
+        ...routing.locales.map((supportedLocale) => [
+          supportedLocale,
+          `/${supportedLocale}/p/${project.slug}`,
+        ]),
+        ["x-default", `/en/p/${project.slug}`],
+      ]),
+    },
     openGraph: {
       type: "website",
       url: pageUrl,
-      siteName: "Build4Venezuela",
+      siteName: "Build4Latam",
       title,
       description,
+      images,
     },
-    twitter: { card: "summary_large_image", title, description },
+    twitter: { card: "summary_large_image", title, description, images },
   };
 }
 
@@ -101,7 +116,7 @@ export default async function ProjectPage({ params }: Props) {
 
   const jsonLd = buildProjectJsonLd(
     project,
-    `https://build4venezuela.com/${locale}/p/${project.slug}`,
+    `https://build4latam.com/${locale}/p/${project.slug}`,
   );
 
   return (
@@ -110,7 +125,7 @@ export default async function ProjectPage({ params }: Props) {
         type="application/ld+json"
         // biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD serialized with < escaped to block </script> breakout
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
+          __html: serializeJsonLd(jsonLd),
         }}
       />
       <article className="px-5 py-16 sm:px-8 sm:py-20 lg:px-10">

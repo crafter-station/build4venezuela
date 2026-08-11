@@ -3,7 +3,7 @@ import type { Project } from "@/lib/projects/schema";
 type Organization = {
   name: string;
   url: string;
-  sameAs: string[];
+  sameAs?: string[];
   email?: string;
   logo?: string;
 };
@@ -54,6 +54,7 @@ export function markdownExcerpt(markdown: string, maxLength = 300): string {
     .replace(/```[\s\S]*?```/g, " ") // fenced code
     .replace(/!\[[^\]]*\]\([^)]*\)/g, " ") // images
     .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1") // links -> text
+    .replace(/<[^>]*>/g, " ") // raw HTML
     .replace(/[#>*_`~|]/g, " ") // md punctuation
     .replace(/\s+/g, " ")
     .trim();
@@ -62,39 +63,51 @@ export function markdownExcerpt(markdown: string, maxLength = 300): string {
 }
 
 function organizationNode(org: Organization) {
+  const sameAs = org.sameAs?.filter(isHttpUrl);
+
   return {
     "@type": "Organization",
     name: org.name,
     url: org.url,
-    sameAs: org.sameAs,
+    ...(sameAs?.length ? { sameAs } : {}),
     ...(org.logo ? { logo: org.logo } : {}),
     ...(org.email ? { email: org.email } : {}),
   };
 }
 
-// schema.org SoftwareApplication for a project, so search engines and AI answer
-// engines treat the project as the primary entity and can attribute it to its
-// org, its social proof, and any official bodies backing it.
+function isHttpUrl(value: string): boolean {
+  try {
+    return ["http:", "https:"].includes(new URL(value).protocol);
+  } catch {
+    return false;
+  }
+}
+
+export function serializeJsonLd(value: Record<string, unknown>): string {
+  return JSON.stringify(value).replace(/</g, "\\u003c");
+}
+
+// Ideas are described as CreativeWork until there is software to use or test.
 export function buildProjectJsonLd(
   project: Project,
   pageUrl: string,
   profile: ProjectProfile | undefined = projectProfile(project.slug),
 ): Record<string, unknown> {
-  const linkSameAs = [project.videoUrl, project.contributeInUrl].filter(
-    (u): u is string => Boolean(u) && /^https?:/.test(u),
-  );
-  const sameAs = [...new Set([...linkSameAs, ...(profile?.sameAs ?? [])])];
+  const sameAs = [...new Set((profile?.sameAs ?? []).filter(isHttpUrl))];
 
   const jsonLd: Record<string, unknown> = {
     "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
+    "@type":
+      project.lifecycleStatus === "idea"
+        ? "CreativeWork"
+        : "SoftwareApplication",
     name: project.name,
     description: markdownExcerpt(project.descriptionMarkdown),
     url: project.projectUrl || pageUrl,
-    applicationCategory: "BusinessApplication",
-    operatingSystem: "Web",
-    offers: { "@type": "Offer", price: 0, priceCurrency: "USD" },
     mainEntityOfPage: pageUrl,
+    ...(project.imageUrl ? { image: project.imageUrl } : {}),
+    ...(project.createdAt ? { dateCreated: project.createdAt } : {}),
+    ...(project.updatedAt ? { dateModified: project.updatedAt } : {}),
     ...(sameAs.length ? { sameAs } : {}),
   };
 
@@ -102,8 +115,6 @@ export function buildProjectJsonLd(
     const org = organizationNode(profile.organization);
     jsonLd.author = org;
     jsonLd.publisher = org;
-  } else if (project.participantName) {
-    jsonLd.author = { "@type": "Person", name: project.participantName };
   }
 
   if (profile?.endorsedBy?.length) {
