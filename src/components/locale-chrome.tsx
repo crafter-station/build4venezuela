@@ -22,16 +22,18 @@ export function LocaleChrome({
 
   if (isLanding) {
     return (
-      <div className="landing-type flex min-h-full flex-col bg-background">
+      <div className="landing-type flex h-svh max-h-svh flex-col overflow-hidden bg-background">
         <LandingSplash />
-        <div className="relative flex flex-1 flex-col gap-3 p-3 sm:gap-4 sm:p-4 lg:p-5">
+        <div className="relative flex min-h-0 flex-1 flex-col gap-2 p-2 sm:gap-3 sm:p-3 lg:gap-3 lg:p-4">
           <div
             aria-hidden="true"
             className="bg-grid absolute inset-0 opacity-[0.05]"
           />
-          <HudCapsule className="flex min-h-[calc(100svh-8.5rem)] flex-1 flex-col">
+          <HudCapsule className="flex min-h-0 flex-1 flex-col overflow-hidden">
             {header}
-            <div className="flex min-h-0 flex-1 flex-col">{children}</div>
+            <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+              {children}
+            </div>
           </HudCapsule>
           <HudCapsule className="shrink-0">{footer}</HudCapsule>
         </div>

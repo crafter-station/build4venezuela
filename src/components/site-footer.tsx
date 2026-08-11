@@ -59,7 +59,7 @@ export async function SiteFooter({
 
   return (
     <footer className="hud-capsule__footer border-border border-t bg-background text-foreground">
-      <div className="mx-auto flex h-12 max-w-7xl items-center justify-between gap-4 px-4 sm:h-14 sm:px-5 lg:px-6">
+      <div className="mx-auto flex h-10 max-w-7xl items-center justify-between gap-4 px-4 sm:h-11 sm:px-5 lg:px-6">
         <div className="flex min-w-0 items-center gap-3 sm:gap-4">
           {sponsors.map((sponsor) => (
             <SponsorLink

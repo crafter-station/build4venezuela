@@ -64,10 +64,10 @@ export function SiteHeader() {
     >
       <div
         className={cn(
-          "flex h-14 items-center gap-2 sm:h-16",
+          "flex items-center gap-2",
           isLanding
-            ? "w-full px-4 sm:px-5 lg:px-6"
-            : "mx-auto max-w-7xl px-5 sm:px-8 lg:px-10",
+            ? "h-12 w-full px-3 sm:h-14 sm:px-4 lg:px-5"
+            : "mx-auto h-14 max-w-7xl px-5 sm:h-16 sm:px-8 lg:px-10",
         )}
       >
         <Link

@@ -267,7 +267,7 @@ export function SouthAmericaMapPanel({
 
   return (
     <div
-      className="relative grid w-full gap-6 lg:min-h-[calc(100svh-12rem)] lg:grid-cols-[minmax(0,7fr)_minmax(18rem,5fr)] lg:items-center lg:gap-0"
+      className="relative grid min-h-0 w-full flex-1 gap-3 overflow-hidden lg:grid-cols-[minmax(0,7fr)_minmax(18rem,5fr)] lg:items-center lg:gap-0"
       ref={layoutRef}
     >
       {leader ? (
@@ -293,7 +293,7 @@ export function SouthAmericaMapPanel({
       ) : null}
 
       {/* Mobile: hubs first, other Latam in a dropdown — map stays desktop-only */}
-      <div className="order-1 lg:hidden">
+      <div className="order-1 min-h-0 overflow-y-auto lg:hidden">
         <nav aria-label={copy.mapLabel} className="sa-mobile-list">
           {MOBILE_HUB_CODES.map((code) => renderMobileCountry(code))}
 
@@ -332,15 +332,15 @@ export function SouthAmericaMapPanel({
         </nav>
       </div>
 
-      <div className="relative order-1 hidden items-center justify-center py-4 sm:py-6 lg:flex lg:order-1 lg:py-0">
+      <div className="relative order-1 hidden min-h-0 h-full items-center justify-center lg:flex lg:order-1">
         <div
           aria-label={copy.mapLabel}
-          className="relative w-full max-w-[36rem]"
+          className="relative flex h-full max-h-full w-full max-w-[min(34rem,100%)] items-center justify-center"
           role="listbox"
         >
           <svg
             aria-hidden="true"
-            className="sa-map h-auto w-full select-none overflow-visible"
+            className="sa-map max-h-full w-auto max-w-full select-none overflow-visible"
             viewBox={SOUTH_AMERICA_MAP.viewBox}
           >
             {SOUTH_AMERICA_MAP.countries.map((country) => {
