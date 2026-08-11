@@ -10,6 +10,7 @@
     "test": "bun test",
     "format": "biome format --write",
     "gen:assets": "bun scripts/generate-assets.ts",
+    "gen:south-america-map": "bun scripts/generate-south-america-map.ts",
     "backfill:project-images": "bun scripts/backfill-project-images.ts",
     "db:studio": "bun --env-file=.env.local drizzle-kit studio",
     "db:generate": "drizzle-kit generate",
@@ -53,11 +54,15 @@
     "@biomejs/biome": "2.2.0",
     "@tailwindcss/postcss": "^4",
     "@types/bun": "^1.3.14",
+    "@types/d3-geo": "^3.1.1",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/topojson-client": "^3.1.5",
+    "d3-geo": "^3.1.1",
     "drizzle-kit": "^0.31.10",
     "tailwindcss": "^4",
+    "topojson-client": "^3.1.0",
     "typescript": "^5"
   },
   "ignoreScripts": [
