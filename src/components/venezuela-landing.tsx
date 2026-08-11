@@ -12,6 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { SOCIAL_LINKS as socialChannels } from "@/lib/social-links";
 import { cn } from "@/lib/utils";
 
 const assetPath = "/BFV/assets/";
@@ -36,21 +37,6 @@ const watchChannels = [
     className: "border-channel-youtube text-channel-youtube",
     dotClassName: "bg-channel-youtube",
   },
-] as const;
-
-const socialChannels = [
-  { label: "Instagram", href: "https://www.instagram.com/build4venezuela/" },
-  {
-    label: "Facebook",
-    href: "https://www.facebook.com/profile.php?id=61591302428491",
-  },
-  {
-    label: "LinkedIn",
-    href: "https://www.linkedin.com/company/buildforvenezuela/",
-  },
-  { label: "TikTok", href: "https://www.tiktok.com/@build4venezuela" },
-  { label: "YouTube", href: "https://www.youtube.com/@build4venezuela" },
-  { label: "X", href: "https://x.com/Build4Venezuela" },
 ] as const;
 
 type Channel = {
