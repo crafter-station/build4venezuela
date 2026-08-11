@@ -216,11 +216,11 @@ export function CommandSearch({ locale, labels }: CommandSearchProps) {
 
             {loading ? <SearchMessage>{labels.loading}</SearchMessage> : null}
             {failed ? <SearchMessage>{labels.error}</SearchMessage> : null}
-            {query.trim() && results && resultCount === 0 ? (
+            {results && resultCount === 0 ? (
               <CommandEmpty>{labels.empty}</CommandEmpty>
             ) : null}
 
-            {query.trim() && results ? (
+            {results && resultCount > 0 ? (
               <>
                 <SearchGroup label={labels.projects}>
                   {results.projects.map((project) => (
