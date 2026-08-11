@@ -4,23 +4,22 @@ import {
   ClockCounterClockwiseIcon,
   MagnifyingGlassIcon,
 } from "@phosphor-icons/react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { startTransition, useDeferredValue, useEffect, useState } from "react";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
+  Command,
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 import type { BuilderProfile } from "@/lib/builders/schema";
 import type { Project } from "@/lib/projects/schema";
 import type { SolutionRequest } from "@/lib/requests/schema";
-import { cn } from "@/lib/utils";
 
 const RECENT_SEARCHES_KEY = "b4v-recent-searches-v1";
 
@@ -49,6 +48,7 @@ type CommandSearchProps = {
 };
 
 export function CommandSearch({ locale, labels }: CommandSearchProps) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [data, setData] = useState<SearchData | null>(null);
@@ -173,107 +173,108 @@ export function CommandSearch({ locale, labels }: CommandSearchProps) {
     : 0;
 
   return (
-    <Dialog onOpenChange={handleOpenChange} open={open}>
-      <DialogTrigger
-        render={
-          <Button
-            aria-label={labels.label}
-            size="icon"
-            title={`${labels.label} (⌘K)`}
-            type="button"
-            variant="ghost"
-          />
-        }
+    <>
+      <Button
+        aria-label={labels.label}
+        onClick={() => handleOpenChange(true)}
+        size="icon"
+        title={`${labels.label} (⌘K)`}
+        type="button"
+        variant="ghost"
       >
         <MagnifyingGlassIcon />
-      </DialogTrigger>
-      <DialogContent className="top-[12vh] max-w-xl translate-y-0 gap-0 overflow-hidden p-0 text-sm shadow-2xl duration-0 sm:max-w-xl">
-        <DialogHeader className="sr-only">
-          <DialogTitle>{labels.label}</DialogTitle>
-          <DialogDescription>{labels.description}</DialogDescription>
-        </DialogHeader>
-
-        <div className="flex items-center gap-3 border-b px-4">
-          <MagnifyingGlassIcon className="shrink-0 text-muted-foreground" />
-          <Input
+      </Button>
+      <CommandDialog
+        className="top-[12vh] max-w-xl translate-y-0 text-sm shadow-2xl duration-0 sm:max-w-xl"
+        description={labels.description}
+        onOpenChange={handleOpenChange}
+        open={open}
+        title={labels.label}
+      >
+        <Command shouldFilter={false}>
+          <CommandInput
             autoFocus
-            className="border-0 bg-transparent px-0 shadow-none focus-visible:ring-0"
-            size="lg"
-            onChange={(event) => setQuery(event.target.value)}
+            onValueChange={setQuery}
             placeholder={labels.placeholder}
             value={query}
           />
-          <kbd className="rounded border bg-muted px-1.5 py-1 font-mono text-[0.65rem] text-muted-foreground">
-            ESC
-          </kbd>
-        </div>
-
-        <div className="max-h-[min(60vh,30rem)] overflow-y-auto p-2">
-          {!query.trim() && recent.length > 0 ? (
-            <SearchGroup label={labels.recent}>
-              {recent.map((item) => (
-                <Button
-                  className="w-full justify-start"
-                  key={item}
-                  onClick={() => setQuery(item)}
-                  type="button"
-                  variant="ghost"
-                >
-                  <ClockCounterClockwiseIcon />
-                  {item}
-                </Button>
-              ))}
-            </SearchGroup>
-          ) : null}
-
-          {loading ? <SearchMessage>{labels.loading}</SearchMessage> : null}
-          {failed ? <SearchMessage>{labels.error}</SearchMessage> : null}
-          {query.trim() && results && resultCount === 0 ? (
-            <SearchMessage>{labels.empty}</SearchMessage>
-          ) : null}
-
-          {query.trim() && results ? (
-            <>
-              <SearchGroup label={labels.projects}>
-                {results.projects.map((project) => (
-                  <SearchResult
-                    description={project.countries.join(" / ")}
-                    href={`/${locale}/p/${project.slug}`}
-                    key={project.id}
-                    onSelect={rememberSearch}
-                    title={project.name}
-                  />
+          <CommandList>
+            {!query.trim() && recent.length > 0 ? (
+              <SearchGroup label={labels.recent}>
+                {recent.map((item) => (
+                  <CommandItem
+                    key={item}
+                    onSelect={() => setQuery(item)}
+                    value={`recent-${item}`}
+                  >
+                    <ClockCounterClockwiseIcon />
+                    {item}
+                  </CommandItem>
                 ))}
               </SearchGroup>
-              <SearchGroup label={labels.builders}>
-                {results.builders.map((builder) => (
-                  <SearchResult
-                    description={
-                      builder.customRole || builder.role.replaceAll("_", " ")
-                    }
-                    href={`/${locale}/builders`}
-                    key={builder.id}
-                    onSelect={rememberSearch}
-                    title={builder.name}
-                  />
-                ))}
-              </SearchGroup>
-              <SearchGroup label={labels.needs}>
-                {results.requests.map((request) => (
-                  <SearchResult
-                    description={request.authorName}
-                    href={`/${locale}/requests`}
-                    key={request.id}
-                    onSelect={rememberSearch}
-                    title={request.name}
-                  />
-                ))}
-              </SearchGroup>
-            </>
-          ) : null}
-        </div>
-      </DialogContent>
-    </Dialog>
+            ) : null}
+
+            {loading ? <SearchMessage>{labels.loading}</SearchMessage> : null}
+            {failed ? <SearchMessage>{labels.error}</SearchMessage> : null}
+            {query.trim() && results && resultCount === 0 ? (
+              <CommandEmpty>{labels.empty}</CommandEmpty>
+            ) : null}
+
+            {query.trim() && results ? (
+              <>
+                <SearchGroup label={labels.projects}>
+                  {results.projects.map((project) => (
+                    <SearchResult
+                      description={project.countries.join(" / ")}
+                      href={`/${locale}/p/${project.slug}`}
+                      key={project.id}
+                      onSelect={() => {
+                        rememberSearch();
+                        setOpen(false);
+                        router.push(`/${locale}/p/${project.slug}`);
+                      }}
+                      title={project.name}
+                    />
+                  ))}
+                </SearchGroup>
+                <SearchGroup label={labels.builders}>
+                  {results.builders.map((builder) => (
+                    <SearchResult
+                      description={
+                        builder.customRole || builder.role.replaceAll("_", " ")
+                      }
+                      href={`/${locale}/builders`}
+                      key={builder.id}
+                      onSelect={() => {
+                        rememberSearch();
+                        setOpen(false);
+                        router.push(`/${locale}/builders`);
+                      }}
+                      title={builder.name}
+                    />
+                  ))}
+                </SearchGroup>
+                <SearchGroup label={labels.needs}>
+                  {results.requests.map((request) => (
+                    <SearchResult
+                      description={request.authorName}
+                      href={`/${locale}/requests`}
+                      key={request.id}
+                      onSelect={() => {
+                        rememberSearch();
+                        setOpen(false);
+                        router.push(`/${locale}/requests`);
+                      }}
+                      title={request.name}
+                    />
+                  ))}
+                </SearchGroup>
+              </>
+            ) : null}
+          </CommandList>
+        </Command>
+      </CommandDialog>
+    </>
   );
 }
 
@@ -287,14 +288,7 @@ function SearchGroup({
   if (!children || (Array.isArray(children) && children.length === 0))
     return null;
 
-  return (
-    <section className="py-1">
-      <h3 className="px-3 py-2 font-mono text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
-        {label}
-      </h3>
-      {children}
-    </section>
-  );
+  return <CommandGroup heading={label}>{children}</CommandGroup>;
 }
 
 function SearchResult({
@@ -309,19 +303,16 @@ function SearchResult({
   title: string;
 }) {
   return (
-    <Link
-      className={cn(
-        buttonVariants({ variant: "ghost" }),
-        "flex h-auto min-w-0 justify-between py-2.5",
-      )}
-      href={href}
-      onClick={onSelect}
+    <CommandItem
+      className="min-w-0 justify-between"
+      onSelect={onSelect}
+      value={`${title} ${description} ${href}`}
     >
       <span className="truncate font-medium">{title}</span>
       <span className="max-w-40 truncate text-xs text-muted-foreground">
         {description}
       </span>
-    </Link>
+    </CommandItem>
   );
 }
 
