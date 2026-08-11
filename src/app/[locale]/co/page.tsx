@@ -1,12 +1,10 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { CountryHub } from "@/components/country-hub";
+import { ColombiaLanding } from "@/components/colombia-landing";
 
 type Props = {
   params: Promise<{ locale: string }>;
 };
-
-export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
@@ -35,5 +33,5 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function ColombiaPage({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
-  return <CountryHub country="colombia" locale={locale} />;
+  return <ColombiaLanding locale={locale} />;
 }

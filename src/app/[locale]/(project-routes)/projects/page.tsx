@@ -10,6 +10,7 @@ import {
   getProjectCategoryMap,
 } from "@/lib/projects/category-store";
 import { localizeClusters } from "@/lib/projects/localize-clusters";
+import { projectApplicabilityFromCountryParam } from "@/lib/projects/schema";
 import { getCachedProjects } from "@/lib/projects/store";
 import { withTimeout } from "@/lib/timeout";
 import { ProjectShell } from "../project-shell";
@@ -26,10 +27,14 @@ const RENDER_TIMEOUT_MS = 8_000;
 
 type Props = {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ country?: string | string[] }>;
 };
 
-export default async function ProjectsPage({ params }: Props) {
+export default async function ProjectsPage({ params, searchParams }: Props) {
   const { locale } = await params;
+  const country = projectApplicabilityFromCountryParam(
+    (await searchParams).country,
+  );
   const t = await getTranslations({ locale, namespace: "Projects" });
   const tCategories = await getTranslations({
     locale,
@@ -81,6 +86,7 @@ export default async function ProjectsPage({ params }: Props) {
           <ProjectsGrid
             assignments={assignments}
             clusters={clusters}
+            initialCountry={country}
             initialProjects={projects}
           />
         </div>

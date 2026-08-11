@@ -24,7 +24,6 @@ function isProtectedRoute(pathname: string) {
 
 function skipsIntl(pathname: string) {
   return (
-    pathname === "/" ||
     pathname.startsWith("/api") ||
     pathname.startsWith("/trpc") ||
     pathname.startsWith("/_next") ||
@@ -46,7 +45,7 @@ export default clerkMiddleware(async (auth, request) => {
       request.nextUrl.hostname,
     )
   ) {
-    const destination = new URL("https://build4latam.com/ve");
+    const destination = new URL("https://build4latam.com/en/ve");
     destination.search = request.nextUrl.search;
     return NextResponse.redirect(destination, 308);
   }

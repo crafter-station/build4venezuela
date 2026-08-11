@@ -15,6 +15,14 @@
       }
     },
     "heroTitle": "Nous construisons pour",
+    "selector": {
+      "choose": "Choisissez où aider",
+      "description": "Un réseau ouvert d'outils, de builders et de ressources pour répondre aux urgences en Amérique latine.",
+      "enter": "Entrer",
+      "networkActive": "Réseau actif",
+      "solidarity": "la technologie solidaire",
+      "statement": "Ce qui fonctionne dans un pays peut aider le suivant."
+    },
     "addProject": "Ajouter un projet",
     "goToCountry": "Aller à {country}",
     "availableTools": "Outils disponibles",
@@ -288,7 +296,8 @@
     "projects": {
       "eyebrow": "Idées de projets",
       "title": "Ce que vous pouvez construire",
-      "description": "Choisissez un problème concret. Connectez-vous à ce qui existe déjà. Laissez quelque chose d'utile pour l'urgence et assez durable pour la reconstruction."
+      "description": "Choisissez un problème concret. Connectez-vous à ce qui existe déjà. Laissez quelque chose d'utile pour l'urgence et assez durable pour la reconstruction.",
+      "viewAll": "Voir les projets pour le Venezuela"
     },
     "projectIdeas": [
       "Des annuaires vérifiés pour les abris, les centres de collecte et les soins médicaux.",

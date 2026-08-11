@@ -15,6 +15,14 @@
       }
     },
     "heroTitle": "我们为此而构建",
+    "selector": {
+      "choose": "选择援助地区",
+      "description": "一个由工具、Builder 和资源组成的开放网络，响应拉丁美洲各地的紧急情况。",
+      "enter": "进入",
+      "networkActive": "网络运行中",
+      "solidarity": "团结互助的技术",
+      "statement": "在一个国家有效的方案，也能帮助下一个国家。"
+    },
     "addProject": "添加项目",
     "goToCountry": "前往{country}",
     "availableTools": "可用工具",
@@ -288,7 +296,8 @@
     "projects": {
       "eyebrow": "项目想法",
       "title": "你可以构建什么",
-      "description": "选择一个具体问题。连接已有工作。留下一个既能服务紧急情况、又足够支持恢复阶段的成果。"
+      "description": "选择一个具体问题。连接已有工作。留下一个既能服务紧急情况、又足够支持恢复阶段的成果。",
+      "viewAll": "查看委内瑞拉项目"
     },
     "projectIdeas": [
       "经过验证的避难所、物资收集点和医疗服务目录。",

@@ -15,6 +15,14 @@
       }
     },
     "heroTitle": "We build for",
+    "selector": {
+      "choose": "Choose where to help",
+      "description": "An open network of tools, builders, and resources responding to emergencies across Latin America.",
+      "enter": "Enter",
+      "networkActive": "Network active",
+      "solidarity": "technology in solidarity",
+      "statement": "What works in one country can help the next."
+    },
     "addProject": "Add a project",
     "goToCountry": "Go to {country}",
     "availableTools": "Available tools",
@@ -288,7 +296,8 @@
     "projects": {
       "eyebrow": "Project ideas",
       "title": "What you can build",
-      "description": "Choose a concrete problem. Connect with what already exists. Leave something useful for the emergency and durable enough for recovery."
+      "description": "Choose a concrete problem. Connect with what already exists. Leave something useful for the emergency and durable enough for recovery.",
+      "viewAll": "View projects for Venezuela"
     },
     "projectIdeas": [
       "Verified directories for shelters, collection centers, and medical care.",

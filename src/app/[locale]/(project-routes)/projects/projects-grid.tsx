@@ -20,7 +20,9 @@ import {
 } from "@/lib/projects/categories";
 import { fetchProjects, projectQueryKeys } from "@/lib/projects/queries";
 import {
+  isProjectApplicableTo,
   type Project,
+  type ProjectApplicability,
   type ProjectLifecycleStatus,
   projectLifecycleStatuses,
 } from "@/lib/projects/schema";
@@ -28,22 +30,28 @@ import {
 type CategoryFilter = string;
 type StatusFilter = "all" | ProjectLifecycleStatus;
 type ViewMode = "grid" | "list";
+type CountryFilter = "all" | Exclude<ProjectApplicability, "latam">;
 
 type ProjectsGridProps = {
   initialProjects: Project[];
   clusters: ResolvedCluster[];
   assignments: Record<string, string>;
+  initialCountry?: Exclude<ProjectApplicability, "latam">;
 };
 
 export function ProjectsGrid({
   initialProjects,
   clusters,
   assignments,
+  initialCountry,
 }: ProjectsGridProps) {
   const locale = useLocale();
   const t = useTranslations("Projects.grid");
   const [activeCategory, setActiveCategory] = useState<CategoryFilter>("all");
   const [activeStatus, setActiveStatus] = useState<StatusFilter>("all");
+  const [activeCountry, setActiveCountry] = useState<CountryFilter>(
+    initialCountry ?? "all",
+  );
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [query, setQuery] = useState("");
   const deferredQuery = useDeferredValue(
@@ -79,13 +87,15 @@ export function ProjectsGrid({
       activeCategory === "all" || categoryId === activeCategory;
     const statusMatches =
       activeStatus === "all" || project.lifecycleStatus === activeStatus;
+    const countryMatches =
+      activeCountry === "all" || isProjectApplicableTo(project, activeCountry);
     const queryMatches =
       !deferredQuery ||
       `${project.name} ${project.descriptionMarkdown} ${project.ownerName} ${project.participantName} ${project.countries.join(" ")}`
         .toLocaleLowerCase(locale)
         .includes(deferredQuery);
 
-    return categoryMatches && statusMatches && queryMatches;
+    return categoryMatches && statusMatches && countryMatches && queryMatches;
   });
   const activeMeta =
     activeCategory === "all" ? null : clusterById.get(activeCategory);
@@ -132,6 +142,35 @@ export function ProjectsGrid({
                 onClick={() => setActiveCategory(cluster.id)}
               />
             ))}
+          </div>
+
+          <div className="mt-2 flex gap-2 overflow-x-auto border-t pt-3 pb-1">
+            <FilterChip
+              active={activeCountry === "all"}
+              count={projects.length}
+              label={t("all")}
+              onClick={() => setActiveCountry("all")}
+            />
+            <FilterChip
+              active={activeCountry === "venezuela"}
+              count={
+                projects.filter((project) =>
+                  isProjectApplicableTo(project, "venezuela"),
+                ).length
+              }
+              label={t("applicabilities.venezuela")}
+              onClick={() => setActiveCountry("venezuela")}
+            />
+            <FilterChip
+              active={activeCountry === "colombia"}
+              count={
+                projects.filter((project) =>
+                  isProjectApplicableTo(project, "colombia"),
+                ).length
+              }
+              label={t("applicabilities.colombia")}
+              onClick={() => setActiveCountry("colombia")}
+            />
           </div>
 
           <div className="mt-2 flex gap-2 overflow-x-auto border-t pt-3 pb-1">

@@ -15,6 +15,14 @@
       }
     },
     "heroTitle": "Construimos por",
+    "selector": {
+      "choose": "Elige dónde ayudar",
+      "description": "Una red abierta de herramientas, builders y recursos para responder a emergencias en América Latina.",
+      "enter": "Entrar",
+      "networkActive": "Red activa",
+      "solidarity": "tecnología en solidaridad",
+      "statement": "Lo que funciona en un país puede ayudar al siguiente."
+    },
     "addProject": "Agregar un proyecto",
     "goToCountry": "Ir a {country}",
     "availableTools": "Herramientas disponibles",
@@ -288,7 +296,8 @@
     "projects": {
       "eyebrow": "Ideas de proyectos",
       "title": "Qué puedes construir",
-      "description": "Elige un problema concreto. Conecta con lo que ya existe. Deja algo útil para la emergencia y suficientemente duradero para la recuperación."
+      "description": "Elige un problema concreto. Conecta con lo que ya existe. Deja algo útil para la emergencia y suficientemente duradero para la recuperación.",
+      "viewAll": "Ver proyectos para Venezuela"
     },
     "projectIdeas": [
       "Directorios verificados de refugios, centros de acopio y atención médica.",
