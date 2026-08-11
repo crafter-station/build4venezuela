@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { AuthorBadge } from "@/components/author-badge";
+import { ProjectExternalLink } from "@/components/project-external-link";
 import { ProjectMarkdown } from "@/components/project-markdown";
 import { ProjectVideoEmbed } from "@/components/project-video-embed";
 import { Badge } from "@/components/ui/badge";
@@ -205,34 +206,29 @@ export default async function ProjectPage({ params }: Props) {
             </Card>
             <div className="mt-6 flex flex-wrap gap-3">
               {project.projectUrl ? (
-                <a
+                <ProjectExternalLink
                   className={buttonVariants({ size: "lg" })}
                   href={project.projectUrl}
-                  rel="noreferrer"
-                  target="_blank"
+                  sendReferrer
                 >
                   {t("openProject")}
-                </a>
+                </ProjectExternalLink>
               ) : null}
               {project.videoUrl ? (
-                <a
+                <ProjectExternalLink
                   className={buttonVariants({ size: "lg", variant: "outline" })}
                   href={project.videoUrl}
-                  rel="noreferrer"
-                  target="_blank"
                 >
                   {t("watchDemo")}
-                </a>
+                </ProjectExternalLink>
               ) : null}
               {project.contributeInUrl ? (
-                <a
+                <ProjectExternalLink
                   className={buttonVariants({ size: "lg", variant: "outline" })}
                   href={project.contributeInUrl}
-                  rel="noreferrer"
-                  target="_blank"
                 >
                   {t("contribute")}
-                </a>
+                </ProjectExternalLink>
               ) : null}
               <VoteButton
                 projectId={project.id}

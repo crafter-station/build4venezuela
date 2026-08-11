@@ -10,6 +10,7 @@ import {
   RadarChart,
   ResponsiveContainer,
 } from "recharts";
+import { ProjectExternalLink } from "@/components/project-external-link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -113,13 +114,23 @@ export function ProjectDrawer({
               )}
               <div className="mt-1 flex flex-wrap gap-3 font-mono text-[11px]">
                 {node.repoUrl && (
-                  <Link href={node.repoUrl} label={t("links.repo")} />
+                  <ProjectResourceLink
+                    href={node.repoUrl}
+                    label={t("links.repo")}
+                  />
                 )}
                 {node.liveUrl && /^https?:/.test(node.liveUrl) && (
-                  <Link href={node.liveUrl} label={t("links.live")} />
+                  <ProjectResourceLink
+                    href={node.liveUrl}
+                    label={t("links.live")}
+                    sendReferrer
+                  />
                 )}
                 {node.videoUrl && (
-                  <Link href={node.videoUrl} label={t("links.video")} />
+                  <ProjectResourceLink
+                    href={node.videoUrl}
+                    label={t("links.video")}
+                  />
                 )}
               </div>
             </SheetHeader>
@@ -467,15 +478,22 @@ function StackLine({ label, items }: { label: string; items: string[] }) {
   );
 }
 
-function Link({ href, label }: { href: string; label: string }) {
+function ProjectResourceLink({
+  href,
+  label,
+  sendReferrer = false,
+}: {
+  href: string;
+  label: string;
+  sendReferrer?: boolean;
+}) {
   return (
-    <a
+    <ProjectExternalLink
       href={href}
-      target="_blank"
-      rel="noopener noreferrer"
+      sendReferrer={sendReferrer}
       className="text-accent underline underline-offset-4 hover:opacity-80"
     >
       {label}
-    </a>
+    </ProjectExternalLink>
   );
 }
