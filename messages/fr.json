@@ -3,6 +3,36 @@
     "title": "BUILD4VENEZUELA | Hackathon mondial",
     "description": "Un hackathon mondial de 72 heures pour construire des outils utiles pour le Venezuela après les tremblements de terre du 24 juin."
   },
+  "CountryHub": {
+    "metadata": {
+      "venezuela": {
+        "title": "Venezuela | Build4Latam",
+        "description": "Des outils, projets et ressources ouverts conçus pour aider le Venezuela."
+      },
+      "colombia": {
+        "title": "Colombie | Build4Latam",
+        "description": "Des outils, projets et ressources ouverts qui peuvent aider la Colombie."
+      }
+    },
+    "heroTitle": "Nous construisons pour",
+    "addProject": "Ajouter un projet",
+    "goToCountry": "Aller à {country}",
+    "availableTools": "Outils disponibles",
+    "toolsTitle": "Utilisez-les. Adaptez-les. Partagez-les.",
+    "empty": "Il n'y a pas encore de projets étiquetés pour {country}.",
+    "countries": {
+      "venezuela": {
+        "name": "Venezuela",
+        "eyebrow": "L'origine de ce réseau",
+        "description": "Build4Latam est né sous le nom de Build4Venezuela : une réponse ouverte pour relier l'aide, l'information et la technologie après les tremblements de terre. Le travail continue."
+      },
+      "colombia": {
+        "name": "Colombie",
+        "eyebrow": "Le réseau traverse les frontières",
+        "description": "L'urgence touche maintenant aussi la Colombie. Nous réunissons de nouvelles initiatives et des outils du hackathon vénézuélien qui peuvent être adaptés et utilisés ici."
+      }
+    }
+  },
   "Header": {
     "brand": "Build4Venezuela",
     "mobileBrand": "B4B",

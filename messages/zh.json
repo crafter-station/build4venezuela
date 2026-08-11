@@ -3,6 +3,36 @@
     "title": "BUILD4VENEZUELA | 全球黑客松",
     "description": "一场全球 72 小时黑客松，为 6 月 24 日地震后的委内瑞拉构建实用工具。"
   },
+  "CountryHub": {
+    "metadata": {
+      "venezuela": {
+        "title": "委内瑞拉 | Build4Latam",
+        "description": "为帮助委内瑞拉而构建的开放工具、项目和资源。"
+      },
+      "colombia": {
+        "title": "哥伦比亚 | Build4Latam",
+        "description": "能够帮助哥伦比亚的开放工具、项目和资源。"
+      }
+    },
+    "heroTitle": "我们为此而构建",
+    "addProject": "添加项目",
+    "goToCountry": "前往{country}",
+    "availableTools": "可用工具",
+    "toolsTitle": "使用、改造、分享。",
+    "empty": "目前还没有标记为适用于{country}的项目。",
+    "countries": {
+      "venezuela": {
+        "name": "委内瑞拉",
+        "eyebrow": "这个网络的起点",
+        "description": "Build4Latam 始于 Build4Venezuela：地震后连接援助、信息与技术的开放行动。这项工作仍在继续。"
+      },
+      "colombia": {
+        "name": "哥伦比亚",
+        "eyebrow": "网络跨越国界",
+        "description": "紧急状况如今也影响着哥伦比亚。我们汇集新的行动，以及来自委内瑞拉黑客松、可在这里调整使用的工具。"
+      }
+    }
+  },
   "Header": {
     "brand": "Build4Venezuela",
     "mobileBrand": "B4B",

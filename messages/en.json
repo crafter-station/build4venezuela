@@ -3,6 +3,36 @@
     "title": "BUILD4VENEZUELA | Global Hackathon",
     "description": "A global 72-hour hackathon to build useful tools for Venezuela after the June 24 earthquakes."
   },
+  "CountryHub": {
+    "metadata": {
+      "venezuela": {
+        "title": "Venezuela | Build4Latam",
+        "description": "Open tools, projects, and resources built to help Venezuela."
+      },
+      "colombia": {
+        "title": "Colombia | Build4Latam",
+        "description": "Open tools, projects, and resources that can help Colombia."
+      }
+    },
+    "heroTitle": "We build for",
+    "addProject": "Add a project",
+    "goToCountry": "Go to {country}",
+    "availableTools": "Available tools",
+    "toolsTitle": "Use them. Adapt them. Share them.",
+    "empty": "There are no projects tagged for {country} yet.",
+    "countries": {
+      "venezuela": {
+        "name": "Venezuela",
+        "eyebrow": "Where this network began",
+        "description": "Build4Latam began as Build4Venezuela: an open response connecting aid, information, and technology after the earthquakes. The work continues."
+      },
+      "colombia": {
+        "name": "Colombia",
+        "eyebrow": "The network crosses borders",
+        "description": "The emergency is now affecting Colombia too. We bring together new initiatives and tools from the Venezuelan hackathon that can be adapted and used here."
+      }
+    }
+  },
   "Header": {
     "brand": "Build4Venezuela",
     "mobileBrand": "B4B",

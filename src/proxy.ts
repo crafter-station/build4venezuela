@@ -53,10 +53,6 @@ function legacyLocalizedRedirect(request: Request) {
 function skipsIntl(pathname: string) {
   return (
     pathname === "/" ||
-    pathname === "/ve" ||
-    pathname.startsWith("/ve/") ||
-    pathname === "/co" ||
-    pathname.startsWith("/co/") ||
     pathname.startsWith("/api") ||
     pathname.startsWith("/trpc") ||
     pathname.startsWith("/_next") ||

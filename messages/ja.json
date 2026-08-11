@@ -3,6 +3,36 @@
     "title": "BUILD4VENEZUELA | グローバルハッカソン",
     "description": "6月24日の地震後のベネズエラに役立つツールをつくる、世界規模の72時間ハッカソン。"
   },
+  "CountryHub": {
+    "metadata": {
+      "venezuela": {
+        "title": "ベネズエラ | Build4Latam",
+        "description": "ベネズエラを支援するために作られたオープンなツール、プロジェクト、リソース。"
+      },
+      "colombia": {
+        "title": "コロンビア | Build4Latam",
+        "description": "コロンビアを支援できるオープンなツール、プロジェクト、リソース。"
+      }
+    },
+    "heroTitle": "私たちが支援する国",
+    "addProject": "プロジェクトを追加",
+    "goToCountry": "{country}へ移動",
+    "availableTools": "利用可能なツール",
+    "toolsTitle": "使い、適応し、共有しよう。",
+    "empty": "{country}向けのプロジェクトはまだありません。",
+    "countries": {
+      "venezuela": {
+        "name": "ベネズエラ",
+        "eyebrow": "このネットワークの原点",
+        "description": "Build4LatamはBuild4Venezuelaとして始まりました。地震後に支援、情報、テクノロジーをつなぐオープンな取り組みです。活動は今も続いています。"
+      },
+      "colombia": {
+        "name": "コロンビア",
+        "eyebrow": "国境を越えるネットワーク",
+        "description": "緊急事態はコロンビアにも影響しています。ベネズエラのハッカソンから、ここでも適応して使える新しい取り組みとツールを集めています。"
+      }
+    }
+  },
   "Header": {
     "brand": "Build4Venezuela",
     "mobileBrand": "B4B",
