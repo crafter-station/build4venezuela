@@ -1,13 +1,17 @@
 "use client";
 
 import { Show, SignInButton, UserButton } from "@clerk/nextjs";
-import { ListIcon, PlusIcon, UserCircleIcon } from "@phosphor-icons/react";
+import {
+  CaretDownIcon,
+  ListIcon,
+  PlusIcon,
+  UserCircleIcon,
+} from "@phosphor-icons/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { CommandSearch } from "@/components/command-search";
 import { LanguageSelector } from "@/components/language-selector";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -25,6 +29,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { SOCIAL_LINKS } from "@/lib/social-links";
 import { cn } from "@/lib/utils";
 
 export function SiteHeader() {
@@ -32,6 +37,8 @@ export function SiteHeader() {
   const pathname = usePathname();
   const t = useTranslations("Header");
   const homeHref = `/${locale}`;
+  const isLanding =
+    pathname === homeHref || pathname === `${homeHref}/` || pathname === "/";
   const navigationLinks = [
     { href: `/${locale}/projects`, label: t("links.projects") },
     { href: `/${locale}/builders`, label: t("links.builders") },
@@ -47,8 +54,22 @@ export function SiteHeader() {
   ];
 
   return (
-    <header className="fixed inset-x-0 top-0 z-40 border-border/80 border-b bg-background/88 backdrop-blur-xl">
-      <div className="mx-auto flex h-16 max-w-7xl items-center gap-2 px-5 sm:px-8 lg:px-10">
+    <header
+      className={cn(
+        "z-40 border-border/80 border-b",
+        isLanding
+          ? "relative shrink-0 bg-background/40"
+          : "fixed inset-x-0 top-0 bg-background/88 backdrop-blur-xl",
+      )}
+    >
+      <div
+        className={cn(
+          "flex h-14 items-center gap-2 sm:h-16",
+          isLanding
+            ? "w-full px-4 sm:px-5 lg:px-6"
+            : "mx-auto max-w-7xl px-5 sm:px-8 lg:px-10",
+        )}
+      >
         <Link
           aria-label={t("homeLabel")}
           className="ui-focus mr-auto inline-flex items-center font-mono text-lg font-black tracking-[-0.055em] sm:text-xl"
@@ -78,6 +99,37 @@ export function SiteHeader() {
                 </Link>
               );
             })}
+
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={
+                  <Button
+                    className="text-muted-foreground"
+                    size="sm"
+                    type="button"
+                    variant="ghost"
+                  />
+                }
+              >
+                {t("links.socials")}
+                <CaretDownIcon data-icon="inline-end" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="min-w-44">
+                <DropdownMenuGroup>
+                  <DropdownMenuLabel>{t("links.socials")}</DropdownMenuLabel>
+                  {SOCIAL_LINKS.map((link) => (
+                    <DropdownMenuItem
+                      key={link.href}
+                      render={
+                        <a href={link.href} rel="noreferrer" target="_blank">
+                          {link.label}
+                        </a>
+                      }
+                    />
+                  ))}
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </nav>
 
@@ -101,7 +153,6 @@ export function SiteHeader() {
 
         <div className="hidden items-center gap-1 md:flex">
           <LanguageSelector />
-          <ThemeToggle label={t("themeToggle")} />
         </div>
 
         <DropdownMenu>
@@ -133,9 +184,9 @@ export function SiteHeader() {
         </DropdownMenu>
 
         <Show when="signed-in">
-          <div className="hidden size-10 items-center justify-center md:flex">
+          <div className="hidden h-8 w-8 items-center justify-center md:flex">
             <UserButton
-              appearance={{ elements: { userButtonAvatarBox: "size-9" } }}
+              appearance={{ elements: { userButtonAvatarBox: "size-7" } }}
             />
           </div>
         </Show>
@@ -143,8 +194,8 @@ export function SiteHeader() {
           <SignInButton mode="modal">
             <Button
               aria-label={t("signIn")}
-              className="hidden md:inline-flex"
-              size="icon"
+              className="hidden h-8 w-8 md:inline-flex"
+              size="icon-sm"
               title={t("signIn")}
               variant="outline"
             >
@@ -205,6 +256,28 @@ export function SiteHeader() {
 
             <div className="mx-4 border-t p-4 px-0">
               <p className="mb-2 px-3 font-mono text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                {t("links.socials")}
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                {SOCIAL_LINKS.map((link) => (
+                  <a
+                    className={cn(
+                      buttonVariants({ variant: "outline" }),
+                      "h-auto min-h-12 justify-start whitespace-normal p-3",
+                    )}
+                    href={link.href}
+                    key={link.href}
+                    rel="noreferrer"
+                    target="_blank"
+                  >
+                    {link.label}
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            <div className="mx-4 border-t p-4 px-0">
+              <p className="mb-2 px-3 font-mono text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
                 {t("create.label")}
               </p>
               <div className="grid grid-cols-2 gap-2">
@@ -225,7 +298,6 @@ export function SiteHeader() {
 
             <div className="mt-auto flex items-center gap-2 border-t p-4">
               <LanguageSelector />
-              <ThemeToggle label={t("themeToggle")} />
               <Show when="signed-out">
                 <SignInButton mode="modal">
                   <Button className="ml-auto" variant="outline">

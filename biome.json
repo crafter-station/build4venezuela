@@ -14,7 +14,9 @@
       "!dist",
       "!build",
       "!analysis",
-      "!src/lib/insights/dataset.json"
+      "!src/lib/insights/dataset.json",
+      "!src/lib/south-america-map.ts",
+      "!public/BFV/assets/south-america-map.svg"
     ]
   },
   "formatter": {

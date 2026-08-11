@@ -23,6 +23,76 @@
       "solidarity": "tecnologia em solidariedade",
       "statement": "O que funciona em um país pode ajudar o próximo."
     },
+    "map": {
+      "chooseHint": "Escolha um país",
+      "emptyTitle": "Escolha onde ajudar.",
+      "explore": "Explorar",
+      "mapLabel": "Mapa interativo da América do Sul",
+      "otherCountries": "Resto da Latam",
+      "submitProject": "Enviar projeto",
+      "countries": {
+        "AR": {
+          "name": "Argentina",
+          "disaster": "Ainda não há um hub de emergência ativo. Envie ferramentas que possam se adaptar na Latam na próxima crise.",
+          "tags": ["Coordenação de ajuda", "Info verificada", "Dados e APIs"]
+        },
+        "BO": {
+          "name": "Bolívia",
+          "disaster": "Ainda não há um hub de emergência ativo. Construa ferramentas reutilizáveis que a rede possa ativar rápido.",
+          "tags": ["Coordenação de ajuda", "Info verificada", "Conectividade e infra"]
+        },
+        "BR": {
+          "name": "Brasil",
+          "disaster": "Ainda não há um hub de emergência ativo. Contribua com projetos que escalem entre idiomas e regiões.",
+          "tags": ["Coordenação de ajuda", "Dados e APIs", "Info verificada"]
+        },
+        "CL": {
+          "name": "Chile",
+          "disaster": "Ainda não há um hub de emergência ativo. Ferramentas prontas para sismos — alertas, danos e coordenação — são bem-vindas.",
+          "tags": ["Avaliação de danos", "Info verificada", "Conectividade e infra"]
+        },
+        "CO": {
+          "name": "Colômbia",
+          "disaster": "Terremoto de magnitude 7,4 perto de San José del Palmar, Chocó (10 de agosto de 2026). São necessárias informação verificada, abrigos e ferramentas de coordenação.",
+          "tags": ["Coordenação de ajuda", "Info verificada", "Conectividade e infra"]
+        },
+        "EC": {
+          "name": "Equador",
+          "disaster": "Ainda não há um hub de emergência ativo. Envie ferramentas prontas para resposta sísmica e baixa conectividade.",
+          "tags": ["Avaliação de danos", "Coordenação de ajuda", "Info verificada"]
+        },
+        "GY": {
+          "name": "Guiana",
+          "disaster": "Ainda não há um hub de emergência ativo. Construa ferramentas leves que a rede Latam possa reutilizar.",
+          "tags": ["Coordenação de ajuda", "Info verificada"]
+        },
+        "PE": {
+          "name": "Peru",
+          "disaster": "Ainda não há um hub de emergência ativo. Contribua com projetos para rotas de ajuda, alertas e atualizações verificadas.",
+          "tags": ["Coordenação de ajuda", "Info verificada", "Avaliação de danos"]
+        },
+        "PY": {
+          "name": "Paraguai",
+          "disaster": "Ainda não há um hub de emergência ativo. Envie ferramentas adaptáveis para coordenação e informação pública.",
+          "tags": ["Coordenação de ajuda", "Info verificada"]
+        },
+        "SR": {
+          "name": "Suriname",
+          "disaster": "Ainda não há um hub de emergência ativo. Construa ferramentas reutilizáveis para a rede Latam.",
+          "tags": ["Coordenação de ajuda", "Info verificada"]
+        },
+        "UY": {
+          "name": "Uruguai",
+          "disaster": "Ainda não há um hub de emergência ativo. Contribua com ferramentas que possam migrar para emergências vizinhas.",
+          "tags": ["Dados e APIs", "Info verificada", "Coordenação de ajuda"]
+        },
+        "VE": {
+          "name": "Venezuela",
+          "disaster": "Após os terremotos de 24 de junho, famílias e voluntários ainda precisam de informação confiável, coordenação de ajuda e ferramentas que funcionem com pouca conectividade.",
+          "tags": ["Encontrar pessoas", "Coordenação de ajuda", "Info verificada", "Avaliação de danos"]
+        }
+      }
+    },
     "addProject": "Adicionar um projeto",
     "goToCountry": "Ir para {country}",
     "availableTools": "Ferramentas disponíveis",
@@ -334,7 +404,8 @@
       }
     ],
     "footer": {
-      "description": "Build for Venezuela é organizado por uma comunidade de builders, designers e aliados que acreditam que a tecnologia também pode ser uma forma de solidariedade."
+      "description": "Build for Venezuela é organizado por uma comunidade de builders, designers e aliados que acreditam que a tecnologia também pode ser uma forma de solidariedade.",
+      "supportedBy": "Com o apoio de"
     },
     "partners": [
       {
