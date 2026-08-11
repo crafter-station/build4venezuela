@@ -6,7 +6,13 @@ import {
 } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
-import { startTransition, useDeferredValue, useEffect, useState } from "react";
+import {
+  startTransition,
+  useDeferredValue,
+  useEffect,
+  useEffectEvent,
+  useState,
+} from "react";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -58,12 +64,15 @@ export function CommandSearch({ locale, labels }: CommandSearchProps) {
   const deferredQuery = useDeferredValue(
     query.trim().toLocaleLowerCase(locale),
   );
+  const toggleSearch = useEffectEvent(() => handleOpenChange(!open));
 
+  // Effect Events always read current state and are intentionally not dependencies.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: toggleSearch is an Effect Event.
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();
-        setOpen((current) => !current);
+        toggleSearch();
       }
     }
 
