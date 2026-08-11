@@ -40,6 +40,14 @@
     "brandPageLink": "Marque",
     "homeLabel": "Accueil de la communauté Build4Venezuela",
     "search": "Rechercher des projets",
+    "searchDialog": {
+      "description": "Recherchez des projets, des builders et des besoins communautaires.",
+      "placeholder": "Rechercher dans la communauté...",
+      "loading": "Chargement de l’index communautaire...",
+      "empty": "Aucun projet, builder ou besoin correspondant.",
+      "error": "La recherche est indisponible. Réessayez bientôt.",
+      "recent": "Recherches récentes"
+    },
     "themeToggle": "Changer le thème de couleur",
     "menu": "Ouvrir le menu",
     "menuDescription": "Explorez la communauté et trouvez une façon de contribuer.",

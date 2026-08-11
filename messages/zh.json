@@ -40,6 +40,14 @@
     "brandPageLink": "品牌",
     "homeLabel": "Build4Venezuela 社区首页",
     "search": "搜索项目",
+    "searchDialog": {
+      "description": "搜索项目、Builder 和社区需求。",
+      "placeholder": "搜索社区...",
+      "loading": "正在加载社区索引...",
+      "empty": "没有匹配的项目、Builder 或需求。",
+      "error": "搜索暂时不可用，请稍后重试。",
+      "recent": "最近搜索"
+    },
     "themeToggle": "切换颜色主题",
     "menu": "打开菜单",
     "menuDescription": "探索社区并找到参与贡献的方式。",

@@ -1,18 +1,14 @@
 "use client";
 
 import { Show, SignInButton, UserButton } from "@clerk/nextjs";
-import {
-  ListIcon,
-  MagnifyingGlassIcon,
-  PlusIcon,
-  UserCircleIcon,
-} from "@phosphor-icons/react";
+import { ListIcon, PlusIcon, UserCircleIcon } from "@phosphor-icons/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
+import { CommandSearch } from "@/components/command-search";
 import { LanguageSelector } from "@/components/language-selector";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -86,14 +82,21 @@ export function SiteHeader() {
 
         <div className="ml-1 hidden h-6 w-px bg-border lg:block" />
 
-        <Link
-          aria-label={t("search")}
-          className={buttonVariants({ variant: "ghost", size: "icon" })}
-          href={`/${locale}/projects`}
-          title={t("search")}
-        >
-          <MagnifyingGlassIcon />
-        </Link>
+        <CommandSearch
+          labels={{
+            label: t("search"),
+            description: t("searchDialog.description"),
+            placeholder: t("searchDialog.placeholder"),
+            loading: t("searchDialog.loading"),
+            empty: t("searchDialog.empty"),
+            error: t("searchDialog.error"),
+            recent: t("searchDialog.recent"),
+            projects: t("links.projects"),
+            builders: t("links.builders"),
+            needs: t("links.requests"),
+          }}
+          locale={locale}
+        />
 
         <div className="hidden items-center gap-1 md:flex">
           <LanguageSelector />

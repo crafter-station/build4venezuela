@@ -95,7 +95,7 @@ export default async function Home({ params }: Props) {
   })}`;
 
   return (
-    <main className="movement-surface min-h-screen overflow-hidden bg-background text-foreground">
+    <main className="min-h-screen overflow-hidden bg-background text-foreground">
       <section className="relative isolate flex min-h-screen items-center justify-center px-4 pt-20 pb-4 sm:px-8 lg:px-10">
         <div className="absolute inset-0 -z-20 bg-background" />
         <div className="bg-grid absolute inset-0 -z-10 opacity-[0.06]" />
@@ -105,7 +105,7 @@ export default async function Home({ params }: Props) {
         <VMark className="absolute bottom-5 left-4 h-8 w-8 opacity-70 sm:bottom-8 sm:left-8 sm:h-10 sm:w-10 lg:left-14" />
         <VMark className="absolute right-4 bottom-5 h-8 w-8 opacity-70 sm:right-8 sm:bottom-8 sm:h-10 sm:w-10 lg:right-14" />
 
-        <article className="poster-frame relative flex min-h-[calc(100svh-2rem)] w-full max-w-[1120px] flex-col items-center justify-center gap-[clamp(1.75rem,4svh,3.5rem)] py-10 sm:min-h-[calc(100svh-2rem)] sm:py-12 lg:gap-[clamp(1.6rem,3svh,3rem)] lg:py-10">
+        <article className="movement-surface poster-frame relative flex min-h-[calc(100svh-8rem)] w-full max-w-[1120px] flex-col items-center justify-center gap-[clamp(1.75rem,4svh,3.5rem)] border border-line bg-background px-4 py-10 shadow-xl sm:min-h-[calc(100svh-10rem)] sm:px-8 sm:py-12 lg:gap-[clamp(1.6rem,3svh,3rem)] lg:px-10 lg:py-10">
           <header className="flex w-full flex-col items-center">
             <Image
               alt={t("hero.logoAlt")}
