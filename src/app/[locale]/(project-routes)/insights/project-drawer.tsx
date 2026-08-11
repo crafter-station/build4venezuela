@@ -114,17 +114,23 @@ export function ProjectDrawer({
               )}
               <div className="mt-1 flex flex-wrap gap-3 font-mono text-[11px]">
                 {node.repoUrl && (
-                  <Link href={node.repoUrl} label={t("links.repo")} />
+                  <ProjectResourceLink
+                    href={node.repoUrl}
+                    label={t("links.repo")}
+                  />
                 )}
                 {node.liveUrl && /^https?:/.test(node.liveUrl) && (
-                  <Link
+                  <ProjectResourceLink
                     href={node.liveUrl}
                     label={t("links.live")}
                     sendReferrer
                   />
                 )}
                 {node.videoUrl && (
-                  <Link href={node.videoUrl} label={t("links.video")} />
+                  <ProjectResourceLink
+                    href={node.videoUrl}
+                    label={t("links.video")}
+                  />
                 )}
               </div>
             </SheetHeader>
@@ -472,7 +478,7 @@ function StackLine({ label, items }: { label: string; items: string[] }) {
   );
 }
 
-function Link({
+function ProjectResourceLink({
   href,
   label,
   sendReferrer = false,
