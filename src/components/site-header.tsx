@@ -54,7 +54,7 @@ export function SiteHeader() {
           className="ui-focus mr-auto inline-flex items-center font-mono text-lg font-black tracking-[-0.055em] sm:text-xl"
           href={homeHref}
         >
-          Build4<span className="text-brand-yellow">Venezuela</span>
+          Build4<span className="text-brand-yellow">Latam</span>
         </Link>
 
         <nav aria-label={t("navigationLabel")} className="hidden lg:block">
@@ -170,7 +170,7 @@ export function SiteHeader() {
           <SheetContent className="w-[min(90vw,24rem)] p-0" side="right">
             <SheetHeader className="border-b p-6 pr-14">
               <SheetTitle className="font-mono text-lg font-black tracking-[-0.04em]">
-                Build4Venezuela
+                Build4Latam
               </SheetTitle>
               <SheetDescription>{t("menuDescription")}</SheetDescription>
             </SheetHeader>
