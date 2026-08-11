@@ -236,11 +236,12 @@ export function ProjectsGrid({
         </Card>
       ) : viewMode === "grid" ? (
         <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-          {visible.map(({ categoryId, project }) => (
+          {visible.map(({ categoryId, project }, index) => (
             <ProjectCard
               applicabilityLabel={t(`applicabilities.${project.applicability}`)}
               categoryLabel={clusterById.get(categoryId)?.label}
               href={`/${locale}/p/${project.slug}`}
+              imageLoading={index < 3 ? "eager" : undefined}
               key={project.id}
               lifecycleLabel={t(`statuses.${project.lifecycleStatus}`)}
               openLabel={t("open")}

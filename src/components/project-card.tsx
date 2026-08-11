@@ -8,6 +8,7 @@ import { AuthorBadge } from "./author-badge";
 type ProjectCardProps = {
   project: Project;
   href: string;
+  imageLoading?: "eager" | "lazy";
   applicabilityLabel: string;
   lifecycleLabel: string;
   openLabel: string;
@@ -25,6 +26,7 @@ const statusStyles: Record<ProjectLifecycleStatus, string> = {
 export function ProjectCard({
   project,
   href,
+  imageLoading,
   applicabilityLabel,
   lifecycleLabel,
   openLabel,
@@ -45,7 +47,11 @@ export function ProjectCard({
         className,
       )}
     >
-      <ProjectPreview href={href} project={project} />
+      <ProjectPreview
+        href={href}
+        imageLoading={imageLoading}
+        project={project}
+      />
 
       <div className="flex flex-1 flex-col p-5 sm:p-6">
         <div className="flex min-w-0 items-center gap-2">
@@ -174,10 +180,12 @@ export function ProjectListItem({
 function ProjectPreview({
   compact = false,
   href,
+  imageLoading,
   project,
 }: {
   compact?: boolean;
   href: string;
+  imageLoading?: "eager" | "lazy";
   project: Project;
 }) {
   return (
@@ -196,6 +204,7 @@ function ProjectPreview({
           alt={`${project.name} project preview`}
           className="object-cover transition-transform duration-300 ease-[var(--ease-out)] group-hover:scale-[1.02] motion-reduce:transition-none"
           fill
+          loading={imageLoading}
           sizes={
             compact
               ? "(max-width: 640px) 104px, 160px"
