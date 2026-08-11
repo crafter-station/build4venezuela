@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, inArray } from "drizzle-orm";
 import { db, isDbConfigured } from "@/db";
 import {
   projectComments,
@@ -10,9 +10,9 @@ import {
   projectVotes,
 } from "@/db/schema";
 import { cachedAggregate, invalidateCache } from "@/lib/cache";
-import { logError } from "@/lib/log";
 import type {
   Project,
+  ProjectApplicability,
   ProjectComment,
   ProjectCommentInput,
   ProjectFormInput,
@@ -31,10 +31,12 @@ type ProjectRow = {
   name: string;
   status?: ProjectStatus | null;
   lifecycle_status?: ProjectLifecycleStatus | null;
+  applicability?: ProjectApplicability | null;
   project_url: string;
   countries: string[];
   participant_name: string;
   video_url: string;
+  image_url?: string | null;
   contribute_in_url?: string | null;
   description_markdown: string;
   owner_user_id: string;
@@ -83,19 +85,17 @@ type LocalData = {
 
 const localStorePath = path.join(process.cwd(), ".data", "projects.json");
 
-// Hot-read cache (Upstash). Short TTL because vote counts/ordering change
-// often — but the realtime channel patches votes on the client, so a slightly
-// stale SSR payload is fine, and writes invalidate explicitly below.
+// Hot-read cache (Upstash). Polling clients reconcile every 30 seconds and
+// writes invalidate explicitly, keeping repeated reads off Neon.
 const CACHE_VERSION = "v1";
-const CACHE_TTL_SECONDS = 60;
+const CACHE_TTL_SECONDS = 30;
 const projectCacheKeys = {
-  list: `build4venezuela:projects:list:${CACHE_VERSION}`,
-  detail: (slug: string) => `build4venezuela:project:${slug}:${CACHE_VERSION}`,
+  list: `build4latam:projects:list:${CACHE_VERSION}`,
+  detail: (slug: string) => `build4latam:project:${slug}:${CACHE_VERSION}`,
 };
 
-const voteCount = sql<number>`count(${projectVotes.voterId})`.mapWith(Number);
-const commentVoteCount =
-  sql<number>`count(${projectCommentVotes.voterId})`.mapWith(Number);
+const voteCount = count(projectVotes.voterId);
+const commentVoteCount = count(projectCommentVotes.voterId);
 
 // --- Drizzle row -> domain mappers ------------------------------------------
 
@@ -110,10 +110,12 @@ function rowToProject(
     status: (row.status ?? "published") as ProjectStatus,
     lifecycleStatus: (row.lifecycleStatus ??
       "ready_to_use") as ProjectLifecycleStatus,
+    applicability: (row.applicability ?? "latam") as ProjectApplicability,
     projectUrl: row.projectUrl,
     countries: row.countries,
     participantName: row.participantName,
     videoUrl: row.videoUrl,
+    imageUrl: row.imageUrl,
     contributeInUrl: row.contributeInUrl ?? "",
     descriptionMarkdown: row.descriptionMarkdown,
     ownerName: row.ownerName || row.participantName,
@@ -152,10 +154,12 @@ function toProject(row: ProjectRow): Project {
     name: row.name,
     status: row.status ?? "published",
     lifecycleStatus: row.lifecycle_status ?? "ready_to_use",
+    applicability: row.applicability ?? "latam",
     projectUrl: row.project_url,
     countries: row.countries,
     participantName: row.participant_name,
     videoUrl: row.video_url,
+    imageUrl: row.image_url ?? "",
     contributeInUrl: row.contribute_in_url ?? "",
     descriptionMarkdown: row.description_markdown,
     ownerName: row.owner_name || row.participant_name,
@@ -189,10 +193,12 @@ function toLocalRow(
     name: input.name,
     status: "published",
     lifecycle_status: input.lifecycleStatus,
+    applicability: input.applicability,
     project_url: input.projectUrl,
     countries: normalizeCountries(input.countries),
     participant_name: input.participantName,
     video_url: input.videoUrl,
+    image_url: input.imageUrl,
     contribute_in_url: input.contributeInUrl,
     description_markdown: input.descriptionMarkdown,
     owner_user_id: input.ownerUserId,
@@ -223,19 +229,6 @@ async function writeLocalData(data: LocalData) {
   await writeFile(localStorePath, `${JSON.stringify(data, null, 2)}\n`);
 }
 
-function normalizeStoreError(error: unknown) {
-  if (!(error instanceof Error) && typeof error !== "object") {
-    return { message: String(error) };
-  }
-
-  const details = error as Record<string, unknown>;
-  return {
-    code: details.code,
-    message: details.message,
-    name: details.name,
-  };
-}
-
 // Build the project domain shape from an insert/update Drizzle row, where the
 // vote count is fetched separately (insert returns no aggregate).
 function toProjectInput(
@@ -245,10 +238,12 @@ function toProjectInput(
     slug: input.slug,
     name: input.name,
     lifecycleStatus: input.lifecycleStatus,
+    applicability: input.applicability,
     projectUrl: input.projectUrl,
     countries: normalizeCountries(input.countries),
     participantName: input.participantName,
     videoUrl: input.videoUrl,
+    imageUrl: input.imageUrl,
     contributeInUrl: input.contributeInUrl,
     descriptionMarkdown: input.descriptionMarkdown,
     spamScore: input.spamScore,
@@ -256,7 +251,7 @@ function toProjectInput(
   };
 }
 
-async function withLocalFallback<T>(
+async function withConfiguredStore<T>(
   operation: () => Promise<T>,
   fallback: () => Promise<T>,
 ) {
@@ -264,18 +259,11 @@ async function withLocalFallback<T>(
     return fallback();
   }
 
-  try {
-    return await operation();
-  } catch (error) {
-    logError("project.store.fallback", error, {
-      detail: normalizeStoreError(error),
-    });
-    return fallback();
-  }
+  return operation();
 }
 
 export async function listProjects() {
-  return withLocalFallback(
+  return withConfiguredStore(
     async () => {
       const rows = await db
         .select({ project: projects, votesCount: voteCount })
@@ -306,8 +294,30 @@ export async function listProjects() {
   );
 }
 
+export async function listProjectsByOwner(userId: string) {
+  return withConfiguredStore(
+    async () => {
+      const rows = await db
+        .select({ project: projects, votesCount: voteCount })
+        .from(projects)
+        .leftJoin(projectVotes, eq(projectVotes.projectId, projects.id))
+        .where(eq(projects.ownerUserId, userId))
+        .groupBy(projects.id)
+        .orderBy(desc(projects.createdAt));
+
+      return rows.map((row) => rowToProject(row.project, row.votesCount));
+    },
+    async () => {
+      const data = await readLocalData();
+      return data.projects
+        .filter((project) => project.owner_user_id === userId)
+        .map((project) => toProject({ ...project, votes_count: 0 }));
+    },
+  );
+}
+
 export async function getProjectBySlug(slug: string) {
-  return withLocalFallback(
+  return withConfiguredStore(
     async () => {
       const rows = await db
         .select({ project: projects, votesCount: voteCount })
@@ -382,7 +392,7 @@ export async function isSlugAvailable(slug: string, currentProjectId?: string) {
 }
 
 export async function createProject(input: ProjectWrite) {
-  const project = await withLocalFallback(
+  const project = await withConfiguredStore(
     async () => {
       const [row] = await db
         .insert(projects)
@@ -421,7 +431,7 @@ export async function updateProject(
   projectId: string,
   input: Omit<ProjectWrite, "ownerUserId" | "ownerName" | "ownerImageUrl">,
 ) {
-  const project = await withLocalFallback(
+  const project = await withConfiguredStore(
     async () => {
       const [row] = await db
         .update(projects)
@@ -477,7 +487,7 @@ export async function deleteProject(projectId: string) {
     throw new Error("Project not found.");
   }
 
-  await withLocalFallback(
+  await withConfiguredStore(
     async () => {
       await db.delete(projects).where(eq(projects.id, projectId));
     },
@@ -523,7 +533,7 @@ export async function canEditProject(
     return false;
   }
 
-  return withLocalFallback(
+  return withConfiguredStore(
     async () => {
       const rows = await db
         .select({ id: projects.id })
@@ -546,10 +556,10 @@ export async function canEditProject(
 }
 
 export async function getVoteCount(projectId: string) {
-  return withLocalFallback(
+  return withConfiguredStore(
     async () => {
       const rows = await db
-        .select({ count: sql<number>`count(*)`.mapWith(Number) })
+        .select({ count: count() })
         .from(projectVotes)
         .where(eq(projectVotes.projectId, projectId));
 
@@ -567,7 +577,7 @@ export async function hasVoted(projectId: string, voterId: string | undefined) {
     return false;
   }
 
-  return withLocalFallback(
+  return withConfiguredStore(
     async () => {
       const rows = await db
         .select({ projectId: projectVotes.projectId })
@@ -592,7 +602,7 @@ export async function hasVoted(projectId: string, voterId: string | undefined) {
 }
 
 export async function toggleVote(projectId: string, voterId: string) {
-  const result = await withLocalFallback(
+  const result = await withConfiguredStore(
     async () => {
       const voted = await hasVoted(projectId, voterId);
 
@@ -638,7 +648,7 @@ export async function toggleVote(projectId: string, voterId: string) {
 }
 
 export async function listComments(projectId: string, voterId?: string) {
-  return withLocalFallback(
+  return withConfiguredStore(
     async () => {
       const rows = await db
         .select({ comment: projectComments, votesCount: commentVoteCount })
@@ -715,7 +725,7 @@ export async function createComment(
   authorImageUrl: string,
   input: ProjectCommentInput,
 ) {
-  return withLocalFallback(
+  return withConfiguredStore(
     async () => {
       const [row] = await db
         .insert(projectComments)
@@ -753,10 +763,10 @@ export async function createComment(
 }
 
 export async function getCommentVoteCount(commentId: string) {
-  return withLocalFallback(
+  return withConfiguredStore(
     async () => {
       const rows = await db
-        .select({ count: sql<number>`count(*)`.mapWith(Number) })
+        .select({ count: count() })
         .from(projectCommentVotes)
         .where(eq(projectCommentVotes.commentId, commentId));
 
@@ -779,7 +789,7 @@ export async function hasCommentVoted(
     return false;
   }
 
-  return withLocalFallback(
+  return withConfiguredStore(
     async () => {
       const rows = await db
         .select({ commentId: projectCommentVotes.commentId })
@@ -804,7 +814,7 @@ export async function hasCommentVoted(
 }
 
 export async function toggleCommentVote(commentId: string, voterId: string) {
-  return withLocalFallback(
+  return withConfiguredStore(
     async () => {
       const voted = await hasCommentVoted(commentId, voterId);
 

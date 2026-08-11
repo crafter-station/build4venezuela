@@ -1,9 +1,12 @@
 import { ClerkProvider } from "@clerk/nextjs";
 import { shadcn } from "@clerk/ui/themes";
 import { Analytics } from "@vercel/analytics/next";
+import { GeistSans } from "geist/font/sans";
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { getLocale } from "next-intl/server";
 import type { ReactNode } from "react";
+import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
 import { QueryProvider } from "./query-provider";
 
@@ -65,9 +68,10 @@ const inputMonoNarrow = localFont({
   variable: "--font-input-mono-narrow",
 });
 
-const SITE_URL = "https://build4venezuela.com";
-const SITE_TITLE = "Build4Venezuela";
-const SITE_DESCRIPTION = "Build projects for Venezuelans.";
+const SITE_URL = "https://build4latam.com";
+const SITE_TITLE = "Build4Latam";
+const SITE_DESCRIPTION =
+  "Open tools and builder communities responding to urgent needs across Latin America.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -79,7 +83,14 @@ export const metadata: Metadata = {
     siteName: SITE_TITLE,
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
-    images: [{ url: "/og.png", width: 1200, height: 630, alt: SITE_TITLE }],
+    images: [
+      {
+        url: "/assets/og-latam.jpg",
+        width: 1200,
+        height: 630,
+        alt: SITE_TITLE,
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
@@ -91,16 +102,30 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  const locale = await getLocale();
+
   return (
     <html
-      lang="en"
-      className={`${inputMonoNarrow.variable} h-full antialiased`}
+      lang={locale}
+      className={`${GeistSans.variable} ${inputMonoNarrow.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
       <body className="min-h-full bg-background text-foreground">
-        <ClerkProvider appearance={{ theme: shadcn }}>
-          <QueryProvider>{children}</QueryProvider>
-        </ClerkProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          disableTransitionOnChange
+          enableSystem
+        >
+          <ClerkProvider appearance={{ theme: shadcn }}>
+            <QueryProvider>{children}</QueryProvider>
+          </ClerkProvider>
+        </ThemeProvider>
         <Analytics />
       </body>
     </html>

@@ -1,0 +1,168 @@
+{
+  "project_slug": "puente-de-vida",
+  "name": "Puente de Vida",
+  "repo_url": "https://github.com/DataTalesByAgos/Puente-de-Vida",
+  "live_url": "https://docs.google.com/document/d/1CnY_SZOGfB6r3yJDiAr_odOm0yTfUQ05teEMeRCIL-c/edit?usp=sharing",
+  "video_url": "",
+  "countries": [
+    "Argentina"
+  ],
+  "db_description": "# Puente de Vida\n\n**Puente de Vida** es una plataforma de coordinación de emergencias **offline-first**. Su misión es asegurar que los reportes de ayuda humanitaria y rescate sigan fluyendo de forma continua, incluso durante caídas masivas de conectividad o colapso de las telecomunicaciones.\n\nLa plataforma destaca por su alta modularidad, facilidad de integración y resiliencia en terreno.\n\n---\n\n### ¿Cuál es la meta?\n\n* **Propósito Humano:** Colaborar con los equipos de respuesta en el terreno para ayudar a salvar vidas mediante información oportuna y organizada.\n* **Propósito Técnico:** Resolver los problemas críticos de comunicación, registro y logística que surgen cuando no hay acceso a Internet.\n\n---\n\n### ¿Cómo funciona?\n\nEl sistema opera bajo un flujo de sincronización inteligente en 4 pasos:\n\n1. **Captura sin conexión (PWA):** Los reportes se registran en una aplicación web progresiva y se guardan localmente de forma segura en `IndexedDB`.\n2. **Sincronización en segundo plano:** Al recuperar señal, un `Service Worker` transmite automáticamente los reportes pendientes al servidor central.\n3. **Clasificación y deduplicación:** El backend procesa cada reporte usando una lógica híbrida (heurística local ultrarrápida + inteligencia artificial opcional compatible con `OpenAI`) para extraer coordenadas, calcular prioridades y fusionar duplicados.\n4. **Coordinación en terreno:** Los operadores gestionan los recursos y voluntarios desde un mapa interactivo y un panel en tiempo real según la gravedad de cada situación.\n\n---\n### Equipo\nAgostina Silva — Coordinación | [LinkedIn](https://www.linkedin.com/in/agostinadevdc)\n\nChristian Chávez— UI / UX | [LinkedIn](https://www.linkedin.com/in/christianchavez-io/)\n\nDeyanira Alcaraz — Diseño / CM / marketing | [LinkedIn](https://www.linkedin.com/in/deyanira-alcaraz/)\n\n\n---\n\n### Arquitectura de Flujo\n\n```\nCanales (WhatsApp/Telegram/Web) \n   └─► PWA Offline (IndexedDB) \n         └─► Service Worker (Sync) \n               └─► API REST (Fastify) \n                     └─► Clasificación Híbrida (Heurística + IA) \n                           └─► Panel Coordinador (React + Leaflet)\n```\n\n---\n\n### Stack Tecnológico\n\n* **Lenguaje:** `TypeScript` (Fullstack)\n* **Frontend:** `React 19` + `Vite` + `TanStack Router` + `Tailwind CSS` + `vite-plugin-pwa`\n* **Backend:** `Fastify` + `@fastify/rate-limit` + `PostgreSQL`\n* **Persistencia Local:** `Dexie.js` / `IndexedDB`\n* **Mapas:** `Leaflet` + `OpenStreetMap`\n* **Inteligencia Artificial:** Heurística de texto / API compatible con `OpenAI`\n\n---\n### Privacidad y Seguridad de Datos\n\n* **Protección de Datos Sensibles:** Enmascaramiento automático de identificaciones y resguardo nativo de datos de menores de edad.\n* **Cifrado Local:** Encriptación simétrica AES-256-GCM de todos los reportes persistidos localmente en el navegador (`IndexedDB`).\n* **Acceso por Roles (RBAC):** Filtrado dinámico de información en la API según el nivel de autorización (`viewer`, `operator`, `admin`) para resguardar la privacidad.\n\n---\n\n### Modularidad y Buenas Prácticas\n\n* **Arquitectura Conmutable:** Permite cambiar fácilmente entre simulación local y proveedores reales (WhatsApp/IA) mediante variables de entorno.\n* **Ingesta Inteligente:** Optimizado para recibir y unificar reportes de herramientas externas, usando inserciones masivas por lotes en base de datos.",
+  "lifecycle_status": "in_development",
+  "analysis": {
+    "summary": "Puente de Vida is a monorepo emergency-coordination platform (Fastify+Postgres API, a fairly mature Vite/React PWA, and a newly-started Expo mobile app) for reporting incidents/needs, triaging with a local heuristic or pluggable LLM classifier, deduping reports, managing shelters/orgs/volunteers, and a mock/generic WhatsApp integration. The API and web layers contain real, non-trivial business logic (privacy-tiered data filtering, audit logging, rate limiting, session auth, offline sync with IndexedDB), but the codebase just underwent a 'mobile-first' pivot and the new Expo app is almost entirely placeholder screens, and there are zero automated tests anywhere in the repo.",
+    "project_type": "Full-stack monorepo: Fastify/Postgres REST API + Vite/React PWA (functional) + Expo/React Native mobile app (mostly scaffolding, in-progress rewrite)",
+    "stack": {
+      "frontend": [
+        "Vite",
+        "React 19",
+        "TanStack Router",
+        "Tailwind CSS"
+      ],
+      "backend": [
+        "Node.js",
+        "Fastify 5",
+        "@fastify/rate-limit",
+        "@fastify/cors",
+        "Zod"
+      ],
+      "database": [
+        "PostgreSQL (raw SQL via node-pg, no ORM)"
+      ],
+      "infra_deploy": [
+        "Docker (multi-stage Dockerfiles for api/web)",
+        "docker-compose",
+        "GitHub Actions CI (lint/typecheck/build only, no test execution)"
+      ],
+      "ai_ml": [
+        "Local heuristic classifier (apps/api/src/ai/heuristic.ts, 632 lines)",
+        "Optional OpenAI-compatible provider (switchable via AI_PROVIDER env)",
+        "Dedupe/summary modules"
+      ],
+      "languages": [
+        "TypeScript",
+        "CSS",
+        "JavaScript",
+        "Dockerfile",
+        "HTML",
+        "PowerShell"
+      ]
+    },
+    "architecture": {
+      "pattern": "Layered monorepo: apps/api (Fastify routes -> services -> raw SQL via pg), apps/web (React PWA with IndexedDB offline store + sync), apps/mobile (Expo Router, mostly stubs), packages/shared (zod schemas/types/api-client shared across apps)",
+      "uses_orm": false,
+      "orm_or_db_layer": "Raw SQL via 'pg' Pool with parameterized queries (query/queryOne helpers in db.ts); schema embedded as an idempotent SQL string with CREATE TABLE IF NOT EXISTS / ALTER TABLE IF NOT EXISTS migrations run at boot (migrate.ts)",
+      "api_design": "REST-ish Fastify routes grouped by domain (reports, sync, dashboard, resources, whatsapp, admin, orgs, external) with zod request validation, custom session-token auth (in-memory Map + role hierarchy viewer/operator/admin), rate limiting (global + stricter login limiter)",
+      "separation_of_concerns": "Reasonably clean: routes call service functions (services/reports.ts, services/ingestion.ts, services/whatsapp.ts) which call db.ts; privacy.ts centralizes role-based field filtering/masking applied consistently across routes",
+      "modularity": "Good use of npm workspaces (api/web/mobile/shared); shared package exposes typed api-client and zod schemas reused by web and mobile",
+      "notable_patterns": [
+        "Pluggable AI provider abstraction (none/openai) with graceful fallback to local heuristic on failure or missing keys",
+        "Pluggable/generic WhatsApp Business API adapter with a free 'mock' mode by default",
+        "Role-based response filtering/masking (phones, addresses, minor-protection) in privacy.ts applied per endpoint",
+        "Offline-first web client: IndexedDB local store + background sync + client-side crypto (crypto.ts) for local encryption",
+        "Idempotent embedded SQL schema run as a lightweight migration on startup instead of a migration framework"
+      ]
+    },
+    "code_organization": {
+      "score": 4,
+      "directory_structure": "Clear monorepo layout (apps/api, apps/web, apps/mobile, packages/shared) with route/service/lib separation inside each app; docs/ folder with architecture, technical and privacy docs in Spanish",
+      "naming_quality": "Consistent, descriptive Spanish/English mixed naming (reports, shelters, ai/heuristic, privacy.ts) that matches domain concepts",
+      "documentation_quality": "Above average for a hackathon project: README, ROADMAP.md, ROADMAP-MOBILE.md, and docs/ARQUITECTURA.md, docs/PRIVACIDAD.md, docs/TECNICO.md; config.ts is heavily commented explaining provider switches",
+      "reasoning": "Well-organized layered monorepo with real separation of routes/services/db and shared types package; loses a point because the mobile app directory is currently just route stubs mixed into the same tree, slightly muddying the current state vs documented roadmap."
+    },
+    "production_readiness": {
+      "score": 3,
+      "has_auth": true,
+      "has_error_handling": true,
+      "has_logging": true,
+      "has_env_config": true,
+      "has_deploy_config": true,
+      "secrets_handling": "Uses env vars with .env.example (no secrets committed); default ADMIN_PASS in docker-compose/.env.example is a weak hardcoded default (PdV2026!) meant to be overridden, which is a real risk if deployed as-is",
+      "security_notes": "Custom scrypt-based password hashing, session tokens via crypto.randomBytes, role-based access control, rate limiting (incl. stricter login limiter), parameterized SQL throughout (no obvious injection), privacy-tier field masking, audit logging of report views/logins. Session store is in-memory (Map) which won't scale across multiple API instances and loses sessions on restart — acceptable for a single-instance MVP but not production-grade for HA deployment.",
+      "scalability_notes": "Single Fastify instance + Postgres pool with conservative defaults (pool max 10); no Redis session backing despite config.ts mentioning it as optional/unused; ingestion loop and WhatsApp are synchronous/interval-based, fine for MVP scale but not built for high concurrency or multi-region resilience needed in a real disaster response at scale.",
+      "reasoning": "The API has real production-conscious touches (Docker multi-stage builds, healthchecks, rate limiting, auth, migrations-on-boot, structured logging via Fastify/pino) but lacks automated tests, uses in-memory session state, and ships a weak default admin password — solid MVP/pilot readiness but not yet hardened for unattended production use in a crisis."
+    },
+    "maturity": {
+      "score": 3,
+      "has_readme": true,
+      "has_tests": false,
+      "has_ci": true,
+      "is_real_or_boilerplate": "Real, substantial custom logic (not generic AI boilerplate) — e.g. 632-line heuristic classifier, dedupe engine, privacy masking, offline sync — but the codebase is mid-pivot: the just-added mobile app is skeletal (many screens are ~20-line placeholder components) and there is zero test coverage despite a 'test' npm script pointing to a non-existent ./test directory.",
+      "reasoning": "19 commits over ~5 days culminating in a 'rework: mobile first' pivot; substantial working web+API but a very fresh, incomplete mobile rewrite and no tests anywhere, so overall maturity is mid-MVP rather than polished."
+    },
+    "viability": {
+      "score": 3,
+      "reasoning": "The web+API stack is a genuinely usable MVP for incident/needs reporting and coordination with real privacy and auth considerations relevant to a sensitive humanitarian context, but the just-started mobile pivot (the stated 'target principal' per README) is largely unbuilt, there are no automated tests to guard against regressions, and default credentials/in-memory sessions need hardening before trusting it with real earthquake victim data."
+    },
+    "key_features": [
+      "Incident/need reporting via PWA and WhatsApp with local + optional LLM triage classification",
+      "Automatic report deduplication/grouping engine",
+      "Role-based (viewer/operator/admin) authenticated dashboard with masked PII and audit logging",
+      "Offline-first PWA with IndexedDB local storage, client-side encryption, and background sync",
+      "Shelter, organization, volunteer, and supply management with map view",
+      "Pluggable external data ingestion from third-party missing-persons APIs",
+      "Mobile app (Expo) scaffolded with role-based navigation (citizen/volunteer/coordinator/organization/admin) but mostly placeholder screens"
+    ],
+    "domain_tags": [
+      "shelter-mapping",
+      "aid-logistics",
+      "volunteer-coordination",
+      "comms-chat",
+      "mapping-geo",
+      "family-reunification"
+    ],
+    "merge_potential": "Strong candidate to merge with other projects covering people-finder/missing-persons datasets (it already has an external_sources ingestion mechanism for missing-persons APIs) or with a more mature mobile-native app, given its solid API/privacy/auth backbone that other teams could adopt as a shared backend.",
+    "red_flags": [
+      "Zero automated tests despite a package.json 'test' script referencing a nonexistent ./test directory; CI only runs lint/typecheck/build, no test execution",
+      "In-memory session store (Map) — sessions are lost on restart/won't work with multiple API replicas, a scalability/reliability risk for real deployment",
+      "Weak default admin credentials (ADMIN_PASS=PdV2026!) baked into docker-compose/.env.example, risky if not rotated before deployment",
+      "Mobile app (per README, the primary target platform) is largely unimplemented placeholder screens as of the latest commit — core feature parity with the web app is not yet there"
+    ]
+  },
+  "signals": {
+    "accessible": true,
+    "stars": 1,
+    "forks": 0,
+    "contributors": 1,
+    "commit_count": 19,
+    "code_loc": 14663,
+    "created_at": "2026-06-27T01:38:04Z",
+    "pushed_at": "2026-07-01T20:39:51Z",
+    "license": null,
+    "languages_bytes": {
+      "TypeScript": 516977,
+      "CSS": 2831,
+      "PowerShell": 1890,
+      "JavaScript": 1120,
+      "Dockerfile": 995,
+      "HTML": 719
+    },
+    "archived": false
+  },
+  "evaluation": {
+    "diffusion": {
+      "score": 2,
+      "ready_to_promote": false,
+      "available_assets": [
+        "clear-value-prop"
+      ],
+      "recommended_angle": "Position as a strong technical MVP / backend architecture story (offline-first PWA, privacy-by-design, AI triage) for a developer/technical audience once a real live demo and screenshots exist — not yet a consumer-facing spotlight piece.",
+      "gaps": [
+        "No working live demo URL (current 'live_url' is a private Google Doc, not a deployed app)",
+        "No demo video",
+        "No screenshots of the actual UI",
+        "No evidence of real users or field testing",
+        "Mobile app (the stated primary target platform) is mostly placeholder screens"
+      ]
+    },
+    "impact_potential": 4,
+    "live_demo_notes": "The 'live_url' provided is a Google Docs link (a Technical Design Document titled \"Puente de Vida_TDD_1.0\"), not a deployed application. WebFetch could only see the Google Docs UI chrome, confirming this is documentation, not a live product. There is no actual public demo URL to test the PWA, API, or dashboard.",
+    "live_demo_status": "no-public-demo",
+    "one_line_pitch": "Puente de Vida: una plataforma offline-first de coordinación de emergencias con IA para triaje y mapas en tiempo real — un MVP técnico sólido que aún necesita una demo pública para mostrar su impacto.",
+    "overall_recommendation": "improve-first",
+    "problem_severity": "high",
+    "product_quality": 3,
+    "real_problem_reasoning": "Coordinating humanitarian aid/rescue reporting when connectivity collapses (a very real scenario in earthquake disasters) is a genuine, high-value problem. The project's design (offline-first PWA with IndexedDB, background sync, deduplication, privacy-tiered RBAC for sensitive data including minors) shows real understanding of field conditions during a disaster. However, the primary target platform per their own roadmap (mobile app) is still mostly placeholder screens, and there's no evidence yet of use by actual response teams or victims, so real-world validation is unclear.",
+    "solves_real_problem": "partial"
+  }
+}

@@ -2,9 +2,9 @@
 
 import { ClerkLoading, Show, SignInButton } from "@clerk/nextjs";
 import { useLocale, useTranslations } from "next-intl";
+import { buttonVariants } from "@/components/ui/button";
 
-const ctaClassName =
-  "inline-flex border border-primary bg-primary px-4 py-3 font-mono text-xs font-bold uppercase tracking-[0.18em] text-primary-foreground transition hover:bg-primary/80";
+const ctaClassName = buttonVariants({ size: "lg" });
 
 export function SubmitProjectCta() {
   const locale = useLocale();

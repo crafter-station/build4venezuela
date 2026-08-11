@@ -1,15 +1,27 @@
 import { getTranslations } from "next-intl/server";
-import { emptyProjectFormState } from "@/lib/projects/schema";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  emptyProjectFormState,
+  projectApplicabilityFromCountryParam,
+} from "@/lib/projects/schema";
 import { ProjectShell } from "../project-shell";
 import { ProjectForm } from "./project-form";
 
 type Props = {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ country?: string | string[] }>;
 };
 
-export default async function SubmitProjectPage({ params }: Props) {
-  const { locale } = await params;
+export default async function SubmitProjectPage({
+  params,
+  searchParams,
+}: Props) {
+  const [{ locale }, query] = await Promise.all([params, searchParams]);
   const t = await getTranslations({ locale, namespace: "SubmitProject" });
+  const applicability = projectApplicabilityFromCountryParam(query.country);
+  const initialState = applicability
+    ? { ...emptyProjectFormState, values: { applicability } }
+    : emptyProjectFormState;
 
   return (
     <ProjectShell>
@@ -19,19 +31,21 @@ export default async function SubmitProjectPage({ params }: Props) {
             <p className="font-mono text-sm uppercase tracking-[0.28em] text-primary">
               {t("eyebrow")}
             </p>
-            <h1 className="mt-5 font-mono text-[clamp(3rem,8vw,7rem)] font-black uppercase leading-[0.85] tracking-[-0.07em]">
+            <h1 className="type-page-title mt-5 font-mono font-black uppercase">
               {t("title")}
             </h1>
             <p className="mt-6 max-w-md font-mono text-base uppercase leading-7 tracking-[0.12em] text-muted-foreground">
               {t("description")}
             </p>
           </div>
-          <div className="border border-border bg-card p-5 sm:p-7">
-            <ProjectForm
-              initialState={emptyProjectFormState}
-              submitLabel={t("submitLabel")}
-            />
-          </div>
+          <Card>
+            <CardContent>
+              <ProjectForm
+                initialState={initialState}
+                submitLabel={t("submitLabel")}
+              />
+            </CardContent>
+          </Card>
         </div>
       </section>
     </ProjectShell>

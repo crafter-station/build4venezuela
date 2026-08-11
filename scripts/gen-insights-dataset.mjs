@@ -11,9 +11,16 @@ import { dirname, resolve } from "node:path";
 
 const ROOT = resolve(import.meta.dirname, "..");
 const SRC = resolve(ROOT, "analysis/insights.json");
+const SECURITY = resolve(ROOT, "analysis/security-audit.json");
 const OUT = resolve(ROOT, "src/lib/insights/dataset.json");
 
 const insights = JSON.parse(readFileSync(SRC, "utf8"));
+let securityBySlug = {};
+try {
+  securityBySlug = JSON.parse(readFileSync(SECURITY, "utf8"));
+} catch {
+  console.warn("no analysis/security-audit.json — nodes ship without security");
+}
 
 const short = (s, n = 160) =>
   !s ? "" : s.length <= n ? s : `${s.slice(0, n - 1).trimEnd()}…`;
@@ -69,6 +76,9 @@ const nodes = insights.map((p) => {
     repoUrl: p.repo_url ?? "",
     liveUrl: p.live_url ?? "",
     videoUrl: p.video_url ?? "",
+    ...(securityBySlug[p.project_slug]
+      ? { security: securityBySlug[p.project_slug] }
+      : {}),
   };
 });
 

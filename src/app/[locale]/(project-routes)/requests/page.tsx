@@ -34,7 +34,7 @@ export default async function RequestsPage({ params }: Props) {
               <p className="font-mono text-sm uppercase tracking-[0.28em] text-accent">
                 {t("eyebrow")}
               </p>
-              <h1 className="mt-4 font-mono text-[clamp(3rem,8vw,7rem)] font-black uppercase leading-[0.85] tracking-[-0.07em]">
+              <h1 className="type-page-title mt-4 font-mono font-black uppercase">
                 {t("title")}
               </h1>
             </div>

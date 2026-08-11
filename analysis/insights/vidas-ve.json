@@ -1,0 +1,167 @@
+{
+  "project_slug": "vidas-ve",
+  "name": "VidasVE",
+  "repo_url": "https://github.com/aldoapicella/vidasve",
+  "live_url": "https://www.vidasve.help/",
+  "video_url": "",
+  "countries": [
+    "Venezuela"
+  ],
+  "db_description": "Un mapa colaborativo para reportar el estado de edificios y zonas afectadas.\nLa idea es que un familiar en el exterior, un vecino o cualquier persona cercana pueda marcar un lugar en el mapa, indicar qué está pasando allí y ayudar a difundir dónde se necesita apoyo.\nAsí, quienes no están cerca pueden consultar el estado del edificio o zona donde viven sus seres queridos, ver si hay reportes recientes y compartir la información para buscar ayuda más rápido.",
+  "lifecycle_status": "ready_to_use",
+  "analysis": {
+    "summary": "VidasVE (MapaRescate) is a production-oriented missing-persons / disaster reporting map for Venezuela: a Vite/React SPA and an Azure Functions TypeScript API backed by Cosmos DB, with real anti-abuse (proof-of-work, rate limiting, Turnstile captcha), owner-token privacy model, moderation queue, geo search, PWA offline outbox, Bicep IaC, and a working GitHub Actions CI/CD pipeline with Azure OIDC deploy.",
+    "project_type": "web app (PWA) with serverless API backend",
+    "stack": {
+      "frontend": [
+        "React 18",
+        "Vite",
+        "TypeScript",
+        "azure-maps-control",
+        "PWA manifest + service worker"
+      ],
+      "backend": [
+        "Azure Functions v4 (TypeScript)",
+        "Node.js"
+      ],
+      "database": [
+        "Azure Cosmos DB (NoSQL API)"
+      ],
+      "infra_deploy": [
+        "Bicep (infra/main.bicep)",
+        "GitHub Actions (ci.yml, deploy-app.yml, deploy-infra.yml)",
+        "Azure Static Web Apps",
+        "Azure OIDC federated deploy",
+        "Application Insights",
+        "Azure Blob Storage (optional media)"
+      ],
+      "ai_ml": [],
+      "languages": [
+        "TypeScript",
+        "CSS",
+        "JavaScript",
+        "Bicep",
+        "HTML"
+      ]
+    },
+    "architecture": {
+      "pattern": "Serverless functions API + SPA frontend, monorepo with npm workspaces (app/, api/, infra/)",
+      "uses_orm": false,
+      "orm_or_db_layer": "Raw Cosmos DB SQL API queries via @azure/cosmos SDK, wrapped in a ReportStore interface with two implementations: CosmosReportStore (prod) and MemoryReportStore (in-memory fallback/tests), selected via env var (COSMOS_ENDPOINT / USE_IN_MEMORY_STORE)",
+      "api_design": "Azure Functions HTTP triggers per resource (reportsCreate, reportGet, reportEvents, reportOwnerEvents, search, places, media, adminModeration, health, config, mapsToken, challenge, externalImage, posts) with shared lib modules for cross-cutting concerns (cors, validation, sanitize, rateLimit, captcha, crypto, priority, geo)",
+      "separation_of_concerns": "Clean separation: lib/ holds pure logic (priority scoring, status derivation, validation, sanitize, geo bbox/polygon) decoupled from functions/ HTTP handlers and store.ts persistence layer; frontend api/client.ts isolates HTTP calls from components",
+      "modularity": "Well-modularized into small single-responsibility files (adminAuth.ts, captcha.ts, rateLimit.ts, crypto.ts, sanitize.ts, deriveStatus.ts, priority.ts, geo.ts) each independently unit-tested",
+      "notable_patterns": [
+        "Interface-based store abstraction allowing swap between Cosmos and in-memory implementations",
+        "HMAC-based admin auth with constant-time comparison (safeEqual) and derived actor hash",
+        "Proof-of-work challenge for mutation anti-abuse plus Cloudflare Turnstile captcha with local text-fallback",
+        "Owner-token privacy model scoped per report, delivered via URL hash fragment (not query param)",
+        "PII encryption key and HMAC secret required as separate env secrets",
+        "Non-destructive/append-only report events with derived status computed from multiple event signals",
+        "Offline outbox pattern in frontend (lib/outbox.ts) with service worker for PWA install",
+        "Bounded/allow-listed geographic bboxes (ALLOWED_BBOXES_JSON) restricting map/search scope to disaster-affected zones"
+      ]
+    },
+    "code_organization": {
+      "score": 4,
+      "directory_structure": "Clear top-level split (app/api/infra/scripts) with consistent internal structure (src/functions, src/lib, tests) mirrored between app and api workspaces",
+      "naming_quality": "Descriptive, consistent naming (reportsCreate, deriveStatus, adminModeration) matching domain concepts",
+      "documentation_quality": "README.md (Spanish) is thorough and operationally specific: env vars, deployment steps, custom domain gotchas, P0 rules list; no inline JSDoc but code is largely self-explanatory",
+      "reasoning": "Consistent, professional layout across three sub-projects with strong naming discipline and an unusually detailed operational README, though it lacks in-code documentation/comments."
+    },
+    "production_readiness": {
+      "score": 4,
+      "has_auth": true,
+      "has_error_handling": true,
+      "has_logging": true,
+      "has_env_config": true,
+      "has_deploy_config": true,
+      "secrets_handling": "Secrets (ADMIN_API_TOKEN, APP_HMAC_SECRET, PII_ENCRYPTION_KEY, COSMOS_KEY, TURNSTILE_SECRET_KEY) read from process.env only; local.settings.example.json and main.parameters.example.json provided as templates (not committed with real secrets); GitHub Actions uses Azure OIDC (federated credential) rather than long-lived publish profiles",
+      "security_notes": "Admin auth uses bearer token compared via HMAC + constant-time safeEqual; anti-abuse stack includes proof-of-work challenge, rate limiting by IP/device/contact/report/geoCell, honeypot field, and Cloudflare Turnstile with a fallback text captcha; contacts are HMAC-hashed and excluded from public responses by default; CORS restricted to ALLOWED_ORIGINS; moderation queue and non-destructive removal flow exist",
+      "scalability_notes": "Cosmos DB with configurable RU/s (free tier default 1000 RU/s) and TTL-based retention; server-side query limits capped (TOP 500, 100 for search) with client-side truncation warning; no server-side clustering for map yet, noted as a known limitation in README",
+      "reasoning": "Real IaC (Bicep) provisioning Cosmos, Function App, Static Web App, App Insights, budget alerts, and optional Blob Storage; working CI (lint, unit tests for both workspaces, Playwright e2e, build) and two deploy workflows; env var docs are extensive and match code; a few operational rough edges (single free-tier Cosmos, no server-side map clustering) but overall close to genuinely deployable for a hackathon-grade MVP."
+    },
+    "maturity": {
+      "score": 4,
+      "has_readme": true,
+      "has_tests": true,
+      "has_ci": true,
+      "is_real_or_boilerplate": "real, non-trivial implementation",
+      "reasoning": "17 API test files plus a frontend offline test and Playwright e2e spec exercise real business logic (priority scoring, status derivation, PoW replay, rate limiting, admin auth, sanitize, CORS, media upload); 49 commits with incremental feature history (not a single AI-dump commit); this is clearly hand-iterated, working code rather than generated scaffolding."
+    },
+    "viability": {
+      "score": 4,
+      "reasoning": "Directly addresses a core earthquake-response need (crowd-sourced missing-person/status reporting with location, geographically scoped to Venezuela disaster zones) with a deployable, moderated, abuse-resistant public system; main risks are operational (single free-tier Cosmos, single contributor, no load testing evidence, no automated content moderation beyond flag counting) rather than code quality."
+    },
+    "key_features": [
+      "Public map-first SPA to report missing/found persons without login",
+      "Owner-token private links (HMAC-derived) for report owners to update status",
+      "Priority scoring and derived status computed from multiple report/event signals",
+      "Full-text search across reports, persons, posts, and locations excluding private contact info",
+      "Moderation queue with abuse flagging and non-destructive removal",
+      "Proof-of-work + rate limiting + honeypot + Turnstile captcha anti-abuse stack",
+      "Geofenced map/search restricted to configurable affected bboxes",
+      "Optional media upload (PNG/JPEG/WebP/PDF up to 5MB) to Azure Blob Storage behind a feature flag",
+      "PWA manifest/offline outbox and CSV import script for verified reports",
+      "IaC (Bicep) with budget alerts and CI/CD via Azure OIDC"
+    ],
+    "domain_tags": [
+      "people-finder",
+      "family-reunification",
+      "mapping-geo",
+      "alerts-notifications"
+    ],
+    "merge_potential": "Strong candidate for a core people-finder/mapping module in a combined platform; its store interface (ReportStore) and moderation/anti-abuse layer could be adapted or referenced by other teams building similar reporting tools, and its geofenced bbox + priority/status derivation logic is reusable for other disaster-reporting use cases.",
+    "red_flags": [
+      "Single contributor and very young repo (created 2026-06-26, ~49 commits) — no evidence of load testing or real-world usage yet",
+      "Relies on a single Azure subscription's Cosmos free tier (1000 RU/s) noted explicitly as a constraint in README, limiting scale without manual upgrade",
+      "No automated/AI content moderation — abuse handling depends on community flags and a manual moderation queue with a shared admin token",
+      "No rate-limit/captcha bypass audit or penetration testing evidence beyond unit tests"
+    ]
+  },
+  "signals": {
+    "accessible": true,
+    "stars": 0,
+    "forks": 0,
+    "contributors": 1,
+    "commit_count": 49,
+    "code_loc": 8798,
+    "created_at": "2026-06-26T16:42:28Z",
+    "pushed_at": "2026-06-30T05:06:32Z",
+    "license": null,
+    "languages_bytes": {
+      "TypeScript": 341735,
+      "CSS": 64092,
+      "JavaScript": 17756,
+      "Bicep": 14707,
+      "HTML": 1105
+    },
+    "archived": false
+  },
+  "evaluation": {
+    "diffusion": {
+      "score": 3,
+      "ready_to_promote": true,
+      "available_assets": [
+        "live-demo",
+        "clear-value-prop"
+      ],
+      "gaps": [
+        "No demo video",
+        "No screenshots on file",
+        "No real reports/data yet to show social proof",
+        "No branding/press kit assets confirmed"
+      ],
+      "recommended_angle": "Technical-credibility angle: 'A production-grade, abuse-resistant crowdsourced missing-persons map for Venezuela earthquake zones — live and open source' aimed at developers, NGOs and donors rather than a viral consumer post (since it has zero real reports so far)."
+    },
+    "impact_potential": 4,
+    "live_demo_notes": "The live URL (https://www.vidasve.help/) returns HTTP 200 and serves a real Vite/React SPA (title 'VidasVE', Spanish meta description about a public map of trapped persons/life signs/last known location in Venezuela). It is not just static HTML - the CSP headers reference a live Azure Functions API (maparescate-api-j5oyin3m4kbek.azurewebsites.net), Azure Maps (atlas.microsoft.com), Cloudflare Turnstile captcha, and Azure Blob Storage, confirming a real deployed backend. I directly verified the backend: GET /api/health returned {\"ok\":true,...}, and GET /api/search returned a valid empty-but-well-formed JSON payload ({\"reports\":[],\"people\":[],\"posts\":[],\"locations\":[]}) — i.e., the API works but currently has zero reports/data (no real usage yet). WebFetch could not render the JS-driven map UI itself (SPA content not visible to the fetch-and-summarize tool), but combined with curl verification this is clearly a working, live full-stack product, just without real user-generated content yet.",
+    "live_demo_status": "working",
+    "one_line_pitch": "VidasVE: un mapa colaborativo en vivo donde cualquier persona puede reportar el estado de un edificio o zona afectada en Venezuela, para que familiares en el exterior sepan dónde se necesita ayuda — ya desplegado y funcionando hoy.",
+    "overall_recommendation": "promote",
+    "problem_severity": "critical",
+    "product_quality": 4,
+    "real_problem_reasoning": "After a Venezuelan earthquake, the most acute need is fast, reliable information about who is safe, who is missing, and which buildings/zones are affected — especially for the Venezuelan diaspora abroad who cannot check on relatives directly. VidasVE addresses this precisely: a public, no-login map for reporting missing/found persons and building/zone status, with owner-token private links for verified updates, geofencing to actual disaster-affected bboxes, priority/status scoring, and a moderation queue with anti-abuse protections (proof-of-work, rate limiting, captcha) to keep the crowdsourced data trustworthy. This is a well-scoped, realistic tool for the stated crisis rather than a generic app retrofitted to the hackathon theme.",
+    "solves_real_problem": "yes"
+  }
+}

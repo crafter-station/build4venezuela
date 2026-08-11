@@ -13,6 +13,7 @@ import {
   YAxis,
   ZAxis,
 } from "recharts";
+import { Card, CardContent } from "@/components/ui/card";
 import { TIER_COLOR } from "@/lib/insights/constants";
 import type { InsightNode } from "@/lib/insights/types";
 
@@ -58,19 +59,23 @@ export function TriageQuadrant({
       </div>
       <ResponsiveContainer width="100%" height={360}>
         <ScatterChart margin={{ top: 16, right: 16, bottom: 28, left: 0 }}>
-          <CartesianGrid stroke="#1f1f1f" />
+          <CartesianGrid stroke="var(--border)" />
           <XAxis
             type="number"
             dataKey="x"
             name={t("productionReadiness")}
             domain={[0.5, 5.5]}
             ticks={[1, 2, 3, 4, 5]}
-            tick={{ fill: "#a6a6a6", fontSize: 11, fontFamily: "monospace" }}
-            stroke="#333"
+            tick={{
+              fill: "var(--muted-foreground)",
+              fontSize: 11,
+              fontFamily: "monospace",
+            }}
+            stroke="var(--border)"
             label={{
               value: t("productionReadinessAxis"),
               position: "bottom",
-              fill: "#a6a6a6",
+              fill: "var(--muted-foreground)",
               fontSize: 10,
               fontFamily: "monospace",
             }}
@@ -81,23 +86,35 @@ export function TriageQuadrant({
             name={t("impact")}
             domain={[0.5, 5.5]}
             ticks={[1, 2, 3, 4, 5]}
-            tick={{ fill: "#a6a6a6", fontSize: 11, fontFamily: "monospace" }}
-            stroke="#333"
+            tick={{
+              fill: "var(--muted-foreground)",
+              fontSize: 11,
+              fontFamily: "monospace",
+            }}
+            stroke="var(--border)"
             width={40}
             label={{
               value: t("impactAxis"),
               angle: -90,
               position: "insideLeft",
-              fill: "#a6a6a6",
+              fill: "var(--muted-foreground)",
               fontSize: 10,
               fontFamily: "monospace",
             }}
           />
           <ZAxis type="number" dataKey="z" range={[40, 600]} />
-          <ReferenceLine x={3.5} stroke="#444" strokeDasharray="3 3" />
-          <ReferenceLine y={3.5} stroke="#444" strokeDasharray="3 3" />
+          <ReferenceLine
+            x={3.5}
+            stroke="var(--line-strong)"
+            strokeDasharray="3 3"
+          />
+          <ReferenceLine
+            y={3.5}
+            stroke="var(--line-strong)"
+            strokeDasharray="3 3"
+          />
           <Tooltip
-            cursor={{ strokeDasharray: "3 3", stroke: "#444" }}
+            cursor={{ strokeDasharray: "3 3", stroke: "var(--line-strong)" }}
             content={
               <QuadrantTooltip tierLabel={(tier) => tShared(`tiers.${tier}`)} />
             }
@@ -118,7 +135,7 @@ export function TriageQuadrant({
                   key={d.slug}
                   fill={TIER_COLOR[d.tier]}
                   fillOpacity={dim ? 0.12 : hot ? 1 : 0.78}
-                  stroke={hot ? "#fff" : TIER_COLOR[d.tier]}
+                  stroke={hot ? "var(--foreground)" : TIER_COLOR[d.tier]}
                   strokeOpacity={dim ? 0.2 : 1}
                   strokeWidth={hot ? 2 : 1}
                   style={{ cursor: "pointer" }}
@@ -147,18 +164,20 @@ function QuadrantTooltip({
   if (!active || !payload?.length) return null;
   const n = payload[0].payload.node;
   return (
-    <div className="border border-border bg-card px-3 py-2 font-mono text-xs">
-      <div className="font-bold" style={{ color: TIER_COLOR[n.tier] }}>
-        {n.name}
-      </div>
-      <div className="text-muted-foreground">
-        {tierLabel(n.tier)} · {n.signals.stars}★ · {n.severity}
-      </div>
-      <div className="mt-1 text-muted-foreground">
-        {t("impact", { score: n.scores.impact })} ·{" "}
-        {t("production", { score: n.scores.production })} ·{" "}
-        {t("viability", { score: n.scores.viability })}
-      </div>
-    </div>
+    <Card size="sm" className="py-3 font-mono text-xs">
+      <CardContent className="flex flex-col gap-1 px-3">
+        <div className="font-bold" style={{ color: TIER_COLOR[n.tier] }}>
+          {n.name}
+        </div>
+        <div className="text-muted-foreground">
+          {tierLabel(n.tier)} · {n.signals.stars}★ · {n.severity}
+        </div>
+        <div className="text-muted-foreground">
+          {t("impact", { score: n.scores.impact })} ·{" "}
+          {t("production", { score: n.scores.production })} ·{" "}
+          {t("viability", { score: n.scores.viability })}
+        </div>
+      </CardContent>
+    </Card>
   );
 }

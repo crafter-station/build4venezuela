@@ -41,14 +41,8 @@ function createDb(): DB {
 
   const isProduction = process.env.NODE_ENV === "production";
 
-  // Supabase's transaction pooler (port 6543) requires `prepare: false`.
-  //
-  // Serverless timeout discipline: the pooler silently drops idle server-side
-  // connections, so we must recycle ours proactively or a stale socket will
-  // accept a query that never completes and the request hangs until Vercel's
-  // 300s wall (504). `idle_timeout`/`max_lifetime` recycle connections,
-  // `statement_timeout` bounds any single query server-side, and `max > 1`
-  // keeps one stuck connection from stalling every concurrent request.
+  // Keep serverless connections short-lived and bound every query. Neon can
+  // serve pooled URLs, so prepared statements stay disabled for compatibility.
   const client =
     globalForDb.client ??
     postgres(env.DATABASE_URL, {

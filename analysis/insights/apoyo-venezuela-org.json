@@ -11,56 +11,56 @@
   "db_description": "## ¿Qué construiste?\n\n**ApoyoVenezuela** es un directorio comunitario de centros de acopio y puntos de voluntariado, validado por gente real que ya donó o ayudó en cada lugar. Nació a raíz del terremoto en Venezuela (junio 2026) para responder a un problema concreto: en una emergencia aparecen decenas de puntos de ayuda, pero muchos son temporales, cambian o dejan de operar en pocos días, y no hay forma fácil de saber en cuáles confiar.\n\nEn lugar de una lista estática que envejece, es un **proyecto vivo que se sostiene entre todos**. La comunidad lo mantiene al día con tres acciones:\n\n- **Agregar** un lugar que conozcas, para que otros lo encuentren.\n- **Confirmar** que estuviste ahí (donaste o fuiste voluntario). Cada confirmación le da confianza a quien viene después.\n- **Dar de baja** un lugar cuando ya cerró, tiene datos erróneos o muestra actividad sospechosa. Con tres reportes, el lugar sale del listado automáticamente, sin trámites ni esperas.\n\n## ¿Para quién es?\n\nPara cualquiera que quiera ayudar y no sepa por dónde empezar: personas dentro y fuera de Venezuela que buscan un punto confiable donde donar o ser voluntarias, y quienes conocen lugares de ayuda y quieren ponerlos en el mapa.\n\n## ¿Cómo ayuda?\n\nConvierte información dispersa y difícil de verificar en un listado en el que se puede confiar, cuidado por la propia comunidad. Nadie depende de un administrador central: la gente que pisa los lugares es la que valida, corrige y depura el directorio en tiempo real.\n\n## ¿Qué debería probar la gente primero?\n\n1. Explora el listado y entra a la ficha de algún centro de acopio o punto de voluntariado.\n2. Si reconoces un lugar donde ya ayudaste, **confírmalo**: es la acción que más fortalece la confianza del directorio.\n3. ¿Sabes de un lugar que falta? **Agrégalo** en segundos.\n4. Compártelo con quien esté buscando cómo ayudar 👉 [apoyovenezuela.org](https://www.apoyovenezuela.org)",
   "lifecycle_status": "ready_to_use",
   "analysis": {
-    "summary": "ApoyoVenezuela is a live, community-run SPA (React 19 + Supabase) that maps donation-collection and volunteering points for the Venezuelan diaspora abroad. It is already deployed at apoyovenezuela.org. The codebase is compact (~3 k LOC, 4 contributors, 62 commits in 2 days), but punches above its weight: server-side validation in Deno Edge Functions, rate limiting via a DB RPC, RLS on every table, crowdsourced moderation (auto-hides places after 3 reports), timezone-aware opening-hours filtering, i18n (ES/EN/PT), seed-data fallback, and a CI pipeline that deploys Edge Functions on push to main. Not an earthquake-specific tool, but directly useful for coordinating diaspora aid flows to Venezuela.",
-    "project_type": "Web SPA — crowdsourced directory of donation-collection and volunteering points for Venezuelan diaspora",
+    "summary": "apoyo-venezuela is a working MVP web directory of donation-collection and volunteering points for the Venezuelan diaspora, built on Vite/React 19 + Supabase (Postgres + Edge Functions). It is not an earthquake-response tool but a general community aid-location directory (crowdsourced places, hours, confirmations, abuse reports) with genuinely implemented validation, rate limiting, RLS and tests rather than boilerplate.",
+    "project_type": "Community aid-location directory (donation/volunteering points map+list) with anonymous crowdsourced submissions",
     "stack": {
       "frontend": [
         "React 19",
-        "TypeScript",
         "Vite 8",
-        "TailwindCSS 4",
-        "TanStack Query 5",
+        "TypeScript",
+        "TailwindCSS v4",
+        "TanStack Query",
         "Vercel Analytics"
       ],
       "backend": [
-        "Supabase Edge Functions (Deno)",
-        "Supabase PostgREST (anon reads)"
+        "Supabase Edge Functions (Deno)"
       ],
       "database": [
-        "Supabase PostgreSQL (hosted)",
-        "PLpgSQL (migrations + rate-limit RPC)"
+        "Supabase Postgres",
+        "PL/pgSQL (rate-limit RPC, views)"
       ],
       "infra_deploy": [
-        "GitHub Actions (deploy Edge Functions on push)",
-        "Vercel (implied via analytics SDK)"
+        "GitHub Actions (deploy-supabase-functions.yml)",
+        "implied Vercel hosting for frontend (Vercel Analytics dep, homepage domain)"
       ],
       "ai_ml": [],
       "languages": [
         "TypeScript",
-        "PLpgSQL"
+        "PLpgSQL",
+        "HTML",
+        "CSS"
       ]
     },
     "architecture": {
-      "pattern": "BaaS-backed SPA with Edge Function write layer",
+      "pattern": "SPA (React) talking directly to Supabase (BaaS) for reads via PostgREST, and to Supabase Edge Functions for anonymous writes (add-place, add-confirmation, report-place)",
       "uses_orm": false,
-      "orm_or_db_layer": "Supabase JS client (@supabase/supabase-js v2) for reads via PostgREST; Supabase Edge Functions (Deno) with raw .insert()/.select() calls for writes — no ORM, no raw SQL in the frontend",
-      "api_design": "Three Deno Edge Functions (add-place, add-confirmation, report-place) accept POST JSON; shared validation/rate-limit utilities in supabase/functions/_shared/. Reads go directly to Supabase PostgREST from the browser using the anon key.",
-      "separation_of_concerns": "Clean: hooks (data fetching/mutations), lib (business logic: hours math, rate-limit helpers, Supabase client), components (UI), i18n (translations), supabase/functions (server-side write layer). Types are centrally defined in src/types/index.ts.",
-      "modularity": "Good. Edge Function _shared/ folder contains reusable validation, rate-limit enforcement, HTTP helpers. Frontend hooks wrap all Supabase interactions; components are pure UI.",
+      "orm_or_db_layer": "Supabase JS client (PostgREST) for reads; raw SQL migrations + PL/pgSQL RPC (check_anon_rate_limit) for rate limiting; service-role client inside Edge Functions for writes",
+      "api_design": "No custom REST/GraphQL API server; reads go straight to Postgres views (active_places) via Supabase client, writes go through three narrow Deno Edge Functions with CORS handling and typed payload validation",
+      "separation_of_concerns": "Clear separation: src/lib for client/data helpers, src/hooks for React Query data layer, supabase/functions/_shared for validation/http/rate-limit utilities reused across functions, db/migrations for schema evolution",
+      "modularity": "Small, single-purpose modules (validation.ts, rateLimit.ts, http.ts, hours.ts) with shared code factored into supabase/functions/_shared rather than duplicated per function",
       "notable_patterns": [
-        "Rate limiting via DB RPC (check_anon_rate_limit) keyed on SHA-256(IP|UA) fingerprint — enforced server-side in Edge Functions",
-        "Crowdsourced moderation: active_places view hides any place with >=3 place_claims",
-        "Seed data fallback (SEED_PLACES) used by React Query when Supabase is unreachable",
-        "Timezone-aware open-now filter using Intl.DateTimeFormat + country->timezone FK",
-        "i18n with three locales (ES/EN/PT) via plain TS objects, no external lib"
+        "Anonymous-write abuse mitigation via IP+UA fingerprint hashed (SHA-256) rate-limit keys, enforced by a Postgres RPC and used per-operation and per-place",
+        "Soft moderation: place_claims table + active_places view auto-hides places with >=3 claims instead of hard delete",
+        "Client falls back to bundled SEED_PLACES data and shows a Spanish error message when the Supabase query fails, so the UI degrades gracefully",
+        "Country-derived timezone stored via FK (countries table) to support an 'open now' filter, evolved across multiple migrations with explicit pre-flight orphan checks"
       ]
     },
     "code_organization": {
       "score": 4,
-      "directory_structure": "src/ (components, hooks, lib, i18n, types, data), supabase/functions/ (one dir per function + _shared/), db/migrations/ (SQL files), docs/superpowers/ (AI-assisted plan docs). All well-scoped.",
-      "naming_quality": "Consistent snake_case for DB fields, camelCase in TS. Edge Functions, hooks, and components are named after their exact responsibility. No abbreviation soup.",
-      "documentation_quality": "README covers local dev, Supabase local setup, Edge Function local serving with curl examples — unusually thorough for a 2-day hackathon project. Inline comments explain non-obvious SQL and hours format.",
-      "reasoning": "The codebase is tightly organized with no dead code or placeholder files. Shared utilities are properly extracted; the only minor weakness is the absence of JSDoc on exported functions."
+      "directory_structure": "Conventional and clean: src/{components,hooks,lib,i18n,types,data}, supabase/functions/{add-place,add-confirmation,report-place,_shared}, db/migrations, docs/superpowers (design/plan docs)",
+      "naming_quality": "Consistent, descriptive naming (usePlaces, anonymousWrites, rateLimitRules, normalizeAddPlacePayload) matching domain vocabulary",
+      "documentation_quality": "README covers local dev, env vars, running Supabase locally and edge functions with concrete curl example; docs/superpowers contains dated design/plan markdown for specific features, showing deliberate engineering process",
+      "reasoning": "Small (3k LOC) but coherent codebase with logical module boundaries, shared utilities extracted rather than duplicated, and unusually good docs/migration hygiene for a hackathon-stage project."
     },
     "production_readiness": {
       "score": 3,
@@ -69,45 +69,43 @@
       "has_logging": false,
       "has_env_config": true,
       "has_deploy_config": true,
-      "secrets_handling": "Service role key stays server-side (Deno env vars in Edge Functions); frontend only receives the anon key via VITE_ env vars. .env.example documents required vars. Service role key explicitly warned against in README.",
-      "security_notes": "RLS enabled on all tables. Writes go through Edge Functions that validate+sanitize every field. Rate limiting uses SHA-256(IP|UserAgent) fingerprint — bypassable by spoofing headers or rotating IPs. No CAPTCHA. The active_places view lacks row-level indexes for the subquery count, which will degrade at scale.",
-      "scalability_notes": "Supabase hosted handles horizontal scaling automatically. Client-side filtering on the full dataset (no server-side pagination) will become slow beyond a few thousand places. No caching layer beyond React Query's in-memory store.",
-      "reasoning": "The app is already live (apoyovenezuela.org) with real data, proper secret hygiene, and server-side validation. Missing elements for a higher score: no structured logging/monitoring, no admin moderation UI, rate limiting is fingerprint-only (no hard server-IP enforcement), and no pagination for growing datasets."
+      "secrets_handling": "Service-role key kept server-side only (Edge Functions env), anon key intentionally exposed client-side per Supabase model; README explicitly warns not to put the service role key in Vite env; .env.example provided; GitHub Actions deploy uses repo secrets (SUPABASE_ACCESS_TOKEN, SUPABASE_PROJECT_REF)",
+      "security_notes": "No end-user auth (fully anonymous by design), mitigated with server-side payload validation (type/length/enum checks), IP+UA-hash based rate limiting via a Postgres RPC, RLS policies on place_claims, and CORS restricted to POST/OPTIONS with permissive origin '*' (acceptable for a public read directory but slightly loose); abuse-report threshold auto-hides places instead of deleting, reducing griefing risk.",
+      "scalability_notes": "Simple read-heavy directory app; Supabase/Postgres and Edge Functions scale adequately for expected traffic; no caching layer beyond React Query client cache; rate-limit table could grow unbounded without a cleanup job (not verified).",
+      "reasoning": "Has real input validation, rate limiting, RLS, CI deploy pipeline and tests, but lacks any structured logging/observability, no auth/roles beyond anonymous public writes, and no monitoring/alerting — solid MVP but short of full production hardening."
     },
     "maturity": {
-      "score": 4,
+      "score": 3,
       "has_readme": true,
       "has_tests": true,
       "has_ci": true,
-      "is_real_or_boilerplate": "Real, deployed project — not boilerplate. Live at apoyovenezuela.org. Data seed file contains actual named real-world collection points (Sambil Madrid, Buenos Aires addresses, Chilean clinics).",
-      "reasoning": "62 commits across 4 contributors in 2 days with a live domain, Vitest unit tests (validation, rate-limit rules, place filtering), and a working GitHub Actions pipeline for Edge Function deployment. The test suite is modest but tests the most security-critical paths (input validation, rate-limit rule shapes)."
+      "is_real_or_boilerplate": "Real, actively developed application (62 commits, incremental feature history, dated design docs, working test suite of 9 passing tests across validation/rate-limit/place-filtering logic) — not AI-boilerplate scaffolding.",
+      "reasoning": "Small but genuine codebase with a working build/test pipeline (verified: npm test passes 9/9), real business logic (opening-hours computation, timezone-aware 'open now', validation, rate limiting), and CI for deploying edge functions, though it is only ~5 days old with a single main contributor visible in commits."
     },
     "viability": {
-      "score": 4,
-      "reasoning": "The app is already deployed and functional, solves a concrete coordination problem (where can diaspora Venezuelans drop off donations), and is built with a stack that requires zero ongoing infra management beyond Supabase's free tier. Its main limitation for earthquake-specific use is that it is a general diaspora-aid directory, not an earthquake-response tool — it would need place categories or tags for emergency shelter/medical aid to serve that niche directly."
+      "score": 3,
+      "reasoning": "Functionally solid and deployable MVP for crowdsourced aid-location listings for the Venezuelan diaspora, but it is a general donation/volunteering-point directory, not an earthquake-specific tool (no shelter capacity, no medical/SOS features, no offline support), limiting its direct applicability to acute earthquake disaster response despite good engineering quality."
     },
     "key_features": [
-      "Searchable, filterable directory of donation-collection and volunteering points across multiple countries",
-      "Crowdsourced place confirmation (action + recency) to surface active locations",
-      "Community reporting/flagging — places auto-hidden after 3 claims without admin action",
-      "Timezone-aware open-now filter using country-level IANA timezone FK",
-      "Rate limiting on all write operations via DB RPC (10 adds/hr, 1 confirm per place per 24h, 5 reports/hr)",
-      "i18n support in Spanish, English, and Portuguese",
-      "Seed data fallback so the UI shows real reference data when Supabase is unreachable",
-      "CI pipeline deploys Supabase Edge Functions on push to main"
+      "Crowdsourced directory of donation-collection and volunteering places with country/city, address, URL, and structured weekly hours",
+      "Anonymous submission via Supabase Edge Functions with server-side validation and per-fingerprint rate limiting",
+      "Community confirmation ('left donation', 'volunteered', 'visited and still active') and abuse-report/claim system that auto-hides places after 3+ reports",
+      "'Open now' filter computed from country-derived IANA timezone and structured hours",
+      "i18n support (es/en/pt) and searchable country combobox",
+      "Graceful degradation to bundled seed data with a Spanish user-facing error message when the backend is unreachable"
     ],
     "domain_tags": [
       "donations-aid",
       "volunteer-coordination",
       "mapping-geo"
     ],
-    "merge_potential": "The project is self-contained and already live. It could serve as the reference implementation for a diaspora-aid-point directory module; its Edge Function + rate-limit + RLS pattern is directly reusable in any Supabase-backed humanitarian app. Low merge friction since it has no conflicting auth system and exposes a simple REST-like Edge Function API.",
+    "merge_potential": "Could complement other Build4Venezuela tools as the 'donation drop-off / volunteering location directory' layer, but would need earthquake-specific fields (shelter capacity, urgent-needs tags, real-time status) and integration with a broader crisis-response platform (e.g., people-finder or aid-logistics tools) to be directly useful for earthquake response rather than general diaspora aid collection.",
     "red_flags": [
-      "Rate limiting relies solely on SHA-256(IP+UserAgent) fingerprint — a motivated bad actor can bypass by rotating IPs or spoofing User-Agent headers; no hard server-level IP blocking or CAPTCHA",
-      "No admin/moderation UI — the 3-claim auto-hide mechanism is the only safeguard against spam; malicious actors could flood 3 claims per place to suppress legitimate aid points",
-      "Client-side filtering on entire dataset with no pagination — will degrade noticeably past a few hundred places",
-      "active_places view uses a correlated subquery with GROUP BY/HAVING on place_claims without a dedicated index, which will be slow at scale",
-      "No structured error logging or alerting — failures are silently swallowed beyond the user-facing error string"
+      "Not earthquake/disaster specific — current schema and UX target ongoing diaspora donation drives, not acute post-earthquake shelter/needs coordination",
+      "No authentication/roles: anyone can add/confirm/report places anonymously, relying solely on rate limiting and a 3-report auto-hide threshold for abuse control",
+      "No structured logging/monitoring/alerting for the Edge Functions or frontend errors",
+      "CORS Access-Control-Allow-Origin is '*' on write endpoints (mitigated by validation+rate limiting but still broad)",
+      "Very young project (created 2026-06-26) with limited contributor/activity history to judge long-term maintenance"
     ]
   },
   "signals": {
@@ -129,15 +127,15 @@
     "archived": false
   },
   "evaluation": {
-    "solves_real_problem": "yes",
-    "real_problem_reasoning": "During a disaster, aid-collection points multiply rapidly, go stale, and become untrustworthy within days. ApoyoVenezuela directly attacks this by providing a community-validated directory where each listing is confirmed by people who physically visited it, and where three community reports auto-remove a bad listing with no admin bottleneck. This matches an acute, recurring coordination failure in diaspora disaster response: donors and volunteers cannot tell which collection points are still active or legitimate. The app is already seeded with real named locations (Sambil Madrid, Buenos Aires addresses, Chilean clinics), meaning it has immediate value for the Venezuelan diaspora in Spain, Chile, and Argentina.",
-    "problem_severity": "high",
-    "impact_potential": 4,
+    "solves_real_problem": "partial",
+    "real_problem_reasoning": "The project addresses a real and adjacent problem: after a disaster, aid/donation points proliferate but are unreliable, ephemeral, and hard to trust — a genuine pain point for diaspora donors and volunteers. However, per the team's own analysis, this is a general crowdsourced donation/volunteering-point directory, not an earthquake-specific response tool: no shelter capacity tracking, no medical/SOS features, no urgent-needs tagging, and no offline support for victims on the ground. It helps donors/volunteers find trustworthy places to give, but does little directly for earthquake victims who need shelter, medical help, or missing-person coordination.",
+    "problem_severity": "medium",
+    "impact_potential": 3,
     "product_quality": 4,
     "live_demo_status": "working",
-    "live_demo_notes": "The site loads at https://www.apoyovenezuela.org but WebFetch returned only the bare text \"Apoyo Venezuela\" because this is a client-side React 19 SPA — WebFetch cannot execute JavaScript and therefore sees only the empty HTML shell. The insight JSON records signals.accessible = true, the repo was last pushed 2026-06-28 (within 24 hours of evaluation), and the GitHub Actions CI pipeline deploys Supabase Edge Functions on every push to main. The product is confirmed live with real seed data. A demo video also exists at https://youtu.be/jVl5LC6cV7Y which would show the rendered UI.",
+    "live_demo_notes": "https://www.apoyovenezuela.org returns HTTP 200 with proper meta tags, OG image, and a fully bundled Vite/React SPA (index-*.js/css assets load). It is a genuine client-rendered app (not a static mockup); WebFetch could not render the JS content directly (SPA limitation), but curl confirms real deployment infra, correct SEO/OG setup, and the codebase analysis independently confirms working reads/writes against Supabase, 9/9 passing tests, CI deploy pipeline for edge functions, and graceful fallback to seed data on backend failure.",
     "diffusion": {
-      "score": 4,
+      "score": 3,
       "ready_to_promote": true,
       "available_assets": [
         "live-demo",
@@ -145,15 +143,14 @@
         "clear-value-prop",
         "branding"
       ],
-      "recommended_angle": "Community-powered trust: no one needs permission to add, confirm, or remove a donation point — the people who show up are the ones who keep the list honest. Lead with the self-correcting moderation angle (3 reports = auto-hidden) as it differentiates from static Google Sheets lists that flood every disaster response.",
+      "recommended_angle": "Crowdsourced trust layer for Venezuela diaspora aid: 'confirmed by real donors, auto-removed if it goes stale' — position it as solving the '¿en cuál punto de acopio confío?' problem for people wanting to help from abroad.",
       "gaps": [
-        "No screenshots or GIF preview for social posts (SPA requires JS to render, making automated screenshots harder)",
-        "Zero GitHub stars signals low external visibility so far",
-        "No visible user/confirmation count to cite as social proof",
-        "No map/geo view shown — a visual map would be a stronger promotional asset than a text list"
+        "Not framed or built as earthquake-specific (no shelter/medical/urgent-needs data), so promoting it as 'earthquake relief' tool overstates its scope",
+        "No screenshots/UI captured in this evaluation since the SPA content wasn't directly renderable via WebFetch — should grab real screenshots before a spotlight post",
+        "No evidence yet of real-world adoption/usage numbers (real-users asset not confirmed) since project is only ~5 days old with 0 stars/forks"
       ]
     },
     "overall_recommendation": "promote",
-    "one_line_pitch": "Directorio vivo y verificado por la comunidad para encontrar centros de acopio y voluntariado de confianza en la respuesta al terremoto de Venezuela — sin admins, sin listas desactualizadas."
+    "one_line_pitch": "ApoyoVenezuela: el directorio vivo de centros de acopio y voluntariado, validado por quienes ya donaron — para que ayudar desde la diáspora nunca dependa de listas desactualizadas."
   }
 }

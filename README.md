@@ -1,6 +1,6 @@
-# Build4Venezuela
+# Build4Latam
 
-Build4Venezuela is a multilingual Next.js app for the Build4Venezuela community. It includes the public landing page, project submissions, project browsing, voting, comments, spam checks, and community redirects.
+Build4Latam is a multilingual platform for emergency-response tools and builder communities across Latin America. It grew from Build4Venezuela and includes country hubs, project submissions, browsing, voting, comments, spam checks, and community redirects.
 
 ## Tech Stack
 
@@ -10,7 +10,7 @@ Build4Venezuela is a multilingual Next.js app for the Build4Venezuela community.
 - Tailwind CSS v4
 - next-intl for localization
 - Clerk for authentication
-- Supabase for projects, votes, and comments
+- Neon Postgres with Drizzle ORM for durable data
 - AI SDK Gateway for submission/comment spam checks
 - Biome for linting and formatting
 
@@ -33,9 +33,7 @@ Fill in the required variables:
 ```bash
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
 CLERK_SECRET_KEY=
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
-SUPABASE_SERVICE_ROLE_KEY=
+DATABASE_URL=
 AI_GATEWAY_API_KEY=
 ```
 
@@ -58,12 +56,13 @@ Open `http://localhost:3000`.
 
 ## Main Routes
 
-- `/` redirects through locale routing to the localized landing page.
+- `/` is the Build4Latam country selector.
+- `/ve` and `/co` are the Venezuela and Colombia tool hubs.
 - `/:locale` serves the localized landing page.
-- `/projects` lists published community projects.
-- `/submit` lets signed-in users submit projects.
-- `/p/:slug` shows a project detail page with voting and comments.
-- `/p/:slug/edit` lets the project owner edit their submission.
+- `/:locale/projects` lists published community projects.
+- `/:locale/submit` lets signed-in users submit projects.
+- `/:locale/p/:slug` shows a project detail page with voting and comments.
+- `/:locale/p/:slug/edit` lets the project owner edit their submission.
 
 Community redirects are configured in `next.config.ts`:
 
@@ -86,13 +85,12 @@ Locale routing is configured in `src/i18n/`.
 
 ## Data
 
-Supabase schema files live in `supabase/`:
+The typed schema is `src/db/schema.ts`. Versioned Neon migrations live in `drizzle/`:
 
-- `supabase/projects.sql`
-- `supabase/migrations/20260626000000_create_projects.sql`
-- `supabase/migrations/20260626010000_create_project_comments.sql`
+- `bun run db:generate -- --name=<migration-name>` generates a migration.
+- `bun run db:migrate` applies pending migrations to `DATABASE_URL`.
 
-The project store uses Supabase when configured and falls back to `.data/projects.json` locally if Supabase calls fail.
+The stores use Drizzle when `DATABASE_URL` is configured and local `.data/*.json` fixtures in development when it is absent. `supabase/` is retained only as historical source material from the pre-Neon deployment.
 
 ## Project Features
 
@@ -100,7 +98,7 @@ The project store uses Supabase when configured and falls back to `.data/project
 - Project validation with Zod.
 - Project and comment spam checks through AI Gateway.
 - Project voting and comment voting.
-- Realtime-friendly project/comment query helpers with TanStack Query.
+- Optimistic mutations and visibility-aware polling with TanStack Query.
 - Markdown rendering for project descriptions.
 - Hosted video embeds for YouTube, Vimeo, Loom, and Screen Studio links.
 

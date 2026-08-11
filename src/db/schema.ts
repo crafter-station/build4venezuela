@@ -15,12 +15,8 @@ import {
 /**
  * Drizzle schema for the tables the app reads/writes directly.
  *
- * Source of truth for the database remains the raw SQL in `supabase/migrations`
- * — triggers, functions, RLS policies, the realtime event-queue tables, and
- * `gen_random_uuid()` defaults live there and are NOT modeled here. Treat this
- * file as the typed query surface; keep it in sync by hand (or `drizzle-kit
- * pull`) when migrations change. Do NOT `drizzle-kit push` against this DB — it
- * would not see the trigger/RLS objects and could drift destructively.
+ * This typed schema is the source of truth for Neon. Generate and review a
+ * versioned Drizzle migration for every schema change; never use `push`.
  */
 
 export const projects = pgTable(
@@ -31,10 +27,12 @@ export const projects = pgTable(
     name: text("name").notNull(),
     status: text("status").notNull().default("published"),
     lifecycleStatus: text("lifecycle_status").notNull().default("ready_to_use"),
+    applicability: text("applicability").notNull().default("latam"),
     projectUrl: text("project_url").notNull(),
     countries: text("countries").array().notNull().default(sql`'{}'`),
     participantName: text("participant_name").notNull(),
     videoUrl: text("video_url").notNull().default(""),
+    imageUrl: text("image_url").notNull().default(""),
     contributeInUrl: text("contribute_in_url").notNull().default(""),
     descriptionMarkdown: text("description_markdown").notNull(),
     ownerUserId: text("owner_user_id").notNull(),
@@ -95,6 +93,66 @@ export const projectCommentVotes = pgTable(
     commentId: uuid("comment_id")
       .notNull()
       .references(() => projectComments.id, { onDelete: "cascade" }),
+    voterId: text("voter_id").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .default(sql`now()`),
+  },
+  (table) => [primaryKey({ columns: [table.commentId, table.voterId] })],
+);
+
+export const solutionRequests = pgTable("solution_requests", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  descriptionMarkdown: text("description_markdown").notNull().default(""),
+  authorUserId: text("author_user_id").notNull(),
+  authorName: text("author_name").notNull(),
+  authorImageUrl: text("author_image_url").notNull().default(""),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .default(sql`now()`),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .default(sql`now()`),
+});
+
+export const solutionRequestVotes = pgTable(
+  "solution_request_votes",
+  {
+    requestId: uuid("request_id")
+      .notNull()
+      .references(() => solutionRequests.id, { onDelete: "cascade" }),
+    voterId: text("voter_id").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .default(sql`now()`),
+  },
+  (table) => [primaryKey({ columns: [table.requestId, table.voterId] })],
+);
+
+export const solutionRequestComments = pgTable("solution_request_comments", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  requestId: uuid("request_id")
+    .notNull()
+    .references(() => solutionRequests.id, { onDelete: "cascade" }),
+  authorUserId: text("author_user_id").notNull(),
+  authorName: text("author_name").notNull(),
+  authorImageUrl: text("author_image_url").notNull().default(""),
+  body: text("body").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .default(sql`now()`),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .default(sql`now()`),
+});
+
+export const solutionRequestCommentVotes = pgTable(
+  "solution_request_comment_votes",
+  {
+    commentId: uuid("comment_id")
+      .notNull()
+      .references(() => solutionRequestComments.id, { onDelete: "cascade" }),
     voterId: text("voter_id").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
@@ -197,5 +255,75 @@ export const projectInsights = pgTable(
       table.overallRecommendation,
     ),
     index("project_insights_viability_idx").on(table.viabilityScore.desc()),
+  ],
+);
+
+export const builderProfiles = pgTable(
+  "builder_profiles",
+  {
+    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+    userId: text("user_id").notNull().unique(),
+    name: text("name").notNull(),
+    role: text("role").notNull(),
+    customRole: text("custom_role").notNull().default(""),
+    description: text("description").notNull(),
+    linkedinUrl: text("linkedin_url").notNull().default(""),
+    portfolioUrl: text("portfolio_url").notNull().default(""),
+    availabilityVisible: boolean("availability_visible")
+      .notNull()
+      .default(false),
+    availability: jsonb("availability")
+      .$type<Record<string, number>>()
+      .notNull()
+      .default(sql`'{}'::jsonb`),
+    weeklyHours: integer("weekly_hours").notNull().default(0),
+    status: text("status").notNull().default("available"),
+    directoryVisible: boolean("directory_visible").notNull().default(true),
+    spamScore: numeric("spam_score", { mode: "number" }),
+    spamReason: text("spam_reason"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .default(sql`now()`),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .default(sql`now()`),
+  },
+  (table) => [
+    index("builder_profiles_role_idx").on(table.role),
+    index("builder_profiles_status_idx").on(table.status),
+    index("builder_profiles_weekly_hours_idx").on(table.weeklyHours),
+  ],
+);
+
+export const builderContactRequests = pgTable(
+  "builder_contact_requests",
+  {
+    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+    builderId: uuid("builder_id")
+      .notNull()
+      .references(() => builderProfiles.id, { onDelete: "cascade" }),
+    requesterUserId: text("requester_user_id").notNull(),
+    requesterName: text("requester_name").notNull().default(""),
+    requesterImageUrl: text("requester_image_url").notNull().default(""),
+    projectName: text("project_name").notNull(),
+    coverLetter: text("cover_letter").notNull(),
+    contactEmail: text("contact_email").notNull().default(""),
+    contactPhone: text("contact_phone").notNull().default(""),
+    status: text("status").notNull().default("pending"),
+    spamScore: numeric("spam_score", { mode: "number" }),
+    spamReason: text("spam_reason"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .default(sql`now()`),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .default(sql`now()`),
+  },
+  (table) => [
+    index("builder_contact_requests_builder_id_idx").on(table.builderId),
+    index("builder_contact_requests_requester_user_id_idx").on(
+      table.requesterUserId,
+    ),
+    index("builder_contact_requests_status_idx").on(table.status),
   ],
 );

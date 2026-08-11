@@ -1,5 +1,11 @@
 import { expect, test } from "bun:test";
-import { type Project, projectFormSchema, sortProjectsByVotes } from "./schema";
+import {
+  isProjectApplicableTo,
+  type Project,
+  projectApplicabilityFromCountryParam,
+  projectFormSchema,
+  sortProjectsByVotes,
+} from "./schema";
 
 function project(overrides: Partial<Project>): Project {
   return {
@@ -8,10 +14,12 @@ function project(overrides: Partial<Project>): Project {
     name: "Project",
     status: "published",
     lifecycleStatus: "ready_to_use",
+    applicability: "latam",
     projectUrl: "https://example.com",
     countries: ["Venezuela"],
     participantName: "Team",
     videoUrl: "",
+    imageUrl: "",
     contributeInUrl: "",
     descriptionMarkdown: "Description",
     ownerName: "Owner",
@@ -46,6 +54,24 @@ test("sortProjectsByVotes prioritizes video when vote counts tie", () => {
   ]);
 });
 
+test("regional projects are visible in both country hubs", () => {
+  const regionalProject = project({ applicability: "latam" });
+  const venezuelaProject = project({ applicability: "venezuela" });
+
+  expect(isProjectApplicableTo(regionalProject, "venezuela")).toBe(true);
+  expect(isProjectApplicableTo(regionalProject, "colombia")).toBe(true);
+  expect(isProjectApplicableTo(venezuelaProject, "colombia")).toBe(false);
+});
+
+test("country submission params only accept supported country applicability", () => {
+  expect(projectApplicabilityFromCountryParam("venezuela")).toBe("venezuela");
+  expect(projectApplicabilityFromCountryParam("colombia")).toBe("colombia");
+  expect(projectApplicabilityFromCountryParam("latam")).toBeUndefined();
+  expect(
+    projectApplicabilityFromCountryParam(["venezuela", "colombia"]),
+  ).toBeUndefined();
+});
+
 test("projectFormSchema accepts common demo video hosts", () => {
   const baseProject = {
     slug: "project-slug",
@@ -54,6 +80,7 @@ test("projectFormSchema accepts common demo video hosts", () => {
     projectUrl: "https://example.com",
     countries: "Venezuela",
     participantName: "Team",
+    imageUrl: "",
     contributeInUrl: "",
     descriptionMarkdown:
       "This is a complete project description with enough detail to satisfy the minimum length requirement.",

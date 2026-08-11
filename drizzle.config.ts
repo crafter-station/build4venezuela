@@ -1,7 +1,7 @@
 import { defineConfig } from "drizzle-kit";
 
-// Used by `drizzle-kit studio` / `pull` for typed DB access. The schema source
-// of truth is `supabase/migrations` (see src/db/schema.ts) — do not `push`.
+// Neon is the database source of truth. Generate versioned migrations from the
+// typed schema and apply them with `drizzle-kit migrate`; never use `push`.
 export default defineConfig({
   schema: "./src/db/schema.ts",
   out: "./drizzle",

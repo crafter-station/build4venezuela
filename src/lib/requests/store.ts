@@ -1,9 +1,14 @@
 import { randomUUID } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { createClient } from "@supabase/supabase-js";
-import { env } from "@/env";
-import { logError } from "@/lib/log";
+import { and, asc, count, desc, eq, inArray } from "drizzle-orm";
+import { db, isDbConfigured } from "@/db";
+import {
+  solutionRequestComments,
+  solutionRequestCommentVotes,
+  solutionRequests,
+  solutionRequestVotes,
+} from "@/db/schema";
 import type {
   SolutionRequest,
   SolutionRequestComment,
@@ -60,37 +65,48 @@ const localStorePath = path.join(
   ".data",
   "solution-requests.json",
 );
-const requestSelect = "*, votes_count:solution_request_votes(count)";
-const commentSelect = "*, votes_count:solution_request_comment_votes(count)";
+const requestVoteCount = count(solutionRequestVotes.voterId);
+const commentVoteCount = count(solutionRequestCommentVotes.voterId);
 
-// The Supabase JS client's fetch has no default timeout, so a stalled PostgREST
-// request would hang the whole route until Vercel's 300s wall. Bound every call.
-const SUPABASE_TIMEOUT_MS = 8_000;
-
-function getSupabase() {
-  const url = env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = env.SUPABASE_SERVICE_ROLE_KEY;
-
-  if (!url || !key) {
-    return null;
-  }
-
-  // Cast: the wrapper satisfies the call signature but not the extra static
-  // members on the global `fetch` type (e.g. `preconnect`), which Supabase
-  // never calls.
-  const timeoutFetch = ((input: RequestInfo | URL, init?: RequestInit) =>
-    fetch(input, {
-      ...init,
-      signal: init?.signal ?? AbortSignal.timeout(SUPABASE_TIMEOUT_MS),
-    })) as typeof fetch;
-
-  return createClient(url, key, {
-    auth: { persistSession: false },
-    global: { fetch: timeoutFetch },
-  });
+function drizzleComment(
+  row: typeof solutionRequestComments.$inferSelect,
+  votesCount = 0,
+  voted = false,
+): SolutionRequestComment {
+  return {
+    id: row.id,
+    requestId: row.requestId,
+    authorName: row.authorName,
+    authorImageUrl: row.authorImageUrl,
+    body: row.body,
+    createdAt: row.createdAt.toISOString(),
+    updatedAt: row.updatedAt.toISOString(),
+    votesCount,
+    voted,
+  };
 }
 
-function toComment(
+function drizzleRequest(
+  row: typeof solutionRequests.$inferSelect,
+  votesCount = 0,
+  comments: SolutionRequestComment[] = [],
+  voted = false,
+): SolutionRequest {
+  return {
+    id: row.id,
+    name: row.name,
+    descriptionMarkdown: row.descriptionMarkdown,
+    authorName: row.authorName,
+    authorImageUrl: row.authorImageUrl,
+    createdAt: row.createdAt.toISOString(),
+    updatedAt: row.updatedAt.toISOString(),
+    votesCount,
+    voted,
+    comments: sortSolutionRequestComments(comments),
+  };
+}
+
+function localComment(
   row: RequestCommentRow,
   voted = false,
 ): SolutionRequestComment {
@@ -107,7 +123,7 @@ function toComment(
   };
 }
 
-function toRequest(
+function localRequest(
   row: RequestRow,
   comments: SolutionRequestComment[] = [],
   voted = false,
@@ -147,113 +163,100 @@ async function writeLocalData(data: LocalData) {
   await writeFile(localStorePath, `${JSON.stringify(data, null, 2)}\n`);
 }
 
-async function withLocalFallback<T>(
+async function withConfiguredStore<T>(
   operation: () => Promise<T>,
   fallback: () => Promise<T>,
 ) {
-  const supabase = getSupabase();
-
-  if (!supabase) {
+  if (!isDbConfigured()) {
     return fallback();
   }
 
-  try {
-    return await operation();
-  } catch (error) {
-    logError("request.store.fallback", error);
-    return fallback();
-  }
+  return operation();
 }
 
 export async function listSolutionRequests(voterId?: string) {
-  const supabase = getSupabase();
-
-  return withLocalFallback(
+  return withConfiguredStore(
     async () => {
-      if (!supabase) {
+      const requestRows = await db
+        .select({ request: solutionRequests, votesCount: requestVoteCount })
+        .from(solutionRequests)
+        .leftJoin(
+          solutionRequestVotes,
+          eq(solutionRequestVotes.requestId, solutionRequests.id),
+        )
+        .groupBy(solutionRequests.id)
+        .orderBy(desc(solutionRequests.createdAt));
+      const requestIds = requestRows.map(({ request }) => request.id);
+
+      if (requestIds.length === 0) {
         return [];
       }
 
-      const { data, error } = await supabase
-        .from("solution_requests")
-        .select(requestSelect)
-        .order("created_at", { ascending: false });
-
-      if (error) {
-        throw error;
-      }
-
-      const requestRows = (data ?? []).map((row) => ({
-        ...(row as RequestRow),
-        votes_count: row.votes_count?.[0]?.count ?? 0,
-      }));
-      const requestIds = requestRows.map((request) => request.id);
-      const votedRequestIds = new Set<string>();
-
-      if (voterId && requestIds.length > 0) {
-        const { data: votes, error: votesError } = await supabase
-          .from("solution_request_votes")
-          .select("request_id")
-          .eq("voter_id", voterId)
-          .in("request_id", requestIds);
-
-        if (votesError) {
-          throw votesError;
-        }
-
-        for (const vote of votes ?? []) {
-          votedRequestIds.add(String(vote.request_id));
-        }
-      }
-
-      const { data: commentsData, error: commentsError } = requestIds.length
-        ? await supabase
-            .from("solution_request_comments")
-            .select(commentSelect)
-            .in("request_id", requestIds)
-            .order("created_at", { ascending: true })
-        : { data: [], error: null };
-
-      if (commentsError) {
-        throw commentsError;
-      }
-
-      const commentRows = (commentsData ?? []).map((row) => ({
-        ...(row as RequestCommentRow),
-        votes_count: row.votes_count?.[0]?.count ?? 0,
-      }));
-      const commentIds = commentRows.map((comment) => comment.id);
-      const votedCommentIds = new Set<string>();
-
-      if (voterId && commentIds.length > 0) {
-        const { data: commentVotes, error: commentVotesError } = await supabase
-          .from("solution_request_comment_votes")
-          .select("comment_id")
-          .eq("voter_id", voterId)
-          .in("comment_id", commentIds);
-
-        if (commentVotesError) {
-          throw commentVotesError;
-        }
-
-        for (const vote of commentVotes ?? []) {
-          votedCommentIds.add(String(vote.comment_id));
-        }
-      }
-
+      const [commentRows, requestVotes] = await Promise.all([
+        db
+          .select({
+            comment: solutionRequestComments,
+            votesCount: commentVoteCount,
+          })
+          .from(solutionRequestComments)
+          .leftJoin(
+            solutionRequestCommentVotes,
+            eq(
+              solutionRequestCommentVotes.commentId,
+              solutionRequestComments.id,
+            ),
+          )
+          .where(inArray(solutionRequestComments.requestId, requestIds))
+          .groupBy(solutionRequestComments.id)
+          .orderBy(asc(solutionRequestComments.createdAt)),
+        voterId
+          ? db
+              .select({ requestId: solutionRequestVotes.requestId })
+              .from(solutionRequestVotes)
+              .where(
+                and(
+                  eq(solutionRequestVotes.voterId, voterId),
+                  inArray(solutionRequestVotes.requestId, requestIds),
+                ),
+              )
+          : Promise.resolve([]),
+      ]);
+      const commentIds = commentRows.map(({ comment }) => comment.id);
+      const commentVotes =
+        voterId && commentIds.length > 0
+          ? await db
+              .select({ commentId: solutionRequestCommentVotes.commentId })
+              .from(solutionRequestCommentVotes)
+              .where(
+                and(
+                  eq(solutionRequestCommentVotes.voterId, voterId),
+                  inArray(solutionRequestCommentVotes.commentId, commentIds),
+                ),
+              )
+          : [];
+      const votedRequestIds = new Set(
+        requestVotes.map((vote) => vote.requestId),
+      );
+      const votedCommentIds = new Set(
+        commentVotes.map((vote) => vote.commentId),
+      );
       const commentsByRequest = new Map<string, SolutionRequestComment[]>();
-      for (const row of commentRows) {
-        const comments = commentsByRequest.get(row.request_id) ?? [];
-        comments.push(toComment(row, votedCommentIds.has(row.id)));
-        commentsByRequest.set(row.request_id, comments);
+
+      for (const { comment, votesCount } of commentRows) {
+        const comments = commentsByRequest.get(comment.requestId) ?? [];
+        comments.push(
+          drizzleComment(comment, votesCount, votedCommentIds.has(comment.id)),
+        );
+        commentsByRequest.set(comment.requestId, comments);
       }
 
       return sortSolutionRequests(
-        requestRows.map((row) =>
-          toRequest(
-            row,
-            commentsByRequest.get(row.id) ?? [],
-            votedRequestIds.has(row.id),
+        requestRows.map(({ request, votesCount }) =>
+          drizzleRequest(
+            request,
+            votesCount,
+            commentsByRequest.get(request.id) ?? [],
+            votedRequestIds.has(request.id),
           ),
         ),
       );
@@ -265,7 +268,7 @@ export async function listSolutionRequests(voterId?: string) {
       for (const comment of data.comments) {
         const comments = commentsByRequest.get(comment.request_id) ?? [];
         comments.push(
-          toComment(
+          localComment(
             {
               ...comment,
               votes_count: data.commentVotes.filter(
@@ -283,7 +286,7 @@ export async function listSolutionRequests(voterId?: string) {
 
       return sortSolutionRequests(
         data.requests.map((request) =>
-          toRequest(
+          localRequest(
             {
               ...request,
               votes_count: data.votes.filter(
@@ -308,69 +311,48 @@ export async function createSolutionRequest(
   authorName: string,
   authorImageUrl: string,
 ) {
-  const supabase = getSupabase();
-  const row = {
-    name: input.name,
-    description_markdown: input.descriptionMarkdown,
-    author_user_id: authorUserId,
-    author_name: authorName,
-    author_image_url: authorImageUrl,
-  };
-
-  return withLocalFallback(
+  return withConfiguredStore(
     async () => {
-      if (!supabase) {
-        throw new Error("Supabase is not configured.");
-      }
-
-      const { data, error } = await supabase
-        .from("solution_requests")
-        .insert(row)
-        .select("*")
-        .single();
-
-      if (error) {
-        throw error;
-      }
-
-      return toRequest(data as RequestRow);
+      const [row] = await db
+        .insert(solutionRequests)
+        .values({
+          name: input.name,
+          descriptionMarkdown: input.descriptionMarkdown,
+          authorUserId,
+          authorName,
+          authorImageUrl,
+        })
+        .returning();
+      return drizzleRequest(row);
     },
     async () => {
       const data = await readLocalData();
       const now = new Date().toISOString();
-      const request: RequestRow = {
+      const row: RequestRow = {
         id: randomUUID(),
-        ...row,
+        name: input.name,
+        description_markdown: input.descriptionMarkdown,
+        author_user_id: authorUserId,
+        author_name: authorName,
+        author_image_url: authorImageUrl,
         created_at: now,
         updated_at: now,
       };
-
-      data.requests.unshift(request);
+      data.requests.unshift(row);
       await writeLocalData(data);
-      return toRequest(request);
+      return localRequest(row);
     },
   );
 }
 
 export async function getSolutionRequestVoteCount(requestId: string) {
-  const supabase = getSupabase();
-
-  return withLocalFallback(
+  return withConfiguredStore(
     async () => {
-      if (!supabase) {
-        return 0;
-      }
-
-      const { count, error } = await supabase
-        .from("solution_request_votes")
-        .select("*", { count: "exact", head: true })
-        .eq("request_id", requestId);
-
-      if (error) {
-        throw error;
-      }
-
-      return count ?? 0;
+      const [row] = await db
+        .select({ count: count() })
+        .from(solutionRequestVotes)
+        .where(eq(solutionRequestVotes.requestId, requestId));
+      return row?.count ?? 0;
     },
     async () => {
       const data = await readLocalData();
@@ -383,30 +365,21 @@ export async function hasSolutionRequestVoted(
   requestId: string,
   voterId?: string,
 ) {
-  if (!voterId) {
-    return false;
-  }
+  if (!voterId) return false;
 
-  const supabase = getSupabase();
-
-  return withLocalFallback(
+  return withConfiguredStore(
     async () => {
-      if (!supabase) {
-        return false;
-      }
-
-      const { data, error } = await supabase
-        .from("solution_request_votes")
-        .select("request_id")
-        .eq("request_id", requestId)
-        .eq("voter_id", voterId)
-        .maybeSingle();
-
-      if (error) {
-        throw error;
-      }
-
-      return Boolean(data);
+      const rows = await db
+        .select({ requestId: solutionRequestVotes.requestId })
+        .from(solutionRequestVotes)
+        .where(
+          and(
+            eq(solutionRequestVotes.requestId, requestId),
+            eq(solutionRequestVotes.voterId, voterId),
+          ),
+        )
+        .limit(1);
+      return rows.length > 0;
     },
     async () => {
       const data = await readLocalData();
@@ -421,71 +394,46 @@ export async function toggleSolutionRequestVote(
   requestId: string,
   voterId: string,
 ) {
-  const supabase = getSupabase();
-
-  return withLocalFallback(
+  return withConfiguredStore(
     async () => {
-      if (!supabase) {
-        throw new Error("Supabase is not configured.");
-      }
-
       const voted = await hasSolutionRequestVoted(requestId, voterId);
-
       if (voted) {
-        const { error } = await supabase
-          .from("solution_request_votes")
-          .delete()
-          .eq("request_id", requestId)
-          .eq("voter_id", voterId);
-
-        if (error) {
-          throw error;
-        }
-
-        return {
-          voted: false,
-          count: await getSolutionRequestVoteCount(requestId),
-        };
+        await db
+          .delete(solutionRequestVotes)
+          .where(
+            and(
+              eq(solutionRequestVotes.requestId, requestId),
+              eq(solutionRequestVotes.voterId, voterId),
+            ),
+          );
+      } else {
+        await db.insert(solutionRequestVotes).values({ requestId, voterId });
       }
-
-      const { error } = await supabase.from("solution_request_votes").insert({
-        request_id: requestId,
-        voter_id: voterId,
-      });
-
-      if (error) {
-        throw error;
-      }
-
       return {
-        voted: true,
+        voted: !voted,
         count: await getSolutionRequestVoteCount(requestId),
       };
     },
     async () => {
       const data = await readLocalData();
-      const voteIndex = data.votes.findIndex(
+      const index = data.votes.findIndex(
         (vote) => vote.request_id === requestId && vote.voter_id === voterId,
       );
-
-      if (voteIndex >= 0) {
-        data.votes.splice(voteIndex, 1);
-        await writeLocalData(data);
-        return {
-          voted: false,
-          count: await getSolutionRequestVoteCount(requestId),
-        };
+      const voted = index < 0;
+      if (voted) {
+        data.votes.push({
+          request_id: requestId,
+          voter_id: voterId,
+          created_at: new Date().toISOString(),
+        });
+      } else {
+        data.votes.splice(index, 1);
       }
-
-      data.votes.push({
-        request_id: requestId,
-        voter_id: voterId,
-        created_at: new Date().toISOString(),
-      });
       await writeLocalData(data);
       return {
-        voted: true,
-        count: await getSolutionRequestVoteCount(requestId),
+        voted,
+        count: data.votes.filter((vote) => vote.request_id === requestId)
+          .length,
       };
     },
   );
@@ -498,46 +446,36 @@ export async function createSolutionRequestComment(
   authorImageUrl: string,
   input: SolutionRequestCommentInput,
 ) {
-  const supabase = getSupabase();
-  const row = {
-    request_id: requestId,
-    author_user_id: authorUserId,
-    author_name: authorName,
-    author_image_url: authorImageUrl,
-    body: input.body,
-  };
-
-  return withLocalFallback(
+  return withConfiguredStore(
     async () => {
-      if (!supabase) {
-        throw new Error("Supabase is not configured.");
-      }
-
-      const { data, error } = await supabase
-        .from("solution_request_comments")
-        .insert(row)
-        .select("*")
-        .single();
-
-      if (error) {
-        throw error;
-      }
-
-      return toComment(data as RequestCommentRow);
+      const [row] = await db
+        .insert(solutionRequestComments)
+        .values({
+          requestId,
+          authorUserId,
+          authorName,
+          authorImageUrl,
+          body: input.body,
+        })
+        .returning();
+      return drizzleComment(row);
     },
     async () => {
       const data = await readLocalData();
       const now = new Date().toISOString();
-      const comment: RequestCommentRow = {
+      const row: RequestCommentRow = {
         id: randomUUID(),
-        ...row,
+        request_id: requestId,
+        author_user_id: authorUserId,
+        author_name: authorName,
+        author_image_url: authorImageUrl,
+        body: input.body,
         created_at: now,
         updated_at: now,
       };
-
-      data.comments.push(comment);
+      data.comments.push(row);
       await writeLocalData(data);
-      return toComment(comment);
+      return localComment(row);
     },
   );
 }
@@ -546,26 +484,19 @@ export async function solutionRequestCommentBelongsToRequest(
   requestId: string,
   commentId: string,
 ) {
-  const supabase = getSupabase();
-
-  return withLocalFallback(
+  return withConfiguredStore(
     async () => {
-      if (!supabase) {
-        return false;
-      }
-
-      const { data, error } = await supabase
-        .from("solution_request_comments")
-        .select("id")
-        .eq("id", commentId)
-        .eq("request_id", requestId)
-        .maybeSingle();
-
-      if (error) {
-        throw error;
-      }
-
-      return Boolean(data);
+      const rows = await db
+        .select({ id: solutionRequestComments.id })
+        .from(solutionRequestComments)
+        .where(
+          and(
+            eq(solutionRequestComments.id, commentId),
+            eq(solutionRequestComments.requestId, requestId),
+          ),
+        )
+        .limit(1);
+      return rows.length > 0;
     },
     async () => {
       const data = await readLocalData();
@@ -578,24 +509,13 @@ export async function solutionRequestCommentBelongsToRequest(
 }
 
 export async function getSolutionRequestCommentVoteCount(commentId: string) {
-  const supabase = getSupabase();
-
-  return withLocalFallback(
+  return withConfiguredStore(
     async () => {
-      if (!supabase) {
-        return 0;
-      }
-
-      const { count, error } = await supabase
-        .from("solution_request_comment_votes")
-        .select("*", { count: "exact", head: true })
-        .eq("comment_id", commentId);
-
-      if (error) {
-        throw error;
-      }
-
-      return count ?? 0;
+      const [row] = await db
+        .select({ count: count() })
+        .from(solutionRequestCommentVotes)
+        .where(eq(solutionRequestCommentVotes.commentId, commentId));
+      return row?.count ?? 0;
     },
     async () => {
       const data = await readLocalData();
@@ -609,30 +529,21 @@ export async function hasSolutionRequestCommentVoted(
   commentId: string,
   voterId?: string,
 ) {
-  if (!voterId) {
-    return false;
-  }
+  if (!voterId) return false;
 
-  const supabase = getSupabase();
-
-  return withLocalFallback(
+  return withConfiguredStore(
     async () => {
-      if (!supabase) {
-        return false;
-      }
-
-      const { data, error } = await supabase
-        .from("solution_request_comment_votes")
-        .select("comment_id")
-        .eq("comment_id", commentId)
-        .eq("voter_id", voterId)
-        .maybeSingle();
-
-      if (error) {
-        throw error;
-      }
-
-      return Boolean(data);
+      const rows = await db
+        .select({ commentId: solutionRequestCommentVotes.commentId })
+        .from(solutionRequestCommentVotes)
+        .where(
+          and(
+            eq(solutionRequestCommentVotes.commentId, commentId),
+            eq(solutionRequestCommentVotes.voterId, voterId),
+          ),
+        )
+        .limit(1);
+      return rows.length > 0;
     },
     async () => {
       const data = await readLocalData();
@@ -647,70 +558,48 @@ export async function toggleSolutionRequestCommentVote(
   commentId: string,
   voterId: string,
 ) {
-  const supabase = getSupabase();
-
-  return withLocalFallback(
+  return withConfiguredStore(
     async () => {
-      if (!supabase) {
-        throw new Error("Supabase is not configured.");
-      }
-
       const voted = await hasSolutionRequestCommentVoted(commentId, voterId);
-
       if (voted) {
-        const { error } = await supabase
-          .from("solution_request_comment_votes")
-          .delete()
-          .eq("comment_id", commentId)
-          .eq("voter_id", voterId);
-
-        if (error) {
-          throw error;
-        }
-
-        return {
-          voted: false,
-          count: await getSolutionRequestCommentVoteCount(commentId),
-        };
+        await db
+          .delete(solutionRequestCommentVotes)
+          .where(
+            and(
+              eq(solutionRequestCommentVotes.commentId, commentId),
+              eq(solutionRequestCommentVotes.voterId, voterId),
+            ),
+          );
+      } else {
+        await db
+          .insert(solutionRequestCommentVotes)
+          .values({ commentId, voterId });
       }
-
-      const { error } = await supabase
-        .from("solution_request_comment_votes")
-        .insert({ comment_id: commentId, voter_id: voterId });
-
-      if (error) {
-        throw error;
-      }
-
       return {
-        voted: true,
+        voted: !voted,
         count: await getSolutionRequestCommentVoteCount(commentId),
       };
     },
     async () => {
       const data = await readLocalData();
-      const voteIndex = data.commentVotes.findIndex(
+      const index = data.commentVotes.findIndex(
         (vote) => vote.comment_id === commentId && vote.voter_id === voterId,
       );
-
-      if (voteIndex >= 0) {
-        data.commentVotes.splice(voteIndex, 1);
-        await writeLocalData(data);
-        return {
-          voted: false,
-          count: await getSolutionRequestCommentVoteCount(commentId),
-        };
+      const voted = index < 0;
+      if (voted) {
+        data.commentVotes.push({
+          comment_id: commentId,
+          voter_id: voterId,
+          created_at: new Date().toISOString(),
+        });
+      } else {
+        data.commentVotes.splice(index, 1);
       }
-
-      data.commentVotes.push({
-        comment_id: commentId,
-        voter_id: voterId,
-        created_at: new Date().toISOString(),
-      });
       await writeLocalData(data);
       return {
-        voted: true,
-        count: await getSolutionRequestCommentVoteCount(commentId),
+        voted,
+        count: data.commentVotes.filter((vote) => vote.comment_id === commentId)
+          .length,
       };
     },
   );

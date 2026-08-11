@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
 import { TIER_COLOR } from "@/lib/insights/constants";
 import type { InsightEdge, InsightNode } from "@/lib/insights/types";
 
@@ -173,7 +174,7 @@ export function OverlapNetwork({
                 y1={a.y}
                 x2={b.x}
                 y2={b.y}
-                stroke={touchesHover ? "#16c7e8" : "#ffffff"}
+                stroke={touchesHover ? "var(--accent)" : "var(--foreground)"}
                 strokeOpacity={op}
                 strokeWidth={
                   (touchesHover ? 1 + e.weight * 0.5 : e.weight * 0.5) / view.k
@@ -213,14 +214,14 @@ export function OverlapNetwork({
                   r={r}
                   fill={TIER_COLOR[n.tier]}
                   fillOpacity={hot ? 1 : 0.82}
-                  stroke={hot ? "#fff" : "#000"}
+                  stroke={hot ? "var(--foreground)" : "var(--background)"}
                   strokeWidth={(hot ? 2 : 1) / view.k}
                 />
                 {(hot || r > 11) && (
                   <text
                     x={r + 3}
                     y={3}
-                    fill="#fff"
+                    fill="var(--foreground)"
                     fontSize={(hot ? 15 : 12) / view.k}
                     fontFamily="monospace"
                     style={{ pointerEvents: "none" }}
@@ -239,12 +240,15 @@ export function OverlapNetwork({
 
 function ZoomBtn({ label, onClick }: { label: string; onClick: () => void }) {
   return (
-    <button
+    <Button
       type="button"
       onClick={onClick}
-      className="flex h-7 w-7 items-center justify-center border border-border bg-card font-mono text-sm text-foreground hover:border-foreground"
+      variant="outline"
+      size="icon-xs"
+      className="font-mono"
+      aria-label={label}
     >
       {label}
-    </button>
+    </Button>
   );
 }
