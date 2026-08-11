@@ -49,13 +49,21 @@ export default function LatamHome() {
             Build4Latam <span aria-hidden="true">{"//"}</span>{" "}
             <span className="hidden sm:inline">tecnología en solidaridad</span>
           </p>
-          <p className="ui-eyebrow flex shrink-0 items-center gap-2 text-ink-muted">
-            <span
-              aria-hidden="true"
-              className="size-1.5 bg-accent shadow-[0_0_12px_var(--accent)]"
-            />
-            Red activa
-          </p>
+          <div className="flex shrink-0 items-center gap-4">
+            <p className="ui-eyebrow hidden items-center gap-2 text-ink-muted sm:flex">
+              <span
+                aria-hidden="true"
+                className="size-1.5 bg-accent shadow-[0_0_12px_var(--accent)]"
+              />
+              Red activa
+            </p>
+            <Link
+              className="ui-focus border border-primary bg-primary px-3 py-2 font-mono text-[0.625rem] font-black uppercase tracking-[0.13em] text-primary-foreground transition-colors hover:bg-transparent hover:text-primary sm:px-4 sm:text-xs"
+              href="/es/submit"
+            >
+              Agregar proyecto
+            </Link>
+          </div>
         </header>
 
         <div className="grid lg:min-h-[36rem] lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">

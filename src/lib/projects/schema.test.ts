@@ -2,6 +2,7 @@ import { expect, test } from "bun:test";
 import {
   isProjectApplicableTo,
   type Project,
+  projectApplicabilityFromCountryParam,
   projectFormSchema,
   sortProjectsByVotes,
 } from "./schema";
@@ -59,6 +60,15 @@ test("regional projects are visible in both country hubs", () => {
   expect(isProjectApplicableTo(regionalProject, "venezuela")).toBe(true);
   expect(isProjectApplicableTo(regionalProject, "colombia")).toBe(true);
   expect(isProjectApplicableTo(venezuelaProject, "colombia")).toBe(false);
+});
+
+test("country submission params only accept supported country applicability", () => {
+  expect(projectApplicabilityFromCountryParam("venezuela")).toBe("venezuela");
+  expect(projectApplicabilityFromCountryParam("colombia")).toBe("colombia");
+  expect(projectApplicabilityFromCountryParam("latam")).toBeUndefined();
+  expect(
+    projectApplicabilityFromCountryParam(["venezuela", "colombia"]),
+  ).toBeUndefined();
 });
 
 test("projectFormSchema accepts common demo video hosts", () => {

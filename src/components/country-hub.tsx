@@ -98,6 +98,12 @@ export async function CountryHub({ country }: { country: Country }) {
             <p className="type-body-lg mt-6 max-w-[38rem] font-mono text-ink-muted lg:max-w-[32ch]">
               {content.description}
             </p>
+            <Link
+              className="ui-focus mt-8 inline-flex min-h-12 items-center justify-center border border-primary bg-primary px-6 font-mono text-xs font-black uppercase tracking-[0.16em] text-primary-foreground transition-colors duration-150 ease-[var(--ease-out)] hover:bg-transparent hover:text-primary"
+              href={`/es/submit?country=${country}`}
+            >
+              Agregar un proyecto
+            </Link>
           </aside>
         </div>
       </section>

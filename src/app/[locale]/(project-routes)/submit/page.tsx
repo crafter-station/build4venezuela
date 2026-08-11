@@ -1,15 +1,26 @@
 import { getTranslations } from "next-intl/server";
-import { emptyProjectFormState } from "@/lib/projects/schema";
+import {
+  emptyProjectFormState,
+  projectApplicabilityFromCountryParam,
+} from "@/lib/projects/schema";
 import { ProjectShell } from "../project-shell";
 import { ProjectForm } from "./project-form";
 
 type Props = {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ country?: string | string[] }>;
 };
 
-export default async function SubmitProjectPage({ params }: Props) {
-  const { locale } = await params;
+export default async function SubmitProjectPage({
+  params,
+  searchParams,
+}: Props) {
+  const [{ locale }, query] = await Promise.all([params, searchParams]);
   const t = await getTranslations({ locale, namespace: "SubmitProject" });
+  const applicability = projectApplicabilityFromCountryParam(query.country);
+  const initialState = applicability
+    ? { ...emptyProjectFormState, values: { applicability } }
+    : emptyProjectFormState;
 
   return (
     <ProjectShell>
@@ -28,7 +39,7 @@ export default async function SubmitProjectPage({ params }: Props) {
           </div>
           <div className="border border-border bg-card p-5 sm:p-7">
             <ProjectForm
-              initialState={emptyProjectFormState}
+              initialState={initialState}
               submitLabel={t("submitLabel")}
             />
           </div>

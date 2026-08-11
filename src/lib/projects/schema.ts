@@ -51,6 +51,10 @@ export const projectApplicabilities = [
 
 export type ProjectApplicability = (typeof projectApplicabilities)[number];
 
+export function projectApplicabilityFromCountryParam(value: unknown) {
+  return value === "venezuela" || value === "colombia" ? value : undefined;
+}
+
 export function isProjectApplicableTo(
   project: Pick<Project, "applicability">,
   country: "venezuela" | "colombia",
