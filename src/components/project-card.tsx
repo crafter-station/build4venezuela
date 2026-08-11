@@ -50,6 +50,7 @@ export function ProjectCard({
       <ProjectVideoEmbed
         className="mt-7"
         detailHref={href}
+        imageUrl={project.imageUrl}
         title={project.name}
         videoUrl={project.videoUrl}
       />

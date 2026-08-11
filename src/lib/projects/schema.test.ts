@@ -19,6 +19,7 @@ function project(overrides: Partial<Project>): Project {
     countries: ["Venezuela"],
     participantName: "Team",
     videoUrl: "",
+    imageUrl: "",
     contributeInUrl: "",
     descriptionMarkdown: "Description",
     ownerName: "Owner",
@@ -79,6 +80,7 @@ test("projectFormSchema accepts common demo video hosts", () => {
     projectUrl: "https://example.com",
     countries: "Venezuela",
     participantName: "Team",
+    imageUrl: "",
     contributeInUrl: "",
     descriptionMarkdown:
       "This is a complete project description with enough detail to satisfy the minimum length requirement.",

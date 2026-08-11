@@ -15,6 +15,7 @@ const validProject = {
   countries: "Venezuela",
   participantName: "Build Team",
   videoUrl: "https://youtube.com/watch?v=abc12345678",
+  imageUrl: "",
   contributeInUrl: "https://github.com/example/civic-dashboard",
   descriptionMarkdown:
     "A civic dashboard that helps organizers track community needs, coordinate volunteers, and publish transparent progress updates for local recovery projects.",

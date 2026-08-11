@@ -176,9 +176,10 @@ export default async function ProjectPage({ params }: Props) {
           </aside>
 
           <section className="min-w-0 border border-border bg-card p-5 sm:p-8">
-            {project.videoUrl ? (
+            {project.videoUrl || project.imageUrl ? (
               <ProjectVideoEmbed
                 className="mb-8 bg-background"
+                imageUrl={project.imageUrl}
                 title={project.name}
                 videoUrl={project.videoUrl}
               />

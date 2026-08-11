@@ -6,6 +6,7 @@ const requiredServerEnv = {
   CLERK_SECRET_KEY: z.string().min(1),
   UPSTASH_REDIS_REST_URL: z.string().url(),
   UPSTASH_REDIS_REST_TOKEN: z.string().min(1),
+  BLOB_READ_WRITE_TOKEN: z.string().min(1),
   // Neon Postgres connection string. Optional outside production, where stores
   // can still use local JSON fixtures.
   DATABASE_URL: z.string().url().optional(),

@@ -2,6 +2,14 @@ import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 
 const nextConfig: NextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        hostname: "**.public.blob.vercel-storage.com",
+        protocol: "https",
+      },
+    ],
+  },
   async redirects() {
     return [
       {

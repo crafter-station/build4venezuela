@@ -36,6 +36,7 @@ type ProjectRow = {
   countries: string[];
   participant_name: string;
   video_url: string;
+  image_url?: string | null;
   contribute_in_url?: string | null;
   description_markdown: string;
   owner_user_id: string;
@@ -114,6 +115,7 @@ function rowToProject(
     countries: row.countries,
     participantName: row.participantName,
     videoUrl: row.videoUrl,
+    imageUrl: row.imageUrl,
     contributeInUrl: row.contributeInUrl ?? "",
     descriptionMarkdown: row.descriptionMarkdown,
     ownerName: row.ownerName || row.participantName,
@@ -157,6 +159,7 @@ function toProject(row: ProjectRow): Project {
     countries: row.countries,
     participantName: row.participant_name,
     videoUrl: row.video_url,
+    imageUrl: row.image_url ?? "",
     contributeInUrl: row.contribute_in_url ?? "",
     descriptionMarkdown: row.description_markdown,
     ownerName: row.owner_name || row.participant_name,
@@ -195,6 +198,7 @@ function toLocalRow(
     countries: normalizeCountries(input.countries),
     participant_name: input.participantName,
     video_url: input.videoUrl,
+    image_url: input.imageUrl,
     contribute_in_url: input.contributeInUrl,
     description_markdown: input.descriptionMarkdown,
     owner_user_id: input.ownerUserId,
@@ -239,6 +243,7 @@ function toProjectInput(
     countries: normalizeCountries(input.countries),
     participantName: input.participantName,
     videoUrl: input.videoUrl,
+    imageUrl: input.imageUrl,
     contributeInUrl: input.contributeInUrl,
     descriptionMarkdown: input.descriptionMarkdown,
     spamScore: input.spamScore,

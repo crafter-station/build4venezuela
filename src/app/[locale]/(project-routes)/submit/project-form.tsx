@@ -1,6 +1,8 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { upload } from "@vercel/blob/client";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import type { ChangeEvent, FormEvent } from "react";
@@ -35,6 +37,7 @@ const projectFormFields = [
   "countries",
   "participantName",
   "videoUrl",
+  "imageUrl",
   "contributeInUrl",
   "descriptionMarkdown",
 ] as const;
@@ -83,6 +86,8 @@ export function ProjectForm({
     projectFormValuesFromState(initialState.values),
   );
   const [errors, setErrors] = useState(initialState.errors);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const projectMutation = useMutation({
     mutationFn: saveProject,
@@ -148,10 +153,38 @@ export function ProjectForm({
     });
   }
 
-  function submitProject(event: FormEvent<HTMLFormElement>) {
+  async function submitProject(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setErrors({});
-    projectMutation.mutate({ projectId, values });
+
+    let nextValues = values;
+
+    if (imageFile) {
+      setIsUploadingImage(true);
+
+      try {
+        const blob = await upload(
+          `project-images/${values.slug || "project"}/${imageFile.name}`,
+          imageFile,
+          {
+            access: "public",
+            handleUploadUrl: "/api/projects/image-upload",
+          },
+        );
+        nextValues = { ...values, imageUrl: blob.url };
+        setValues(nextValues);
+      } catch (error) {
+        setErrors({
+          imageUrl:
+            error instanceof Error ? error.message : t("imageUploadError"),
+        });
+        return;
+      } finally {
+        setIsUploadingImage(false);
+      }
+    }
+
+    projectMutation.mutate({ projectId, values: nextValues });
   }
 
   function requestDelete() {
@@ -311,6 +344,56 @@ export function ProjectForm({
         <FieldError message={errors.videoUrl} />
       </label>
 
+      <div className="grid gap-2">
+        <label
+          className="font-mono text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground"
+          htmlFor="project-image"
+        >
+          {t("imageLabel")}
+        </label>
+        {values.imageUrl && !imageFile ? (
+          <div className="relative aspect-video max-w-xl overflow-hidden border border-border bg-card">
+            <Image
+              alt={t("imagePreviewAlt")}
+              className="h-full w-full object-cover"
+              fill
+              sizes="(max-width: 640px) 100vw, 576px"
+              src={values.imageUrl}
+            />
+          </div>
+        ) : null}
+        <Input
+          accept="image/jpeg,image/png,image/webp"
+          id="project-image"
+          onChange={(event) => {
+            setImageFile(event.target.files?.[0] ?? null);
+            setErrors((currentErrors) => ({
+              ...currentErrors,
+              imageUrl: "",
+              form: "",
+            }));
+          }}
+          type="file"
+        />
+        <p className="font-mono text-xs leading-5 tracking-[0.08em] text-muted-foreground">
+          {imageFile ? imageFile.name : t("imageHint")}
+        </p>
+        {values.imageUrl || imageFile ? (
+          <Button
+            className="w-fit uppercase tracking-[0.14em]"
+            onClick={() => {
+              setImageFile(null);
+              setFieldValue("imageUrl", "");
+            }}
+            type="button"
+            variant="outline"
+          >
+            {t("imageRemove")}
+          </Button>
+        ) : null}
+        <FieldError message={errors.imageUrl} />
+      </div>
+
       <label className="grid gap-2" htmlFor="project-contribute-in-url">
         <span className="font-mono text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground">
           {t("contributeInUrlLabel")}
@@ -352,10 +435,18 @@ export function ProjectForm({
 
       <Button
         className="h-12 text-sm uppercase tracking-[0.18em]"
-        disabled={projectMutation.isPending || deleteMutation.isPending}
+        disabled={
+          isUploadingImage ||
+          projectMutation.isPending ||
+          deleteMutation.isPending
+        }
         type="submit"
       >
-        {projectMutation.isPending ? t("pending") : submitLabel}
+        {isUploadingImage
+          ? t("imageUploading")
+          : projectMutation.isPending
+            ? t("pending")
+            : submitLabel}
       </Button>
 
       {projectId ? (

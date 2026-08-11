@@ -11,6 +11,7 @@ export type Project = {
   countries: string[];
   participantName: string;
   videoUrl: string;
+  imageUrl: string;
   contributeInUrl: string;
   descriptionMarkdown: string;
   ownerName: string;
@@ -147,6 +148,21 @@ export const projectFormSchema = z.object({
         return false;
       }
     }, "Use YouTube, Vimeo, Loom, Screen Studio, Instagram, TikTok, or a similar hosted video link."),
+  imageUrl: z
+    .string()
+    .trim()
+    .refine((value) => {
+      if (!value) return true;
+      try {
+        const url = new URL(value);
+        return (
+          url.protocol === "https:" &&
+          url.hostname.endsWith(".public.blob.vercel-storage.com")
+        );
+      } catch {
+        return false;
+      }
+    }, "Upload a valid project image."),
   contributeInUrl: z
     .string()
     .trim()
@@ -196,6 +212,7 @@ export function projectToFormValues(project: Project) {
     countries: project.countries.join(", "),
     participantName: project.participantName,
     videoUrl: project.videoUrl,
+    imageUrl: project.imageUrl,
     contributeInUrl: project.contributeInUrl,
     descriptionMarkdown: project.descriptionMarkdown,
   };
@@ -211,6 +228,7 @@ export function formDataToValues(formData: FormData) {
     countries: String(formData.get("countries") ?? ""),
     participantName: String(formData.get("participantName") ?? ""),
     videoUrl: String(formData.get("videoUrl") ?? ""),
+    imageUrl: String(formData.get("imageUrl") ?? ""),
     contributeInUrl: String(formData.get("contributeInUrl") ?? ""),
     descriptionMarkdown: String(formData.get("descriptionMarkdown") ?? ""),
   };

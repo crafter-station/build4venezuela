@@ -8,6 +8,7 @@ create table if not exists public.projects (
   countries text[] not null default '{}',
   participant_name text not null,
   video_url text not null default '',
+  image_url text not null default '',
   contribute_in_url text not null default '',
   description_markdown text not null,
   owner_user_id text not null,
@@ -21,6 +22,7 @@ create table if not exists public.projects (
 );
 
 alter table public.projects alter column video_url set default '';
+alter table public.projects add column if not exists image_url text not null default '';
 alter table public.projects add column if not exists status text not null default 'published';
 alter table public.projects add column if not exists lifecycle_status text not null default 'ready_to_use';
 alter table public.projects add column if not exists published_at timestamptz default now();

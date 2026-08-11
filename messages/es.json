@@ -427,7 +427,13 @@
     "deleteButton": "Eliminar postulación",
     "deleteConfirmButton": "Eliminar permanentemente",
     "deleteCancel": "Cancelar",
-    "deletePending": "Eliminando..."
+    "deletePending": "Eliminando...",
+    "imageLabel": "Imagen del proyecto (opcional)",
+    "imageHint": "JPG, PNG o WebP de hasta 8 MB. Si agregas ambos, se muestra primero el video.",
+    "imagePreviewAlt": "Imagen actual del proyecto",
+    "imageRemove": "Quitar imagen",
+    "imageUploading": "Subiendo imagen...",
+    "imageUploadError": "No se pudo subir la imagen del proyecto."
   },
   "ProjectDetail": {
     "metadata": {

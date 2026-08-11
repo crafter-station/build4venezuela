@@ -427,7 +427,13 @@
     "deleteButton": "Delete submission",
     "deleteConfirmButton": "Delete permanently",
     "deleteCancel": "Cancel",
-    "deletePending": "Deleting..."
+    "deletePending": "Deleting...",
+    "imageLabel": "Project image (optional)",
+    "imageHint": "JPG, PNG, or WebP up to 8 MB. The video is shown first when both are provided.",
+    "imagePreviewAlt": "Current project image",
+    "imageRemove": "Remove image",
+    "imageUploading": "Uploading image...",
+    "imageUploadError": "Could not upload the project image."
   },
   "ProjectDetail": {
     "metadata": {

@@ -56,6 +56,7 @@ export async function checkProjectForSpam(
           countries: input.countries,
           participantName: input.participantName,
           videoUrl: input.videoUrl,
+          imageUrl: input.imageUrl,
           contributeInUrl: input.contributeInUrl,
           descriptionMarkdown: input.descriptionMarkdown,
         },

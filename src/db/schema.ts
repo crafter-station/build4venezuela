@@ -32,6 +32,7 @@ export const projects = pgTable(
     countries: text("countries").array().notNull().default(sql`'{}'`),
     participantName: text("participant_name").notNull(),
     videoUrl: text("video_url").notNull().default(""),
+    imageUrl: text("image_url").notNull().default(""),
     contributeInUrl: text("contribute_in_url").notNull().default(""),
     descriptionMarkdown: text("description_markdown").notNull(),
     ownerUserId: text("owner_user_id").notNull(),
