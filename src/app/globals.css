@@ -513,6 +513,8 @@
 .sa-map__leader-dot {
   fill: var(--primary);
   opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
   animation: sa-leader-dot 180ms var(--ease-out) both;
 }
 
