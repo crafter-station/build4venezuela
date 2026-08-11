@@ -38,6 +38,22 @@
     "mobileBrand": "B4B",
     "navigationLabel": "Navegación principal",
     "brandPageLink": "Marca",
+    "homeLabel": "Inicio de la comunidad Build4Venezuela",
+    "search": "Buscar proyectos",
+    "themeToggle": "Cambiar tema de color",
+    "menu": "Abrir menú",
+    "menuDescription": "Explora la comunidad y encuentra una forma de contribuir.",
+    "signIn": "Iniciar sesión",
+    "productLabel": "Explorar",
+    "communityLabel": "Comunidad",
+    "partnersLabel": "Construido con nuestros aliados",
+    "create": {
+      "label": "Crear",
+      "project": "Agregar proyecto",
+      "need": "Publicar necesidad",
+      "resource": "Compartir recurso",
+      "profile": "Perfil de builder"
+    },
     "links": {
       "home": "Inicio",
       "brand": "Marca",
@@ -46,8 +62,9 @@
       "discord": "Discord",
       "projects": "Proyectos",
       "builders": "Builders",
-      "requests": "Solicitudes",
-      "resources": "Recursos"
+      "requests": "Necesidades",
+      "resources": "Recursos",
+      "impact": "Impacto"
     },
     "languageSelector": {
       "label": "Idioma",

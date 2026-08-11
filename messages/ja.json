@@ -38,6 +38,22 @@
     "mobileBrand": "B4B",
     "navigationLabel": "メインナビゲーション",
     "brandPageLink": "ブランド",
+    "homeLabel": "Build4Venezuela コミュニティホーム",
+    "search": "プロジェクトを検索",
+    "themeToggle": "カラーテーマを切り替える",
+    "menu": "メニューを開く",
+    "menuDescription": "コミュニティを探索し、貢献する方法を見つけましょう。",
+    "signIn": "ログイン",
+    "productLabel": "探索",
+    "communityLabel": "コミュニティ",
+    "partnersLabel": "パートナーと共に構築",
+    "create": {
+      "label": "作成",
+      "project": "プロジェクトを追加",
+      "need": "ニーズを投稿",
+      "resource": "リソースを共有",
+      "profile": "Builder プロフィール"
+    },
     "links": {
       "home": "ホーム",
       "brand": "ブランド",
@@ -46,8 +62,9 @@
       "discord": "Discord",
       "projects": "プロジェクト",
       "builders": "Builders",
-      "requests": "リクエスト",
-      "resources": "リソース"
+      "requests": "ニーズ",
+      "resources": "リソース",
+      "impact": "インパクト"
     },
     "languageSelector": {
       "label": "言語",

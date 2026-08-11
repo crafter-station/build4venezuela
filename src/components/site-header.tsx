@@ -1,136 +1,235 @@
 "use client";
 
-import { Show, UserButton } from "@clerk/nextjs";
-import { CaretDownIcon, ListIcon, UsersThreeIcon } from "@phosphor-icons/react";
+import { Show, SignInButton, UserButton } from "@clerk/nextjs";
+import {
+  ListIcon,
+  MagnifyingGlassIcon,
+  PlusIcon,
+  UserCircleIcon,
+} from "@phosphor-icons/react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { LanguageSelector } from "@/components/language-selector";
-import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { cn } from "@/lib/utils";
 
 export function SiteHeader() {
   const locale = useLocale();
+  const pathname = usePathname();
   const t = useTranslations("Header");
+  const homeHref = `/${locale}`;
   const navigationLinks = [
-    { href: `/${locale}`, label: t("links.home") },
-    { href: `/${locale}/brand`, label: t("links.brand") },
-    { href: "/whatsapp", label: t("links.whatsapp") },
-    { href: "/discord", label: t("links.discord") },
     { href: `/${locale}/projects`, label: t("links.projects") },
     { href: `/${locale}/builders`, label: t("links.builders") },
     { href: `/${locale}/requests`, label: t("links.requests") },
     { href: `/${locale}/recursos`, label: t("links.resources") },
+    { href: `/${locale}/insights`, label: t("links.impact") },
   ];
-  const desktopNavigationLinks = navigationLinks.filter(
-    (link) => link.href !== "/whatsapp" && link.href !== "/discord",
-  );
-  const socialLinks = navigationLinks.filter(
-    (link) => link.href === "/whatsapp" || link.href === "/discord",
-  );
+  const createLinks = [
+    { href: `/${locale}/submit`, label: t("create.project") },
+    { href: `/${locale}/requests`, label: t("create.need") },
+    { href: `/${locale}/recursos`, label: t("create.resource") },
+    { href: `/${locale}/builder/register`, label: t("create.profile") },
+  ];
 
   return (
-    <header className="fixed inset-x-0 top-0 isolate z-40 border-border border-b bg-background/95 px-4 py-3 shadow-xl backdrop-blur sm:px-8 lg:px-10">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-3">
-        <a
-          aria-label="Build4Latam home"
-          className="inline-flex items-center font-mono text-lg font-black uppercase tracking-[-0.04em] transition hover:text-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-4 focus-visible:ring-offset-background sm:text-xl"
-          href="/"
+    <header className="fixed inset-x-0 top-0 z-40 border-border/80 border-b bg-background/88 backdrop-blur-xl">
+      <div className="mx-auto flex h-16 max-w-7xl items-center gap-2 px-4 sm:px-6 lg:px-8">
+        <Link
+          aria-label={t("homeLabel")}
+          className="ui-focus mr-auto inline-flex items-center font-mono text-lg font-black tracking-[-0.055em] sm:text-xl"
+          href={homeHref}
         >
-          Build4<span className="text-primary">Latam</span>
-        </a>
+          Build4<span className="text-brand-yellow">Venezuela</span>
+        </Link>
 
-        <div className="flex items-center gap-2 sm:gap-3">
-          <nav aria-label={t("navigationLabel")} className="hidden md:block">
-            <div className="flex items-center gap-2">
-              <Show when="signed-in">
-                <div className="flex h-10 items-center justify-center motion-safe:animate-in motion-safe:fade-in-0 motion-safe:zoom-in-95 motion-safe:slide-in-from-right-1 duration-300">
-                  <UserButton
-                    appearance={{
-                      elements: {
-                        userButtonAvatarBox: "h-10 w-10",
-                      },
-                    }}
-                  />
-                </div>
-              </Show>
-              <DropdownMenu>
-                <DropdownMenuTrigger
-                  render={
-                    <Button
-                      aria-label="Open community links"
-                      className="h-10 border-border bg-background px-3 font-mono text-xs font-bold uppercase tracking-[0.16em] text-foreground hover:border-foreground hover:bg-foreground hover:text-background aria-expanded:border-foreground aria-expanded:bg-foreground aria-expanded:text-background lg:px-4"
-                      size="sm"
-                      variant="outline"
-                    />
-                  }
-                >
-                  <UsersThreeIcon className="ml-1" data-icon="inline-start" />
-                  <span>{t("links.socials")}</span>
-                  <CaretDownIcon data-icon="inline-end" />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="start"
-                  className="min-w-44 border-border bg-popover text-popover-foreground ring-border"
-                >
-                  <DropdownMenuGroup>
-                    {socialLinks.map((socialLink) => (
-                      <DropdownMenuItem
-                        className="cursor-pointer font-mono font-bold uppercase tracking-[0.16em] text-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground"
-                        key={socialLink.href}
-                        render={
-                          <a href={socialLink.href}>{socialLink.label}</a>
-                        }
-                      />
-                    ))}
-                  </DropdownMenuGroup>
-                </DropdownMenuContent>
-              </DropdownMenu>
-              {desktopNavigationLinks.slice(2).map((link) => (
-                <a
-                  className="inline-flex h-10 items-center justify-center border border-border px-3 font-mono text-xs font-bold uppercase tracking-[0.16em] text-foreground transition hover:border-foreground hover:bg-foreground hover:text-background focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-4 focus-visible:ring-offset-background lg:px-4"
+        <nav aria-label={t("navigationLabel")} className="hidden lg:block">
+          <div className="flex items-center gap-1">
+            {navigationLinks.map((link) => {
+              const active =
+                pathname === link.href || pathname.startsWith(`${link.href}/`);
+
+              return (
+                <Link
+                  aria-current={active ? "page" : undefined}
+                  className={cn(
+                    "ui-focus rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
+                    active && "bg-muted text-foreground",
+                  )}
                   href={link.href}
                   key={link.href}
                 >
                   {link.label}
-                </a>
-              ))}
-            </div>
-          </nav>
+                </Link>
+              );
+            })}
+          </div>
+        </nav>
+
+        <div className="ml-1 hidden h-6 w-px bg-border lg:block" />
+
+        <Link
+          aria-label={t("search")}
+          className={buttonVariants({ variant: "ghost", size: "icon" })}
+          href={`/${locale}/projects`}
+          title={t("search")}
+        >
+          <MagnifyingGlassIcon />
+        </Link>
+
+        <div className="hidden items-center gap-1 md:flex">
           <LanguageSelector />
-          <DropdownMenu>
-            <DropdownMenuTrigger
-              render={
-                <Button
-                  aria-label="Open Build4Latam menu"
-                  className="h-10 border-border bg-background px-3 text-foreground hover:bg-foreground hover:text-background aria-expanded:bg-foreground aria-expanded:text-background md:hidden"
-                  size="sm"
-                  variant="outline"
-                />
-              }
-            >
-              <ListIcon data-icon="inline-start" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="end"
-              className="min-w-56 border-border bg-popover text-popover-foreground ring-border md:hidden"
-            >
-              <DropdownMenuGroup>
-                {navigationLinks.map((link) => (
-                  <DropdownMenuItem
-                    className="cursor-pointer font-mono font-bold uppercase tracking-[0.16em] text-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground"
-                    key={link.href}
-                    render={<a href={link.href}>{link.label}</a>}
-                  />
-                ))}
-              </DropdownMenuGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <ThemeToggle label={t("themeToggle")} />
         </div>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            render={
+              <Button
+                className="hidden md:inline-flex"
+                size="sm"
+                type="button"
+              />
+            }
+          >
+            <PlusIcon data-icon="inline-start" />
+            {t("create.label")}
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="min-w-52">
+            <DropdownMenuGroup>
+              <DropdownMenuLabel>{t("create.label")}</DropdownMenuLabel>
+              {createLinks.map((link) => (
+                <DropdownMenuItem
+                  key={link.href}
+                  render={<Link href={link.href} />}
+                >
+                  {link.label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <Show when="signed-in">
+          <div className="hidden size-10 items-center justify-center md:flex">
+            <UserButton
+              appearance={{ elements: { userButtonAvatarBox: "size-9" } }}
+            />
+          </div>
+        </Show>
+        <Show when="signed-out">
+          <SignInButton mode="modal">
+            <Button
+              aria-label={t("signIn")}
+              className="hidden md:inline-flex"
+              size="icon"
+              title={t("signIn")}
+              variant="outline"
+            >
+              <UserCircleIcon />
+            </Button>
+          </SignInButton>
+        </Show>
+
+        <Sheet>
+          <SheetTrigger
+            render={
+              <Button
+                aria-label={t("menu")}
+                className="md:hidden"
+                size="icon"
+                type="button"
+                variant="ghost"
+              />
+            }
+          >
+            <ListIcon />
+          </SheetTrigger>
+          <SheetContent className="w-[min(90vw,24rem)] p-0" side="right">
+            <SheetHeader className="border-b p-6 pr-14">
+              <SheetTitle className="font-mono text-lg font-black tracking-[-0.04em]">
+                Build4Venezuela
+              </SheetTitle>
+              <SheetDescription>{t("menuDescription")}</SheetDescription>
+            </SheetHeader>
+
+            <nav
+              aria-label={t("navigationLabel")}
+              className="flex flex-col gap-1 p-4"
+            >
+              <Link
+                className="rounded-lg px-3 py-3 text-base font-semibold hover:bg-muted"
+                href={homeHref}
+              >
+                {t("links.home")}
+              </Link>
+              {navigationLinks.map((link) => (
+                <Link
+                  aria-current={pathname === link.href ? "page" : undefined}
+                  className="rounded-lg px-3 py-3 text-base font-semibold hover:bg-muted aria-[current=page]:bg-muted"
+                  href={link.href}
+                  key={link.href}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
+
+            <div className="mx-4 border-t p-4 px-0">
+              <p className="mb-2 px-3 font-mono text-xs font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                {t("create.label")}
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                {createLinks.map((link) => (
+                  <Link
+                    className="rounded-lg border bg-surface p-3 text-sm font-medium transition-colors hover:bg-muted"
+                    href={link.href}
+                    key={link.href}
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-auto flex items-center gap-2 border-t p-4">
+              <LanguageSelector />
+              <ThemeToggle label={t("themeToggle")} />
+              <Show when="signed-out">
+                <SignInButton mode="modal">
+                  <Button className="ml-auto" variant="outline">
+                    {t("signIn")}
+                  </Button>
+                </SignInButton>
+              </Show>
+              <Show when="signed-in">
+                <div className="ml-auto">
+                  <UserButton
+                    appearance={{ elements: { userButtonAvatarBox: "size-9" } }}
+                  />
+                </div>
+              </Show>
+            </div>
+          </SheetContent>
+        </Sheet>
       </div>
     </header>
   );

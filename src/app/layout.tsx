@@ -1,9 +1,11 @@
 import { ClerkProvider } from "@clerk/nextjs";
 import { shadcn } from "@clerk/ui/themes";
 import { Analytics } from "@vercel/analytics/next";
+import { GeistSans } from "geist/font/sans";
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import type { ReactNode } from "react";
+import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
 import { QueryProvider } from "./query-provider";
 
@@ -103,12 +105,20 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html
       lang="en"
-      className={`${inputMonoNarrow.variable} h-full antialiased`}
+      className={`${GeistSans.variable} ${inputMonoNarrow.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
       <body className="min-h-full bg-background text-foreground">
-        <ClerkProvider appearance={{ theme: shadcn }}>
-          <QueryProvider>{children}</QueryProvider>
-        </ClerkProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          disableTransitionOnChange
+          enableSystem
+        >
+          <ClerkProvider appearance={{ theme: shadcn }}>
+            <QueryProvider>{children}</QueryProvider>
+          </ClerkProvider>
+        </ThemeProvider>
         <Analytics />
       </body>
     </html>

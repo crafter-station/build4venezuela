@@ -95,7 +95,7 @@ export default async function Home({ params }: Props) {
   })}`;
 
   return (
-    <main className="min-h-screen overflow-hidden bg-background text-foreground">
+    <main className="movement-surface min-h-screen overflow-hidden bg-background text-foreground">
       <section className="relative isolate flex min-h-screen items-center justify-center px-4 pt-20 pb-4 sm:px-8 lg:px-10">
         <div className="absolute inset-0 -z-20 bg-background" />
         <div className="bg-grid absolute inset-0 -z-10 opacity-[0.06]" />

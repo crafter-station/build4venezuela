@@ -38,27 +38,23 @@ export function LanguageSelector() {
       <DropdownMenuTrigger
         render={
           <Button
-            className="h-10 border-border bg-foreground px-3 py-0 text-background hover:bg-primary hover:text-primary-foreground aria-expanded:bg-primary aria-expanded:text-primary-foreground sm:px-4"
-            variant="outline"
-            size="sm"
             aria-label={t("label")}
+            className="uppercase"
+            size="sm"
+            variant="ghost"
           />
         }
       >
         <TranslateIcon data-icon="inline-start" />
+        <span className="hidden sm:inline">{locale}</span>
         <CaretDownIcon data-icon="inline-end" />
       </DropdownMenuTrigger>
-      <DropdownMenuContent
-        align="end"
-        className="min-w-36 border-border bg-popover text-popover-foreground ring-border"
-      >
+      <DropdownMenuContent align="end" className="min-w-40">
         <DropdownMenuGroup>
-          <DropdownMenuLabel className="font-mono text-muted-foreground">
-            {t("label")}
-          </DropdownMenuLabel>
+          <DropdownMenuLabel>{t("label")}</DropdownMenuLabel>
           {routing.locales.map((option) => (
             <DropdownMenuItem
-              className="cursor-pointer justify-between font-mono text-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground [&_svg]:text-primary focus:[&_svg]:text-primary-foreground"
+              className="cursor-pointer justify-between"
               key={option}
               render={
                 <a href={getLocaleHref(pathname, option)}>

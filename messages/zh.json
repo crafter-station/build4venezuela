@@ -38,6 +38,22 @@
     "mobileBrand": "B4B",
     "navigationLabel": "主导航",
     "brandPageLink": "品牌",
+    "homeLabel": "Build4Venezuela 社区首页",
+    "search": "搜索项目",
+    "themeToggle": "切换颜色主题",
+    "menu": "打开菜单",
+    "menuDescription": "探索社区并找到参与贡献的方式。",
+    "signIn": "登录",
+    "productLabel": "探索",
+    "communityLabel": "社区",
+    "partnersLabel": "与合作伙伴共同建设",
+    "create": {
+      "label": "创建",
+      "project": "添加项目",
+      "need": "发布需求",
+      "resource": "分享资源",
+      "profile": "Builder 资料"
+    },
     "links": {
       "home": "首页",
       "brand": "品牌",
@@ -47,7 +63,8 @@
       "projects": "项目",
       "builders": "Builders",
       "requests": "需求",
-      "resources": "资源"
+      "resources": "资源",
+      "impact": "影响力"
     },
     "languageSelector": {
       "label": "语言",

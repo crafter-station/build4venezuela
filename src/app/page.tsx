@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export const metadata: Metadata = {
   title: "Build4Latam | Technology in solidarity",
@@ -57,6 +58,7 @@ export default function LatamHome() {
               />
               Red activa
             </p>
+            <ThemeToggle label="Cambiar tema de color" />
             <Link
               className="ui-focus border border-primary bg-primary px-3 py-2 font-mono text-[0.625rem] font-black uppercase tracking-[0.13em] text-primary-foreground transition-colors hover:bg-transparent hover:text-primary sm:px-4 sm:text-xs"
               href="/es/submit"
