@@ -462,6 +462,14 @@
   transform: scale(0.995);
 }
 
+.sa-map {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: 100%;
+}
+
 .sa-map__country {
   fill: color-mix(in srgb, var(--foreground) 6%, transparent);
   stroke: color-mix(in srgb, var(--foreground) 55%, transparent);
