@@ -163,7 +163,7 @@ async function writeLocalData(data: LocalData) {
   await writeFile(localStorePath, `${JSON.stringify(data, null, 2)}\n`);
 }
 
-async function withLocalFallback<T>(
+async function withConfiguredStore<T>(
   operation: () => Promise<T>,
   fallback: () => Promise<T>,
 ) {
@@ -175,7 +175,7 @@ async function withLocalFallback<T>(
 }
 
 export async function listSolutionRequests(voterId?: string) {
-  return withLocalFallback(
+  return withConfiguredStore(
     async () => {
       const requestRows = await db
         .select({ request: solutionRequests, votesCount: requestVoteCount })
@@ -311,7 +311,7 @@ export async function createSolutionRequest(
   authorName: string,
   authorImageUrl: string,
 ) {
-  return withLocalFallback(
+  return withConfiguredStore(
     async () => {
       const [row] = await db
         .insert(solutionRequests)
@@ -346,7 +346,7 @@ export async function createSolutionRequest(
 }
 
 export async function getSolutionRequestVoteCount(requestId: string) {
-  return withLocalFallback(
+  return withConfiguredStore(
     async () => {
       const [row] = await db
         .select({ count: count() })
@@ -367,7 +367,7 @@ export async function hasSolutionRequestVoted(
 ) {
   if (!voterId) return false;
 
-  return withLocalFallback(
+  return withConfiguredStore(
     async () => {
       const rows = await db
         .select({ requestId: solutionRequestVotes.requestId })
@@ -394,7 +394,7 @@ export async function toggleSolutionRequestVote(
   requestId: string,
   voterId: string,
 ) {
-  return withLocalFallback(
+  return withConfiguredStore(
     async () => {
       const voted = await hasSolutionRequestVoted(requestId, voterId);
       if (voted) {
@@ -446,7 +446,7 @@ export async function createSolutionRequestComment(
   authorImageUrl: string,
   input: SolutionRequestCommentInput,
 ) {
-  return withLocalFallback(
+  return withConfiguredStore(
     async () => {
       const [row] = await db
         .insert(solutionRequestComments)
@@ -484,7 +484,7 @@ export async function solutionRequestCommentBelongsToRequest(
   requestId: string,
   commentId: string,
 ) {
-  return withLocalFallback(
+  return withConfiguredStore(
     async () => {
       const rows = await db
         .select({ id: solutionRequestComments.id })
@@ -509,7 +509,7 @@ export async function solutionRequestCommentBelongsToRequest(
 }
 
 export async function getSolutionRequestCommentVoteCount(commentId: string) {
-  return withLocalFallback(
+  return withConfiguredStore(
     async () => {
       const [row] = await db
         .select({ count: count() })
@@ -531,7 +531,7 @@ export async function hasSolutionRequestCommentVoted(
 ) {
   if (!voterId) return false;
 
-  return withLocalFallback(
+  return withConfiguredStore(
     async () => {
       const rows = await db
         .select({ commentId: solutionRequestCommentVotes.commentId })
@@ -558,7 +558,7 @@ export async function toggleSolutionRequestCommentVote(
   commentId: string,
   voterId: string,
 ) {
-  return withLocalFallback(
+  return withConfiguredStore(
     async () => {
       const voted = await hasSolutionRequestCommentVoted(commentId, voterId);
       if (voted) {

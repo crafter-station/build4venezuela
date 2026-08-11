@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { routing } from "@/i18n/routing";
+import { runMutation } from "@/lib/api-mutation";
 import {
   checkRateLimit,
   rateLimitKey,
@@ -69,11 +70,22 @@ export async function PATCH(request: Request, { params }: Props) {
     );
   }
 
-  const project = await updateProject(projectId, {
-    ...result.data,
-    spamScore: result.spam.confidence,
-    spamReason: result.spam.reason,
-  });
+  const updateResult = await runMutation(
+    "project.update",
+    { userId, projectId },
+    () =>
+      updateProject(projectId, {
+        ...result.data,
+        spamScore: result.spam.confidence,
+        spamReason: result.spam.reason,
+      }),
+  );
+
+  if ("response" in updateResult) {
+    return updateResult.response;
+  }
+
+  const project = updateResult.value;
 
   for (const locale of routing.locales) {
     revalidatePath(`/${locale}/projects`);
@@ -113,7 +125,17 @@ export async function DELETE(_request: Request, { params }: Props) {
     );
   }
 
-  const project = await deleteProject(projectId);
+  const deleteResult = await runMutation(
+    "project.delete",
+    { userId, projectId },
+    () => deleteProject(projectId),
+  );
+
+  if ("response" in deleteResult) {
+    return deleteResult.response;
+  }
+
+  const project = deleteResult.value;
 
   for (const locale of routing.locales) {
     revalidatePath(`/${locale}/projects`);

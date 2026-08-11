@@ -2,6 +2,7 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { routing } from "@/i18n/routing";
+import { runMutation, runQuery } from "@/lib/api-mutation";
 import { logEvent, timed } from "@/lib/log";
 import {
   checkRateLimit,
@@ -58,7 +59,13 @@ function displayName(user: Awaited<ReturnType<typeof currentUser>>) {
 }
 
 export async function GET() {
-  return NextResponse.json({ projects: await getCachedProjects() });
+  const result = await runQuery("project.list", {}, () => getCachedProjects());
+
+  if ("response" in result) {
+    return result.response;
+  }
+
+  return NextResponse.json({ projects: result.value });
 }
 
 export async function POST(request: Request) {
@@ -92,39 +99,45 @@ export async function POST(request: Request) {
   logEvent("project.submit.start", { userId, slug: values.slug });
 
   // Runs the slug check + spam LLM call; the heaviest, most failure-prone step.
-  const result = await timed(
+  const validation = await timed(
     "project.validate",
     { userId, slug: values.slug },
     () => validateProjectSubmission(values),
   );
 
-  if (!result.ok) {
+  if (!validation.ok) {
     logEvent("project.submit.blocked", { userId, slug: values.slug });
     return NextResponse.json(
-      { values: result.values, errors: result.errors },
+      { values: validation.values, errors: validation.errors },
       { status: 400 },
     );
   }
 
   const user = await currentUser();
-  const project = await timed(
+  const result = await runMutation(
     "project.create",
     { userId, slug: values.slug },
     () =>
       createProject({
-        ...result.data,
+        ...validation.data,
         ownerUserId: userId,
         ownerName: displayName(user),
         ownerImageUrl: user?.imageUrl ?? "",
-        spamScore: result.spam.confidence,
-        spamReason: result.spam.reason,
+        spamScore: validation.spam.confidence,
+        spamReason: validation.spam.reason,
       }),
   );
+
+  if ("response" in result) {
+    return result.response;
+  }
+
+  const project = result.value;
 
   // Best-effort: never blocks the response on failure, but we still time it so a
   // slow classify call is visible in the logs.
   await timed("project.classify", { userId, projectId: project.id }, () =>
-    classifyAndStore(project.id, result.data),
+    classifyAndStore(project.id, validation.data),
   );
 
   for (const locale of routing.locales) {

@@ -251,7 +251,7 @@ function toProjectInput(
   };
 }
 
-async function withLocalFallback<T>(
+async function withConfiguredStore<T>(
   operation: () => Promise<T>,
   fallback: () => Promise<T>,
 ) {
@@ -263,7 +263,7 @@ async function withLocalFallback<T>(
 }
 
 export async function listProjects() {
-  return withLocalFallback(
+  return withConfiguredStore(
     async () => {
       const rows = await db
         .select({ project: projects, votesCount: voteCount })
@@ -295,7 +295,7 @@ export async function listProjects() {
 }
 
 export async function listProjectsByOwner(userId: string) {
-  return withLocalFallback(
+  return withConfiguredStore(
     async () => {
       const rows = await db
         .select({ project: projects, votesCount: voteCount })
@@ -317,7 +317,7 @@ export async function listProjectsByOwner(userId: string) {
 }
 
 export async function getProjectBySlug(slug: string) {
-  return withLocalFallback(
+  return withConfiguredStore(
     async () => {
       const rows = await db
         .select({ project: projects, votesCount: voteCount })
@@ -392,7 +392,7 @@ export async function isSlugAvailable(slug: string, currentProjectId?: string) {
 }
 
 export async function createProject(input: ProjectWrite) {
-  const project = await withLocalFallback(
+  const project = await withConfiguredStore(
     async () => {
       const [row] = await db
         .insert(projects)
@@ -431,7 +431,7 @@ export async function updateProject(
   projectId: string,
   input: Omit<ProjectWrite, "ownerUserId" | "ownerName" | "ownerImageUrl">,
 ) {
-  const project = await withLocalFallback(
+  const project = await withConfiguredStore(
     async () => {
       const [row] = await db
         .update(projects)
@@ -487,7 +487,7 @@ export async function deleteProject(projectId: string) {
     throw new Error("Project not found.");
   }
 
-  await withLocalFallback(
+  await withConfiguredStore(
     async () => {
       await db.delete(projects).where(eq(projects.id, projectId));
     },
@@ -533,7 +533,7 @@ export async function canEditProject(
     return false;
   }
 
-  return withLocalFallback(
+  return withConfiguredStore(
     async () => {
       const rows = await db
         .select({ id: projects.id })
@@ -556,7 +556,7 @@ export async function canEditProject(
 }
 
 export async function getVoteCount(projectId: string) {
-  return withLocalFallback(
+  return withConfiguredStore(
     async () => {
       const rows = await db
         .select({ count: count() })
@@ -577,7 +577,7 @@ export async function hasVoted(projectId: string, voterId: string | undefined) {
     return false;
   }
 
-  return withLocalFallback(
+  return withConfiguredStore(
     async () => {
       const rows = await db
         .select({ projectId: projectVotes.projectId })
@@ -602,7 +602,7 @@ export async function hasVoted(projectId: string, voterId: string | undefined) {
 }
 
 export async function toggleVote(projectId: string, voterId: string) {
-  const result = await withLocalFallback(
+  const result = await withConfiguredStore(
     async () => {
       const voted = await hasVoted(projectId, voterId);
 
@@ -648,7 +648,7 @@ export async function toggleVote(projectId: string, voterId: string) {
 }
 
 export async function listComments(projectId: string, voterId?: string) {
-  return withLocalFallback(
+  return withConfiguredStore(
     async () => {
       const rows = await db
         .select({ comment: projectComments, votesCount: commentVoteCount })
@@ -725,7 +725,7 @@ export async function createComment(
   authorImageUrl: string,
   input: ProjectCommentInput,
 ) {
-  return withLocalFallback(
+  return withConfiguredStore(
     async () => {
       const [row] = await db
         .insert(projectComments)
@@ -763,7 +763,7 @@ export async function createComment(
 }
 
 export async function getCommentVoteCount(commentId: string) {
-  return withLocalFallback(
+  return withConfiguredStore(
     async () => {
       const rows = await db
         .select({ count: count() })
@@ -789,7 +789,7 @@ export async function hasCommentVoted(
     return false;
   }
 
-  return withLocalFallback(
+  return withConfiguredStore(
     async () => {
       const rows = await db
         .select({ commentId: projectCommentVotes.commentId })
@@ -814,7 +814,7 @@ export async function hasCommentVoted(
 }
 
 export async function toggleCommentVote(commentId: string, voterId: string) {
-  return withLocalFallback(
+  return withConfiguredStore(
     async () => {
       const voted = await hasCommentVoted(commentId, voterId);
 
