@@ -112,15 +112,16 @@ export default async function RootLayout({
   return (
     <html
       lang={locale}
-      className={`${GeistSans.variable} ${inputMonoNarrow.variable} h-full antialiased`}
+      className={`dark ${GeistSans.variable} ${inputMonoNarrow.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <body className="min-h-full bg-background text-foreground">
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
+          defaultTheme="dark"
+          forcedTheme="dark"
           disableTransitionOnChange
-          enableSystem
+          enableSystem={false}
         >
           <ClerkProvider appearance={{ theme: shadcn }}>
             <QueryProvider>{children}</QueryProvider>
