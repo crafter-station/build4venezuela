@@ -449,6 +449,7 @@
       "project": "proyecto",
       "projects": "proyectos",
       "open": "Abrir",
+      "disabled": "Deshabilitado",
       "vote": "voto",
       "votes": "votos",
       "views": {
@@ -553,6 +554,9 @@
     "countriesLabel": "Países participantes",
     "countriesPlaceholder": "Venezuela, Colombia, Estados Unidos",
     "participantNameLabel": "Equipo o participante",
+    "ownerSocialUrlsLabel": "Perfiles sociales del responsable (opcional)",
+    "ownerSocialUrlsPlaceholder": "https://github.com/tu-usuario, https://linkedin.com/in/tu-usuario",
+    "ownerSocialUrlsHint": "Solo perfiles públicos. Separa varios enlaces con comas.",
     "videoUrlLabel": "Video demo (opcional)",
     "videoUrlPlaceholder": "https://youtu.be/...",
     "contributeInUrlLabel": "Enlace para contribuir (opcional)",
@@ -587,6 +591,8 @@
       "colombia": "Se puede usar en Colombia"
     },
     "status": "Estado",
+    "disabledTitle": "Proyecto deshabilitado temporalmente",
+    "disabledDescription": "El proyecto público o su repositorio no está disponible actualmente. Contacta al responsable mediante sus perfiles públicos si puedes ayudar a reactivarlo.",
     "statuses": {
       "ready_to_use": "Listo para usar",
       "in_development": "En desarrollo",

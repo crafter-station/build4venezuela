@@ -41,6 +41,7 @@ const projectFormFields = [
   "projectUrl",
   "countries",
   "participantName",
+  "ownerSocialUrls",
   "videoUrl",
   "imageUrl",
   "contributeInUrl",
@@ -334,6 +335,23 @@ export function ProjectForm({
           value={values.participantName}
         />
         <FieldError message={errors.participantName} />
+      </label>
+
+      <label className="grid gap-2" htmlFor="project-owner-social-urls">
+        <span className="font-mono text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground">
+          {t("ownerSocialUrlsLabel")}
+        </span>
+        <Input
+          id="project-owner-social-urls"
+          name="ownerSocialUrls"
+          onChange={handleValueChange("ownerSocialUrls")}
+          placeholder={t("ownerSocialUrlsPlaceholder")}
+          value={values.ownerSocialUrls}
+        />
+        <p className="text-xs text-muted-foreground">
+          {t("ownerSocialUrlsHint")}
+        </p>
+        <FieldError message={errors.ownerSocialUrls} />
       </label>
 
       <label className="grid gap-2" htmlFor="project-video-url">

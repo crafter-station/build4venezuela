@@ -38,6 +38,10 @@ export const projects = pgTable(
     ownerUserId: text("owner_user_id").notNull(),
     ownerName: text("owner_name").notNull().default(""),
     ownerImageUrl: text("owner_image_url").notNull().default(""),
+    ownerSocialUrls: text("owner_social_urls")
+      .array()
+      .notNull()
+      .default(sql`'{}'`),
     spamScore: numeric("spam_score", { mode: "number" }),
     spamReason: text("spam_reason"),
     publishedAt: timestamp("published_at", { withTimezone: true }).default(

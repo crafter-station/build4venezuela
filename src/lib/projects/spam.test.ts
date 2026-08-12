@@ -14,6 +14,7 @@ const validProject = {
   projectUrl: "https://example.com",
   countries: "Venezuela",
   participantName: "Build Team",
+  ownerSocialUrls: "",
   videoUrl: "https://youtube.com/watch?v=abc12345678",
   imageUrl: "",
   contributeInUrl: "https://github.com/example/civic-dashboard",

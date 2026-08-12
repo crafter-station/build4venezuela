@@ -240,6 +240,7 @@ export function ProjectsGrid({
             <ProjectCard
               applicabilityLabel={t(`applicabilities.${project.applicability}`)}
               categoryLabel={clusterById.get(categoryId)?.label}
+              disabledLabel={t("disabled")}
               href={`/${locale}/p/${project.slug}`}
               imageLoading={index < 3 ? "eager" : undefined}
               key={project.id}
@@ -256,6 +257,7 @@ export function ProjectsGrid({
             <ProjectListItem
               applicabilityLabel={t(`applicabilities.${project.applicability}`)}
               categoryLabel={clusterById.get(categoryId)?.label}
+              disabledLabel={t("disabled")}
               href={`/${locale}/p/${project.slug}`}
               key={project.id}
               lifecycleLabel={t(`statuses.${project.lifecycleStatus}`)}

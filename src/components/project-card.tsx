@@ -13,6 +13,7 @@ type ProjectCardProps = {
   lifecycleLabel: string;
   openLabel: string;
   voteLabel: string;
+  disabledLabel?: string;
   categoryLabel?: string;
   className?: string;
 };
@@ -31,6 +32,7 @@ export function ProjectCard({
   lifecycleLabel,
   openLabel,
   voteLabel,
+  disabledLabel,
   categoryLabel,
   className,
 }: ProjectCardProps) {
@@ -55,6 +57,14 @@ export function ProjectCard({
 
       <div className="flex flex-1 flex-col p-5 sm:p-6">
         <div className="flex min-w-0 items-center gap-2">
+          {project.status === "disabled" && disabledLabel ? (
+            <Badge
+              className="shrink-0 font-mono font-bold uppercase tracking-[0.08em]"
+              variant="destructive"
+            >
+              {disabledLabel}
+            </Badge>
+          ) : null}
           <Badge
             className={cn(
               "shrink-0 font-mono font-bold uppercase tracking-[0.08em]",
@@ -122,6 +132,7 @@ export function ProjectListItem({
   lifecycleLabel,
   openLabel,
   voteLabel,
+  disabledLabel,
   categoryLabel,
 }: ProjectListItemProps) {
   const author = project.ownerName || project.participantName;
@@ -132,6 +143,14 @@ export function ProjectListItem({
 
       <div className="min-w-0">
         <div className="flex min-w-0 flex-wrap items-center gap-2">
+          {project.status === "disabled" && disabledLabel ? (
+            <Badge
+              className="font-mono font-bold uppercase tracking-[0.08em]"
+              variant="destructive"
+            >
+              {disabledLabel}
+            </Badge>
+          ) : null}
           <Badge
             className={cn(
               "font-mono font-bold uppercase tracking-[0.08em]",

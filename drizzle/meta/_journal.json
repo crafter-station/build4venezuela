@@ -15,6 +15,13 @@
       "when": 1786413999094,
       "tag": "0001_add_project_image",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1786567885298,
+      "tag": "0002_project-disabled-socials",
+      "breakpoints": true
     }
   ]
 }

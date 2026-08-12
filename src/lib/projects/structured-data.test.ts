@@ -23,6 +23,7 @@ function makeProject(overrides: Partial<Project> = {}): Project {
     descriptionMarkdown: "# Title\n\nA **bold** [link](https://x.org) here.",
     ownerName: "",
     ownerImageUrl: "",
+    ownerSocialUrls: [],
     publishedAt: null,
     createdAt: "",
     updatedAt: "",

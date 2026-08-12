@@ -24,6 +24,7 @@ function project(overrides: Partial<Project>): Project {
     descriptionMarkdown: "Description",
     ownerName: "Owner",
     ownerImageUrl: "",
+    ownerSocialUrls: [],
     publishedAt: "2026-01-01T00:00:00.000Z",
     createdAt: "2026-01-01T00:00:00.000Z",
     updatedAt: "2026-01-01T00:00:00.000Z",
@@ -80,6 +81,7 @@ test("projectFormSchema accepts common demo video hosts", () => {
     projectUrl: "https://example.com",
     countries: "Venezuela",
     participantName: "Team",
+    ownerSocialUrls: "",
     imageUrl: "",
     contributeInUrl: "",
     descriptionMarkdown:
@@ -99,4 +101,35 @@ test("projectFormSchema accepts common demo video hosts", () => {
       projectFormSchema.safeParse({ ...baseProject, videoUrl }).success,
     ).toBe(true);
   }
+});
+
+test("projectFormSchema accepts public social profiles and rejects arbitrary links", () => {
+  const baseProject = {
+    slug: "project-slug",
+    name: "Project",
+    lifecycleStatus: "ready_to_use",
+    applicability: "latam",
+    projectUrl: "https://example.com",
+    countries: "Venezuela",
+    participantName: "Team",
+    videoUrl: "",
+    imageUrl: "",
+    contributeInUrl: "",
+    descriptionMarkdown:
+      "This is a complete project description with enough detail to satisfy the minimum length requirement.",
+  };
+
+  expect(
+    projectFormSchema.safeParse({
+      ...baseProject,
+      ownerSocialUrls:
+        "https://github.com/example, https://www.linkedin.com/in/example",
+    }).success,
+  ).toBe(true);
+  expect(
+    projectFormSchema.safeParse({
+      ...baseProject,
+      ownerSocialUrls: "https://example.com/private-contact",
+    }).success,
+  ).toBe(false);
 });

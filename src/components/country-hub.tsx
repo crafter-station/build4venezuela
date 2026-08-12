@@ -143,6 +143,7 @@ export async function CountryHub({
                   applicabilityLabel={projectsT(
                     `applicabilities.${project.applicability as ProjectApplicability}`,
                   )}
+                  disabledLabel={projectsT("disabled")}
                   href={`/${locale}/p/${project.slug}`}
                   key={project.id}
                   lifecycleLabel={projectsT(

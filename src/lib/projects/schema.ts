@@ -16,6 +16,7 @@ export type Project = {
   descriptionMarkdown: string;
   ownerName: string;
   ownerImageUrl: string;
+  ownerSocialUrls: string[];
   publishedAt: string | null;
   createdAt: string;
   updatedAt: string;
@@ -34,7 +35,7 @@ export type ProjectComment = {
   voted: boolean;
 };
 
-export type ProjectStatus = "draft" | "published" | "hidden";
+export type ProjectStatus = "draft" | "published" | "disabled" | "hidden";
 
 export const projectLifecycleStatuses = [
   "ready_to_use",
@@ -124,6 +125,18 @@ const slugSchema = z
 
 const urlSchema = z.string().trim().url("Enter a valid URL.");
 
+const allowedSocialHosts = [
+  "github.com",
+  "linkedin.com",
+  "www.linkedin.com",
+  "x.com",
+  "twitter.com",
+  "instagram.com",
+  "www.instagram.com",
+  "bsky.app",
+  "dev.to",
+];
+
 export const projectFormSchema = z.object({
   slug: slugSchema,
   name: z.string().trim().min(2, "Name is required.").max(120),
@@ -136,6 +149,24 @@ export const projectFormSchema = z.object({
     .trim()
     .min(2, "Team or participant name is required.")
     .max(120),
+  ownerSocialUrls: z
+    .string()
+    .trim()
+    .refine((value) => {
+      if (!value) return true;
+      return value.split(",").every((item) => {
+        try {
+          const url = new URL(item.trim());
+          return (
+            url.protocol === "https:" &&
+            allowedSocialHosts.includes(url.hostname.toLowerCase())
+          );
+        } catch {
+          return false;
+        }
+      });
+    }, "Use comma-separated public GitHub, LinkedIn, X, Instagram, Bluesky, or DEV profile links.")
+    .default(""),
   videoUrl: z
     .string()
     .trim()
@@ -211,6 +242,7 @@ export function projectToFormValues(project: Project) {
     projectUrl: project.projectUrl,
     countries: project.countries.join(", "),
     participantName: project.participantName,
+    ownerSocialUrls: project.ownerSocialUrls.join(", "),
     videoUrl: project.videoUrl,
     imageUrl: project.imageUrl,
     contributeInUrl: project.contributeInUrl,
@@ -227,6 +259,7 @@ export function formDataToValues(formData: FormData) {
     projectUrl: String(formData.get("projectUrl") ?? ""),
     countries: String(formData.get("countries") ?? ""),
     participantName: String(formData.get("participantName") ?? ""),
+    ownerSocialUrls: String(formData.get("ownerSocialUrls") ?? ""),
     videoUrl: String(formData.get("videoUrl") ?? ""),
     imageUrl: String(formData.get("imageUrl") ?? ""),
     contributeInUrl: String(formData.get("contributeInUrl") ?? ""),

@@ -42,6 +42,7 @@ type ProjectRow = {
   owner_user_id: string;
   owner_name?: string | null;
   owner_image_url?: string | null;
+  owner_social_urls?: string[] | null;
   spam_score: number | null;
   spam_reason: string | null;
   published_at?: string | null;
@@ -97,6 +98,13 @@ const projectCacheKeys = {
 const voteCount = count(projectVotes.voterId);
 const commentVoteCount = count(projectCommentVotes.voterId);
 
+function normalizeSocialUrls(value: string) {
+  return value
+    .split(",")
+    .map((url) => url.trim())
+    .filter(Boolean);
+}
+
 // --- Drizzle row -> domain mappers ------------------------------------------
 
 function rowToProject(
@@ -120,6 +128,7 @@ function rowToProject(
     descriptionMarkdown: row.descriptionMarkdown,
     ownerName: row.ownerName || row.participantName,
     ownerImageUrl: row.ownerImageUrl ?? "",
+    ownerSocialUrls: row.ownerSocialUrls,
     publishedAt: (row.publishedAt ?? row.createdAt).toISOString(),
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
@@ -164,6 +173,7 @@ function toProject(row: ProjectRow): Project {
     descriptionMarkdown: row.description_markdown,
     ownerName: row.owner_name || row.participant_name,
     ownerImageUrl: row.owner_image_url ?? "",
+    ownerSocialUrls: row.owner_social_urls ?? [],
     publishedAt: row.published_at ?? row.created_at,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -204,6 +214,7 @@ function toLocalRow(
     owner_user_id: input.ownerUserId,
     owner_name: input.ownerName,
     owner_image_url: input.ownerImageUrl,
+    owner_social_urls: normalizeSocialUrls(input.ownerSocialUrls),
     spam_score: input.spamScore,
     spam_reason: input.spamReason,
   };
@@ -242,6 +253,7 @@ function toProjectInput(
     projectUrl: input.projectUrl,
     countries: normalizeCountries(input.countries),
     participantName: input.participantName,
+    ownerSocialUrls: normalizeSocialUrls(input.ownerSocialUrls),
     videoUrl: input.videoUrl,
     imageUrl: input.imageUrl,
     contributeInUrl: input.contributeInUrl,
@@ -269,7 +281,7 @@ export async function listProjects() {
         .select({ project: projects, votesCount: voteCount })
         .from(projects)
         .leftJoin(projectVotes, eq(projectVotes.projectId, projects.id))
-        .where(eq(projects.status, "published"))
+        .where(inArray(projects.status, ["published", "disabled"]))
         .groupBy(projects.id)
         .orderBy(desc(projects.publishedAt), desc(projects.createdAt));
 
@@ -280,7 +292,9 @@ export async function listProjects() {
     async () => {
       const data = await readLocalData();
       const list = data.projects
-        .filter((project) => (project.status ?? "published") === "published")
+        .filter((project) =>
+          ["published", "disabled"].includes(project.status ?? "published"),
+        )
         .map((project) => ({
           ...project,
           votes_count: data.votes.filter(
@@ -323,7 +337,12 @@ export async function getProjectBySlug(slug: string) {
         .select({ project: projects, votesCount: voteCount })
         .from(projects)
         .leftJoin(projectVotes, eq(projectVotes.projectId, projects.id))
-        .where(and(eq(projects.slug, slug), eq(projects.status, "published")))
+        .where(
+          and(
+            eq(projects.slug, slug),
+            inArray(projects.status, ["published", "disabled"]),
+          ),
+        )
         .groupBy(projects.id)
         .limit(1);
 
@@ -334,7 +353,8 @@ export async function getProjectBySlug(slug: string) {
       const data = await readLocalData();
       const project = data.projects.find(
         (item) =>
-          item.slug === slug && (item.status ?? "published") === "published",
+          item.slug === slug &&
+          ["published", "disabled"].includes(item.status ?? "published"),
       );
 
       if (!project) {
@@ -382,8 +402,24 @@ function invalidateProjectCaches(slug: string) {
 }
 
 export async function getProjectById(projectId: string) {
-  const list = await listProjects();
-  return list.find((project) => project.id === projectId) ?? null;
+  return withConfiguredStore(
+    async () => {
+      const rows = await db
+        .select({ project: projects, votesCount: voteCount })
+        .from(projects)
+        .leftJoin(projectVotes, eq(projectVotes.projectId, projects.id))
+        .where(eq(projects.id, projectId))
+        .groupBy(projects.id)
+        .limit(1);
+      const row = rows[0];
+      return row ? rowToProject(row.project, row.votesCount) : null;
+    },
+    async () => {
+      const data = await readLocalData();
+      const project = data.projects.find((item) => item.id === projectId);
+      return project ? toProject(project) : null;
+    },
+  );
 }
 
 export async function isSlugAvailable(slug: string, currentProjectId?: string) {

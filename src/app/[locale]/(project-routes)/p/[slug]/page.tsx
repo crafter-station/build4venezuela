@@ -152,6 +152,16 @@ export default async function ProjectPage({ params }: Props) {
         }}
       />
       <article className="px-5 py-16 sm:px-8 sm:py-20 lg:px-10">
+        {project.status === "disabled" ? (
+          <div className="mx-auto mb-8 max-w-6xl border border-destructive/40 bg-destructive/10 px-5 py-4">
+            <p className="font-mono text-sm font-black uppercase tracking-[0.16em] text-destructive">
+              {t("disabledTitle")}
+            </p>
+            <p className="mt-2 text-sm leading-6 text-muted-foreground">
+              {t("disabledDescription")}
+            </p>
+          </div>
+        ) : null}
         <div className="mx-auto grid max-w-6xl grid-cols-[minmax(0,1fr)] gap-10 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:gap-16">
           <aside className="min-w-0 lg:sticky lg:top-8 lg:self-start">
             <p className="font-mono text-sm uppercase tracking-[0.28em] text-accent [overflow-wrap:anywhere]">
@@ -174,6 +184,19 @@ export default async function ProjectPage({ params }: Props) {
                     name={project.ownerName || project.participantName}
                     nameClassName="text-lg tracking-[0.08em]"
                   />
+                  {project.ownerSocialUrls.length > 0 ? (
+                    <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2">
+                      {project.ownerSocialUrls.map((url) => (
+                        <ProjectExternalLink
+                          className="font-mono text-xs uppercase tracking-[0.12em] text-link underline underline-offset-4"
+                          href={url}
+                          key={url}
+                        >
+                          {new URL(url).hostname.replace(/^www\./, "")}
+                        </ProjectExternalLink>
+                      ))}
+                    </div>
+                  ) : null}
                 </div>
                 <div className="border-t pt-5">
                   <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground">
@@ -205,7 +228,7 @@ export default async function ProjectPage({ params }: Props) {
               </CardContent>
             </Card>
             <div className="mt-6 flex flex-wrap gap-3">
-              {project.projectUrl ? (
+              {project.projectUrl && project.status !== "disabled" ? (
                 <ProjectExternalLink
                   className={buttonVariants({ size: "lg" })}
                   href={project.projectUrl}
@@ -222,7 +245,7 @@ export default async function ProjectPage({ params }: Props) {
                   {t("watchDemo")}
                 </ProjectExternalLink>
               ) : null}
-              {project.contributeInUrl ? (
+              {project.contributeInUrl && project.status !== "disabled" ? (
                 <ProjectExternalLink
                   className={buttonVariants({ size: "lg", variant: "outline" })}
                   href={project.contributeInUrl}
@@ -230,12 +253,14 @@ export default async function ProjectPage({ params }: Props) {
                   {t("contribute")}
                 </ProjectExternalLink>
               ) : null}
-              <VoteButton
-                projectId={project.id}
-                initialCount={project.votesCount}
-                initialSignedIn={Boolean(userId)}
-                initialVoted={voted}
-              />
+              {project.status !== "disabled" ? (
+                <VoteButton
+                  projectId={project.id}
+                  initialCount={project.votesCount}
+                  initialSignedIn={Boolean(userId)}
+                  initialVoted={voted}
+                />
+              ) : null}
             </div>
             {canEdit ? (
               <a
@@ -261,11 +286,13 @@ export default async function ProjectPage({ params }: Props) {
             </CardContent>
           </Card>
         </div>
-        <CommentsSection
-          initialComments={comments}
-          initialSignedIn={Boolean(userId)}
-          projectId={project.id}
-        />
+        {project.status !== "disabled" ? (
+          <CommentsSection
+            initialComments={comments}
+            initialSignedIn={Boolean(userId)}
+            projectId={project.id}
+          />
+        ) : null}
       </article>
     </ProjectShell>
   );
