@@ -33,6 +33,7 @@ function skipsIntl(pathname: string) {
     pathname.startsWith("/luma") ||
     pathname.startsWith("/discord") ||
     pathname.startsWith("/event") ||
+    pathname.startsWith("/slides") ||
     /\.[^/]+$/.test(pathname)
   );
 }
